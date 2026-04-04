@@ -1,0 +1,1 @@
+Update the pages to not rely on dark mode prefixes. so theme toggler will work and will be able to switch to dark and light theme

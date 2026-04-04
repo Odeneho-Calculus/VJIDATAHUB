@@ -1,0 +1,40 @@
+# 1. Check Console Balance
+curl -X GET "https://myztadata.com/api/v1/check-console-balance" \
+  -H "x-api-key: xxxxx"
+
+# 2. Fetch Data Packages
+curl -X GET "https://myztadata.com/api/v1/fetch-data-packages" \
+  -H "x-api-key: xxxxx"
+
+# 3. Fetch Transactions
+curl -X GET "https://myztadata.com/api/v1/fetch-transactions" \
+  -H "x-api-key: xxxxx"
+
+# 4. Fetch Other Network Transactions
+curl -X GET "https://myztadata.com/api/v1/fetch-other-network-transactions" \
+  -H "x-api-key: xxxxx"
+
+# 5. Fetch Networks
+curl -X GET "https://myztadata.com/api/v1/fetch-networks" \
+  -H "x-api-key: xxxxx"
+
+# 6. Check Transaction
+curl -X POST "https://myztadata.com/api/v1/fetch-other-network-transaction" \
+  -H "x-api-key: xxxxx" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "transaction_id": "txn_67fa80b5341ff"
+  }'
+
+# 7. Send Order (Buy Other Package)
+curl -X POST "https://myztadata.com/api/v1/buy-other-package" \
+  -H "x-api-key: xxxxx" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "recipient_msisdn": "0246363567",
+    "network_id": 3,
+    "shared_bundle": 1000,
+    "trx_ref": "testConsoleOrder1"
+  }'

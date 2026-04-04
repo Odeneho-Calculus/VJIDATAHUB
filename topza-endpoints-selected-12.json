@@ -1,0 +1,796 @@
+{
+  "exportedAt": "2026-04-01T10:47:06.099Z",
+  "totalAvailableEndpoints": 40,
+  "totalExportedEndpoints": 12,
+  "selectionMode": "custom",
+  "endpoints": [
+    {
+      "id": "GET-/wallet/balance",
+      "method": "GET",
+      "path": "/wallet/balance",
+      "name": "Get wallet balance",
+      "description": "Retrieve the current wallet balance for the authenticated user",
+      "category": "Wallet",
+      "requiresAuth": false,
+      "requestSchema": null,
+      "responseSchema": {
+        "200": {
+          "description": "Wallet balance retrieved successfully",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean",
+                    "example": true
+                  },
+                  "data": {
+                    "$ref": "#/components/schemas/Wallet"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "GET-/wallet/transactions",
+      "method": "GET",
+      "path": "/wallet/transactions",
+      "name": "Get wallet transactions",
+      "description": "List all transactions for the user's wallet",
+      "category": "Wallet",
+      "requiresAuth": false,
+      "requestSchema": null,
+      "responseSchema": {
+        "200": {
+          "description": "Transactions retrieved successfully"
+        }
+      }
+    },
+    {
+      "id": "GET-/wallet/transactions/{id}",
+      "method": "GET",
+      "path": "/wallet/transactions/{id}",
+      "name": "Get transaction details",
+      "description": "Retrieve details for a specific transaction",
+      "category": "Wallet",
+      "requiresAuth": false,
+      "requestSchema": null,
+      "responseSchema": {
+        "200": {
+          "description": "Transaction details retrieved"
+        },
+        "404": {
+          "description": "Transaction not found"
+        }
+      }
+    },
+    {
+      "id": "GET-/orders",
+      "method": "GET",
+      "path": "/orders",
+      "name": "Get user orders",
+      "description": "List all orders for the authenticated user",
+      "category": "Orders",
+      "requiresAuth": false,
+      "requestSchema": null,
+      "responseSchema": {
+        "200": {
+          "description": "Orders retrieved successfully"
+        }
+      }
+    },
+    {
+      "id": "GET-/orders/{id}",
+      "method": "GET",
+      "path": "/orders/{id}",
+      "name": "Get order details",
+      "description": "Retrieve details for a specific order",
+      "category": "Orders",
+      "requiresAuth": true,
+      "requestSchema": null,
+      "responseSchema": {
+        "200": {
+          "description": "Order details retrieved",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "example": "507f1f77bcf86cd799439020"
+                  },
+                  "orderNumber": {
+                    "type": "string",
+                    "example": "ORD168765432100001"
+                  },
+                  "userId": {
+                    "type": "string",
+                    "example": "507f1f77bcf86cd799439011"
+                  },
+                  "transactionId": {
+                    "type": "string",
+                    "example": "507f1f77bcf86cd799439021"
+                  },
+                  "dataBundle": {
+                    "type": "object",
+                    "properties": {
+                      "dataPlanId": {
+                        "type": "string",
+                        "example": "507f1f77bcf86cd799439012"
+                      },
+                      "network": {
+                        "type": "string",
+                        "enum": [
+                          "MTN",
+                          "Telecel",
+                          "AirtelTigo"
+                        ],
+                        "example": "MTN"
+                      },
+                      "planName": {
+                        "type": "string",
+                        "example": "MTN 1GB Monthly"
+                      },
+                      "dataAmount": {
+                        "type": "string",
+                        "example": "1GB"
+                      },
+                      "amount": {
+                        "type": "number",
+                        "example": 450
+                      },
+                      "phoneNumber": {
+                        "type": "string",
+                        "example": "0597537575"
+                      }
+                    }
+                  },
+                  "paymentMethod": {
+                    "type": "string",
+                    "enum": [
+                      "wallet",
+                      "paystack"
+                    ],
+                    "example": "wallet"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "Pending",
+                      "Processing",
+                      "Completed"
+                    ],
+                    "example": "Processing"
+                  },
+                  "completedAt": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2024-01-20T14:35:00Z"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2024-01-20T14:30:00Z"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "404": {
+          "description": "Order not found"
+        }
+      }
+    },
+    {
+      "id": "GET-/orders/{id}/receipt",
+      "method": "GET",
+      "path": "/orders/{id}/receipt",
+      "name": "Get order receipt",
+      "description": "Retrieve the receipt/invoice for an order as a PDF file",
+      "category": "Orders",
+      "requiresAuth": true,
+      "requestSchema": null,
+      "responseSchema": {
+        "200": {
+          "description": "Receipt PDF retrieved successfully",
+          "content": {
+            "application/pdf": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        },
+        "404": {
+          "description": "Order not found"
+        }
+      }
+    },
+    {
+      "id": "POST-/orders/buy",
+      "method": "POST",
+      "path": "/orders/buy",
+      "name": "Purchase Data Bundle",
+      "description": "Creates a new data purchase order. Deducts from wallet or initiates Paystack payment. Requires user authentication.",
+      "category": "Orders",
+      "requiresAuth": true,
+      "requestSchema": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "dataPlanId",
+                "phoneNumber"
+              ],
+              "properties": {
+                "dataPlanId": {
+                  "type": "string",
+                  "example": "507f1f77bcf86cd799439012",
+                  "description": "MongoDB ID of the data plan"
+                },
+                "phoneNumber": {
+                  "type": "string",
+                  "example": "0597537575",
+                  "description": "Valid Ghanaian phone number (10 digits starting with 0)"
+                },
+                "paymentMethod": {
+                  "type": "string",
+                  "enum": [
+                    "wallet"
+                  ],
+                  "default": "wallet",
+                  "description": "Payment method - currently only 'wallet' is supported"
+                }
+              }
+            },
+            "examples": {
+              "wallet_payment": {
+                "summary": "Purchase with wallet payment",
+                "value": {
+                  "dataPlanId": "507f1f77bcf86cd799439012",
+                  "phoneNumber": "0597537575",
+                  "paymentMethod": "wallet"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responseSchema": {
+        "200": {
+          "description": "Order created successfully",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean",
+                    "example": true
+                  },
+                  "message": {
+                    "type": "string",
+                    "example": "Order placed successfully and is being processed"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "order": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "507f1f77bcf86cd799439020"
+                          },
+                          "orderNumber": {
+                            "type": "string",
+                            "example": "ORD168765432100001"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "Pending",
+                              "Processing",
+                              "Completed"
+                            ],
+                            "example": "Processing"
+                          },
+                          "network": {
+                            "type": "string",
+                            "example": "MTN"
+                          },
+                          "phoneNumber": {
+                            "type": "string",
+                            "example": "0597537575"
+                          },
+                          "dataAmount": {
+                            "type": "string",
+                            "example": "1GB"
+                          },
+                          "planName": {
+                            "type": "string",
+                            "example": "MTN 1GB Monthly"
+                          },
+                          "amount": {
+                            "type": "number",
+                            "example": 450
+                          },
+                          "date": {
+                            "type": "string",
+                            "format": "date-time",
+                            "example": "2024-01-20T14:30:00Z"
+                          }
+                        }
+                      },
+                      "transaction": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "507f1f77bcf86cd799439021"
+                          },
+                          "reference": {
+                            "type": "string",
+                            "example": "TXN1687654321000001"
+                          },
+                          "amount": {
+                            "type": "number",
+                            "example": 450
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "pending",
+                              "processing",
+                              "successful",
+                              "failed"
+                            ],
+                            "example": "successful"
+                          }
+                        }
+                      },
+                      "wallet": {
+                        "type": "object",
+                        "properties": {
+                          "balance": {
+                            "type": "number",
+                            "example": 4550
+                          },
+                          "previousBalance": {
+                            "type": "number",
+                            "example": 5000
+                          }
+                        }
+                      },
+                      "providerMessage": {
+                        "type": "string",
+                        "example": "Bundle delivered successfully"
+                      }
+                    }
+                  }
+                }
+              },
+              "examples": {
+                "wallet_payment_success": {
+                  "summary": "Wallet payment successful",
+                  "value": {
+                    "success": true,
+                    "message": "Order placed successfully and is being processed",
+                    "data": {
+                      "order": {
+                        "id": "69392d39e7bdbaafaef1e4d8",
+                        "orderNumber": "ORD17653548098987769",
+                        "status": "Processing",
+                        "network": "MTN",
+                        "phoneNumber": "0597537575",
+                        "dataAmount": "1GB",
+                        "planName": "1GB MTN Data",
+                        "amount": 4.8,
+                        "date": "2025-12-10T08:20:09.900Z"
+                      },
+                      "transaction": {
+                        "id": "69392d38e7bdbaafaef1e4d2",
+                        "reference": "TXN1687654321000001",
+                        "amount": 4.8,
+                        "status": "successful"
+                      },
+                      "wallet": {
+                        "balance": 360.2,
+                        "previousBalance": 365
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "Bad request - validation error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean",
+                    "example": false
+                  },
+                  "message": {
+                    "type": "string"
+                  }
+                }
+              },
+              "examples": {
+                "invalid_phone": {
+                  "summary": "Invalid phone number",
+                  "value": {
+                    "success": false,
+                    "message": "Invalid Ghanaian phone number format"
+                  }
+                },
+                "insufficient_balance": {
+                  "summary": "Insufficient wallet balance",
+                  "value": {
+                    "success": false,
+                    "message": "Insufficient wallet balance. Your balance is GHS 200 but this plan costs GHS 450"
+                  }
+                },
+                "out_of_stock": {
+                  "summary": "Plan out of stock",
+                  "value": {
+                    "success": false,
+                    "message": "PACKAGE_OUT_OF_STOCK: This data package is currently out of stock"
+                  }
+                },
+                "network_mismatch": {
+                  "summary": "Phone network mismatch",
+                  "value": {
+                    "success": false,
+                    "message": "NETWORK_MISMATCH: Phone number does not match the selected network"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "401": {
+          "description": "Unauthorized - user not authenticated"
+        },
+        "404": {
+          "description": "Data plan not found"
+        }
+      }
+    },
+    {
+      "id": "GET-/dataplans",
+      "method": "GET",
+      "path": "/dataplans",
+      "name": "List data plans",
+      "description": "Browse available data plans with filtering and pagination",
+      "category": "Data Plans",
+      "requiresAuth": false,
+      "requestSchema": null,
+      "responseSchema": {
+        "200": {
+          "description": "Data plans retrieved successfully",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean",
+                    "example": true
+                  },
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/DataPlan"
+                    }
+                  },
+                  "pagination": {
+                    "type": "object",
+                    "properties": {
+                      "total": {
+                        "type": "integer"
+                      },
+                      "pages": {
+                        "type": "integer"
+                      },
+                      "page": {
+                        "type": "integer"
+                      },
+                      "limit": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "GET-/dataplans/{id}",
+      "method": "GET",
+      "path": "/dataplans/{id}",
+      "name": "Get data plan details",
+      "description": "Retrieve details for a specific data plan",
+      "category": "Data Plans",
+      "requiresAuth": false,
+      "requestSchema": null,
+      "responseSchema": {
+        "200": {
+          "description": "Data plan retrieved successfully"
+        },
+        "404": {
+          "description": "Data plan not found"
+        }
+      }
+    },
+    {
+      "id": "GET-/business/status",
+      "method": "GET",
+      "path": "/business/status",
+      "name": "Check business status and operating hours",
+      "description": "Retrieve current business status, operating hours, and timezone information. This endpoint allows third-party integrations to verify if Topza is currently operating before attempting to purchase data bundles. No authentication required.",
+      "category": "Business",
+      "requiresAuth": false,
+      "requestSchema": null,
+      "responseSchema": {
+        "200": {
+          "description": "Business status retrieved successfully",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean",
+                    "example": true
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "isOpen": {
+                        "type": "boolean",
+                        "description": "Current operational status (true = open, false = closed)",
+                        "example": true
+                      },
+                      "enabled": {
+                        "type": "boolean",
+                        "description": "Whether business hours feature is enabled",
+                        "example": true
+                      },
+                      "timezone": {
+                        "type": "string",
+                        "description": "The timezone used for business hours",
+                        "example": "Africa/Accra"
+                      },
+                      "currentDay": {
+                        "type": "string",
+                        "description": "Current day name in lowercase",
+                        "example": "friday"
+                      },
+                      "currentSchedule": {
+                        "type": "object",
+                        "description": "Today's operating schedule",
+                        "properties": {
+                          "isOpen": {
+                            "type": "boolean",
+                            "description": "Whether the store is open today",
+                            "example": true
+                          },
+                          "openTime": {
+                            "type": "string",
+                            "description": "Opening time in HH:MM format",
+                            "example": "08:00"
+                          },
+                          "closeTime": {
+                            "type": "string",
+                            "description": "Closing time in HH:MM format",
+                            "example": "18:00"
+                          }
+                        }
+                      },
+                      "message": {
+                        "type": "string",
+                        "description": "Human-readable status message",
+                        "example": "We're open! 08:00 - 18:00"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "500": {
+          "description": "Failed to fetch business status"
+        }
+      }
+    },
+    {
+      "id": "GET-/afa/my-registrations",
+      "method": "GET",
+      "path": "/afa/my-registrations",
+      "name": "Get user's AFA Registrations",
+      "description": "Retrieve history of your AFA registrations.",
+      "category": "AFA",
+      "requiresAuth": true,
+      "requestSchema": null,
+      "responseSchema": {
+        "200": {
+          "description": "Success",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean",
+                    "example": true
+                  },
+                  "count": {
+                    "type": "integer"
+                  },
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "registrationId": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "phoneNumber": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "submittedAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "POST-/afa/register",
+      "method": "POST",
+      "path": "/afa/register",
+      "name": "Submit AFA Registration",
+      "description": "Register a customer for Affordable For All (AFA). A registration fee is deducted from your wallet balance. Only MTN numbers are accepted.",
+      "category": "AFA",
+      "requiresAuth": true,
+      "requestSchema": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "name",
+                "phoneNumber",
+                "idNumber",
+                "occupation",
+                "location",
+                "region",
+                "dateOfBirth"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "John Doe"
+                },
+                "phoneNumber": {
+                  "type": "string",
+                  "description": "MTN phone number (starts with 024, 054, 055, 059, 053)",
+                  "example": "0240000000"
+                },
+                "idNumber": {
+                  "type": "string",
+                  "example": "GHA-123456789-0"
+                },
+                "occupation": {
+                  "type": "string",
+                  "example": "Farmer"
+                },
+                "location": {
+                  "type": "string",
+                  "example": "Accra"
+                },
+                "region": {
+                  "type": "string",
+                  "example": "Greater Accra"
+                },
+                "dateOfBirth": {
+                  "type": "string",
+                  "format": "date",
+                  "example": "1990-01-01"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responseSchema": {
+        "201": {
+          "description": "AFA Registration submitted successfully",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean",
+                    "example": true
+                  },
+                  "message": {
+                    "type": "string",
+                    "example": "AFA Registration submitted successfully"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "registrationId": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "phoneNumber": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "submittedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "Invalid parameters or insufficient balance"
+        },
+        "401": {
+          "description": "Unauthorized"
+        }
+      }
+    }
+  ]
+}

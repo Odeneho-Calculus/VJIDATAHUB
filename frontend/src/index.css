@@ -1,0 +1,244 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-50: #f9fafb;
+  --color-primary-100: #f3f4f6;
+  --color-primary-200: #e5e7eb;
+  --color-primary-300: #d1d5db;
+  --color-primary-400: #9ca3af;
+  --color-primary-500: #6b7280;
+  --color-primary-600: #4b5563;
+  --color-primary-700: #374151;
+  --color-primary-800: #1f2937;
+  --color-primary-900: #111827;
+
+  --color-accent-50: #fef2f2;
+  --color-accent-100: #fee2e2;
+  --color-accent-200: #fecaca;
+  --color-accent-300: #fca5a5;
+  --color-accent-400: #f87171;
+  --color-accent-500: #ef4444;
+  --color-accent-600: #dc2626;
+  --color-accent-700: #b91c1c;
+  --color-accent-800: #991b1b;
+  --color-accent-900: #7f1d1d;
+}
+
+@layer base {
+  :root {
+    --bg-primary: #f8fafc;
+    --bg-secondary: #ffffff;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --border-color: #e2e8f0;
+  }
+
+  * {
+    @apply transition-colors duration-200;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: var(--text-primary);
+  }
+
+  a {
+    color: var(--color-primary-600);
+  }
+
+  a:hover {
+    color: var(--color-primary-700);
+  }
+
+  p {
+    color: var(--text-secondary);
+  }
+
+  label {
+    color: var(--text-secondary);
+  }
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    color: white;
+    background-color: var(--color-primary-700);
+  }
+
+  .btn-primary:hover {
+    background-color: var(--color-primary-800);
+  }
+
+  .btn-primary:active {
+    background-color: var(--color-primary-900);
+  }
+
+  .btn-secondary {
+    color: white;
+    background-color: #374151;
+  }
+
+  .btn-secondary:hover {
+    background-color: #1f2937;
+  }
+
+  .btn-secondary:active {
+    background-color: #111827;
+  }
+
+  .btn-ghost {
+    color: var(--text-primary);
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+  }
+
+  .btn-ghost:hover {
+    background-color: var(--bg-secondary);
+  }
+
+  .btn-ghost:active {
+    background-color: var(--bg-secondary);
+  }
+
+  .btn-danger {
+    @apply bg-red-500 hover:bg-red-600 active:bg-red-700 text-white;
+  }
+
+  .btn-success {
+    @apply bg-green-500 hover:bg-green-600 active:bg-green-700 text-white;
+  }
+
+  .card {
+    @apply rounded-lg shadow-sm hover:shadow-md transition-shadow;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+  }
+
+  .card-elevated {
+    @apply rounded-lg shadow-md hover:shadow-lg transition-shadow;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+  }
+
+  .input-field {
+    @apply w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+  }
+
+  .input-field::placeholder {
+    color: var(--text-secondary);
+  }
+
+  .input-field:disabled {
+    @apply cursor-not-allowed opacity-50;
+    background-color: var(--bg-primary);
+  }
+
+  .label {
+    @apply block text-sm font-medium mb-2;
+    color: var(--text-primary);
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+  }
+
+  .badge-primary {
+    background-color: var(--color-primary-50);
+    color: var(--color-primary-800);
+  }
+
+  .badge-accent {
+    background-color: #fef2f2;
+    color: #991b1b;
+  }
+
+  .text-muted {
+    color: var(--text-secondary);
+  }
+
+  .text-light {
+    color: var(--text-secondary);
+  }
+
+  .divider {
+    border-top: 1px solid var(--border-color);
+  }
+
+  .backdrop-blur-lg {
+    @apply backdrop-blur-lg;
+  }
+
+  .panel {
+    @apply bg-white border border-slate-200 rounded-3xl shadow-sm;
+  }
+
+  .panel-tight {
+    @apply bg-white border border-slate-200 rounded-2xl shadow-sm;
+  }
+
+  /* Contact FAB Heartbeat Animation */
+  @keyframes heartbeat {
+    0% {
+      transform: scale(1);
+      box-shadow: 0 0 0 0 rgba(var(--color-primary-700-rgb), 0.7);
+    }
+
+    14% {
+      transform: scale(1.1);
+    }
+
+    28% {
+      transform: scale(1);
+      box-shadow: 0 0 0 10px rgba(var(--color-primary-700-rgb), 0);
+    }
+
+    42% {
+      transform: scale(1.1);
+    }
+
+    70% {
+      transform: scale(1);
+      box-shadow: 0 0 0 0 rgba(var(--color-primary-700-rgb), 0);
+    }
+  }
+
+  .contact-fab-heartbeat {
+    animation: heartbeat 3s infinite ease-in-out;
+  }
+}
+
+:root {
+  --color-primary-700-rgb: 37, 99, 235;
+  /* #2563eb (blue-600) */
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

@@ -1,0 +1,111 @@
+DigiMall API
+
+B2B telecom reseller API for placing data/airtime/voice orders, purchasing vouchers, and managing AFA registrations across MTN, Telecel, and AirtelTigo networks in Ghana.
+
+Contact Support: Name: DigiMall Support
+AUTHORIZATIONAPI Key
+Key
+
+x-api-key
+Value
+
+dk_e87pONcP0e0NxTfZg-gvEwwpVf025Czu
+offers
+AUTHORIZATIONAPI Key
+This folder is using API Key from collectionDigiMall API
+GETGet available offers
+https://www.digi-mall.app/api/v1/offers
+
+Retrieve all active offers with available volumes for each ISP. Volumes are resolved based on the authenticated user's group and package assignments.
+AUTHORIZATIONAPI Key
+Key
+
+x-api-key
+Value
+
+dk_e87pONcP0e0NxTfZg-gvEwwpVf025Czu
+HEADERS
+Accept
+
+application/json
+
+order
+AUTHORIZATIONAPI Key
+This folder is using API Key from collectionDigiMall API
+{network}
+AUTHORIZATIONAPI Key
+This folder is using API Key from collectionDigiMall API
+POSTPlace an order
+https://www.digi-mall.app/api/v1/order/:network
+
+Place a single or bulk data/airtime/voice order on a specific network. Deducts from wallet balance. Webhook notifications are sent on status changes.
+AUTHORIZATIONAPI Key
+This request is using API Key from collectionDigiMall API
+HEADERS
+Content-Type
+
+application/json
+Accept
+
+application/json
+PATH VARIABLES
+network
+
+telecel
+
+Target network (case-insensitive)
+Bodyraw (json)
+json
+
+{
+  "type": "single",
+  "volume": "2",
+  "phone": "233241234567",
+  "offerSlug": "mtn_data_bundle",
+  "webhookUrl": "http://zxFzBIcwLWhlKoVJjIfmqg.dxuPzwq,ADCL",
+  "metadata": {
+    "idempotencyKey": "string"
+  }
+}
+
+status
+AUTHORIZATIONAPI Key
+This folder is using API Key from collectionDigiMall API
+{identifier}
+AUTHORIZATIONAPI Key
+This folder is using API Key from collectionDigiMall API
+GETCheck order status
+https://www.digi-mall.app/api/v1/order/status/:identifier
+
+Retrieve the current status of an order by its order ID (e.g. ORD-000067) or reference code (e.g. ORD-IB22OQws).
+AUTHORIZATIONAPI Key
+Key
+
+x-api-key
+Value
+
+dk_e87pONcP0e0NxTfZg-gvEwwpVf025Czu
+HEADERS
+Accept
+
+application/json
+PATH VARIABLES
+identifier
+
+string
+
+Order ID (e.g. ORD-000067) or reference (e.g. ORD-IB22OQws)
+
+balance
+AUTHORIZATIONAPI Key
+This folder is using API Key from collectionDigiMall API
+GETCheck wallet balance
+https://www.digi-mall.app/api/v1/balance
+
+Retrieve your current wallet balance. Useful for pre-order validation or displaying balance in your app.
+AUTHORIZATIONAPI Key
+This request is using API Key from collectionDigiMall API
+HEADERS
+Accept
+
+application/json

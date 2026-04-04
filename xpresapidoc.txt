@@ -1,0 +1,144 @@
+XPRES_API_KEY=dk_wqG3OQKHP2aok-VIRYo1ETSH3oNoUwA-
+
+curl -X GET "https://www.xpresportal.app/api/v1/offers" \
+  -H "x-api-key: dk_wqG3OQKHP2aok-VIRYo1ETSH3oNoUwA-" \
+  -H "Content-Type: application/json"
+
+curl -X POST "https://www.xpresportal.app/api/v1/order/mtn" \
+  -H "x-api-key: dk_wqG3OQKHP2aok-VIRYo1ETSH3oNoUwA-" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type": "single",
+    "volume": 1,
+    "phone": "233535049975",
+    "offerSlug": "mtn_master_beneficiary_portal",
+    "webhookUrl": "https://www.xpresportal.app/api/webhooks/orders"
+  }'
+
+
+
+
+kalculusGuy@kalculus MINGW64 ~/Desktop (master)
+$ curl -X POST "https://www.xpresportal.app/api/v1/order/mtn" \
+  -H "x-api-key: dk_wqG3OQKHP2aok-VIRYo1ETSH3oNoUwA-" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type": "single",
+    "volume": 1,
+    "phone": "233535049975",
+    "offerSlug": "mtn_master_beneficiary_portal",
+    "webhookUrl": "https://www.xpresportal.app/api/webhooks/orders"
+  }'
+{"success":true,"orderId":"ORD-386227","reference":"ORD-27CCxUrT","status":"pending","totalAmount":3.95,"currency":"GHS","items":[{"recipient":"0535049975","volume":0,"status":"pending"}],"metadata":{"idempotencyKey":"5d4bb92a-5007-447f-88d5-c63612bc14b9","webhookUrl":"https://www.xpresportal.app/api/webhooks/orders","source":"api","requestedVolume":1,"requestedOfferSlug":"mtn_master_beneficiary_portal","network":"MTN","offerId":"69123758ac713ed76459e629"}}
+kalculusGuy@kalculus MINGW64 ~/Desktop (master)
+$ curl -X POST "https://www.xpresportal.app/api/v1/order/mtn"   -H "x-api-key: dk_wqG3OQKHP2aok-VIRYo1ETSH3oNoUwA-"   -H "Content-Type: application/json"   -d '{
+    "type": "single",
+    "volume": 1,
+    "phone": "233534359912",
+    "offerSlug": "mtn_master_beneficiary_portal",
+    "webhookUrl": "https://www.xpresportal.app/api/webhooks/orders"  
+  }'
+{"success":true,"orderId":"ORD-386317","reference":"ORD-i1gcK04M","status":"pending","totalAmount":3.95,"currency":"GHS","items":[{"recipient":"0534359912","volume":0,"status":"pending"}],"metadata":{"idempotencyKey":"675b9dfc-28a8-4142-bcbd-264fb8550208","webhookUrl":"https://www.xpresportal.app/api/webhooks/orders","source":"api","requestedVolume":1,"requestedOfferSlug":"mtn_master_beneficiary_portal","network":"MTN","offerId":"69123758ac713ed76459e629"}}
+kalculusGuy@kalculus MINGW64 ~/Desktop (master)
+$
+
+
+
+all endpoints
+
+
+XpresPortal API Documentation
+Complete guide to integrating with our data, airtime, voice, voucher, and AFA registration API services.
+
+
+Auth
+
+Offers
+
+Endpoints
+
+Vouchers
+
+AFA
+
+Status
+
+Code
+GET
+/api/v1/offers
+Retrieve all active offers with available volumes for each ISP. Use this to build your integration UI.
+Success Response
+json
+
+{
+  "success": true,
+  "offers": [
+    {
+      "name": "MTN Data Bundle",
+      "isp": "MTN",
+      "type": "Data",
+      "offerSlug": "mtn_data_bundle",
+      "volumes": [1, 2, 5, 10, 20, 50, 100]
+    },
+    {
+      "name": "AirtelTigo Voice Minutes",
+      "isp": "AirtelTigo",
+      "type": "Voice Minutes",
+      "offerSlug": "airteltigo_voice_minutes",
+      "volumes": [10, 50, 100, 500, 1000]
+    }
+  ]
+}
+Error Response
+json
+
+{
+  "success": false,
+  "error": "Insufficient wallet balance",
+  "type": "INSUFFICIENT_BALANCE"
+}
+POST
+/api/v1/order/:network
+Place single or bulk orders for the specified network (mtn, at, telecel). Only 'single' and 'bulk' types are supported.
+Request Example
+json
+
+{
+  "type": "single",
+  "volume": 2,
+  "phone": "233241234567",
+  "offerSlug": "mtn_data_bundle",
+  "webhookUrl": "https://www.xpresportal.app/api/webhooks/orders"
+}
+Success Response
+json
+
+{
+  "success": true,
+  "orderId": "ORD-000067",
+  "reference": "ORD-IB22OQws",
+  "status": "pending",
+  "totalAmount": 26,
+  "currency": "GHS",
+  "items": [
+    {
+      "recipient": "233241234567",
+      "volume": 2,
+      "status": "pending"
+    }
+  ],
+  "metadata": {
+    "webhookUrl": "https://www.xpresportal.app/api/webhooks/orders",
+    "source": "api",
+    "requestedOfferSlug": "master_beneficiary",
+    "network": "MTN"
+  }
+}
+Error Response
+json
+
+{
+  "success": false,
+  "error": "Insufficient wallet balance",
+  "type": "INSUFFICIENT_BALANCE"
+}
