@@ -192,7 +192,7 @@ export default function Dashboard() {
     <UserLayout>
       <div className="relative min-h-screen bg-[#F8FAFC]">
         {/* Top Header - Glassmorphism */}
-        <div className="sticky top-0 z-20 backdrop-blur-md bg-white/80 border-b border-slate-200/60 px-6 py-4">
+        <div className="sticky top-0 z-20 app-pro-header px-6 py-4">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2 text-blue-600 min-w-0">

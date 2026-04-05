@@ -134,7 +134,7 @@ export default function PublicCatalog() {
 
     return (
         <div className="min-h-screen bg-slate-100 text-slate-900">
-            <nav className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/92 backdrop-blur-xl">
+            <nav className="sticky top-0 z-50 app-pro-header">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
                         <Link to={`/store/${slug}`} className="flex items-center gap-3 min-w-0 hover:opacity-90 transition">

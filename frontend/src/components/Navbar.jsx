@@ -19,14 +19,14 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-[1000] bg-white border-b-2 border-slate-200 w-full max-w-full overflow-x-hidden">
+    <nav className="sticky top-0 z-[1000] app-pro-header app-pro-header-strong w-full max-w-full overflow-x-hidden">
       <div className="px-4 sm:px-6 lg:px-8 w-full max-w-full">
         <div className="flex justify-between items-center h-16 min-w-0">
           <div className="flex items-center gap-3 flex-shrink-0 min-w-0">
             {showSidebarToggle && (
               <button
                 onClick={toggleSidebar}
-                className="lg:hidden p-2 hover:bg-slate-100 rounded-lg transition"
+                className="lg:hidden p-2.5 hover:bg-slate-100/90 rounded-xl border border-slate-200/70 shadow-sm transition"
                 aria-label="Toggle sidebar"
               >
                 <Menu size={24} className="text-slate-900" />
@@ -40,6 +40,9 @@ export default function Navbar() {
               }}>
                 VJI DATA HUB 
               </div>
+              <span className="hidden md:inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-sky-700">
+                Trusted VTU
+              </span>
             </Link>
           </div>
 
@@ -53,17 +56,17 @@ export default function Navbar() {
             ) : (
               <>
                 <div className="hidden sm:flex gap-2">
-                  <Link to="/login" className="px-4 py-2 text-slate-700 font-medium rounded-lg hover:bg-slate-100 transition border border-slate-200">
+                  <Link to="/login" className="px-4 py-2 text-slate-700 font-semibold rounded-xl hover:bg-slate-100 transition border border-slate-200/80 shadow-sm">
                     Login
                   </Link>
-                  <Link to="/register" className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:shadow transition">
+                  <Link to="/register" className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-blue-100 transition">
                     Sign up
                   </Link>
                 </div>
 
                 <button
                   onClick={toggleMenu}
-                  className="sm:hidden p-2 hover:bg-slate-100 rounded-lg transition"
+                  className="sm:hidden p-2.5 hover:bg-slate-100 rounded-xl border border-slate-200/70 shadow-sm transition"
                   aria-label="Toggle menu"
                 >
                   {isMenuOpen ? <X size={20} className="text-slate-900" /> : <Menu size={20} className="text-slate-900" />}
@@ -74,7 +77,7 @@ export default function Navbar() {
         </div>
 
         {isMenuOpen && !user && (
-          <div className="sm:hidden border-t border-slate-200 bg-white">
+          <div className="sm:hidden border-t border-slate-200/70 bg-white/95 backdrop-blur">
             <div className="px-2 pt-2 pb-3 space-y-1">
               <Link
                 to="/login"

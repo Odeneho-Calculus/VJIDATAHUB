@@ -198,6 +198,30 @@
     @apply bg-white border border-slate-200 rounded-2xl shadow-sm;
   }
 
+  .app-pro-header {
+    background: linear-gradient(120deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 250, 252, 0.95) 55%, rgba(241, 245, 249, 0.95) 100%);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.24);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 10px 28px -22px rgba(15, 23, 42, 0.45), 0 2px 10px -8px rgba(37, 99, 235, 0.45);
+    position: relative;
+  }
+
+  .app-pro-header::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(37, 99, 235, 0.1), rgba(14, 165, 233, 0.45), rgba(37, 99, 235, 0.1));
+    pointer-events: none;
+  }
+
+  .app-pro-header-strong {
+    box-shadow: 0 12px 34px -22px rgba(15, 23, 42, 0.55), 0 3px 12px -8px rgba(14, 165, 233, 0.4);
+  }
+
   /* Contact FAB Heartbeat Animation */
   @keyframes heartbeat {
     0% {

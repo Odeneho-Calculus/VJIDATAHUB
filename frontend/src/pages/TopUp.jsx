@@ -83,7 +83,7 @@ export default function TopUp() {
       <div className="min-h-screen bg-[#F8FAFC]">
         <div className="flex flex-col">
           {/* Sticky Header */}
-          <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 pb-1">
+          <div className="sticky top-0 z-30 app-pro-header pb-1">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">

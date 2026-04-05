@@ -193,7 +193,7 @@ export default function AgentOrders() {
     <AgentLayout>
       <div className="min-h-screen bg-[#F8FAFC]">
         {/* Top Header - Glassmorphism */}
-        <div className="sticky top-0 z-20 backdrop-blur-md bg-white/80 border-b border-slate-200/60 px-6 py-4">
+        <div className="sticky top-0 z-20 app-pro-header px-6 py-4">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 text-primary-600 mb-1">
