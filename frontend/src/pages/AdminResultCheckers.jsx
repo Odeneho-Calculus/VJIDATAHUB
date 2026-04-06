@@ -104,21 +104,23 @@ export default function AdminResultCheckers() {
     }
   };
 
+  const formatAmount = (value) => `GHc ${Number(value || 0).toFixed(2)}`;
+
   return (
-    <div className="flex h-screen">
+    <div className="flex min-h-[calc(100vh-56px)] sm:min-h-[calc(100vh-64px)]">
       <AdminSidebar isOpen={sidebarOpen} onClose={closeSidebar} />
-      <div className="flex-1 overflow-auto bg-slate-50 p-4 sm:p-6">
-        <div className="max-w-6xl mx-auto space-y-5">
+      <div className="flex-1 overflow-auto bg-slate-50 p-3 sm:p-6">
+        <div className="max-w-6xl mx-auto space-y-4 sm:space-y-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Result Checker Config</h1>
-              <p className="text-sm text-slate-600">Set admin and agent checker prices and availability</p>
+              <h1 className="text-xl sm:text-3xl font-bold text-slate-900">Result Checker Config</h1>
+              <p className="text-sm text-slate-600 mt-1">Set admin and agent checker prices and availability</p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
               <button
                 onClick={handleToggleLock}
                 disabled={savingLock}
-                className={`px-4 py-2 rounded-xl text-sm font-semibold border transition flex items-center gap-2 ${locked ? 'bg-rose-600 text-white border-rose-600' : 'bg-white text-slate-700 border-slate-200'}`}
+                className={`px-3 sm:px-4 py-2 rounded-xl text-sm font-semibold border transition flex items-center justify-center gap-2 flex-1 sm:flex-initial ${locked ? 'bg-rose-600 text-white border-rose-600' : 'bg-white text-slate-700 border-slate-200'}`}
               >
                 {locked ? <Lock size={16} /> : <Unlock size={16} />}
                 {locked ? 'Locked' : 'Unlocked'}
@@ -126,7 +128,7 @@ export default function AdminResultCheckers() {
               <button
                 onClick={handleSync}
                 disabled={syncing}
-                className="px-4 py-2 rounded-xl bg-slate-900 text-white text-sm font-semibold flex items-center gap-2"
+                className="px-3 sm:px-4 py-2 rounded-xl bg-slate-900 text-white text-sm font-semibold flex items-center justify-center gap-2 flex-1 sm:flex-initial"
               >
                 <RefreshCw size={16} className={syncing ? 'animate-spin' : ''} />
                 {syncing ? 'Syncing...' : 'Sync Checkers'}
@@ -159,54 +161,106 @@ export default function AdminResultCheckers() {
             ) : offers.length === 0 ? (
               <div className="p-10 text-center text-slate-500">No checker offers found</div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-slate-50 text-xs text-slate-600 uppercase tracking-wider">
-                      <th className="text-left p-3">Checker</th>
-                      <th className="text-left p-3">Cost</th>
-                      <th className="text-left p-3">Prices</th>
-                      <th className="text-left p-3">Stock</th>
-                      <th className="text-left p-3">Status</th>
-                      <th className="text-left p-3">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {offers.map((offer) => (
-                      <tr key={offer._id} className="border-t border-slate-100">
-                        <td className="p-3">
-                          <p className="font-semibold text-slate-900">{offer.displayName || offer.checkerType}</p>
-                          <p className="text-xs text-slate-500">{offer.checkerType}</p>
-                        </td>
-                        <td className="p-3 text-sm text-slate-700">GHc {Number(offer.costPrice || 0).toFixed(2)}</td>
-                        <td className="p-3 text-xs text-slate-600">
-                          <p>Admin: GHc {Number(offer.sellingPrice || 0).toFixed(2)}</p>
-                          <p>Agent: GHc {Number(offer.agentPrice || 0).toFixed(2)}</p>
-                        </td>
-                        <td className="p-3 text-xs text-slate-600">
-                          <p>{offer.available ? 'Available' : 'Unavailable'}</p>
-                          <p>Stock: {Number(offer.stockCount || 0)}</p>
-                        </td>
-                        <td className="p-3">
-                          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${offer.status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
-                            {offer.status}
-                          </span>
-                        </td>
-                        <td className="p-3">
-                          <div className="flex items-center gap-1">
-                            <button onClick={() => openEdit(offer)} className="p-2 rounded-lg hover:bg-slate-100" title="Edit prices">
-                              <Edit2 size={15} className="text-slate-700" />
-                            </button>
-                            <button onClick={() => handleToggleStatus(offer)} className="p-2 rounded-lg hover:bg-slate-100" title="Toggle status">
-                              <CheckCircle size={15} className={offer.status === 'active' ? 'text-emerald-600' : 'text-slate-400'} />
-                            </button>
-                          </div>
-                        </td>
+              <>
+                <div className="md:hidden divide-y divide-slate-100">
+                  {offers.map((offer) => (
+                    <div key={offer._id} className="p-3.5 space-y-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="font-semibold text-slate-900 truncate">{offer.displayName || offer.checkerType}</p>
+                          <p className="text-xs text-slate-500 truncate">{offer.checkerType}</p>
+                        </div>
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${offer.status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
+                          {offer.status}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2.5 text-xs">
+                        <div className="rounded-lg border border-slate-200 bg-slate-50 p-2.5">
+                          <p className="text-slate-500">Cost</p>
+                          <p className="font-semibold text-slate-800 mt-0.5">{formatAmount(offer.costPrice)}</p>
+                        </div>
+                        <div className="rounded-lg border border-slate-200 bg-slate-50 p-2.5">
+                          <p className="text-slate-500">Stock</p>
+                          <p className="font-semibold text-slate-800 mt-0.5">{Number(offer.stockCount || 0)}</p>
+                          <p className={`mt-0.5 ${offer.available ? 'text-emerald-700' : 'text-slate-500'}`}>{offer.available ? 'Available' : 'Unavailable'}</p>
+                        </div>
+                      </div>
+
+                      <div className="rounded-lg border border-slate-200 p-2.5 text-xs text-slate-600 space-y-1">
+                        <p><span className="font-semibold text-slate-700">Admin:</span> {formatAmount(offer.sellingPrice)}</p>
+                        <p><span className="font-semibold text-slate-700">Agent:</span> {formatAmount(offer.agentPrice)}</p>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => openEdit(offer)}
+                          className="px-3 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 bg-white hover:bg-slate-50"
+                          title="Edit prices"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleToggleStatus(offer)}
+                          className="px-3 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 bg-white hover:bg-slate-50"
+                          title="Toggle status"
+                        >
+                          {offer.status === 'active' ? 'Deactivate' : 'Activate'}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="hidden md:block overflow-x-auto">
+                  <table className="w-full min-w-[760px]">
+                    <thead>
+                      <tr className="bg-slate-50 text-[11px] text-slate-600 uppercase tracking-wider">
+                        <th className="text-left px-4 py-3">Checker</th>
+                        <th className="text-left px-4 py-3">Cost</th>
+                        <th className="text-left px-4 py-3">Prices</th>
+                        <th className="text-left px-4 py-3">Stock</th>
+                        <th className="text-left px-4 py-3">Status</th>
+                        <th className="text-left px-4 py-3">Actions</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {offers.map((offer) => (
+                        <tr key={offer._id} className="border-t border-slate-100 align-top">
+                          <td className="px-4 py-3">
+                            <p className="font-semibold text-slate-900">{offer.displayName || offer.checkerType}</p>
+                            <p className="text-xs text-slate-500">{offer.checkerType}</p>
+                          </td>
+                          <td className="px-4 py-3 text-sm font-medium text-slate-700">{formatAmount(offer.costPrice)}</td>
+                          <td className="px-4 py-3 text-xs text-slate-600 space-y-1">
+                            <p>Admin: {formatAmount(offer.sellingPrice)}</p>
+                            <p>Agent: {formatAmount(offer.agentPrice)}</p>
+                          </td>
+                          <td className="px-4 py-3 text-xs text-slate-600 space-y-1">
+                            <p>{offer.available ? 'Available' : 'Unavailable'}</p>
+                            <p>Stock: {Number(offer.stockCount || 0)}</p>
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${offer.status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
+                              {offer.status}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-1">
+                              <button onClick={() => openEdit(offer)} className="p-2 rounded-lg hover:bg-slate-100" title="Edit prices">
+                                <Edit2 size={15} className="text-slate-700" />
+                              </button>
+                              <button onClick={() => handleToggleStatus(offer)} className="p-2 rounded-lg hover:bg-slate-100" title="Toggle status">
+                                <CheckCircle size={15} className={offer.status === 'active' ? 'text-emerald-600' : 'text-slate-400'} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
           </div>
         </div>

@@ -75,11 +75,11 @@ export default function AdminSidebar({ isOpen, onClose }) {
       />
 
       <aside
-        className={`fixed top-16 left-0 lg:top-16 h-[calc(100vh-64px)] w-72 z-50 transition-transform duration-300 bg-white border-r border-slate-200 ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        className={`fixed top-14 sm:top-16 left-0 lg:top-16 h-[calc(100vh-56px)] sm:h-[calc(100vh-64px)] w-[86vw] max-w-72 z-50 transition-transform duration-300 bg-white border-r border-slate-200 ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
           }`}
       >
         <div className="h-full flex flex-col bg-slate-50/40">
-          <div className="px-4 py-4 border-b border-slate-200 bg-white">
+          <div className="px-3 sm:px-4 py-3.5 sm:py-4 border-b border-slate-200 bg-white">
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center flex-shrink-0">
@@ -100,10 +100,10 @@ export default function AdminSidebar({ isOpen, onClose }) {
             </div>
           </div>
 
-          <nav className="flex-1 p-4 space-y-5 overflow-y-auto scrollbar-hide">
+          <nav className="flex-1 p-3 sm:p-4 space-y-4 sm:space-y-5 overflow-y-auto scrollbar-hide">
             <div>
               <p className="px-2 mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Overview</p>
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 {primaryNav.map((item) => {
                   const Icon = item.icon;
                   const active = isActive(item.path);
@@ -113,14 +113,14 @@ export default function AdminSidebar({ isOpen, onClose }) {
                       key={item.path}
                       to={item.path}
                       onClick={() => onClose()}
-                      className={`group flex items-center justify-between px-3 py-2.5 rounded-xl border transition-all duration-200 ${active
+                      className={`group flex items-center justify-between px-2.5 sm:px-3 py-2 rounded-xl border transition-all duration-200 ${active
                         ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
                         : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50'
                         }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         <Icon size={17} className={`${active ? 'text-white' : 'text-slate-500 group-hover:text-slate-700'} flex-shrink-0`} />
-                        <span className="font-medium text-sm truncate">{item.label}</span>
+                        <span className="font-medium text-xs sm:text-sm truncate">{item.label}</span>
                       </div>
                       {active && <ChevronRight size={14} className="text-white/70 flex-shrink-0" />}
                     </Link>
@@ -131,7 +131,7 @@ export default function AdminSidebar({ isOpen, onClose }) {
 
             <div>
               <p className="px-2 mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Operations</p>
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 {operationsNav.map((item) => {
                   const Icon = item.icon;
                   const active = isActive(item.path);
@@ -141,14 +141,14 @@ export default function AdminSidebar({ isOpen, onClose }) {
                       key={item.path}
                       to={item.path}
                       onClick={() => onClose()}
-                      className={`group flex items-center justify-between px-3 py-2.5 rounded-xl border transition-all duration-200 ${active
+                      className={`group flex items-center justify-between px-2.5 sm:px-3 py-2 rounded-xl border transition-all duration-200 ${active
                         ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
                         : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50'
                         }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         <Icon size={17} className={`${active ? 'text-white' : 'text-slate-500 group-hover:text-slate-700'} flex-shrink-0`} />
-                        <span className="font-medium text-sm truncate">{item.label}</span>
+                        <span className="font-medium text-xs sm:text-sm truncate">{item.label}</span>
                       </div>
                       {active && <ChevronRight size={14} className="text-white/70 flex-shrink-0" />}
                     </Link>
@@ -159,7 +159,7 @@ export default function AdminSidebar({ isOpen, onClose }) {
 
             <div>
               <p className="px-2 mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Settings</p>
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 {settingsNav.map((item) => {
                   const Icon = item.icon;
                   const active = isActive(item.path);
@@ -169,14 +169,14 @@ export default function AdminSidebar({ isOpen, onClose }) {
                       key={item.path}
                       to={item.path}
                       onClick={() => onClose()}
-                      className={`group flex items-center justify-between px-3 py-2.5 rounded-xl border transition-all duration-200 ${active
+                      className={`group flex items-center justify-between px-2.5 sm:px-3 py-2 rounded-xl border transition-all duration-200 ${active
                         ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
                         : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50'
                         }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         <Icon size={17} className={`${active ? 'text-white' : 'text-slate-500 group-hover:text-slate-700'} flex-shrink-0`} />
-                        <span className="font-medium text-sm truncate">{item.label}</span>
+                        <span className="font-medium text-xs sm:text-sm truncate">{item.label}</span>
                       </div>
                       {active && <ChevronRight size={14} className="text-white/70 flex-shrink-0" />}
                     </Link>
@@ -186,7 +186,7 @@ export default function AdminSidebar({ isOpen, onClose }) {
             </div>
           </nav>
 
-          <div className="p-4 border-t border-slate-200 bg-white">
+          <div className="p-3 sm:p-4 border-t border-slate-200 bg-white">
             <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
               <p className="text-xs font-semibold text-slate-700">Admin Dashboard</p>
               <p className="text-[11px] text-slate-500 mt-0.5">Version 1.0</p>
