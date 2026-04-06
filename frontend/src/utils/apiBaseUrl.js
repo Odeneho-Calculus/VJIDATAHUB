@@ -1,5 +1,5 @@
 const LOCAL_API_BASE = 'http://localhost:5000/api';
-const PROD_API_BASE = 'https://api-ag-grafix-data-hub-d5wg.onrender.com/api';
+const PROD_API_BASE = 'https://vjidatahub.onrender.com/api';
 
 const normalizeApiBaseUrl = (rawUrl) => {
   if (!rawUrl || typeof rawUrl !== 'string') {
