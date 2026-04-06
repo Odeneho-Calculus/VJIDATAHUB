@@ -113,6 +113,19 @@ export default function GuestTrackOrder() {
     });
   };
 
+  const isCheckerOrder = (order) => {
+    const kind = String(order?.orderKind || '').toLowerCase();
+    const network = String(order?.network || '').toLowerCase();
+    return kind === 'checker' || network === 'checker' || Boolean(order?.checkerDetails?.checkerType);
+  };
+
+  const getOrderPlanDisplay = (order) => {
+    if (isCheckerOrder(order)) {
+      return order?.planName || order?.checkerDetails?.checkerType || 'Checker';
+    }
+    return order?.dataAmount || order?.planName || 'N/A';
+  };
+
   return (
     <div className="min-h-screen bg-slate-50/50">
       {/* Top Header */}
@@ -260,10 +273,8 @@ export default function GuestTrackOrder() {
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
                       <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Plan</p>
-                      <p className="font-bold text-slate-900 text-sm leading-tight">
-                        {order.network}
-                      </p>
-                      <p className="text-xs text-slate-600 leading-tight">{order.dataAmount}</p>
+                      <p className="font-bold text-slate-900 text-sm leading-tight">{getOrderPlanDisplay(order)}</p>
+                      <p className="text-xs text-slate-600 leading-tight">{isCheckerOrder(order) ? 'CHECKER' : order.network}</p>
                     </div>
                     <div>
                       <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Phone</p>

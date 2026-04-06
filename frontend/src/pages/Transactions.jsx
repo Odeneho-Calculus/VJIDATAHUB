@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Eye, Download, Lock, RotateCcw, X, Copy, Check, RotateCw, Wallet, ArrowUpRight, ArrowDownLeft, Gift, Search, Filter, Calendar, Layout, CreditCard, ChevronRight, Hash, AlertCircle, ShoppingBag, ReceiptText, RefreshCw } from 'lucide-react';
 import { formatCurrencyAbbreviated, formatNumberAbbreviated } from '../utils/formatCurrency';
-import { wallet, purchases } from '../services/api';
+import { wallet, purchases, checkers as checkersAPI } from '../services/api';
 import UserLayout from '../components/UserLayout';
 import Modal from '../components/Modal';
 import AlertModal from '../components/AlertModal';
@@ -55,12 +55,20 @@ export default function Transactions() {
       const ordersList = ordersRes.success ? ordersRes.data?.orders || [] : [];
       const currentBalance = balanceRes.success ? balanceRes.balance || 0 : 0;
 
+      const isCheckerOrder = (order) => {
+        const kind = String(order?.orderKind || '').toLowerCase();
+        const network = String(order?.network || '').toLowerCase();
+        return kind === 'checker' || network === 'checker' || Boolean(order?.checkerDetails?.checkerType);
+      };
+
       const combined = [
         ...walletTransactions.map(tx => {
           const desc = tx.description?.toLowerCase() || '';
           let type = 'Wallet Top-up';
 
-          if (desc.includes('data purchase')) {
+          if (tx.type === 'checker_purchase' || desc.includes('checker purchase')) {
+            type = 'Checker Purchase';
+          } else if (tx.type === 'data_purchase' || desc.includes('data purchase')) {
             type = 'Data Purchase';
           } else if (tx.type === 'referral_bonus') {
             type = 'Referral Bonus';
@@ -82,22 +90,30 @@ export default function Transactions() {
             balanceAfter: 0,
           };
         }),
-        ...ordersList.map(order => ({
-          id: order.id,
-          type: 'Data Purchase',
-          description: `${order.dataAmount} ${order.network} to ${order.phoneNumber}`,
-          amount: -order.amount,
-          date: order.date || order.createdAt,
-          status: order.status.charAt(0).toUpperCase() + order.status.slice(1),
-          statusRaw: order.status,
-          paymentStatus: order.paymentStatus,
-          balanceAfter: 0,
-          paymentMethod: order.paymentMethod,
-          reference: order.transactionReference,
-          paystackReference: order.paystackReference,
-          txType: 'data_purchase',
-          createdAt: order.date || order.createdAt,
-        })),
+        ...ordersList.map(order => {
+          const checkerOrder = isCheckerOrder(order);
+          const planLabel = checkerOrder
+            ? (order.planName || order?.checkerDetails?.checkerType || 'Checker')
+            : (order.dataAmount || order.planName || 'N/A');
+          return {
+            id: order.id,
+            type: checkerOrder ? 'Checker Purchase' : 'Data Purchase',
+            description: checkerOrder
+              ? `${planLabel} checker to ${order.phoneNumber}`
+              : `${planLabel} ${order.network} to ${order.phoneNumber}`,
+            amount: -order.amount,
+            date: order.date || order.createdAt,
+            status: order.status.charAt(0).toUpperCase() + order.status.slice(1),
+            statusRaw: order.status,
+            paymentStatus: order.paymentStatus,
+            balanceAfter: 0,
+            paymentMethod: order.paymentMethod,
+            reference: order.transactionReference,
+            paystackReference: order.paystackReference,
+            txType: checkerOrder ? 'checker_purchase' : 'data_purchase',
+            createdAt: order.date || order.createdAt,
+          };
+        }),
       ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
       let runningBalance = currentBalance;
@@ -131,7 +147,7 @@ export default function Transactions() {
   };
 
   const getResolvedOrderStatus = (tx) => {
-    if (tx?.type !== 'Data Purchase') return 'n/a';
+    if (!['Data Purchase', 'Checker Purchase'].includes(tx?.type)) return 'n/a';
     return normalizeStatus(tx?.statusRaw || tx?.status) || 'pending';
   };
 
@@ -179,6 +195,8 @@ export default function Transactions() {
         response = await wallet.verifyPayment({ reference });
       } else if (verificationTx.txType === 'data_purchase' || verificationTx.txType === 'debit') {
         response = await purchases.verifyPurchase({ reference });
+      } else if (verificationTx.txType === 'checker_purchase') {
+        response = await checkersAPI.verifyCheckerPurchase({ reference });
       } else {
         response = { success: false, message: 'Unknown transaction type for verification' };
       }
@@ -200,6 +218,7 @@ export default function Transactions() {
 
   const filteredTransactions = transactions.filter(tx => {
     if (activeTab === 'data-purchase' && tx.type !== 'Data Purchase') return false;
+    if (activeTab === 'checker-purchase' && tx.type !== 'Checker Purchase') return false;
     if (activeTab === 'topup' && tx.type !== 'Wallet Top-up') return false;
     if (activeTab === 'bonus' && tx.type !== 'Referral Bonus') return false;
 
@@ -217,6 +236,7 @@ export default function Transactions() {
   const getTransactionIcon = (type) => {
     switch (type) {
       case 'Data Purchase': return <ArrowDownLeft size={16} />;
+      case 'Checker Purchase': return <ShoppingBag size={16} />;
       case 'Wallet Top-up': return <ArrowUpRight size={16} />;
       case 'Referral Bonus': return <Gift size={16} />;
       default: return <CreditCard size={16} />;
@@ -224,7 +244,7 @@ export default function Transactions() {
   };
 
   const totalSpent = transactions
-    .filter(t => t.type === 'Data Purchase' && (t.statusRaw === 'completed' || t.statusRaw === 'successful'))
+    .filter(t => ['Data Purchase', 'Checker Purchase'].includes(t.type) && (t.statusRaw === 'completed' || t.statusRaw === 'successful'))
     .reduce((sum, t) => sum + Math.abs(t.amount || 0), 0);
   const totalTopUp = transactions
     .filter(t => (t.type === 'Wallet Top-up' || t.txType === 'referral_bonus') && (t.statusRaw === 'completed' || t.statusRaw === 'successful'))
@@ -243,6 +263,7 @@ export default function Transactions() {
   };
 
   return (
+                    { id: 'checker-purchase', label: 'Checker Purchase', icon: ShoppingBag },
     <UserLayout>
       <div className="min-h-screen bg-[#F8FAFC]">
         <div className="flex flex-col">
@@ -488,7 +509,7 @@ export default function Transactions() {
                             </td>
                             <td className="px-8 py-6 text-right">
                               <div className="flex items-center justify-end gap-2 px-1">
-                                {getResolvedPaymentStatus(tx) === 'pending' && (tx.txType === 'wallet_topup' || tx.type === 'Data Purchase') && (
+                                {getResolvedPaymentStatus(tx) === 'pending' && (tx.txType === 'wallet_topup' || tx.type === 'Data Purchase' || tx.type === 'Checker Purchase') && (
                                   <button
                                     onClick={(e) => openVerificationModal(tx, e)}
                                     className="p-2.5 bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white rounded-xl transition-all shadow-sm active:scale-95 border border-amber-100"
@@ -550,7 +571,7 @@ export default function Transactions() {
                         <div className="flex items-center justify-between pt-4 border-t border-slate-50 mt-1">
                           <p className="text-[11px] font-bold text-slate-500 truncate max-w-[200px]">{tx.description}</p>
                           <div className="flex gap-2">
-                            {getResolvedPaymentStatus(tx) === 'pending' && (tx.txType === 'wallet_topup' || tx.type === 'Data Purchase') && (
+                            {getResolvedPaymentStatus(tx) === 'pending' && (tx.txType === 'wallet_topup' || tx.type === 'Data Purchase' || tx.type === 'Checker Purchase') && (
                               <button
                                 onClick={(e) => openVerificationModal(tx, e)}
                                 className="p-2 bg-amber-50 text-amber-600 rounded-xl border border-amber-100"

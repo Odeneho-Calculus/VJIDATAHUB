@@ -6,6 +6,16 @@ import { formatNumberAbbreviated } from '../utils/formatCurrency';
 export const OrderDetailsModal = ({ isOpen, onClose, order }) => {
   if (!order) return null;
 
+  const isCheckerOrder =
+    String(order?.orderKind || '').toLowerCase() === 'checker' ||
+    String(order?.network || '').toLowerCase() === 'checker' ||
+    Boolean(order?.checkerDetails?.checkerType);
+
+  const planAmountLabel = isCheckerOrder ? 'Checker Type' : 'Amount';
+  const planAmountValue = isCheckerOrder
+    ? (order?.planName || order?.checkerDetails?.checkerType || 'Checker')
+    : (order?.dataAmount || 'N/A');
+
   const isFailedOrder = order.status === 'failed' || order.paymentStatus === 'failed';
   const failedContext = [
     order.errorMessage,
@@ -107,8 +117,8 @@ export const OrderDetailsModal = ({ isOpen, onClose, order }) => {
               <p className="text-xs font-black text-slate-900">{order.network || 'N/A'}</p>
             </div>
             <div className="p-2.5 bg-white border border-slate-200 rounded-xl">
-              <p className="text-[9px] font-bold text-slate-400 uppercase">Amount</p>
-              <p className="text-xs font-black text-slate-900">{order.dataAmount || 'N/A'}</p>
+              <p className="text-[9px] font-bold text-slate-400 uppercase">{planAmountLabel}</p>
+              <p className="text-xs font-black text-slate-900">{planAmountValue}</p>
             </div>
             <div className="p-2.5 bg-white border border-slate-200 rounded-xl col-span-2">
               <p className="text-[9px] font-bold text-slate-400 uppercase">Plan Name</p>

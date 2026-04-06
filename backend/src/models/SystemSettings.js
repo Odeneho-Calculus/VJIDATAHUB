@@ -80,6 +80,10 @@ const systemSettingsSchema = new mongoose.Schema(
         min: 1,
         max: 500,
       },
+      checkerSalesLocked: {
+        type: Boolean,
+        default: false,
+      },
     },
   },
   { timestamps: true }
@@ -108,6 +112,9 @@ systemSettingsSchema.statics.getSettings = async function () {
   const batchLimit = Number(settings.orderSettings.statusSyncBatchLimit);
   if (Number.isNaN(batchLimit) || batchLimit < 1 || batchLimit > 500) {
     settings.orderSettings.statusSyncBatchLimit = 100;
+  }
+  if (typeof settings.orderSettings.checkerSalesLocked !== 'boolean') {
+    settings.orderSettings.checkerSalesLocked = false;
   }
   return settings;
 };

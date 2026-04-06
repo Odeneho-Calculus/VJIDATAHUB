@@ -190,6 +190,42 @@ export const topza = {
   getWalletSettings: () => api.get('/topza/wallet'),
 };
 
+export const checkers = {
+  // Shared/public
+  getLockStatus: () => api.get('/checkers/lock-status'),
+  getAvailability: (checkerType = '') =>
+    api.get(`/checkers/availability${checkerType ? `?checkerType=${checkerType}` : ''}`),
+  getTypes: () => api.get('/checkers/types'),
+
+  // Authenticated
+  getProducts: () => api.get('/checkers/products/list'),
+  buyChecker: (data) => api.post('/checkers/check', data),
+  verifyCheckerPurchase: (data) => api.post('/checkers/verify', data),
+  getMyCheckers: (page = 1, limit = 10, status = '', checkerType = '') =>
+    api.get(`/checkers?page=${page}&limit=${limit}&status=${status}&checkerType=${checkerType}`),
+  getCheckerById: (id) => api.get(`/checkers/${id}`),
+
+  // Admin
+  sync: () => api.post('/checkers/sync'),
+  listOffers: (status = '', search = '', page = 1, limit = 50) =>
+    api.get(`/checkers/offers?status=${status}&search=${search}&page=${page}&limit=${limit}`),
+  updatePrices: (id, data) => api.patch(`/checkers/${id}/prices`, data),
+  toggleStatus: (id) => api.patch(`/checkers/${id}/toggle-status`),
+  updateLockStatus: (enabled) => api.patch('/checkers/lock', { enabled }),
+
+  // Agent store checker management
+  getStoreCheckers: () => api.get('/checkers/store/my-store/checkers'),
+  getStoreAvailableCheckers: () => api.get('/checkers/store/my-store/checkers/available'),
+  addStoreChecker: (data) => api.post('/checkers/store/my-store/checkers', data),
+  updateStoreChecker: (checkerId, data) => api.patch(`/checkers/store/my-store/checkers/${checkerId}`, data),
+  removeStoreChecker: (checkerId) => api.delete(`/checkers/store/my-store/checkers/${checkerId}`),
+
+  // Public store checker purchases
+  getPublicStoreCheckers: (slug) => api.get(`/checkers/store/public/${slug}/checkers`),
+  initializePublicStoreCheckerPurchase: (slug, data) => api.post(`/checkers/store/public/${slug}/checkers/purchase`, data),
+  verifyPublicStoreCheckerPayment: (data) => api.post('/checkers/store/public/checkers/verify-payment', data),
+};
+
 export const xpresdata = {
   list: (network = '', status = 'active', page = 1, limit = 10, type = '') =>
     api.get(`/xpresdata/list?network=${network}&status=${status}&page=${page}&limit=${limit}&type=${type}`),

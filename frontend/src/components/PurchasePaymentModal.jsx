@@ -3,7 +3,7 @@ import { CheckCircle, AlertCircle } from 'lucide-react';
 import { purchases } from '../services/api';
 import { formatCurrencyAbbreviated } from '../utils/formatCurrency';
 
-export default function PurchasePaymentModal({ isOpen, onClose, accessCode, reference, amount, onSuccess }) {
+export default function PurchasePaymentModal({ isOpen, onClose, accessCode, reference, amount, onSuccess, verifyPayment }) {
   const [status, setStatus] = useState('pending');
   const [error, setError] = useState(null);
   const paystackRef = useRef(null);
@@ -31,7 +31,8 @@ export default function PurchasePaymentModal({ isOpen, onClose, accessCode, refe
             if (!isMounted) return;
             setStatus('verifying');
             try {
-              const result = await purchases.verifyPurchase({ reference });
+              const verifyHandler = verifyPayment || purchases.verifyPurchase;
+              const result = await verifyHandler({ reference });
 
               if (isMounted) {
                 if (result.success) {

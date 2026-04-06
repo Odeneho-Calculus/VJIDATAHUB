@@ -94,6 +94,19 @@ export default function AgentDashboard() {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
+  const isCheckerOrder = (order) => {
+    const kind = String(order?.orderKind || '').toLowerCase();
+    const network = String(order?.network || '').toLowerCase();
+    return kind === 'checker' || network === 'checker' || Boolean(order?.checkerDetails?.checkerType);
+  };
+
+  const getOrderPlanDisplay = (order) => {
+    if (isCheckerOrder(order)) {
+      return order?.planName || order?.checkerDetails?.checkerType || 'Checker';
+    }
+    return order?.dataAmount ? `${order.dataAmount} Bundle` : (order?.planName || 'N/A');
+  };
+
   const formatCurrency = (amount) => formatCurrencyAbbreviated(amount);
 
   if (loading) {
@@ -423,7 +436,7 @@ export default function AgentDashboard() {
                           <p className="font-bold text-slate-900">{order.phoneNumber || 'N/A'}</p>
                         </td>
                         <td className="py-4 px-4 whitespace-nowrap">
-                          <p className="text-sm font-semibold text-slate-700">{order.dataAmount} Bundle</p>
+                          <p className="text-sm font-semibold text-slate-700">{getOrderPlanDisplay(order)}</p>
                         </td>
                         <td className="py-4 px-4 whitespace-nowrap">
                           <p className="font-black text-slate-900">{formatCurrency(order.amount)}</p>
@@ -496,8 +509,8 @@ export default function AgentDashboard() {
                 <p className="text-xs font-bold text-slate-600 uppercase mt-1">{selectedOrder.network}</p>
               </div>
               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Data Package</p>
-                <p className="font-bold text-slate-900">{selectedOrder.dataAmount} Bundle</p>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{isCheckerOrder(selectedOrder) ? 'Checker Plan' : 'Data Package'}</p>
+                  <p className="font-bold text-slate-900">{getOrderPlanDisplay(selectedOrder)}</p>
                 <p className="text-xs font-bold text-slate-600 mt-1">{formatCurrency(selectedOrder.amount)}</p>
               </div>
             </div>

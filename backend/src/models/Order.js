@@ -15,7 +15,7 @@ const orderSchema = new mongoose.Schema(
     },
     planType: {
       type: String,
-      enum: ['DataPlan', 'XpresDataOffer', 'DigimallOffer', 'TopzaOffer'],
+      enum: ['DataPlan', 'XpresDataOffer', 'DigimallOffer', 'TopzaOffer', 'TopzaCheckerOffer'],
       default: 'DataPlan',
     },
     apiPlanId: {
@@ -36,8 +36,39 @@ const orderSchema = new mongoose.Schema(
     dataAmount: {
       type: String,
     },
+    orderKind: {
+      type: String,
+      enum: ['data', 'checker'],
+      default: 'data',
+    },
     planName: {
       type: String,
+    },
+    checkerDetails: {
+      checkerType: {
+        type: String,
+        default: null,
+      },
+      resultCheckerId: {
+        type: String,
+        default: null,
+      },
+      serialNumber: {
+        type: String,
+        default: null,
+      },
+      pin: {
+        type: String,
+        default: null,
+      },
+      skipSms: {
+        type: Boolean,
+        default: false,
+      },
+      smsNotificationSent: {
+        type: Boolean,
+        default: false,
+      },
     },
     amount: {
       type: Number,

@@ -6,7 +6,8 @@ import {
   ShoppingBag, Activity, Globe2, Lock, Mail, Facebook, Instagram, Twitter, Smartphone, Headphones
 } from 'lucide-react';
 import { io } from 'socket.io-client';
-import { store as storeAPI, publicAPI } from '../services/api';
+import { formatCurrencyAbbreviated } from '../utils/formatCurrency';
+import { store as storeAPI, publicAPI, checkers as checkersAPI } from '../services/api';
 import { getSocketBaseUrl } from '../utils/apiBaseUrl';
 
 export default function PublicStore() {
@@ -20,6 +21,7 @@ export default function PublicStore() {
   const socketRef = useRef(null);
   const fabRef = useRef(null);
   const [networkCatalog, setNetworkCatalog] = useState([]);
+  const [checkers, setCheckers] = useState([]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -88,6 +90,13 @@ export default function PublicStore() {
 
       if (!storeData.accessStatus?.isAccessible) {
         setError(storeData.accessStatus?.message || 'Store is not available');
+      }
+
+      try {
+        const checkerRes = await checkersAPI.getPublicStoreCheckers(slug);
+        setCheckers(checkerRes?.checkers || []);
+      } catch {
+        setCheckers([]);
       }
     } catch (err) {
       setError(err.message || 'Store not found');
@@ -568,6 +577,54 @@ export default function PublicStore() {
                     <p className="text-sm text-slate-600">No active network catalog available right now.</p>
                   </div>
                 )}
+
+                <div className="mt-4 pt-4 border-t border-slate-200">
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Result Checkers</p>
+                      <h3 className="text-lg font-bold text-slate-900">Checker cards for students</h3>
+                    </div>
+                    <Link
+                      to={`/store/${slug}/catalog`}
+                      className="text-sm font-semibold"
+                      style={{ color: primaryColor }}
+                    >
+                      View checker catalog
+                    </Link>
+                  </div>
+
+                  {checkers.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                      {checkers.map((checker) => {
+                        const isAvailable = Boolean(checker.available) && Number(checker.stockCount || 0) > 0;
+                        return (
+                          <div key={checker._id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                            <div className="flex items-center justify-between gap-2">
+                              <p className="text-sm font-bold text-slate-900">{checker.displayName || checker.checkerType}</p>
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isAvailable ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                                {isAvailable ? 'Available' : 'Low/Out of stock'}
+                              </span>
+                            </div>
+                            <p className="text-xs text-slate-600 mt-1">{checker.checkerType} checker</p>
+                            <p className="text-lg font-black text-slate-900 mt-2">{formatCurrencyAbbreviated(checker.sellingPrice)}</p>
+                            <Link
+                              to={`/store/${slug}/catalog`}
+                              className="mt-2 inline-flex items-center gap-1 text-xs font-semibold"
+                              style={{ color: primaryColor }}
+                            >
+                              Buy now
+                              <ArrowRight size={12} />
+                            </Link>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 text-center">
+                      <p className="text-sm text-slate-600">No checker products are visible yet for this store.</p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 

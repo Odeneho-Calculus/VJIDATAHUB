@@ -172,6 +172,19 @@ export default function AdminOrders() {
     }
   };
 
+  const isCheckerOrder = (order) => {
+    const kind = String(order?.orderKind || '').toLowerCase();
+    const network = String(order?.network || '').toLowerCase();
+    return kind === 'checker' || network === 'checker' || Boolean(order?.checkerDetails?.checkerType);
+  };
+
+  const getPlanDisplayValue = (order) => {
+    if (isCheckerOrder(order)) {
+      return order?.planName || order?.checkerDetails?.checkerType || 'Checker';
+    }
+    return order?.dataAmount || order?.planName || 'N/A';
+  };
+
   const handleViewDetails = (order) => {
     setSelectedOrder(order);
     setShowDetailsModal(true);
@@ -557,7 +570,7 @@ export default function AdminOrders() {
                             </td>
                             <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                               <div className="flex flex-col gap-1">
-                                <p className="text-sm font-bold text-slate-900">{order.dataAmount || 'N/A'}</p>
+                                <p className="text-sm font-bold text-slate-900">{getPlanDisplayValue(order)}</p>
                                 <p className="text-[11px] text-slate-500 font-medium">{order.phoneNumber || 'N/A'}</p>
                               </div>
                             </td>

@@ -1,0 +1,289 @@
+{
+  "document": {
+    "title": "Topza Results Checker API",
+    "version": "v1",
+    "lastUpdated": "2026-04-06",
+    "baseUrl": "https://api.topza.culustech.com/api/v1",
+    "description": "Complete third-party integration guide for Topza Results Checker endpoints.",
+    "authentication": {
+      "type": "apiKey",
+      "header": "X-API-Key",
+      "example": "topza_xxxxxxxxxxxxxxxxxxxxx"
+    },
+    "contentType": "application/json",
+    "rules": [
+      "For v1 Results Checker purchase, wallet is the only supported payment method.",
+      "Do not send paymentMethod. Wallet is applied automatically.",
+      "If skipSms is false, SMS fee is charged only when SMS sends successfully.",
+      "Use /checkers/availability to confirm product-level availability before purchase.",
+      "Product stock and availability can change, so re-check before each purchase."
+    ]
+  },
+  "endpoints": [
+    {
+      "name": "Get Checker Service Availability",
+      "method": "GET",
+      "path": "/checkers/availability",
+      "description": "Returns provider and product availability status. Supports optional checkerType query for a specific product.",
+      "query": [
+        {
+          "name": "checkerType",
+          "required": false,
+          "type": "string",
+          "enum": ["WAEC", "NECO", "JAMB", "BECE"],
+          "description": "If provided, checks one checker product only."
+        }
+      ],
+      "successResponseExample": {
+        "success": true,
+        "data": {
+          "available": true,
+          "providerAvailable": true,
+          "totalProducts": 2,
+          "availableProducts": 1,
+          "unavailableProducts": 1,
+          "availableProductsList": [
+            {
+              "checkerType": "BECE",
+              "available": true,
+              "stockCount": 88,
+              "lastCheckedAt": "2026-03-18T10:35:43.127Z"
+            }
+          ],
+          "unavailableProductsList": [
+            {
+              "checkerType": "WAEC",
+              "available": false,
+              "stockCount": 0,
+              "lastCheckedAt": "2026-03-18T10:35:42.694Z"
+            }
+          ],
+          "message": "Checker purchases are available"
+        }
+      }
+    },
+    {
+      "name": "Get Checker Lock Status",
+      "method": "GET",
+      "path": "/checkers/lock-status",
+      "description": "Returns whether checker sales are globally locked by admin settings.",
+      "successResponseExample": {
+        "success": true,
+        "data": {
+          "enabled": false,
+          "message": ""
+        }
+      }
+    },
+    {
+      "name": "List Checker Types",
+      "method": "GET",
+      "path": "/checkers/types",
+      "description": "Returns checker taxonomy/basic metadata. Use products/list for pricing and stock.",
+      "successResponseExample": {
+        "success": true,
+        "data": [
+          {
+            "name": "WAEC",
+            "displayName": "WAEC",
+            "description": "West African Examinations Council result checker",
+            "category": "secondary",
+            "icon": null,
+            "color": null,
+            "isActive": true,
+            "sortOrder": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "List Checker Products",
+      "method": "GET",
+      "path": "/checkers/products/list",
+      "description": "Returns buy-ready products with admin pricing and stock state.",
+      "successResponseExample": {
+        "success": true,
+        "data": [
+          {
+            "_id": "692f337c89a8c1d95a13e687",
+            "name": "WAEC",
+            "displayName": "WAEC",
+            "description": "West African Examinations Council (WAEC) Result Checker",
+            "price": 18,
+            "discount": 0,
+            "finalPrice": 18,
+            "available": false,
+            "stockCount": 0,
+            "lastCheckedAt": "2026-03-18T10:35:42.694Z",
+            "category": "secondary",
+            "icon": null,
+            "color": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "Buy Checker",
+      "method": "POST",
+      "path": "/checkers/check",
+      "description": "Initiates checker purchase. v1 API uses wallet only.",
+      "requestBody": {
+        "required": ["checkerType", "phoneNumber"],
+        "properties": {
+          "checkerType": {
+            "type": "string",
+            "enum": ["WAEC", "NECO", "JAMB", "BECE"]
+          },
+          "phoneNumber": {
+            "type": "string",
+            "description": "Ghana number for checker notification"
+          },
+          "skipSms": {
+            "type": "boolean",
+            "required": false,
+            "default": false,
+            "description": "Set true to skip SMS send and SMS charge"
+          }
+        }
+      },
+      "requestExample": {
+        "checkerType": "WAEC",
+        "phoneNumber": "0240000000",
+        "skipSms": false
+      },
+      "successResponseExample": {
+        "success": true,
+        "message": "Checker purchase initiated",
+        "data": {
+          "resultCheckerId": "69d2f675efa7ff9a30151c25",
+          "purchaseId": "CHK17754333332249775",
+          "reference": "CHKW1775433333224757366",
+          "status": "pending"
+        }
+      },
+      "commonFailureExamples": [
+        {
+          "success": false,
+          "message": "WAEC checker is currently unavailable"
+        },
+        {
+          "success": false,
+          "message": "Insufficient wallet balance"
+        },
+        {
+          "success": false,
+          "message": "V1 checker purchase supports wallet only"
+        }
+      ]
+    },
+    {
+      "name": "List My Checkers",
+      "method": "GET",
+      "path": "/checkers",
+      "description": "Returns authenticated API user's checker history (paginated).",
+      "query": [
+        { "name": "page", "required": false, "type": "number", "default": 1 },
+        { "name": "limit", "required": false, "type": "number", "default": 10 },
+        {
+          "name": "status",
+          "required": false,
+          "type": "string",
+          "enum": ["active", "used", "expired", "revoked"]
+        },
+        {
+          "name": "checkerType",
+          "required": false,
+          "type": "string",
+          "enum": ["WAEC", "NECO", "JAMB", "BECE"]
+        },
+        { "name": "dateFrom", "required": false, "type": "ISO date" },
+        { "name": "dateTo", "required": false, "type": "ISO date" }
+      ],
+      "successResponseExample": {
+        "success": true,
+        "count": 1,
+        "pagination": {
+          "page": 1,
+          "limit": 10,
+          "total": 1,
+          "pages": 1
+        },
+        "data": [
+          {
+            "_id": "69ad74e70bc39cfb925df583",
+            "purchaseId": "CHK17729753350573531",
+            "reference": "CHKW1772975335057855033",
+            "checkerType": "WAEC",
+            "serialNumber": "WGR250517103",
+            "pin": "697067644189",
+            "phoneNumber": "0534359912",
+            "price": 18,
+            "status": "active",
+            "purchaseStatus": "success",
+            "smsNotificationSent": false,
+            "failureReason": null,
+            "retryCount": 0,
+            "expiresAt": "2027-03-08T13:08:55.057Z",
+            "createdAt": "2026-03-08T13:08:55.058Z",
+            "updatedAt": "2026-03-08T13:08:55.762Z",
+            "metadata": {
+              "paymentMethod": "wallet",
+              "balanceBefore": 18,
+              "balanceAfter": 219.85,
+              "skipSms": true,
+              "webhookUrl": null,
+              "smsNotification": {
+                "sent": false,
+                "message": "SMS skipped as per request"
+              },
+              "paystackReference": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "List My Checkers (Alias)",
+      "method": "GET",
+      "path": "/checkers/results",
+      "description": "Same output as GET /checkers. Kept for compatibility with existing clients."
+    },
+    {
+      "name": "Get Checker By ID",
+      "method": "GET",
+      "path": "/checkers/{id}",
+      "description": "Returns one checker that belongs to the authenticated API user.",
+      "pathParams": [
+        { "name": "id", "type": "string", "required": true }
+      ],
+      "commonFailureExamples": [
+        {
+          "success": false,
+          "message": "Unauthorized access"
+        },
+        {
+          "success": false,
+          "message": "Checker not found"
+        }
+      ]
+    }
+  ],
+  "integrationFlow": [
+    "Call GET /checkers/lock-status",
+    "Call GET /checkers/availability?checkerType=WAEC",
+    "Call GET /checkers/products/list and verify selected product available=true",
+    "Call POST /checkers/check",
+    "Poll GET /checkers/{id} or GET /checkers/results to confirm final purchaseStatus"
+  ],
+  "notes": {
+    "security": [
+      "Store API keys server-side only.",
+      "Do not expose API keys in frontend JavaScript."
+    ],
+    "currency": "GHS",
+    "support": {
+      "email": "culustech@gmail.com",
+      "platform": "Topza"
+    }
+  }
+}

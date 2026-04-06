@@ -189,6 +189,19 @@ export default function AgentOrders() {
     }
   };
 
+  const isCheckerOrder = (order) => {
+    const kind = String(order?.orderKind || '').toLowerCase();
+    const network = String(order?.network || '').toLowerCase();
+    return kind === 'checker' || network === 'checker' || Boolean(order?.checkerDetails?.checkerType);
+  };
+
+  const getOrderPlanDisplay = (order) => {
+    if (isCheckerOrder(order)) {
+      return order?.planName || order?.checkerDetails?.checkerType || 'Checker';
+    }
+    return order?.dataAmount ? `${order.dataAmount} Bundle` : (order?.planName || 'N/A');
+  };
+
   return (
     <AgentLayout>
       <div className="min-h-screen bg-[#F8FAFC]">
@@ -309,7 +322,7 @@ export default function AgentOrders() {
                     <tr className="border-b border-slate-100">
                       <th className="py-4 px-8 font-bold text-[11px] uppercase text-slate-600 tracking-wider whitespace-nowrap">ID</th>
                       <th className="py-4 px-4 font-bold text-[11px] uppercase text-slate-600 tracking-wider whitespace-nowrap">Customer</th>
-                      <th className="py-4 px-4 font-bold text-[11px] uppercase text-slate-600 tracking-wider whitespace-nowrap">Data Plan</th>
+                      <th className="py-4 px-4 font-bold text-[11px] uppercase text-slate-600 tracking-wider whitespace-nowrap">Plan</th>
                       <th className="py-4 px-4 font-bold text-[11px] uppercase text-slate-600 tracking-wider whitespace-nowrap">Amount</th>
                       <th className="py-4 px-4 font-bold text-[11px] uppercase text-slate-600 tracking-wider whitespace-nowrap">Commission</th>
                       <th className="py-4 px-4 font-bold text-[11px] uppercase text-slate-600 tracking-wider whitespace-nowrap">Payment</th>
@@ -329,7 +342,7 @@ export default function AgentOrders() {
                           <p className="text-[10px] font-black text-slate-600 uppercase">{order.network}</p>
                         </td>
                         <td className="py-4 px-4 whitespace-nowrap">
-                          <p className="text-sm font-semibold text-slate-700">{order.dataAmount} Bundle</p>
+                          <p className="text-sm font-semibold text-slate-700">{getOrderPlanDisplay(order)}</p>
                         </td>
                         <td className="py-4 px-4 whitespace-nowrap">
                           <p className="font-black text-slate-900">{formatCurrency(order.amount)}</p>
@@ -423,8 +436,8 @@ export default function AgentOrders() {
                   <p className="text-xs font-bold text-slate-600 uppercase mt-1">{selectedOrder.network}</p>
                 </div>
                 <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Data Package</p>
-                  <p className="font-bold text-slate-900">{selectedOrder.dataAmount} Bundle</p>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{isCheckerOrder(selectedOrder) ? 'Checker Plan' : 'Data Package'}</p>
+                  <p className="font-bold text-slate-900">{getOrderPlanDisplay(selectedOrder)}</p>
                   <p className="text-xs font-bold text-slate-600 mt-1">{formatCurrency(selectedOrder.amount)}</p>
                 </div>
               </div>

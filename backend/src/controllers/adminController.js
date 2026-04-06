@@ -351,6 +351,8 @@ exports.getTransactions = async (req, res) => {
   try {
     const { page = 1, limit = 10, type = '', status = '', scope = '' } = req.query;
     const skip = (page - 1) * limit;
+    const ORDER_TRANSACTION_TYPES = ['data_purchase', 'checker_purchase'];
+    const isOrderTypeFilter = ORDER_TRANSACTION_TYPES.includes(type);
 
     const allTransactions = [];
 
@@ -368,24 +370,32 @@ exports.getTransactions = async (req, res) => {
       txFilter.userId = { $in: agentUserIds };
     }
 
-    if (type && type !== 'data_purchase') {
+    if (type && !isOrderTypeFilter) {
       txFilter.type = type;
     }
 
+    if (type === 'data_purchase') {
+      orderFilter.orderKind = { $ne: 'checker' };
+    }
+
+    if (type === 'checker_purchase') {
+      orderFilter.orderKind = 'checker';
+    }
+
     if (status) {
-      if (type === 'data_purchase' || !type) {
+      if (!type || isOrderTypeFilter) {
         if (status === 'successful') {
           orderFilter.status = 'completed';
         } else {
           orderFilter.status = status;
         }
       }
-      if (type !== 'data_purchase') {
+      if (!type || !isOrderTypeFilter) {
         txFilter.status = status;
       }
     }
 
-    if (!type || type === 'data_purchase') {
+    if (!type || isOrderTypeFilter) {
       const orders = await Order.find(orderFilter)
         .populate('userId', 'name email')
         .populate('guestInfo', 'name email phone')
@@ -403,7 +413,7 @@ exports.getTransactions = async (req, res) => {
           userId: order.userId,
           isGuest: order.isGuest || false,
           guestInfo: order.guestInfo,
-          type: 'data_purchase',
+          type: order.orderKind === 'checker' ? 'checker_purchase' : 'data_purchase',
           amount: order.amount,
           currency: 'GHS',
           status: order.status === 'completed' ? 'successful' : order.status,
@@ -411,7 +421,9 @@ exports.getTransactions = async (req, res) => {
           reference: order.orderNumber,
           transactionReference: order.transactionReference,
           paystackReference: order.paystackReference,
-          description: `${order.planName} - ${order.dataAmount}`,
+          description: order.orderKind === 'checker'
+            ? `Result checker purchase: ${order.planName} (${order.phoneNumber || 'N/A'})`
+            : `${order.planName} - ${order.dataAmount}`,
           isAPI: false,
           createdAt: order.createdAt,
           updatedAt: order.updatedAt,
@@ -422,11 +434,12 @@ exports.getTransactions = async (req, res) => {
       allTransactions.push(...formattedOrders);
     }
 
-    if (!type || type !== 'data_purchase') {
-      // Exclude data_purchase types from Transaction model as they are already 
+    if (!type || !isOrderTypeFilter) {
+      // Exclude purchase types from Transaction model when listing all,
+      // because purchase events are represented from Order model.
       // included from the Order model to avoid duplicates
       if (!type) {
-        txFilter.type = { $ne: 'data_purchase' };
+        txFilter.type = { $nin: ORDER_TRANSACTION_TYPES };
       }
 
       const transactions = await Transaction.find(txFilter)

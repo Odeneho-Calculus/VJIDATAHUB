@@ -219,12 +219,13 @@ export default function AdminTransactions() {
   };
 
   const getResolvedOrderStatus = (tx) => {
-    if (normalizeStatus(tx?.type) !== 'data_purchase') return 'n/a';
+    if (!['data_purchase', 'checker_purchase'].includes(normalizeStatus(tx?.type))) return 'n/a';
     return normalizeStatus(tx?.status) || 'pending';
   };
 
   const typeLabels = {
     data_purchase: 'Data Purchase',
+    checker_purchase: 'Checker Purchase',
     wallet_funding: 'Wallet Funding',
     wallet_topup: 'Wallet Funding',
     refund: 'Refund',
@@ -362,7 +363,7 @@ export default function AdminTransactions() {
                     >
                       All Types
                     </button>
-                    {['data_purchase', 'wallet_funding', 'refund'].map(type => (
+                    {['data_purchase', 'checker_purchase', 'wallet_funding', 'refund'].map(type => (
                       <button
                         key={type}
                         onClick={() => { setTypeFilter(type); setPage(1); }}

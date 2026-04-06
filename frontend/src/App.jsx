@@ -33,6 +33,7 @@ import AdminNotifications from './pages/AdminNotifications';
 import AdminOffers from './pages/AdminOffers';
 import AdminDigimallPlans from './pages/AdminDigimallPlans';
 import AdminTopzaPlans from './pages/AdminTopzaPlans';
+import AdminResultCheckers from './pages/AdminResultCheckers';
 import AdminStore from './pages/AdminStore';
 import AdminAgentStores from './pages/AdminAgentStores';
 import AdminCommissions from './pages/AdminCommissions';
@@ -49,6 +50,7 @@ import GuestPurchase from './pages/GuestPurchase';
 import GuestTrackOrder from './pages/GuestTrackOrder';
 import GuestVerifyPayment from './pages/GuestVerifyPayment';
 import ContactFAB from './components/ContactFAB';
+import ResultsChecker from './pages/ResultsChecker';
 
 function AppContent() {
   const location = useLocation();
@@ -80,6 +82,14 @@ function AppContent() {
             <UserProtectedRoute>
               <BuyData />
             </UserProtectedRoute>
+          }
+        />
+        <Route
+          path="/results-checker"
+          element={
+            <ProtectedRoute>
+              <ResultsChecker />
+            </ProtectedRoute>
           }
         />
         <Route
@@ -172,6 +182,14 @@ function AppContent() {
             </AgentProtectedRoute>
           }
         />
+        <Route
+          path="/agent/results-checker"
+          element={
+            <AgentProtectedRoute>
+              <ResultsChecker />
+            </AgentProtectedRoute>
+          }
+        />
 
         {/* Public Store Routes */}
         <Route
@@ -247,6 +265,14 @@ function AppContent() {
           element={
             <AdminProtectedRoute>
               <AdminTopzaPlans />
+            </AdminProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/result-checkers"
+          element={
+            <AdminProtectedRoute>
+              <AdminResultCheckers />
             </AdminProtectedRoute>
           }
         />

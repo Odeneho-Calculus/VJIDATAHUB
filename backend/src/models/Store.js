@@ -77,6 +77,24 @@ const storeSchema = new mongoose.Schema(
         },
       },
     ],
+    checkerProducts: [
+      {
+        checkerId: {
+          type: mongoose.Schema.Types.ObjectId,
+          required: true,
+          ref: 'TopzaCheckerOffer',
+        },
+        customPrice: {
+          type: Number,
+          required: true,
+          min: 0,
+        },
+        isActive: {
+          type: Boolean,
+          default: true,
+        },
+      },
+    ],
     socialLinks: {
       whatsapp: {
         value: {

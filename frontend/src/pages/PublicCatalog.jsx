@@ -7,7 +7,7 @@ import {
     ShoppingBag, CreditCard
 } from 'lucide-react';
 import { io } from 'socket.io-client';
-import { store as storeAPI, publicAPI } from '../services/api';
+import { store as storeAPI, publicAPI, checkers as checkersAPI } from '../services/api';
 import { getSocketBaseUrl } from '../utils/apiBaseUrl';
 
 export default function PublicCatalog() {
@@ -27,6 +27,9 @@ export default function PublicCatalog() {
     const [selectedNetwork, setSelectedNetwork] = useState(initialNetwork);
     const [showCheckoutModal, setShowCheckoutModal] = useState(false);
     const [selectedPlan, setSelectedPlan] = useState(null);
+    const [checkers, setCheckers] = useState([]);
+    const [showCheckerModal, setShowCheckerModal] = useState(false);
+    const [selectedChecker, setSelectedChecker] = useState(null);
     const [networkLogos, setNetworkLogos] = useState({});
     const socketRef = useRef(null);
 
@@ -92,6 +95,13 @@ export default function PublicCatalog() {
                 return acc;
             }, {});
             setNetworkLogos(mapped);
+
+            try {
+                const checkerRes = await checkersAPI.getPublicStoreCheckers(slug);
+                setCheckers(checkerRes?.checkers || []);
+            } catch {
+                setCheckers([]);
+            }
         } catch (err) {
             setError(err.message || 'Store data not found');
         } finally {
@@ -268,6 +278,47 @@ export default function PublicCatalog() {
                     })}
                 </section>
 
+                {checkers.length > 0 && (
+                    <section className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5">
+                        <div className="flex items-center justify-between gap-3 mb-4">
+                            <div>
+                                <h3 className="text-lg font-bold text-slate-900">Result Checkers</h3>
+                                <p className="text-sm text-slate-600">Buy WAEC, NECO, JAMB and BECE checker pins</p>
+                            </div>
+                            <span className="text-xs text-slate-500">Wallet-backed instant fulfillment</span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                            {checkers.map((checker) => {
+                                const isAvailable = Boolean(checker.available) && Number(checker.stockCount || 0) > 0;
+                                return (
+                                    <article key={checker._id} className="rounded-xl border border-slate-200 p-3 bg-slate-50/40">
+                                        <div className="flex items-center justify-between gap-2">
+                                            <p className="font-semibold text-slate-900">{checker.displayName || checker.checkerType}</p>
+                                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isAvailable ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                                                {isAvailable ? 'Available' : 'Out of stock'}
+                                            </span>
+                                        </div>
+                                        <p className="text-xs text-slate-500">{checker.checkerType}</p>
+                                        <p className="text-xl font-bold text-slate-900 mt-2">{formatCurrencyAbbreviated(checker.sellingPrice)}</p>
+                                        <button
+                                            onClick={() => {
+                                                if (!isAvailable) return;
+                                                setSelectedChecker(checker);
+                                                setShowCheckerModal(true);
+                                            }}
+                                            disabled={!isAvailable}
+                                            className="mt-3 w-full py-2 rounded-lg font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                                            style={{ backgroundColor: store?.theme?.buttonBg || primaryColor }}
+                                        >
+                                            {isAvailable ? 'Buy Checker' : 'Unavailable'}
+                                        </button>
+                                    </article>
+                                );
+                            })}
+                        </div>
+                    </section>
+                )}
+
                 {filteredPlans.length === 0 && (
                     <section className="py-14 flex flex-col items-center justify-center text-slate-600 gap-3 bg-white rounded-2xl border border-dashed border-slate-300">
                         <Smartphone size={42} className="opacity-25" />
@@ -284,6 +335,18 @@ export default function PublicCatalog() {
                     onClose={() => {
                         setShowCheckoutModal(false);
                         setSelectedPlan(null);
+                    }}
+                />
+            )}
+
+            {showCheckerModal && selectedChecker && (
+                <GuestCheckerCheckoutModal
+                    checker={selectedChecker}
+                    store={store}
+                    primaryColor={primaryColor}
+                    onClose={() => {
+                        setShowCheckerModal(false);
+                        setSelectedChecker(null);
                     }}
                 />
             )}
@@ -498,6 +561,139 @@ function GuestCheckoutModal({ plan, store, primaryColor, onClose }) {
                         <span className="text-[8px] font-bold text-slate-600 uppercase tracking-widest leading-none">Secure Payment</span>
                         <div className="h-px bg-slate-200 flex-1"></div>
                     </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function GuestCheckerCheckoutModal({ checker, store, primaryColor, onClose }) {
+    const [formData, setFormData] = useState({ email: '', phone: '', name: '', skipSms: false });
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!formData.name || !formData.email || !formData.phone) {
+            setError('Please fill all required fields.');
+            return;
+        }
+
+        try {
+            setLoading(true);
+            setError('');
+            setSuccessMessage('');
+
+            const initRes = await checkersAPI.initializePublicStoreCheckerPurchase(store.slug, {
+                checkerId: checker.checkerId,
+                email: formData.email,
+                phone: formData.phone,
+                name: formData.name,
+                skipSms: Boolean(formData.skipSms),
+            });
+
+            const accessCode = initRes?.data?.accessCode;
+            const reference = initRes?.data?.reference;
+
+            if (!initRes.success || !accessCode || !reference) {
+                setError(initRes.message || 'Could not start checker payment.');
+                setLoading(false);
+                return;
+            }
+
+            if (!window.PaystackPop) {
+                setError('Paystack library not loaded. Please refresh and try again.');
+                setLoading(false);
+                return;
+            }
+
+            const paystack = new window.PaystackPop();
+            paystack.resumeTransaction(accessCode, {
+                onSuccess: async () => {
+                    try {
+                        const verifyRes = await checkersAPI.verifyPublicStoreCheckerPayment({ reference });
+                        if (verifyRes?.success) {
+                            setSuccessMessage('Payment successful. Checker purchase is processing.');
+                            setTimeout(() => onClose(), 1500);
+                        } else {
+                            setError(verifyRes?.message || 'Payment verification failed.');
+                        }
+                    } catch (verifyErr) {
+                        setError(verifyErr.message || 'Failed to verify payment.');
+                    } finally {
+                        setLoading(false);
+                    }
+                },
+                onCancel: () => {
+                    setError('Payment was cancelled.');
+                    setLoading(false);
+                },
+                onError: (paystackError) => {
+                    setError(paystackError?.message || 'Payment error occurred.');
+                    setLoading(false);
+                },
+            });
+        } catch (err) {
+            setError(err.message || 'Network error. Please try again.');
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose}></div>
+
+            <div className="relative w-full max-w-md bg-[#F8FAFC] rounded-2xl shadow-2xl overflow-hidden border border-slate-200/60">
+                <div className="px-6 py-4 bg-white border-b border-slate-200/60 flex items-center justify-between">
+                    <div>
+                        <h3 className="text-lg font-bold text-slate-900">Buy Result Checker</h3>
+                        <p className="text-xs text-slate-600">{checker.displayName || checker.checkerType}</p>
+                    </div>
+                    <button onClick={onClose} className="p-2 text-slate-600 hover:text-slate-800 rounded-lg hover:bg-slate-100 transition-colors">
+                        <X size={20} />
+                    </button>
+                </div>
+
+                <div className="p-6 space-y-5">
+                    <div className="p-4 rounded-xl border border-slate-200 bg-white">
+                        <p className="text-xs text-slate-500">Price</p>
+                        <p className="text-2xl font-bold text-slate-900">{formatCurrencyAbbreviated(checker.sellingPrice)}</p>
+                    </div>
+
+                    {error && (
+                        <div className="p-3 bg-rose-50 border border-rose-100 rounded-xl text-rose-700 text-xs font-semibold">
+                            {error}
+                        </div>
+                    )}
+                    {successMessage && (
+                        <div className="p-3 bg-emerald-50 border border-emerald-100 rounded-xl text-emerald-700 text-xs font-semibold">
+                            {successMessage}
+                        </div>
+                    )}
+
+                    <div className="space-y-3">
+                        <InputGroup label="Full Name" value={formData.name} onChange={(v) => setFormData({ ...formData, name: v })} required />
+                        <InputGroup label="Phone Number" value={formData.phone} onChange={(v) => setFormData({ ...formData, phone: v })} required />
+                        <InputGroup label="Email Address" value={formData.email} onChange={(v) => setFormData({ ...formData, email: v })} required />
+                        <label className="flex items-center gap-2 text-xs text-slate-700">
+                            <input
+                                type="checkbox"
+                                checked={formData.skipSms}
+                                onChange={(e) => setFormData({ ...formData, skipSms: e.target.checked })}
+                            />
+                            Skip SMS notification
+                        </label>
+                    </div>
+
+                    <button
+                        disabled={loading}
+                        onClick={handleSubmit}
+                        className="w-full py-3 text-white rounded-xl font-bold text-xs uppercase tracking-widest transition-all disabled:opacity-50"
+                        style={{ backgroundColor: primaryColor }}
+                    >
+                        {loading ? 'Processing...' : 'Pay and Buy Checker'}
+                    </button>
                 </div>
             </div>
         </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { formatCurrencyAbbreviated } from '../utils/formatCurrency';
 import {
@@ -10,6 +10,7 @@ import {
   TrendingUp, Wallet, Send
 } from 'lucide-react';
 import { store as storeAPI, dataplans as globalPlansAPI, wallet as walletAPI } from '../services/api';
+import { checkers as checkersAPI } from '../services/api';
 import AgentLayout from '../components/AgentLayout';
 import AlertModal from '../components/AlertModal';
 import { useSettings } from '../context/SettingsContext';
@@ -174,6 +175,7 @@ export default function AdminStore() {
                 {[
                   { id: 'general', label: 'Store Details', icon: Palette },
                   { id: 'plans', label: 'Data Plans', icon: Smartphone },
+                  { id: 'checkers', label: 'Result Checkers', icon: CreditCard },
                   { id: 'orders', label: 'Sales', icon: CreditCard },
                   { id: 'commissions', label: 'Earnings', icon: Share2 },
                   { id: 'billing', label: 'Setup Fee', icon: Settings },
@@ -210,6 +212,12 @@ export default function AdminStore() {
                 plans={storeData.plans || []}
                 storeId={storeData._id}
                 activeProvider={settings?.vtuProvider || 'xpresdata'}
+                onRefresh={fetchStore}
+                showAlert={showAlert}
+              />
+            )}
+            {activeTab === 'checkers' && (
+              <CheckerInventoryTab
                 onRefresh={fetchStore}
                 showAlert={showAlert}
               />
@@ -876,6 +884,203 @@ function InventoryTab({ plans, storeId, activeProvider = 'xpresdata', onRefresh,
           }}
         />
       )}
+    </div>
+  );
+}
+
+function CheckerInventoryTab({ onRefresh, showAlert }) {
+  const [loading, setLoading] = useState(true);
+  const [availableCheckers, setAvailableCheckers] = useState([]);
+  const [storeCheckers, setStoreCheckers] = useState([]);
+  const [selectedCheckerId, setSelectedCheckerId] = useState('');
+  const [customPrice, setCustomPrice] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const refresh = useCallback(async () => {
+    try {
+      setLoading(true);
+      const [availableRes, storeRes] = await Promise.all([
+        checkersAPI.getStoreAvailableCheckers(),
+        checkersAPI.getStoreCheckers(),
+      ]);
+      setAvailableCheckers(availableRes?.checkers || []);
+      setStoreCheckers(storeRes?.checkerProducts || []);
+    } catch (err) {
+      showAlert('error', err.message || 'Failed to load store checkers');
+    } finally {
+      setLoading(false);
+    }
+  }, [showAlert]);
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
+  const addChecker = async () => {
+    if (!selectedCheckerId) {
+      showAlert('warning', 'Select a checker first');
+      return;
+    }
+    try {
+      setSaving(true);
+      await checkersAPI.addStoreChecker({ checkerId: selectedCheckerId, customPrice: Number(customPrice || 0) });
+      showAlert('success', 'Checker added to store');
+      setSelectedCheckerId('');
+      setCustomPrice('');
+      await refresh();
+      onRefresh?.();
+    } catch (err) {
+      showAlert('error', err.message || 'Failed to add checker');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const updateChecker = async (checkerRow, data) => {
+    try {
+      await checkersAPI.updateStoreChecker(checkerRow._id, data);
+      showAlert('success', 'Store checker updated');
+      await refresh();
+      onRefresh?.();
+    } catch (err) {
+      showAlert('error', err.message || 'Failed to update store checker');
+    }
+  };
+
+  const removeChecker = async (checkerRow) => {
+    try {
+      await checkersAPI.removeStoreChecker(checkerRow._id);
+      showAlert('success', 'Checker removed from store');
+      await refresh();
+      onRefresh?.();
+    } catch (err) {
+      showAlert('error', err.message || 'Failed to remove store checker');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center text-slate-500">
+        Loading store checker settings...
+      </div>
+    );
+  }
+
+  const selectedChecker = availableCheckers.find((row) => row._id === selectedCheckerId);
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-white rounded-2xl border border-slate-200 p-5">
+        <h3 className="text-lg font-bold text-slate-900 mb-3">Add Result Checker To Store</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <select
+            value={selectedCheckerId}
+            onChange={(e) => {
+              const nextId = e.target.value;
+              setSelectedCheckerId(nextId);
+              const checker = availableCheckers.find((row) => row._id === nextId);
+              setCustomPrice(checker ? String(checker.basePrice || 0) : '');
+            }}
+            className="px-3 py-2.5 rounded-xl border border-slate-200"
+          >
+            <option value="">Select checker</option>
+            {availableCheckers.map((checker) => (
+              <option key={checker._id} value={checker._id}>
+                {checker.displayName} (Base GHc {Number(checker.basePrice || 0).toFixed(2)})
+              </option>
+            ))}
+          </select>
+
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            value={customPrice}
+            onChange={(e) => setCustomPrice(e.target.value)}
+            placeholder="Custom selling price"
+            className="px-3 py-2.5 rounded-xl border border-slate-200"
+          />
+
+          <button
+            onClick={addChecker}
+            disabled={saving || !selectedCheckerId}
+            className="px-4 py-2.5 rounded-xl bg-slate-900 text-white font-semibold disabled:opacity-50"
+          >
+            {saving ? 'Saving...' : 'Add Checker'}
+          </button>
+        </div>
+        {selectedChecker && (
+          <p className="mt-2 text-xs text-slate-500">
+            Base price: GHc {Number(selectedChecker.basePrice || 0).toFixed(2)}. Your store price must not be below base.
+          </p>
+        )}
+      </div>
+
+      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+        <div className="p-4 border-b border-slate-100">
+          <h3 className="font-bold text-slate-900">Store Result Checkers</h3>
+        </div>
+        {storeCheckers.length === 0 ? (
+          <div className="p-6 text-sm text-slate-500">No checker configured in your store yet.</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-slate-50 text-xs text-slate-600 uppercase tracking-wider">
+                  <th className="text-left p-3">Checker</th>
+                  <th className="text-left p-3">Store Price</th>
+                  <th className="text-left p-3">Stock</th>
+                  <th className="text-left p-3">Visibility</th>
+                  <th className="text-left p-3">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {storeCheckers.map((row) => (
+                  <tr key={row._id} className="border-t border-slate-100 text-sm">
+                    <td className="p-3">
+                      <p className="font-semibold text-slate-900">{row.checkerId?.displayName || row.checkerId?.checkerType || 'Checker'}</p>
+                      <p className="text-xs text-slate-500">{row.checkerId?.checkerType || ''}</p>
+                    </td>
+                    <td className="p-3">GHc {Number(row.customPrice || 0).toFixed(2)}</td>
+                    <td className="p-3 text-xs text-slate-600">{Number(row.checkerId?.stockCount || 0)}</td>
+                    <td className="p-3">
+                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${row.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
+                        {row.isActive ? 'Visible' : 'Hidden'}
+                      </span>
+                    </td>
+                    <td className="p-3">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => {
+                            const next = window.prompt('Enter new store price', String(Number(row.customPrice || 0)));
+                            if (next === null) return;
+                            updateChecker(row, { customPrice: Number(next) });
+                          }}
+                          className="px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold hover:bg-slate-50"
+                        >
+                          Edit Price
+                        </button>
+                        <button
+                          onClick={() => updateChecker(row, { isActive: !row.isActive })}
+                          className="px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold hover:bg-slate-50"
+                        >
+                          {row.isActive ? 'Hide' : 'Show'}
+                        </button>
+                        <button
+                          onClick={() => removeChecker(row)}
+                          className="px-2.5 py-1.5 rounded-lg border border-rose-200 text-rose-700 text-xs font-semibold hover:bg-rose-50"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

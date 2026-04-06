@@ -10,7 +10,7 @@ export const TransactionDetailsModal = ({ isOpen, onClose, transaction, typeLabe
   const paymentStatus = transaction?.paymentStatus
     ? normalizeStatus(transaction.paymentStatus)
     : (['successful', 'completed', 'success'].includes(normalizeStatus(transaction?.status)) ? 'completed' : normalizeStatus(transaction?.status) || 'pending');
-  const orderStatus = normalizeStatus(transaction?.type) === 'data_purchase'
+  const orderStatus = ['data_purchase', 'checker_purchase'].includes(normalizeStatus(transaction?.type))
     ? (normalizeStatus(transaction?.status) || 'pending')
     : 'n/a';
 

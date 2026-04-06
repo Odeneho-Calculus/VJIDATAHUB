@@ -350,3 +350,135 @@ exports.getOrders = async ({ page = 1, limit = 25 } = {}) => {
     };
   }
 };
+
+exports.getCheckerAvailability = async (checkerType = '') => {
+  if (!TOPZA_BASE_URL) {
+    return { success: false, error: 'TOPZA_BASE_URL is not configured' };
+  }
+
+  try {
+    const params = {};
+    if (checkerType) {
+      params.checkerType = checkerType;
+    }
+    const response = await retryRequest(() => topzaClient.get('/checkers/availability', { params }), 3, 1000);
+    return {
+      success: true,
+      data: response.data?.data || response.data || null,
+      raw: response.data || null,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.response?.data?.message || error.response?.data?.error || error.message,
+    };
+  }
+};
+
+exports.getCheckerTypes = async () => {
+  if (!TOPZA_BASE_URL) {
+    return { success: false, types: [], error: 'TOPZA_BASE_URL is not configured' };
+  }
+
+  try {
+    const response = await retryRequest(() => topzaClient.get('/checkers/types'), 3, 1000);
+    const types = Array.isArray(response.data?.data)
+      ? response.data.data
+      : Array.isArray(response.data)
+      ? response.data
+      : [];
+
+    return {
+      success: true,
+      types,
+      raw: response.data || null,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      types: [],
+      error: error.response?.data?.message || error.response?.data?.error || error.message,
+    };
+  }
+};
+
+exports.getCheckerProducts = async () => {
+  if (!TOPZA_BASE_URL) {
+    return { success: false, products: [], error: 'TOPZA_BASE_URL is not configured' };
+  }
+
+  try {
+    const response = await retryRequest(() => topzaClient.get('/checkers/products/list'), 3, 1000);
+    const products = Array.isArray(response.data?.data)
+      ? response.data.data
+      : Array.isArray(response.data)
+      ? response.data
+      : [];
+
+    return {
+      success: true,
+      products,
+      raw: response.data || null,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      products: [],
+      error: error.response?.data?.message || error.response?.data?.error || error.message,
+    };
+  }
+};
+
+exports.buyChecker = async ({ checkerType, phoneNumber, skipSms = false, idempotencyKey = '' } = {}) => {
+  if (!TOPZA_BASE_URL) {
+    return { success: false, error: 'TOPZA_BASE_URL is not configured' };
+  }
+
+  try {
+    const payload = {
+      checkerType,
+      phoneNumber,
+      skipSms: Boolean(skipSms),
+    };
+
+    if (idempotencyKey) {
+      payload.idempotencyKey = idempotencyKey;
+    }
+
+    const response = await retryRequest(() => topzaClient.post('/checkers/check', payload), 3, 1000);
+    return {
+      success: true,
+      data: response.data?.data || null,
+      message: response.data?.message || 'Checker purchase initiated',
+      raw: response.data || null,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.response?.data?.message || error.response?.data?.error || error.message,
+      statusCode: error.response?.status,
+      providerError: error.response?.data || null,
+    };
+  }
+};
+
+exports.getCheckerById = async (id) => {
+  if (!TOPZA_BASE_URL) {
+    return { success: false, error: 'TOPZA_BASE_URL is not configured' };
+  }
+
+  try {
+    const response = await retryRequest(() => topzaClient.get(`/checkers/${id}`), 3, 1000);
+    return {
+      success: true,
+      checker: response.data?.data || response.data || null,
+      raw: response.data || null,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.response?.data?.message || error.response?.data?.error || error.message,
+      statusCode: error.response?.status,
+    };
+  }
+};

@@ -46,6 +46,7 @@ export default function AgentWallet() {
     wallet_topup: 'Wallet Funding',
     wallet_funding: 'Wallet Funding',
     data_purchase: 'Data Purchase',
+    checker_purchase: 'Checker Purchase',
     refund: 'Refund',
     referral_bonus: 'Referral Bonus',
     admin_adjustment: 'Admin Adjustment',
@@ -69,7 +70,7 @@ export default function AgentWallet() {
     return 'pending';
   };
   const getResolvedOrderStatus = (transaction) => {
-    if (normalizeStatus(transaction?.type) !== 'data_purchase') return 'n/a';
+    if (!['data_purchase', 'checker_purchase'].includes(normalizeStatus(transaction?.type))) return 'n/a';
     return normalizeStatus(transaction?.status) || 'pending';
   };
 

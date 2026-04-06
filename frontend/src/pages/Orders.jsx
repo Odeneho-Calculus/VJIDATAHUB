@@ -190,6 +190,24 @@ export default function Orders() {
     setShowDetails(true);
   };
 
+  const isCheckerOrder = (order) => {
+    const kind = String(order?.orderKind || '').toLowerCase();
+    const network = String(order?.network || '').toLowerCase();
+    return kind === 'checker' || network === 'checker' || Boolean(order?.checkerDetails?.checkerType);
+  };
+
+  const getOrderPlanDisplay = (order) => {
+    if (isCheckerOrder(order)) {
+      return order?.planName || order?.checkerDetails?.checkerType || 'Checker';
+    }
+    return order?.dataAmount || order?.planName || 'N/A';
+  };
+
+  const getOrderNetworkDisplay = (order) => {
+    if (isCheckerOrder(order)) return 'CHECKER';
+    return order?.network || 'N/A';
+  };
+
   return (
     <UserLayout>
       <div className="min-h-screen bg-slate-50/50 pb-20">
@@ -333,14 +351,14 @@ export default function Orders() {
                         <td className="px-6 py-5">
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-[10px]">
-                              {order.network?.charAt(0).toUpperCase()}
+                              {getOrderNetworkDisplay(order)?.charAt(0).toUpperCase()}
                             </div>
                             <div className="min-w-0">
                               <p className="text-sm font-black text-slate-900 tracking-tight truncate">
-                                {order.dataAmount || 'N/A'}
+                                {getOrderPlanDisplay(order)}
                               </p>
                               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
-                                {order.network}
+                                {getOrderNetworkDisplay(order)}
                               </p>
                             </div>
                           </div>
@@ -402,14 +420,14 @@ export default function Orders() {
                       <div className="flex justify-between items-start mb-4">
                         <div className="flex gap-3">
                           <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-xs shadow-sm">
-                            {order.network?.charAt(0).toUpperCase()}
+                            {getOrderNetworkDisplay(order)?.charAt(0).toUpperCase()}
                           </div>
                           <div>
                             <p className="text-base font-black text-slate-900 tracking-tight">
-                              {order.dataAmount}
+                              {getOrderPlanDisplay(order)}
                             </p>
                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">
-                              {order.network}
+                              {getOrderNetworkDisplay(order)}
                             </p>
                           </div>
                         </div>
@@ -482,8 +500,8 @@ export default function Orders() {
                 <div className="w-16 h-16 rounded-2xl bg-white shadow-sm flex items-center justify-center text-blue-600 mb-4 border border-slate-100">
                   <Smartphone size={32} strokeWidth={1.5} />
                 </div>
-                <p className="text-2xl font-black text-slate-900 tracking-tight">{selectedOrder.dataAmount}</p>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mt-1">{selectedOrder.network}</p>
+                <p className="text-2xl font-black text-slate-900 tracking-tight">{getOrderPlanDisplay(selectedOrder)}</p>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mt-1">{getOrderNetworkDisplay(selectedOrder)}</p>
 
                 <div className="mt-6 space-y-2">
                   <div className={`px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border inline-block ${getPaymentStatusStyles(selectedOrder.paymentStatus || 'pending')}`}>
@@ -499,7 +517,7 @@ export default function Orders() {
                 {[
                   { label: 'Reference', value: selectedOrder.orderNumber, mono: true, icon: Hash },
                   { label: 'Recipient', value: selectedOrder.phoneNumber, mono: true, icon: Smartphone },
-                  { label: 'Plan Name', value: selectedOrder.planName || '-' },
+                  { label: 'Plan Name', value: selectedOrder.planName || getOrderPlanDisplay(selectedOrder) || '-' },
                   { label: 'Total Paid', value: `GH₵ ${formatCurrencyAbbreviated(selectedOrder.amount)}`, bold: true, icon: CreditCard },
                   { label: 'Method', value: selectedOrder.paymentMethod, icon: CreditCard },
                   { label: 'Timestamp', value: new Date(selectedOrder.date || selectedOrder.createdAt).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }), icon: Calendar }
