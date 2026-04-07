@@ -133,7 +133,6 @@ export const UserRoleModal = ({ isOpen, onClose, user, newRole, setNewRole, onUp
           >
             <option value="user">User (Standard)</option>
             <option value="agent">Agent (Store Owner)</option>
-            <option value="admin">Admin (Full Access)</option>
           </select>
         </div>
       </div>
@@ -348,7 +347,6 @@ export const UserEditModal = ({ isOpen, onClose, user, onUpdate, loading }) => {
             >
               <option value="user">User</option>
               <option value="agent">Agent</option>
-              <option value="admin">Admin</option>
             </select>
           </div>
         </div>
