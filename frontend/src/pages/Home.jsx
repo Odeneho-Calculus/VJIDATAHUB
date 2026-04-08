@@ -304,9 +304,9 @@ export default function Home() {
           </div>
 
           {previewPlansLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-              {Array.from({ length: 4 }).map((_, index) => (
-                <div key={index} className="rounded-xl border border-slate-200 bg-slate-50 p-4 animate-pulse">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+              {Array.from({ length: 8 }).map((_, index) => (
+                <div key={index} className={`rounded-xl border border-slate-200 bg-slate-50 p-3 sm:p-4 animate-pulse ${index >= 4 ? 'hidden lg:block' : ''}`}>
                   <div className="h-5 w-16 bg-slate-200 rounded mb-3" />
                   <div className="h-4 w-3/4 bg-slate-200 rounded mb-2" />
                   <div className="h-3 w-1/2 bg-slate-200 rounded mb-4" />
@@ -315,24 +315,31 @@ export default function Home() {
               ))}
             </div>
           ) : previewPlans.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-              {previewPlans.map((plan) => {
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+              {previewPlans.map((plan, index) => {
                 const displayPrice = Number(plan?.sellingPrice ?? plan?.price ?? 0);
+                const displayDataSize = plan?.dataSize
+                  || plan?.dataAmount
+                  || (plan?.dataSizeMB ? `${plan.dataSizeMB}GB` : '')
+                  || (plan?.planName?.match(/\d+(?:\.\d+)?\s*GB/i)?.[0] ?? '')
+                  || 'Data';
                 return (
-                  <div key={plan._id || `${plan.network}-${plan.name}-${plan.dataAmount}`} className="rounded-xl border border-slate-200 bg-slate-50 p-4 hover:border-cyan-200 transition-colors">
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <span className="inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest bg-slate-900 text-white">
+                  <div key={plan._id || `${plan.network}-${plan.name}-${plan.dataAmount}`} className={`relative overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-3 sm:p-4 ring-1 ring-slate-200/60 shadow-[0_8px_22px_rgba(2,6,23,0.12),0_2px_6px_rgba(2,6,23,0.06)] hover:shadow-[0_18px_36px_rgba(2,6,23,0.18),0_6px_14px_rgba(6,95,130,0.14)] hover:-translate-y-0.5 hover:border-cyan-300 transition-all duration-300 ${index >= 4 ? 'hidden lg:block' : ''}`}>
+                    <div className="pointer-events-none absolute -right-7 -top-7 h-16 w-16 rounded-full bg-cyan-100/65 blur-xl" />
+
+                    <div className="relative flex items-center justify-between gap-2 mb-2 sm:mb-3">
+                      <span className="inline-flex items-center rounded-full px-2 py-0.5 sm:px-2.5 sm:py-1 text-[9px] sm:text-[10px] font-extrabold uppercase tracking-widest bg-slate-900 text-white">
                         {plan.network || 'Network'}
                       </span>
-                      <span className="text-[10px] font-semibold uppercase tracking-widest text-cyan-700">View only</span>
+                      <span className="inline-flex items-center rounded-full border border-cyan-200 bg-cyan-50 px-2 py-0.5 text-[9px] sm:text-[10px] font-bold uppercase tracking-wide text-cyan-800">
+                        {displayDataSize}
+                      </span>
                     </div>
-                    <h3 className="text-sm font-bold text-slate-900 leading-tight line-clamp-2">
-                      {plan.name || `${plan.dataAmount || 'Data'} Plan`}
-                    </h3>
-                    <p className="text-xs text-slate-600 mt-1 line-clamp-1">
-                      {[plan.dataAmount, plan.validity].filter(Boolean).join(' • ') || 'Available bundle'}
-                    </p>
-                    <p className="text-lg font-black text-slate-900 mt-3">GHS {displayPrice.toFixed(2)}</p>
+
+                    <div className="relative mt-3 rounded-xl border border-slate-100 bg-slate-50/80 px-2.5 py-2">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Price</p>
+                      <p className="text-base sm:text-lg font-black text-slate-900 leading-tight mt-0.5">GHS {displayPrice.toFixed(2)}</p>
+                    </div>
                   </div>
                 );
               })}

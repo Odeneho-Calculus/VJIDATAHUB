@@ -167,8 +167,33 @@ export default function GuestPurchase() {
     }
   };
 
+  const getBundleSizeInGB = (bundle) => {
+    const textCandidates = [bundle?.dataAmount, bundle?.dataSize, bundle?.name, bundle?.planName];
+
+    for (const candidate of textCandidates) {
+      if (!candidate || typeof candidate !== 'string') continue;
+      const match = candidate.match(/(\d+(?:\.\d+)?)\s*(GB|MB)\b/i);
+      if (!match) continue;
+      const value = Number(match[1]);
+      if (!Number.isFinite(value)) continue;
+      return match[2].toUpperCase() === 'MB' ? value / 1024 : value;
+    }
+
+    const numericSize = Number(bundle?.dataSizeMB);
+    if (Number.isFinite(numericSize) && numericSize > 0) {
+      return numericSize;
+    }
+
+    return Number.POSITIVE_INFINITY;
+  };
+
   if (showCheckout && selectedPlan) {
     const styles = getNetworkStyles(selectedPlan.network);
+    const selectedPlanDataSize = selectedPlan?.dataSize
+      || selectedPlan?.dataAmount
+      || (selectedPlan?.dataSizeMB ? `${selectedPlan.dataSizeMB}GB` : '')
+      || (selectedPlan?.name?.match(/\d+(?:\.\d+)?\s*GB/i)?.[0] ?? '')
+      || 'Data';
     return (
       <div className="min-h-screen bg-slate-50/50">
         <div className="sticky top-0 z-20 app-pro-header px-4 sm:px-6 py-4">
@@ -200,8 +225,8 @@ export default function GuestPurchase() {
                 <span className={`inline-block px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${styles.accent} ${styles.lightBg} ${styles.border} mb-2`}>
                   {selectedPlan.network}
                 </span>
-                <h3 className="text-sm sm:text-base font-black text-slate-900 leading-tight">{selectedPlan.name}</h3>
-                <p className="text-xs text-slate-600 mt-1">{selectedPlan.dataAmount} • {selectedPlan.validity}</p>
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 leading-tight tracking-tight">{selectedPlanDataSize}</h3>
+                <p className="text-xs text-slate-600 mt-1">{selectedPlan.name}</p>
               </div>
               <div className="text-right flex-shrink-0">
                 <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Price</span>
@@ -347,6 +372,12 @@ export default function GuestPurchase() {
 
   const availableNetworks = Object.keys(grouped);
   const currentBundles = grouped[selectedNetwork] || [];
+  const sortedCurrentBundles = [...currentBundles].sort((a, b) => {
+    const sizeDiff = getBundleSizeInGB(a) - getBundleSizeInGB(b);
+    if (sizeDiff !== 0) return sizeDiff;
+
+    return Number(a?.price || 0) - Number(b?.price || 0);
+  });
 
   return (
     <div className="min-h-screen bg-slate-50/50">
@@ -456,27 +487,37 @@ export default function GuestPurchase() {
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {currentBundles.map(bundle => {
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
+                {sortedCurrentBundles.map(bundle => {
                   const styles = getNetworkStyles(bundle.network);
+                  const displayDataSize = bundle?.dataAmount
+                    || bundle?.dataSize
+                    || (bundle?.dataSizeMB ? `${bundle.dataSizeMB}GB` : '')
+                    || (bundle?.name?.match(/\d+(?:\.\d+)?\s*GB/i)?.[0] ?? '')
+                    || 'Data';
                   return (
                     <div
                       key={bundle._id}
                       onClick={() => bundle.inStock && handlePlanSelect(bundle)}
-                      className={`group relative p-4 rounded-2xl border transition-all duration-300 bg-white ${
+                      className={`group relative overflow-hidden p-3 sm:p-4 rounded-2xl border ring-1 ring-slate-200/60 transition-all duration-300 bg-white ${
                         bundle.inStock
-                          ? `border-slate-200/60 shadow-sm hover:shadow-xl ${styles.hoverBorder} hover:-translate-y-1 cursor-pointer`
+                          ? `border-slate-200/80 shadow-[0_8px_22px_rgba(2,6,23,0.12),0_2px_6px_rgba(2,6,23,0.06)] hover:shadow-[0_18px_36px_rgba(2,6,23,0.18),0_6px_14px_rgba(6,95,130,0.14)] ${styles.hoverBorder} hover:-translate-y-0.5 cursor-pointer`
                           : 'opacity-60 cursor-not-allowed border-slate-100 bg-slate-50'
                       }`}
                     >
+                      <div className={`pointer-events-none absolute -right-7 -top-7 h-16 w-16 rounded-full ${styles.lightBg} blur-xl`} />
+
                       {/* Status & Network Badge */}
-                      <div className="flex justify-between items-start mb-3">
-                        <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${
+                      <div className="relative flex justify-between items-start mb-2 sm:mb-3">
+                        <span className={`px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${
                           bundle.inStock
                             ? `${styles.lightBg} ${styles.accent} ${styles.border.replace('border-', 'border-opacity-30 border-')}`
                             : 'bg-slate-100 text-slate-500 border-slate-200'
                         }`}>
                           {bundle.network}
+                        </span>
+                        <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide ${styles.lightBg} ${styles.accent} ${styles.border.replace('border-', 'border-opacity-30 border-')}`}>
+                          {displayDataSize}
                         </span>
                         {!bundle.inStock && (
                           <span className="text-[9px] font-black text-rose-500 uppercase tracking-widest flex items-center gap-1">
@@ -486,24 +527,17 @@ export default function GuestPurchase() {
                         )}
                       </div>
 
-                      {/* Content Section */}
-                      <div className="text-center mb-3">
-                        <p className="text-xl font-black text-slate-900 tracking-tight leading-tight select-none">
-                          {bundle.dataAmount}
-                        </p>
-                      </div>
-
                       {/* Action Section */}
-                      <div className="space-y-2 pt-3 border-t border-slate-50">
-                        <div className="flex items-center justify-between px-1">
+                      <div className="space-y-2 pt-2.5 border-t border-slate-100">
+                        <div className="rounded-xl border border-slate-100 bg-slate-50/80 px-2.5 py-2 flex items-center justify-between">
                           <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Price</span>
-                          <span className={`text-base font-black ${styles.accent} tracking-tighter`}>
+                          <span className={`text-sm sm:text-base font-black ${styles.accent} tracking-tighter`}>
                             {formatCurrencyAbbreviated(bundle.price)}
                           </span>
                         </div>
 
                         <button
-                          className={`w-full py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all font-black text-[11px] uppercase tracking-widest ${
+                          className={`w-full py-2 sm:py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all font-black text-[10px] sm:text-[11px] uppercase tracking-widest ${
                             bundle.inStock
                               ? `bg-slate-900 text-white shadow-lg shadow-slate-100 group-hover:bg-gradient-to-br ${styles.gradient} group-hover:shadow-blue-200 group-hover:scale-[1.02]`
                               : 'bg-slate-100 text-slate-400 cursor-not-allowed'
