@@ -40,6 +40,18 @@ const systemSettingsSchema = new mongoose.Schema(
         min: 0,
       },
     },
+    transactionCharges: {
+      dataPurchaseCharge: {
+        type: Number,
+        default: 0,
+        min: 0,
+      },
+      walletFundingCharge: {
+        type: Number,
+        default: 0,
+        min: 0,
+      },
+    },
     networkCatalog: [
       {
         name: String,
@@ -101,6 +113,17 @@ systemSettingsSchema.statics.getSettings = async function () {
   }
   if (!settings.orderSettings) {
     settings.orderSettings = {};
+  }
+  if (!settings.transactionCharges) {
+    settings.transactionCharges = {};
+  }
+  const dataPurchaseCharge = Number(settings.transactionCharges.dataPurchaseCharge);
+  if (Number.isNaN(dataPurchaseCharge) || dataPurchaseCharge < 0) {
+    settings.transactionCharges.dataPurchaseCharge = 0;
+  }
+  const walletFundingCharge = Number(settings.transactionCharges.walletFundingCharge);
+  if (Number.isNaN(walletFundingCharge) || walletFundingCharge < 0) {
+    settings.transactionCharges.walletFundingCharge = 0;
   }
   if (!['webhook', 'cron'].includes(settings.orderSettings.statusUpdateMethod)) {
     settings.orderSettings.statusUpdateMethod = 'cron';

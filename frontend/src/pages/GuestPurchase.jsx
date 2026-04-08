@@ -17,6 +17,7 @@ export default function GuestPurchase() {
   const [submitting, setSubmitting] = useState(false);
   const [businessStatus, setBusinessStatus] = useState(null);
   const [checkingBusinessStatus, setCheckingBusinessStatus] = useState(false);
+  const [dataPurchaseCharge, setDataPurchaseCharge] = useState(0);
 
   const [formData, setFormData] = useState({
     phoneNumber: '',
@@ -37,14 +38,20 @@ export default function GuestPurchase() {
     const checkStatus = async () => {
       try {
         setCheckingBusinessStatus(true);
-        const response = await publicAPI.getBusinessStatus();
-        if (response.success && response.data) {
-          setBusinessStatus(response.data);
-          if (!response.data.isOpen) {
-            setError(response.data.message || 'Business is currently closed');
+        const [statusRes, settingsRes] = await Promise.all([
+          publicAPI.getBusinessStatus(),
+          publicAPI.getSystemSettings(),
+        ]);
+        if (statusRes.success && statusRes.data) {
+          setBusinessStatus(statusRes.data);
+          if (!statusRes.data.isOpen) {
+            setError(statusRes.data.message || 'Business is currently closed');
           }
         } else {
           setBusinessStatus(null);
+        }
+        if (settingsRes?.settings?.transactionCharges?.dataPurchaseCharge !== undefined) {
+          setDataPurchaseCharge(Number(settingsRes.settings.transactionCharges.dataPurchaseCharge) || 0);
         }
       } catch (err) {
         console.error('Failed to check business status:', err);
@@ -264,6 +271,24 @@ export default function GuestPurchase() {
               )}
 
               <form onSubmit={handleCheckout} className="space-y-5">
+
+                {dataPurchaseCharge > 0 && (
+                  <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 space-y-1.5">
+                    <div className="flex items-center justify-between text-[11px] font-bold text-slate-500">
+                      <span>Plan price</span>
+                      <span>GHS {selectedPlan.price.toFixed(2)}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-[11px] font-bold text-amber-600">
+                      <span>Service charge</span>
+                      <span>+ GHS {dataPurchaseCharge.toFixed(2)}</span>
+                    </div>
+                    <div className="h-px bg-slate-200" />
+                    <div className="flex items-center justify-between text-xs font-black text-slate-900">
+                      <span>Total charged</span>
+                      <span>GHS {(selectedPlan.price + dataPurchaseCharge).toFixed(2)}</span>
+                    </div>
+                  </div>
+                )}
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-widest">
                     Phone Number <span className="text-red-500">*</span>
@@ -333,7 +358,9 @@ export default function GuestPurchase() {
                     ? 'Checking availability...'
                     : submitting
                     ? 'Processing...'
-                    : `Pay GHS ${selectedPlan.price.toFixed(2)}`
+                    : dataPurchaseCharge > 0
+                      ? `Pay GHS ${(selectedPlan.price + dataPurchaseCharge).toFixed(2)}`
+                      : `Pay GHS ${selectedPlan.price.toFixed(2)}`
                   }
                 </button>
               </form>

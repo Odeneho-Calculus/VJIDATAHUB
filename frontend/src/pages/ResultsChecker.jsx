@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CheckCircle, AlertCircle, RefreshCw, CreditCard, History } from 'lucide-react';
-import { checkers as checkersAPI } from '../services/api';
+import { checkers as checkersAPI, publicAPI } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
 import UserLayout from '../components/UserLayout';
 import AgentLayout from '../components/AgentLayout';
@@ -18,6 +18,7 @@ export default function ResultsChecker() {
   const [message, setMessage] = useState({ type: '', text: '' });
   const [paymentData, setPaymentData] = useState(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [dataPurchaseCharge, setDataPurchaseCharge] = useState(0);
 
   const Layout = user?.role === 'agent' ? AgentLayout : UserLayout;
 
@@ -29,12 +30,14 @@ export default function ResultsChecker() {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const [productsRes, historyRes] = await Promise.all([
+      const [productsRes, historyRes, settingsRes] = await Promise.all([
         checkersAPI.getProducts(),
         checkersAPI.getMyCheckers(1, 12),
+        publicAPI.getSystemSettings(),
       ]);
       setProducts(productsRes?.data || []);
       setHistory(historyRes?.data || []);
+      setDataPurchaseCharge(Number(settingsRes?.settings?.transactionCharges?.dataPurchaseCharge) || 0);
     } catch (err) {
       showMessage('error', err.message || 'Failed to load result checker data');
     } finally {
@@ -68,7 +71,7 @@ export default function ResultsChecker() {
       if (paymentMethod === 'paystack') {
         setPaymentData({
           ...response.data,
-          amount: Number(product.finalPrice || 0),
+          amount: Number(product.finalPrice || 0) + dataPurchaseCharge,
         });
         setShowPaymentModal(true);
         return;
@@ -172,6 +175,18 @@ export default function ResultsChecker() {
                     <p className="font-semibold text-slate-900">{product.displayName || product.checkerType}</p>
                     <p className="text-xs text-slate-500 mt-0.5">{product.checkerType}</p>
                     <p className="text-xl font-bold text-slate-900 mt-2">GHc {Number(product.finalPrice || 0).toFixed(2)}</p>
+                    {paymentMethod === 'paystack' && dataPurchaseCharge > 0 && (
+                      <div className="mt-1.5 space-y-0.5 text-xs text-slate-500">
+                        <div className="flex justify-between">
+                          <span>Transaction fee</span>
+                          <span>+GHc {dataPurchaseCharge.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between font-semibold text-slate-700">
+                          <span>Total</span>
+                          <span>GHc {(Number(product.finalPrice || 0) + dataPurchaseCharge).toFixed(2)}</span>
+                        </div>
+                      </div>
+                    )}
                     <button
                       onClick={() => handleBuy(product)}
                       disabled={buyingId === product._id || (paymentMethod === 'wallet' && Number(user?.balance || 0) < Number(product.finalPrice || 0))}

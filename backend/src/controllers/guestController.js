@@ -514,9 +514,12 @@ exports.initializeGuestPurchase = async (req, res) => {
 
     // Initialize Paystack payment
     try {
+      const dataPurchaseCharge = Number(settings.transactionCharges?.dataPurchaseCharge) || 0;
+      const totalAmount = plan.sellingPrice + dataPurchaseCharge;
+
       const paystackPayload = {
         email: email,
-        amount: Math.round(plan.sellingPrice * 100), // Convert to pesewas
+        amount: Math.round(totalAmount * 100), // Convert to pesewas
         reference: txReference,
         metadata: {
           orderId: order._id.toString(),
@@ -526,6 +529,7 @@ exports.initializeGuestPurchase = async (req, res) => {
           network: plan.network,
           isGuest: true,
           guestId: guest._id.toString(),
+          transactionCharge: dataPurchaseCharge,
         },
       };
 

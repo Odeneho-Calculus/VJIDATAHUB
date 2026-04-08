@@ -569,6 +569,9 @@ exports.buyChecker = async (req, res) => {
 
     const reference = 'CHKP' + Date.now() + Math.random().toString(36).slice(2, 9).toUpperCase();
 
+    const dataPurchaseCharge = Number(settings.transactionCharges?.dataPurchaseCharge) || 0;
+    const totalCheckerAmount = price + dataPurchaseCharge;
+
     const transaction = await Transaction.create({
       userId: user._id,
       type: 'checker_purchase',
@@ -582,7 +585,7 @@ exports.buyChecker = async (req, res) => {
 
     const paystackPayload = {
       email: user.email,
-      amount: Math.round(price * 100),
+      amount: Math.round(totalCheckerAmount * 100),
       reference,
       metadata: {
         userId: req.userId.toString(),
@@ -591,6 +594,7 @@ exports.buyChecker = async (req, res) => {
         type: 'checker_purchase',
         checkerType: offer.checkerType,
         phoneNumber: String(phoneNumber).trim(),
+        transactionCharge: dataPurchaseCharge,
       },
     };
 
@@ -1145,9 +1149,12 @@ exports.initializePublicStoreCheckerPurchase = async (req, res) => {
       description: `Guest checker purchase: ${checker.checkerType} (Store: ${store.name})`,
     });
 
+    const dataPurchaseCharge = Number(settings.transactionCharges?.dataPurchaseCharge) || 0;
+    const totalCheckerAmount = customPrice + dataPurchaseCharge;
+
     const paystackPayload = {
       email,
-      amount: Math.round(customPrice * 100),
+      amount: Math.round(totalCheckerAmount * 100),
       reference,
       metadata: {
         orderId: order._id.toString(),
@@ -1155,6 +1162,7 @@ exports.initializePublicStoreCheckerPurchase = async (req, res) => {
         type: 'public_store_checker_purchase',
         storeSlug: store.slug,
         guestId: guest._id.toString(),
+        transactionCharge: dataPurchaseCharge,
       },
     };
 

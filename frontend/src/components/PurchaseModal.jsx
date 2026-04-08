@@ -16,6 +16,7 @@ export default function PurchaseModal({ bundle, isOpen, onClose, userBalance, us
   const [paymentData, setPaymentData] = useState(null);
   const [businessStatus, setBusinessStatus] = useState(null);
   const [checkingBusinessStatus, setCheckingBusinessStatus] = useState(false);
+  const [dataPurchaseCharge, setDataPurchaseCharge] = useState(0);
 
   // Helper function to check if user qualifies for agent pricing
   const isQualifiedAgent = () => {
@@ -47,15 +48,21 @@ export default function PurchaseModal({ bundle, isOpen, onClose, userBalance, us
     const checkStatus = async () => {
       try {
         setCheckingBusinessStatus(true);
-        const response = await publicAPI.getBusinessStatus();
-        if (response.success && response.data) {
-          setBusinessStatus(response.data);
-          if (!response.data.isOpen) {
-            setError(response.data.message || 'Business is currently closed');
+        const [statusRes, settingsRes] = await Promise.all([
+          publicAPI.getBusinessStatus(),
+          publicAPI.getSystemSettings(),
+        ]);
+        if (statusRes.success && statusRes.data) {
+          setBusinessStatus(statusRes.data);
+          if (!statusRes.data.isOpen) {
+            setError(statusRes.data.message || 'Business is currently closed');
           }
         } else {
           setBusinessStatus(null);
-          setError(response.message || 'Failed to check business status');
+          setError(statusRes.message || 'Failed to check business status');
+        }
+        if (settingsRes?.settings?.transactionCharges?.dataPurchaseCharge !== undefined) {
+          setDataPurchaseCharge(Number(settingsRes.settings.transactionCharges.dataPurchaseCharge) || 0);
         }
       } catch (err) {
         console.error('Failed to check business status:', err);
@@ -270,6 +277,24 @@ export default function PurchaseModal({ bundle, isOpen, onClose, userBalance, us
             </div>
           </div>
 
+          {paymentMethod === 'paystack' && dataPurchaseCharge > 0 && (
+            <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 space-y-1.5">
+              <div className="flex items-center justify-between text-[11px] font-bold text-slate-500">
+                <span>Plan price</span>
+                <span>{formatCurrencyAbbreviated(displayPrice)}</span>
+              </div>
+              <div className="flex items-center justify-between text-[11px] font-bold text-amber-600">
+                <span>Service charge</span>
+                <span>+ {formatCurrencyAbbreviated(dataPurchaseCharge)}</span>
+              </div>
+              <div className="h-px bg-slate-200" />
+              <div className="flex items-center justify-between text-xs font-black text-slate-900">
+                <span>Total charged</span>
+                <span>{formatCurrencyAbbreviated(displayPrice + dataPurchaseCharge)}</span>
+              </div>
+            </div>
+          )}
+
           <div className="flex flex-col sm:flex-row gap-3 pt-2">
             <button
               onClick={paymentMethod === 'wallet' ? handleWalletPurchase : handlePaystackPurchase}
@@ -291,7 +316,9 @@ export default function PurchaseModal({ bundle, isOpen, onClose, userBalance, us
               ) : (
                 <>
                   <Zap size={16} strokeWidth={2.5} />
-                  Authorize {formatCurrencyAbbreviated(displayPrice)}
+                  {paymentMethod === 'paystack' && dataPurchaseCharge > 0
+                    ? `Pay ${formatCurrencyAbbreviated(displayPrice + dataPurchaseCharge)}`
+                    : `Authorize ${formatCurrencyAbbreviated(displayPrice)}`}
                 </>
               )}
             </button>

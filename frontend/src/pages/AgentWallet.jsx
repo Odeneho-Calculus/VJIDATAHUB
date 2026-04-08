@@ -39,6 +39,7 @@ export default function AgentWallet() {
   const [showTxDetails, setShowTxDetails] = useState(false);
   const [txPage, setTxPage] = useState(1);
   const [txHasMore, setTxHasMore] = useState(false);
+  const [walletFundingCharge, setWalletFundingCharge] = useState(0);
 
   const TX_LIMIT = 10;
 
@@ -95,9 +96,17 @@ export default function AgentWallet() {
   useEffect(() => {
     const checkStatus = async () => {
       try {
-        const response = await publicAPI.getBusinessStatus();
-        if (response.success && response.data) {
-          setBusinessStatus(response.data);
+        const [statusRes, settingsRes] = await Promise.all([
+          publicAPI.getBusinessStatus(),
+          publicAPI.getSystemSettings(),
+        ]);
+
+        if (statusRes.success && statusRes.data) {
+          setBusinessStatus(statusRes.data);
+        }
+
+        if (settingsRes?.settings?.transactionCharges?.walletFundingCharge !== undefined) {
+          setWalletFundingCharge(Number(settingsRes.settings.transactionCharges.walletFundingCharge) || 0);
         }
       } catch (err) {
         console.error('Failed to check business status:', err);
@@ -298,6 +307,24 @@ export default function AgentWallet() {
                     />
                   </div>
                 </div>
+
+                {walletFundingCharge > 0 && Number(amount || 0) > 0 && (
+                  <div className="mb-6 rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 space-y-1.5">
+                    <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
+                      <span>Amount to credit</span>
+                      <span>GHS {Number(amount || 0).toFixed(2)}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs font-semibold text-amber-600">
+                      <span>Service charge</span>
+                      <span>+ GHS {walletFundingCharge.toFixed(2)}</span>
+                    </div>
+                    <div className="h-px bg-slate-200" />
+                    <div className="flex items-center justify-between text-sm font-bold text-slate-900">
+                      <span>Total charged</span>
+                      <span>GHS {(Number(amount || 0) + walletFundingCharge).toFixed(2)}</span>
+                    </div>
+                  </div>
+                )}
 
                 <button
                   onClick={handleTopUp}

@@ -1556,16 +1556,21 @@ exports.purchasePublicStoreBundle = async (req, res) => {
       description: `Guest Purchase: ${planData.name || planData.planName} for ${phone} (Store: ${store.name})`,
     });
 
+    const sysSettings = await SystemSettings.getSettings();
+    const dataPurchaseCharge = Number(sysSettings.transactionCharges?.dataPurchaseCharge) || 0;
+    const storeTotal = storePlan.customPrice + dataPurchaseCharge;
+
     const paystackPayload = {
       email,
-      amount: Math.round(storePlan.customPrice * 100),
+      amount: Math.round(storeTotal * 100),
       reference,
       metadata: {
         orderId: order._id.toString(),
         transactionId: transaction._id.toString(),
         type: 'public_store_purchase',
         storeSlug: store.slug,
-        guestId: guest._id.toString()
+        guestId: guest._id.toString(),
+        transactionCharge: dataPurchaseCharge,
       },
     };
 

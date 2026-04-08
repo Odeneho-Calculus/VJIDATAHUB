@@ -27,6 +27,15 @@ const transactionSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    baseAmount: {
+      type: Number,
+      default: 0,
+    },
+    transactionCharge: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
     currency: {
       type: String,
       default: 'GHS',

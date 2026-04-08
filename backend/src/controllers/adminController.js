@@ -2454,6 +2454,8 @@ exports.getPublicSettings = async (req, res) => {
     const contactDetails = settings.contactDetails || {};
     const orderSettings = settings.orderSettings || {};
 
+    const transactionCharges = settings.transactionCharges || {};
+
     res.status(200).json({
       success: true,
       settings: {
@@ -2474,6 +2476,10 @@ exports.getPublicSettings = async (req, res) => {
             : 'cron',
           statusSyncIntervalMinutes: Number(orderSettings.statusSyncIntervalMinutes) || 5,
           statusSyncBatchLimit: Number(orderSettings.statusSyncBatchLimit) || 100,
+        },
+        transactionCharges: {
+          dataPurchaseCharge: Number(transactionCharges.dataPurchaseCharge) || 0,
+          walletFundingCharge: Number(transactionCharges.walletFundingCharge) || 0,
         },
       }
     });
@@ -2670,6 +2676,21 @@ exports.updateSystemSettings = async (req, res) => {
       }
       if (!settings.orderSettings) settings.orderSettings = {};
       settings.orderSettings.statusSyncBatchLimit = Math.floor(statusSyncBatchLimit);
+    }
+
+    if (req.body.transactionCharges) {
+      const { dataPurchaseCharge, walletFundingCharge } = req.body.transactionCharges;
+      if (!settings.transactionCharges) settings.transactionCharges = {};
+      if (dataPurchaseCharge !== undefined) {
+        const v = Number(dataPurchaseCharge);
+        if (!Number.isNaN(v) && v >= 0) settings.transactionCharges.dataPurchaseCharge = v;
+        else return res.status(400).json({ success: false, message: 'dataPurchaseCharge must be a non-negative number' });
+      }
+      if (walletFundingCharge !== undefined) {
+        const v = Number(walletFundingCharge);
+        if (!Number.isNaN(v) && v >= 0) settings.transactionCharges.walletFundingCharge = v;
+        else return res.status(400).json({ success: false, message: 'walletFundingCharge must be a non-negative number' });
+      }
     }
 
     await settings.save();

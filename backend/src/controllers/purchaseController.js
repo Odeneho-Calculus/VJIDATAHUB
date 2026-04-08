@@ -263,7 +263,8 @@ exports.buyDataBundle = async (req, res) => {
     if (paymentMethod === 'wallet') {
       return handleWalletPayment(req, res, user, plan, order, activeProvider);
     } else if (paymentMethod === 'paystack') {
-      return handlePaystackPayment(req, res, user, plan, order, activeProvider);
+      const dataPurchaseCharge = Number(settings.transactionCharges?.dataPurchaseCharge) || 0;
+      return handlePaystackPayment(req, res, user, plan, order, activeProvider, dataPurchaseCharge);
     }
   } catch (error) {
     console.error('[Buy Data Bundle] Error:', error);
@@ -473,7 +474,7 @@ const handleWalletPayment = async (req, res, user, plan, order, provider = 'xpre
   }
 };
 
-const handlePaystackPayment = async (req, res, user, plan, order, provider = 'xpresdata') => {
+const handlePaystackPayment = async (req, res, user, plan, order, provider = 'xpresdata', charge = 0) => {
   try {
     const cooldownMinutes = await getOrderDuplicateCooldownMinutes();
 
@@ -519,6 +520,8 @@ const handlePaystackPayment = async (req, res, user, plan, order, provider = 'xp
 
     const reference = 'DT' + Date.now() + Math.random().toString(36).substr(2, 9);
 
+    const totalAmount = plan.sellingPrice + charge;
+
     const transaction = await Transaction.create({
       userId: req.userId,
       type: 'data_purchase',
@@ -532,7 +535,7 @@ const handlePaystackPayment = async (req, res, user, plan, order, provider = 'xp
 
     const paystackPayload = {
       email: user.email,
-      amount: Math.round(plan.sellingPrice * 100),
+      amount: Math.round(totalAmount * 100),
       reference,
       metadata: {
         userId: req.userId.toString(),
@@ -542,6 +545,7 @@ const handlePaystackPayment = async (req, res, user, plan, order, provider = 'xp
         dataPlanId: plan._id.toString(),
         phoneNumber: order.phoneNumber,
         provider: provider,
+        transactionCharge: charge,
       },
     };
 

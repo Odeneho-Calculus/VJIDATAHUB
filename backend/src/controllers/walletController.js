@@ -1,6 +1,7 @@
 const axios = require('axios');
 const User = require('../models/User');
 const Transaction = require('../models/Transaction');
+const SystemSettings = require('../models/SystemSettings');
 
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 const PAYSTACK_BASE_URL = process.env.PAYSTACK_BASE_URL || 'https://api.paystack.co';
@@ -60,6 +61,10 @@ exports.initializePayment = async (req, res) => {
 
     const reference = 'TXN' + Date.now() + Math.random().toString(36).substr(2, 9);
 
+    const sysSettings = await SystemSettings.getSettings();
+    const walletFundingCharge = Number(sysSettings.transactionCharges?.walletFundingCharge) || 0;
+    const totalAmount = amount + walletFundingCharge;
+
     const transaction = await Transaction.create({
       userId: req.userId,
       type: 'wallet_topup',
@@ -72,12 +77,13 @@ exports.initializePayment = async (req, res) => {
 
     const paystackPayload = {
       email: user.email,
-      amount: amount * 100,
+      amount: totalAmount * 100,
       reference,
       metadata: {
         userId: req.userId.toString(),
         transactionId: transaction._id.toString(),
         type: 'wallet_topup',
+        transactionCharge: walletFundingCharge,
       },
     };
 
@@ -97,6 +103,8 @@ exports.initializePayment = async (req, res) => {
         authorizationUrl: response.data.data.authorization_url,
         accessCode: response.data.data.access_code,
         transactionId: transaction._id,
+        walletFundingCharge,
+        totalAmount,
       },
     });
   } catch (error) {

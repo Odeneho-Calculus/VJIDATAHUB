@@ -41,6 +41,8 @@ export default function AdminPlatformSettings() {
     email: '',
     duplicateOrderCooldownMinutes: 10,
     statusUpdateMethod: 'cron',
+    dataPurchaseCharge: 0,
+    walletFundingCharge: 0,
   });
 
   useEffect(() => {
@@ -79,6 +81,8 @@ export default function AdminPlatformSettings() {
         email: cd.email || '',
         duplicateOrderCooldownMinutes: response?.settings?.orderSettings?.duplicateOrderCooldownMinutes || 10,
         statusUpdateMethod: response?.settings?.orderSettings?.statusUpdateMethod || 'cron',
+        dataPurchaseCharge: response?.settings?.transactionCharges?.dataPurchaseCharge ?? 0,
+        walletFundingCharge: response?.settings?.transactionCharges?.walletFundingCharge ?? 0,
       });
       setError('');
     } catch (err) {
@@ -106,6 +110,10 @@ export default function AdminPlatformSettings() {
         orderSettings: {
           duplicateOrderCooldownMinutes: Number(formData.duplicateOrderCooldownMinutes) || 10,
           statusUpdateMethod: formData.statusUpdateMethod || 'cron',
+        },
+        transactionCharges: {
+          dataPurchaseCharge: Number(formData.dataPurchaseCharge) || 0,
+          walletFundingCharge: Number(formData.walletFundingCharge) || 0,
         },
       });
       showMessage('Platform settings saved successfully');
@@ -211,7 +219,7 @@ export default function AdminPlatformSettings() {
         ) : (
           <div className="max-w-3xl space-y-4">
             <div className="bg-white border border-slate-200 rounded-2xl p-2">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 <button
                   onClick={() => setActiveTab('contact')}
                   className={`px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition ${activeTab === 'contact'
@@ -231,6 +239,16 @@ export default function AdminPlatformSettings() {
                 >
                   <Settings2 size={15} />
                   Order Settings
+                </button>
+                <button
+                  onClick={() => setActiveTab('charges')}
+                  className={`px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition ${activeTab === 'charges'
+                    ? 'bg-slate-900 text-white'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    }`}
+                >
+                  <Clock3 size={15} />
+                  Transaction Charges
                 </button>
               </div>
             </div>
@@ -482,6 +500,55 @@ export default function AdminPlatformSettings() {
                         </div>
                       )}
                     </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'charges' && (
+              <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+                <div className="px-5 py-4 border-b border-slate-100">
+                  <h2 className="text-sm font-semibold text-slate-800">Transaction Charges</h2>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Optional flat-fee charged on top of the data plan price at checkout (in GHS). Set to 0 to disable.
+                  </p>
+                </div>
+                <div className="p-5 space-y-4">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1.5">
+                      <span className="flex items-center gap-1.5">
+                        <Settings2 size={13} />
+                        Data Purchase Charge (GHS)
+                      </span>
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      name="dataPurchaseCharge"
+                      value={formData.dataPurchaseCharge}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition"
+                    />
+                    <p className="text-[11px] text-slate-400 mt-1">Applied on all Paystack data purchases (guests, store buyers, and registered users paying via card/Momo). Not charged on wallet payments.</p>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1.5">
+                      <span className="flex items-center gap-1.5">
+                        <Settings2 size={13} />
+                        Wallet Funding Charge (GHS)
+                      </span>
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      name="walletFundingCharge"
+                      value={formData.walletFundingCharge}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition"
+                    />
+                    <p className="text-[11px] text-slate-400 mt-1">Applied every time a user funds their wallet via Paystack. Only the base amount is credited to the wallet.</p>
                   </div>
                 </div>
               </div>
