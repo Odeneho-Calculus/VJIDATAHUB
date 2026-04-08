@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { formatCurrencyAbbreviated } from '../utils/formatCurrency';
-import { CreditCard, Loader, Clock, Wallet, ArrowUpRight, ArrowDownLeft, RotateCw, AlertCircle, CheckCircle2, ArrowLeft, Zap, ReceiptText, Smartphone } from 'lucide-react';
+import {
+  CreditCard,
+  Loader,
+  Clock,
+  Wallet,
+  RefreshCw,
+  AlertCircle,
+  CheckCircle2,
+  Layout,
+} from 'lucide-react';
 import PaymentModal from '../components/PaymentModal';
 import { wallet, publicAPI } from '../services/api';
 import UserLayout from '../components/UserLayout';
@@ -18,9 +27,7 @@ export default function TopUp() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [walletFundingCharge, setWalletFundingCharge] = useState(0);
 
-  useEffect(() => {
-    checkStatus();
-  }, []);
+  const quickAmounts = [10, 20, 50, 100, 200, 500];
 
   const checkStatus = async () => {
     try {
@@ -28,9 +35,11 @@ export default function TopUp() {
         publicAPI.getBusinessStatus(),
         publicAPI.getSystemSettings(),
       ]);
+
       if (statusRes.success && statusRes.data) {
         setBusinessStatus(statusRes.data);
       }
+
       if (settingsRes?.settings?.transactionCharges?.walletFundingCharge !== undefined) {
         setWalletFundingCharge(Number(settingsRes.settings.transactionCharges.walletFundingCharge) || 0);
       }
@@ -39,6 +48,10 @@ export default function TopUp() {
     }
   };
 
+  useEffect(() => {
+    checkStatus();
+  }, []);
+
   const handleRefresh = async () => {
     setIsRefreshing(true);
     await refreshUser();
@@ -46,10 +59,8 @@ export default function TopUp() {
     setIsRefreshing(false);
   };
 
-  const quickAmounts = [10, 20, 50, 100, 200, 500];
-
   const handleTopUp = async () => {
-    if (!amount || amount <= 0) {
+    if (!amount || Number(amount) <= 0) {
       setError('Please enter a valid amount');
       return;
     }
@@ -87,194 +98,189 @@ export default function TopUp() {
 
   return (
     <UserLayout>
-      <div className="min-h-screen bg-[#F8FAFC]">
-        <div className="flex flex-col">
-          {/* Sticky Header */}
-          <div className="sticky top-0 z-30 app-pro-header pb-1">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white shadow-lg shadow-blue-100">
-                    <Wallet size={24} strokeWidth={2.5} />
-                  </div>
-                  <div>
-                    <h1 className="text-2xl font-black text-slate-900 tracking-tight">Wallet Top-up</h1>
-                    <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1.5 mt-0.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                      Fund Account • Secure Gateway
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 self-end sm:self-auto">
-                  <button
-                    onClick={handleRefresh}
-                    disabled={isRefreshing}
-                    className="p-3 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-400 transition-all text-slate-600 hover:text-blue-600 group active:scale-95"
-                  >
-                    <RotateCw size={20} className={`${isRefreshing ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
-                  </button>
-                </div>
+      <div className="min-h-screen bg-[#F8FAFC] overflow-x-hidden">
+        <div className="sticky top-0 z-20 app-pro-header px-4 py-3 sm:px-6 sm:py-4">
+          <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-3">
+            <div>
+              <div className="flex items-center gap-1.5 text-primary-600 mb-1">
+                <Layout size={14} className="sm:w-4 sm:h-4" />
+                <span className="text-xs font-bold uppercase tracking-wider">Wallet Center</span>
               </div>
+              <h1 className="text-lg sm:text-2xl font-bold text-slate-900">Wallet Top-up</h1>
+            </div>
+            <button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="p-2 text-slate-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors disabled:opacity-60"
+              title="Refresh wallet"
+            >
+              <RefreshCw size={18} className={isRefreshing ? 'animate-spin' : ''} />
+            </button>
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
+            <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-blue-200/70 shadow-sm">
+              <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center mb-2 sm:mb-3">
+                <Wallet size={16} className="sm:w-[18px] sm:h-[18px]" />
+              </div>
+              <p className="text-xs text-slate-600 mb-1">Current Balance</p>
+              <p className="text-base sm:text-2xl font-bold text-slate-900 break-words">
+                {formatCurrencyAbbreviated(Number(user?.balance || 0))}
+              </p>
+            </div>
+
+            <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-indigo-200/70 shadow-sm">
+              <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center mb-2 sm:mb-3">
+                <CreditCard size={16} className="sm:w-[18px] sm:h-[18px]" />
+              </div>
+              <p className="text-xs text-slate-600 mb-1">Funding Status</p>
+              <p className="text-base sm:text-xl font-bold text-slate-900">
+                {businessStatus?.isOpen ? 'Available' : 'Unavailable'}
+              </p>
             </div>
           </div>
 
-          <div className="max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-            {/* Status Messages */}
-            {businessStatus && !businessStatus.isOpen && (
-              <div className="mb-8 p-4 bg-amber-50 border border-amber-100 rounded-2xl flex items-center gap-3 text-amber-700 animate-in fade-in slide-in-from-top-4">
-                <Clock size={20} />
-                <p className="text-sm font-bold">{businessStatus.message || 'Business is currently closed.'}</p>
+          {businessStatus && !businessStatus.isOpen && (
+            <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl flex items-start gap-2.5 sm:gap-3 border border-orange-300 bg-white text-orange-700">
+              <Clock size={20} className="flex-shrink-0" />
+              <div>
+                <p className="font-bold text-sm">Business Closed</p>
+                <p className="text-sm">{businessStatus.message || 'Business is currently closed.'}</p>
               </div>
-            )}
+            </div>
+          )}
 
-            {error && (
-              <div className="mb-8 p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-center gap-3 text-rose-600 animate-in fade-in slide-in-from-top-4">
-                <AlertCircle size={20} />
-                <p className="text-sm font-bold">{error}</p>
+          {error && (
+            <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl flex items-start gap-2.5 sm:gap-3 border border-rose-300 bg-white text-rose-700">
+              <AlertCircle size={20} className="flex-shrink-0" />
+              <div>
+                <p className="font-bold text-sm">Error</p>
+                <p className="text-sm">{error}</p>
               </div>
-            )}
+            </div>
+          )}
 
-            {success && (
-              <div className="mb-8 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center gap-3 text-emerald-600 animate-in fade-in slide-in-from-top-4">
-                <CheckCircle2 size={20} />
-                <p className="text-sm font-bold">{success}</p>
+          {success && (
+            <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl flex items-start gap-2.5 sm:gap-3 border border-emerald-300 bg-white text-emerald-700">
+              <CheckCircle2 size={20} className="flex-shrink-0" />
+              <div>
+                <p className="font-bold text-sm">Success</p>
+                <p className="text-sm">{success}</p>
               </div>
-            )}
+            </div>
+          )}
 
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-              {/* Left Column: Balance & Quick Select */}
-              <div className="md:col-span-5 space-y-6">
-                <div className="group bg-white p-8 rounded-[2.5rem] border border-slate-200/60 shadow-sm hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-500">
-                  <div className="flex items-center gap-4 mb-6">
-                    <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
-                      <Zap size={24} />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div className="lg:col-span-1">
+              <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm">
+                <h2 className="font-bold text-sm mb-3 text-slate-900">Quick Amounts</h2>
+                <div className="grid grid-cols-3 sm:grid-cols-2 gap-2">
+                  {quickAmounts.map((quickAmount) => (
+                    <button
+                      key={quickAmount}
+                      onClick={() => {
+                        setAmount(quickAmount.toString());
+                        setError(null);
+                      }}
+                      disabled={loading || (businessStatus && !businessStatus.isOpen)}
+                      className={`py-2 rounded-lg sm:rounded-xl transition text-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed ${amount === quickAmount.toString()
+                        ? 'bg-primary-600 text-white'
+                        : 'bg-slate-100 text-slate-900 hover:bg-slate-200'
+                        }`}
+                    >
+                      GH₵ {quickAmount}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="lg:col-span-2">
+              <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-slate-200 shadow-sm">
+                <h2 className="font-bold text-base sm:text-lg mb-4 sm:mb-5 text-slate-900 flex items-center gap-2">
+                  <Wallet size={18} className="text-blue-600 sm:w-5 sm:h-5" />
+                  Fund Wallet
+                </h2>
+
+                <div className="mb-4 sm:mb-6">
+                  <label className="block text-sm font-semibold mb-2 text-slate-900">Amount (GHS)</label>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold whitespace-nowrap text-slate-900">GH₵</span>
+                    <input
+                      type="number"
+                      value={amount}
+                      onChange={(e) => {
+                        setAmount(e.target.value);
+                        setError(null);
+                      }}
+                      placeholder="Enter amount"
+                      disabled={loading}
+                      min="1"
+                      step="0.01"
+                      className="flex-1 px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-lg sm:rounded-xl border border-slate-200 text-sm bg-slate-50 text-slate-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                      style={{
+                        appearance: 'textfield',
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="mb-4 sm:mb-6 rounded-lg sm:rounded-xl border border-slate-100 bg-slate-50 px-3.5 sm:px-4 py-3">
+                  <div className="flex items-start gap-2.5">
+                    <div className="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-600 flex-shrink-0 flex items-center justify-center mt-0.5">
+                      <CheckCircle2 size={14} />
                     </div>
                     <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Available Balance</p>
-                      <p className="text-3xl font-black text-slate-900 tracking-tight">{formatCurrencyAbbreviated(user?.balance) || '0'}</p>
-                    </div>
-                  </div>
-                  <div className="w-full h-1.5 bg-slate-50 rounded-full overflow-hidden">
-                    <div className="h-full bg-blue-500 rounded-full" style={{ width: '100%' }}></div>
-                  </div>
-                </div>
-
-                <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200/60 shadow-sm">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400">
-                      <Smartphone size={20} />
-                    </div>
-                    <h2 className="text-xs font-black text-slate-900 uppercase tracking-widest">Quick Select</h2>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    {quickAmounts.map(amt => (
-                      <button
-                        key={amt}
-                        onClick={() => {
-                          setAmount(amt.toString());
-                          setError(null);
-                        }}
-                        disabled={loading || (businessStatus && !businessStatus.isOpen)}
-                        className={`py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${amount === amt.toString()
-                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-100 ring-2 ring-blue-600 ring-offset-2'
-                            : 'bg-slate-50 text-slate-500 hover:bg-slate-100 active:scale-95 border border-slate-100'
-                          } disabled:opacity-50 disabled:grayscale`}
-                      >
-                        GH₵ {amt}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Column: Custom Amount Input */}
-              <div className="md:col-span-7">
-                <div className="bg-white p-8 sm:p-10 rounded-[3rem] border border-slate-200/60 shadow-sm relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-64 h-64 bg-blue-50/50 rounded-full blur-3xl group-hover:bg-blue-100/50 transition-colors"></div>
-
-                  <div className="relative z-10">
-                    <div className="flex items-center gap-4 mb-8">
-                      <div className="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600">
-                        <CreditCard size={28} />
-                      </div>
-                      <div>
-                        <h2 className="text-xl font-black text-slate-900 tracking-tight">Custom Amount</h2>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Enter amount to fund</p>
-                      </div>
-                    </div>
-
-                    <div className="space-y-8">
-                      <div className="relative">
-                        <div className="absolute left-6 top-1/2 -translate-y-1/2 pointer-events-none">
-                          <span className="text-lg font-black text-slate-300">GH₵</span>
-                        </div>
-                        <input
-                          type="number"
-                          value={amount}
-                          onChange={(e) => {
-                            setAmount(e.target.value);
-                            setError(null);
-                          }}
-                          placeholder="0.00"
-                          disabled={loading}
-                          min="1"
-                          step="0.01"
-                          className="w-full pl-16 pr-6 py-8 bg-slate-50 border-2 border-slate-100 rounded-[2rem] text-3xl font-black text-slate-900 placeholder:text-slate-200 focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-500/5 transition-all outline-none disabled:opacity-50"
-                        />
-                      </div>
-
-                      <div className="bg-slate-50/50 rounded-[2rem] p-6 border border-slate-100">
-                        <div className="flex items-start gap-4">
-                          <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex-shrink-0 flex items-center justify-center">
-                            <CheckCircle2 size={16} />
-                          </div>
-                          <div>
-                            <p className="text-xs font-bold text-slate-700">Instant Processing</p>
-                            <p className="text-[10px] text-slate-500 mt-1 leading-relaxed">Your wallet will be credited immediately after a successful payment via Paystack.</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {walletFundingCharge > 0 && amount > 0 && (
-                        <div className="rounded-[1.5rem] border border-slate-100 bg-slate-50 px-5 py-4 space-y-1.5">
-                          <div className="flex items-center justify-between text-[11px] font-bold text-slate-500">
-                            <span>Amount to credit</span>
-                            <span>GHS {parseFloat(amount || 0).toFixed(2)}</span>
-                          </div>
-                          <div className="flex items-center justify-between text-[11px] font-bold text-amber-600">
-                            <span>Service charge</span>
-                            <span>+ GHS {walletFundingCharge.toFixed(2)}</span>
-                          </div>
-                          <div className="h-px bg-slate-200" />
-                          <div className="flex items-center justify-between text-xs font-black text-slate-900">
-                            <span>Total charged</span>
-                            <span>GHS {(parseFloat(amount || 0) + walletFundingCharge).toFixed(2)}</span>
-                          </div>
-                        </div>
-                      )}
-
-                      <button
-                        onClick={handleTopUp}
-                        disabled={loading || !amount || (businessStatus && !businessStatus.isOpen)}
-                        className="w-full py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm uppercase tracking-[0.2em] hover:bg-blue-600 transition-all shadow-xl shadow-slate-200 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3 group/btn"
-                      >
-                        {loading ? (
-                          <RotateCw size={20} className="animate-spin" />
-                        ) : (
-                          <>
-                            <Zap size={20} className="group-hover/btn:fill-white transition-all shadow-sm" />
-                            Proceed to Gateway
-                          </>
-                        )}
-                      </button>
-
-                      <p className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                        SECURED BY <span className="text-slate-900">PAYSTACK</span> GATEWAY
+                      <p className="text-xs font-semibold text-slate-700">Instant Processing</p>
+                      <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                        Your wallet will be credited immediately after a successful payment via Paystack.
                       </p>
                     </div>
                   </div>
                 </div>
+
+                {walletFundingCharge > 0 && Number(amount || 0) > 0 && (
+                  <div className="mb-4 sm:mb-6 rounded-lg sm:rounded-xl border border-slate-100 bg-slate-50 px-3.5 sm:px-4 py-3 space-y-1.5">
+                    <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
+                      <span>Amount to credit</span>
+                      <span>GHS {Number(amount || 0).toFixed(2)}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs font-semibold text-amber-600">
+                      <span>Service charge</span>
+                      <span>+ GHS {walletFundingCharge.toFixed(2)}</span>
+                    </div>
+                    <div className="h-px bg-slate-200" />
+                    <div className="flex items-center justify-between text-sm font-bold text-slate-900">
+                      <span>Total charged</span>
+                      <span>GHS {(Number(amount || 0) + walletFundingCharge).toFixed(2)}</span>
+                    </div>
+                  </div>
+                )}
+
+                <button
+                  onClick={handleTopUp}
+                  disabled={loading || !amount || (businessStatus && !businessStatus.isOpen)}
+                  className="w-full text-sm font-bold py-2.5 sm:py-3 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed bg-primary-600 text-white rounded-lg sm:rounded-xl hover:bg-primary-700 transition-all"
+                  title={businessStatus && !businessStatus.isOpen ? 'Business is currently closed' : ''}
+                >
+                  {loading ? (
+                    <>
+                      <Loader size={18} className="animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <CreditCard size={18} />
+                      Proceed to Payment
+                    </>
+                  )}
+                </button>
+
+                <p className="text-xs text-center mt-3 sm:mt-4 text-slate-600">
+                  Your transaction is secure and encrypted with Paystack
+                </p>
               </div>
             </div>
           </div>
