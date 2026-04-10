@@ -2,6 +2,7 @@ const axios = require('axios');
 const User = require('../models/User');
 const Transaction = require('../models/Transaction');
 const SystemSettings = require('../models/SystemSettings');
+const { calculateWalletFundingCharge } = require('../utils/transactionCharges');
 
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 const PAYSTACK_BASE_URL = process.env.PAYSTACK_BASE_URL || 'https://api.paystack.co';
@@ -72,7 +73,11 @@ exports.initializePayment = async (req, res) => {
     const reference = 'TXN' + Date.now() + Math.random().toString(36).substr(2, 9);
 
     const sysSettings = await SystemSettings.getSettings();
-    const walletFundingCharge = Math.round(((Number(sysSettings.transactionCharges?.walletFundingCharge) || 0) * 100)) / 100;
+    const walletFundingCharge = calculateWalletFundingCharge({
+      walletFundingChargeType: sysSettings.transactionCharges?.walletFundingChargeType,
+      walletFundingCharge: sysSettings.transactionCharges?.walletFundingCharge,
+      baseAmount: normalizedAmount,
+    });
     const totalAmount = Math.round((normalizedAmount + walletFundingCharge) * 100) / 100;
     const paystackAmount = Math.round(totalAmount * 100);
 

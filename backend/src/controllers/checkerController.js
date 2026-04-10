@@ -9,6 +9,7 @@ const topzaApi = require('../utils/topzaApi');
 const { resolvePlanPrice, hasAnyConfiguredPrice, toPriceNumber } = require('../utils/planPricing');
 const { creditCommissionForOrder } = require('../services/commissionService');
 const { processRefund } = require('../utils/refund');
+const { calculateDataPurchaseCharge } = require('../utils/transactionCharges');
 const axios = require('axios');
 
 const allowedCheckerTypes = ['WAEC', 'NECO', 'JAMB', 'BECE'];
@@ -569,7 +570,13 @@ exports.buyChecker = async (req, res) => {
 
     const reference = 'CHKP' + Date.now() + Math.random().toString(36).slice(2, 9).toUpperCase();
 
-    const dataPurchaseCharge = Number(settings.transactionCharges?.dataPurchaseCharge) || 0;
+    const dataPurchaseCharge = calculateDataPurchaseCharge({
+      dataPurchaseChargeType: settings.transactionCharges?.dataPurchaseChargeType,
+      dataPurchaseCharge: settings.transactionCharges?.dataPurchaseCharge,
+      isRegisteredUser: true,
+      paymentMethod: 'paystack',
+      baseAmount: price,
+    });
     const totalCheckerAmount = price + dataPurchaseCharge;
 
     const transaction = await Transaction.create({
@@ -1149,7 +1156,13 @@ exports.initializePublicStoreCheckerPurchase = async (req, res) => {
       description: `Guest checker purchase: ${checker.checkerType} (Store: ${store.name})`,
     });
 
-    const dataPurchaseCharge = Number(settings.transactionCharges?.dataPurchaseCharge) || 0;
+    const dataPurchaseCharge = calculateDataPurchaseCharge({
+      dataPurchaseChargeType: settings.transactionCharges?.dataPurchaseChargeType,
+      dataPurchaseCharge: settings.transactionCharges?.dataPurchaseCharge,
+      isStoreBuyer: true,
+      paymentMethod: 'paystack',
+      baseAmount: customPrice,
+    });
     const totalCheckerAmount = customPrice + dataPurchaseCharge;
 
     const paystackPayload = {

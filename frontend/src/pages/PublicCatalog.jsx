@@ -9,6 +9,11 @@ import {
 import { io } from 'socket.io-client';
 import { store as storeAPI, publicAPI, checkers as checkersAPI } from '../services/api';
 import { getSocketBaseUrl } from '../utils/apiBaseUrl';
+import {
+    formatChargeDescriptor,
+    getDataPurchaseChargeAmount,
+    parseTransactionCharges,
+} from '../utils/transactionCharges';
 
 export default function PublicCatalog() {
     const { slug } = useParams();
@@ -31,7 +36,7 @@ export default function PublicCatalog() {
     const [showCheckerModal, setShowCheckerModal] = useState(false);
     const [selectedChecker, setSelectedChecker] = useState(null);
     const [networkLogos, setNetworkLogos] = useState({});
-    const [dataPurchaseCharge, setDataPurchaseCharge] = useState(0);
+    const [transactionCharges, setTransactionCharges] = useState(parseTransactionCharges());
     const socketRef = useRef(null);
 
     const getSocialValue = (value) => {
@@ -97,7 +102,7 @@ export default function PublicCatalog() {
             }, {});
             setNetworkLogos(mapped);
 
-            setDataPurchaseCharge(Number(systemSettings?.settings?.transactionCharges?.dataPurchaseCharge) || 0);
+            setTransactionCharges(parseTransactionCharges(systemSettings?.settings?.transactionCharges));
 
             try {
                 const checkerRes = await checkersAPI.getPublicStoreCheckers(slug);
@@ -335,7 +340,7 @@ export default function PublicCatalog() {
                     plan={selectedPlan}
                     store={store}
                     primaryColor={primaryColor}
-                                        dataPurchaseCharge={dataPurchaseCharge}
+                    transactionCharges={transactionCharges}
                     onClose={() => {
                         setShowCheckoutModal(false);
                         setSelectedPlan(null);
@@ -348,6 +353,7 @@ export default function PublicCatalog() {
                     checker={selectedChecker}
                     store={store}
                     primaryColor={primaryColor}
+                    transactionCharges={transactionCharges}
                     onClose={() => {
                         setShowCheckerModal(false);
                         setSelectedChecker(null);
@@ -392,12 +398,20 @@ function InputGroup({ label, value = '', onChange, placeholder = '', type = 'tex
     );
 }
 
-function GuestCheckoutModal({ plan, store, primaryColor, dataPurchaseCharge = 0, onClose }) {
+function GuestCheckoutModal({ plan, store, primaryColor, transactionCharges, onClose }) {
     const [formData, setFormData] = useState({ email: '', phone: '', name: '' });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const paystackRef = useRef(null);
+    const basePrice = Number(plan?.sellingPrice || 0);
+    const dataPurchaseCharge = getDataPurchaseChargeAmount(transactionCharges, basePrice);
+    const totalPaystackAmount = basePrice + dataPurchaseCharge;
+    const chargeDescriptor = formatChargeDescriptor(
+        transactionCharges?.dataPurchaseChargeType,
+        transactionCharges?.dataPurchaseCharge,
+        'GH₵'
+    );
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -493,7 +507,7 @@ function GuestCheckoutModal({ plan, store, primaryColor, dataPurchaseCharge = 0,
                                 <p className="text-[10px] font-bold text-slate-600 uppercase tracking-wider mt-0.5">{plan.network} Network</p>
                             </div>
                             <div className="text-right">
-                                <p className="text-lg font-bold text-slate-900">{formatCurrencyAbbreviated(plan.sellingPrice)}</p>
+                                <p className="text-lg font-bold text-slate-900">{formatCurrencyAbbreviated(basePrice)}</p>
                                 <div className="flex items-center gap-1 mt-0.5 text-green-600">
                                     <ShieldCheck size={10} />
                                     <span className="text-[8px] font-bold uppercase tracking-wider">Verified</span>
@@ -504,11 +518,11 @@ function GuestCheckoutModal({ plan, store, primaryColor, dataPurchaseCharge = 0,
                             <div className="mt-3 pt-3 border-t border-slate-100 space-y-1 text-xs text-slate-500">
                                 <div className="flex justify-between">
                                     <span>Transaction fee</span>
-                                    <span>+GH₵{dataPurchaseCharge.toFixed(2)}</span>
+                                    <span>+GH₵{dataPurchaseCharge.toFixed(2)} ({chargeDescriptor})</span>
                                 </div>
                                 <div className="flex justify-between font-semibold text-slate-700">
                                     <span>Total</span>
-                                    <span>GH₵{(Number(plan.sellingPrice || 0) + dataPurchaseCharge).toFixed(2)}</span>
+                                    <span>GH₵{totalPaystackAmount.toFixed(2)}</span>
                                 </div>
                             </div>
                         )}
@@ -583,18 +597,19 @@ function GuestCheckoutModal({ plan, store, primaryColor, dataPurchaseCharge = 0,
     );
 }
 
-function GuestCheckerCheckoutModal({ checker, store, primaryColor, onClose }) {
+function GuestCheckerCheckoutModal({ checker, store, primaryColor, transactionCharges, onClose }) {
     const [formData, setFormData] = useState({ email: '', phone: '', name: '', skipSms: false });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
-    const [dataPurchaseCharge, setDataPurchaseCharge] = useState(0);
-
-    useEffect(() => {
-        publicAPI.getSystemSettings()
-            .then((res) => setDataPurchaseCharge(Number(res?.settings?.transactionCharges?.dataPurchaseCharge) || 0))
-            .catch(() => {});
-    }, []);
+    const basePrice = Number(checker?.sellingPrice || 0);
+    const dataPurchaseCharge = getDataPurchaseChargeAmount(transactionCharges, basePrice);
+    const totalPaystackAmount = basePrice + dataPurchaseCharge;
+    const chargeDescriptor = formatChargeDescriptor(
+        transactionCharges?.dataPurchaseChargeType,
+        transactionCharges?.dataPurchaseCharge,
+        'GH₵'
+    );
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -681,16 +696,16 @@ function GuestCheckerCheckoutModal({ checker, store, primaryColor, onClose }) {
                 <div className="p-6 space-y-5">
                     <div className="p-4 rounded-xl border border-slate-200 bg-white">
                         <p className="text-xs text-slate-500">Price</p>
-                        <p className="text-2xl font-bold text-slate-900">{formatCurrencyAbbreviated(checker.sellingPrice)}</p>
+                        <p className="text-2xl font-bold text-slate-900">{formatCurrencyAbbreviated(basePrice)}</p>
                         {dataPurchaseCharge > 0 && (
                             <div className="mt-2 space-y-0.5 text-xs text-slate-500 border-t border-slate-100 pt-2">
                                 <div className="flex justify-between">
                                     <span>Transaction fee</span>
-                                    <span>+GH₵{dataPurchaseCharge.toFixed(2)}</span>
+                                    <span>+GH₵{dataPurchaseCharge.toFixed(2)} ({chargeDescriptor})</span>
                                 </div>
                                 <div className="flex justify-between font-semibold text-slate-700">
                                     <span>Total</span>
-                                    <span>GH₵{(Number(checker.sellingPrice || 0) + dataPurchaseCharge).toFixed(2)}</span>
+                                    <span>GH₵{totalPaystackAmount.toFixed(2)}</span>
                                 </div>
                             </div>
                         )}

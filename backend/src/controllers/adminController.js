@@ -2478,7 +2478,13 @@ exports.getPublicSettings = async (req, res) => {
           statusSyncBatchLimit: Number(orderSettings.statusSyncBatchLimit) || 100,
         },
         transactionCharges: {
+          dataPurchaseChargeType: ['fixed', 'percentage'].includes(transactionCharges.dataPurchaseChargeType)
+            ? transactionCharges.dataPurchaseChargeType
+            : 'fixed',
           dataPurchaseCharge: Number(transactionCharges.dataPurchaseCharge) || 0,
+          walletFundingChargeType: ['fixed', 'percentage'].includes(transactionCharges.walletFundingChargeType)
+            ? transactionCharges.walletFundingChargeType
+            : 'fixed',
           walletFundingCharge: Number(transactionCharges.walletFundingCharge) || 0,
         },
       }
@@ -2679,13 +2685,36 @@ exports.updateSystemSettings = async (req, res) => {
     }
 
     if (req.body.transactionCharges) {
-      const { dataPurchaseCharge, walletFundingCharge } = req.body.transactionCharges;
+      const {
+        dataPurchaseChargeType,
+        dataPurchaseCharge,
+        walletFundingChargeType,
+        walletFundingCharge,
+      } = req.body.transactionCharges;
       if (!settings.transactionCharges) settings.transactionCharges = {};
+
+      if (dataPurchaseChargeType !== undefined) {
+        const normalizedType = String(dataPurchaseChargeType || '').trim().toLowerCase();
+        if (!['fixed', 'percentage'].includes(normalizedType)) {
+          return res.status(400).json({ success: false, message: 'dataPurchaseChargeType must be fixed or percentage' });
+        }
+        settings.transactionCharges.dataPurchaseChargeType = normalizedType;
+      }
+
       if (dataPurchaseCharge !== undefined) {
         const v = Number(dataPurchaseCharge);
         if (!Number.isNaN(v) && v >= 0) settings.transactionCharges.dataPurchaseCharge = v;
         else return res.status(400).json({ success: false, message: 'dataPurchaseCharge must be a non-negative number' });
       }
+
+      if (walletFundingChargeType !== undefined) {
+        const normalizedType = String(walletFundingChargeType || '').trim().toLowerCase();
+        if (!['fixed', 'percentage'].includes(normalizedType)) {
+          return res.status(400).json({ success: false, message: 'walletFundingChargeType must be fixed or percentage' });
+        }
+        settings.transactionCharges.walletFundingChargeType = normalizedType;
+      }
+
       if (walletFundingCharge !== undefined) {
         const v = Number(walletFundingCharge);
         if (!Number.isNaN(v) && v >= 0) settings.transactionCharges.walletFundingCharge = v;

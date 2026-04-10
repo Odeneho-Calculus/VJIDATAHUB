@@ -5,6 +5,11 @@ import PurchasePaymentModal from './PurchasePaymentModal';
 import Modal from './Modal';
 import { getNetworkStyles } from '../utils/networkStyles';
 import { formatCurrencyAbbreviated, formatNumberAbbreviated } from '../utils/formatCurrency';
+import {
+  formatChargeDescriptor,
+  getDataPurchaseChargeAmount,
+  parseTransactionCharges,
+} from '../utils/transactionCharges';
 
 export default function PurchaseModal({ bundle, isOpen, onClose, userBalance, user, onPurchaseSuccess }) {
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -16,7 +21,7 @@ export default function PurchaseModal({ bundle, isOpen, onClose, userBalance, us
   const [paymentData, setPaymentData] = useState(null);
   const [businessStatus, setBusinessStatus] = useState(null);
   const [checkingBusinessStatus, setCheckingBusinessStatus] = useState(false);
-  const [dataPurchaseCharge, setDataPurchaseCharge] = useState(0);
+  const [transactionCharges, setTransactionCharges] = useState(parseTransactionCharges());
 
   // Helper function to check if user qualifies for agent pricing
   const isQualifiedAgent = () => {
@@ -61,9 +66,7 @@ export default function PurchaseModal({ bundle, isOpen, onClose, userBalance, us
           setBusinessStatus(null);
           setError(statusRes.message || 'Failed to check business status');
         }
-        if (settingsRes?.settings?.transactionCharges?.dataPurchaseCharge !== undefined) {
-          setDataPurchaseCharge(Number(settingsRes.settings.transactionCharges.dataPurchaseCharge) || 0);
-        }
+        setTransactionCharges(parseTransactionCharges(settingsRes?.settings?.transactionCharges));
       } catch (err) {
         console.error('Failed to check business status:', err);
         setBusinessStatus(null);
@@ -147,6 +150,13 @@ export default function PurchaseModal({ bundle, isOpen, onClose, userBalance, us
   };
 
   const displayPrice = getDisplayPrice();
+  const dataPurchaseCharge = getDataPurchaseChargeAmount(transactionCharges, displayPrice);
+  const totalPaystackAmount = displayPrice + dataPurchaseCharge;
+  const chargeDescriptor = formatChargeDescriptor(
+    transactionCharges.dataPurchaseChargeType,
+    transactionCharges.dataPurchaseCharge,
+    'GHS'
+  );
   const canAfford = userBalance >= displayPrice;
 
   return (
@@ -285,12 +295,12 @@ export default function PurchaseModal({ bundle, isOpen, onClose, userBalance, us
               </div>
               <div className="flex items-center justify-between text-[11px] font-bold text-amber-600">
                 <span>Service charge</span>
-                <span>+ {formatCurrencyAbbreviated(dataPurchaseCharge)}</span>
+                <span>+ {formatCurrencyAbbreviated(dataPurchaseCharge)} ({chargeDescriptor})</span>
               </div>
               <div className="h-px bg-slate-200" />
               <div className="flex items-center justify-between text-xs font-black text-slate-900">
                 <span>Total charged</span>
-                <span>{formatCurrencyAbbreviated(displayPrice + dataPurchaseCharge)}</span>
+                <span>{formatCurrencyAbbreviated(totalPaystackAmount)}</span>
               </div>
             </div>
           )}
@@ -317,7 +327,7 @@ export default function PurchaseModal({ bundle, isOpen, onClose, userBalance, us
                 <>
                   <Zap size={16} strokeWidth={2.5} />
                   {paymentMethod === 'paystack' && dataPurchaseCharge > 0
-                    ? `Pay ${formatCurrencyAbbreviated(displayPrice + dataPurchaseCharge)}`
+                    ? `Pay ${formatCurrencyAbbreviated(totalPaystackAmount)}`
                     : `Authorize ${formatCurrencyAbbreviated(displayPrice)}`}
                 </>
               )}

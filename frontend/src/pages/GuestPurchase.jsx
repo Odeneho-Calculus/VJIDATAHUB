@@ -4,6 +4,11 @@ import { ShoppingCart, Wifi, Phone, Mail, User, ArrowLeft, Layout, Zap, Check, A
 import { guest, publicAPI } from '../services/api';
 import { formatCurrencyAbbreviated } from '../utils/formatCurrency';
 import { getNetworkStyles } from '../utils/networkStyles';
+import {
+  formatChargeDescriptor,
+  getDataPurchaseChargeAmount,
+  parseTransactionCharges,
+} from '../utils/transactionCharges';
 
 export default function GuestPurchase() {
   const navigate = useNavigate();
@@ -17,7 +22,7 @@ export default function GuestPurchase() {
   const [submitting, setSubmitting] = useState(false);
   const [businessStatus, setBusinessStatus] = useState(null);
   const [checkingBusinessStatus, setCheckingBusinessStatus] = useState(false);
-  const [dataPurchaseCharge, setDataPurchaseCharge] = useState(0);
+  const [transactionCharges, setTransactionCharges] = useState(parseTransactionCharges());
 
   const [formData, setFormData] = useState({
     phoneNumber: '',
@@ -50,9 +55,7 @@ export default function GuestPurchase() {
         } else {
           setBusinessStatus(null);
         }
-        if (settingsRes?.settings?.transactionCharges?.dataPurchaseCharge !== undefined) {
-          setDataPurchaseCharge(Number(settingsRes.settings.transactionCharges.dataPurchaseCharge) || 0);
-        }
+        setTransactionCharges(parseTransactionCharges(settingsRes?.settings?.transactionCharges));
       } catch (err) {
         console.error('Failed to check business status:', err);
         setBusinessStatus(null);
@@ -196,6 +199,14 @@ export default function GuestPurchase() {
 
   if (showCheckout && selectedPlan) {
     const styles = getNetworkStyles(selectedPlan.network);
+    const selectedPlanPrice = Number(selectedPlan.price || 0);
+    const dataPurchaseCharge = getDataPurchaseChargeAmount(transactionCharges, selectedPlanPrice);
+    const totalPaystackAmount = selectedPlanPrice + dataPurchaseCharge;
+    const chargeDescriptor = formatChargeDescriptor(
+      transactionCharges.dataPurchaseChargeType,
+      transactionCharges.dataPurchaseCharge,
+      'GHS'
+    );
     const selectedPlanDataSize = selectedPlan?.dataSize
       || selectedPlan?.dataAmount
       || (selectedPlan?.dataSizeMB ? `${selectedPlan.dataSizeMB}GB` : '')
@@ -276,16 +287,16 @@ export default function GuestPurchase() {
                   <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 space-y-1.5">
                     <div className="flex items-center justify-between text-[11px] font-bold text-slate-500">
                       <span>Plan price</span>
-                      <span>GHS {selectedPlan.price.toFixed(2)}</span>
+                      <span>GHS {selectedPlanPrice.toFixed(2)}</span>
                     </div>
                     <div className="flex items-center justify-between text-[11px] font-bold text-amber-600">
                       <span>Service charge</span>
-                      <span>+ GHS {dataPurchaseCharge.toFixed(2)}</span>
+                      <span>+ GHS {dataPurchaseCharge.toFixed(2)} ({chargeDescriptor})</span>
                     </div>
                     <div className="h-px bg-slate-200" />
                     <div className="flex items-center justify-between text-xs font-black text-slate-900">
                       <span>Total charged</span>
-                      <span>GHS {(selectedPlan.price + dataPurchaseCharge).toFixed(2)}</span>
+                      <span>GHS {totalPaystackAmount.toFixed(2)}</span>
                     </div>
                   </div>
                 )}
@@ -359,8 +370,8 @@ export default function GuestPurchase() {
                     : submitting
                     ? 'Processing...'
                     : dataPurchaseCharge > 0
-                      ? `Pay GHS ${(selectedPlan.price + dataPurchaseCharge).toFixed(2)}`
-                      : `Pay GHS ${selectedPlan.price.toFixed(2)}`
+                      ? `Pay GHS ${totalPaystackAmount.toFixed(2)}`
+                      : `Pay GHS ${selectedPlanPrice.toFixed(2)}`
                   }
                 </button>
               </form>

@@ -11,6 +11,7 @@ const digimallApi = require('../utils/digimallApi');
 const topzaApi = require('../utils/topzaApi');
 const { isValidNetworkNumber } = require('../utils/validation');
 const { isPositivePrice } = require('../utils/planPricing');
+const { calculateDataPurchaseCharge } = require('../utils/transactionCharges');
 
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 const PAYSTACK_BASE_URL = process.env.PAYSTACK_BASE_URL || 'https://api.paystack.co';
@@ -514,7 +515,13 @@ exports.initializeGuestPurchase = async (req, res) => {
 
     // Initialize Paystack payment
     try {
-      const dataPurchaseCharge = Number(settings.transactionCharges?.dataPurchaseCharge) || 0;
+      const dataPurchaseCharge = calculateDataPurchaseCharge({
+        dataPurchaseChargeType: settings.transactionCharges?.dataPurchaseChargeType,
+        dataPurchaseCharge: settings.transactionCharges?.dataPurchaseCharge,
+        isGuest: true,
+        paymentMethod: 'paystack',
+        baseAmount: plan.sellingPrice,
+      });
       const totalAmount = plan.sellingPrice + dataPurchaseCharge;
 
       const paystackPayload = {

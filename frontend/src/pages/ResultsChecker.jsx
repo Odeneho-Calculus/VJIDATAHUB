@@ -5,6 +5,11 @@ import { useAuth } from '../hooks/useAuth';
 import UserLayout from '../components/UserLayout';
 import AgentLayout from '../components/AgentLayout';
 import PurchasePaymentModal from '../components/PurchasePaymentModal';
+import {
+  formatChargeDescriptor,
+  getDataPurchaseChargeAmount,
+  parseTransactionCharges,
+} from '../utils/transactionCharges';
 
 export default function ResultsChecker() {
   const { user, updateBalance } = useAuth();
@@ -18,7 +23,7 @@ export default function ResultsChecker() {
   const [message, setMessage] = useState({ type: '', text: '' });
   const [paymentData, setPaymentData] = useState(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [dataPurchaseCharge, setDataPurchaseCharge] = useState(0);
+  const [transactionCharges, setTransactionCharges] = useState(parseTransactionCharges());
 
   const Layout = user?.role === 'agent' ? AgentLayout : UserLayout;
 
@@ -37,7 +42,7 @@ export default function ResultsChecker() {
       ]);
       setProducts(productsRes?.data || []);
       setHistory(historyRes?.data || []);
-      setDataPurchaseCharge(Number(settingsRes?.settings?.transactionCharges?.dataPurchaseCharge) || 0);
+      setTransactionCharges(parseTransactionCharges(settingsRes?.settings?.transactionCharges));
     } catch (err) {
       showMessage('error', err.message || 'Failed to load result checker data');
     } finally {
@@ -69,9 +74,11 @@ export default function ResultsChecker() {
       });
 
       if (paymentMethod === 'paystack') {
+        const basePrice = Number(product.finalPrice || 0);
+        const dataPurchaseCharge = getDataPurchaseChargeAmount(transactionCharges, basePrice);
         setPaymentData({
           ...response.data,
-          amount: Number(product.finalPrice || 0) + dataPurchaseCharge,
+          amount: basePrice + dataPurchaseCharge,
         });
         setShowPaymentModal(true);
         return;
@@ -171,19 +178,30 @@ export default function ResultsChecker() {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 p-4">
                 {products.map((product) => (
+                  (() => {
+                    const basePrice = Number(product.finalPrice || 0);
+                    const dataPurchaseCharge = getDataPurchaseChargeAmount(transactionCharges, basePrice);
+                    const totalPaystackAmount = basePrice + dataPurchaseCharge;
+                    const chargeDescriptor = formatChargeDescriptor(
+                      transactionCharges.dataPurchaseChargeType,
+                      transactionCharges.dataPurchaseCharge,
+                      'GHS'
+                    );
+
+                    return (
                   <div key={product._id} className="border border-slate-200 rounded-xl p-4 bg-slate-50/40">
                     <p className="font-semibold text-slate-900">{product.displayName || product.checkerType}</p>
                     <p className="text-xs text-slate-500 mt-0.5">{product.checkerType}</p>
-                    <p className="text-xl font-bold text-slate-900 mt-2">GHc {Number(product.finalPrice || 0).toFixed(2)}</p>
+                    <p className="text-xl font-bold text-slate-900 mt-2">GHc {basePrice.toFixed(2)}</p>
                     {paymentMethod === 'paystack' && dataPurchaseCharge > 0 && (
                       <div className="mt-1.5 space-y-0.5 text-xs text-slate-500">
                         <div className="flex justify-between">
                           <span>Transaction fee</span>
-                          <span>+GHc {dataPurchaseCharge.toFixed(2)}</span>
+                          <span>+GHc {dataPurchaseCharge.toFixed(2)} ({chargeDescriptor})</span>
                         </div>
                         <div className="flex justify-between font-semibold text-slate-700">
                           <span>Total</span>
-                          <span>GHc {(Number(product.finalPrice || 0) + dataPurchaseCharge).toFixed(2)}</span>
+                          <span>GHc {totalPaystackAmount.toFixed(2)}</span>
                         </div>
                       </div>
                     )}
@@ -195,6 +213,8 @@ export default function ResultsChecker() {
                       {buyingId === product._id ? 'Processing...' : 'Buy Checker'}
                     </button>
                   </div>
+                    );
+                  })()
                 ))}
               </div>
             )}

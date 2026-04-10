@@ -41,7 +41,9 @@ export default function AdminPlatformSettings() {
     email: '',
     duplicateOrderCooldownMinutes: 10,
     statusUpdateMethod: 'cron',
+    dataPurchaseChargeType: 'fixed',
     dataPurchaseCharge: 0,
+    walletFundingChargeType: 'fixed',
     walletFundingCharge: 0,
   });
 
@@ -81,7 +83,9 @@ export default function AdminPlatformSettings() {
         email: cd.email || '',
         duplicateOrderCooldownMinutes: response?.settings?.orderSettings?.duplicateOrderCooldownMinutes || 10,
         statusUpdateMethod: response?.settings?.orderSettings?.statusUpdateMethod || 'cron',
+        dataPurchaseChargeType: response?.settings?.transactionCharges?.dataPurchaseChargeType || 'fixed',
         dataPurchaseCharge: response?.settings?.transactionCharges?.dataPurchaseCharge ?? 0,
+        walletFundingChargeType: response?.settings?.transactionCharges?.walletFundingChargeType || 'fixed',
         walletFundingCharge: response?.settings?.transactionCharges?.walletFundingCharge ?? 0,
       });
       setError('');
@@ -112,7 +116,9 @@ export default function AdminPlatformSettings() {
           statusUpdateMethod: formData.statusUpdateMethod || 'cron',
         },
         transactionCharges: {
+          dataPurchaseChargeType: formData.dataPurchaseChargeType || 'fixed',
           dataPurchaseCharge: Number(formData.dataPurchaseCharge) || 0,
+          walletFundingChargeType: formData.walletFundingChargeType || 'fixed',
           walletFundingCharge: Number(formData.walletFundingCharge) || 0,
         },
       });
@@ -510,7 +516,7 @@ export default function AdminPlatformSettings() {
                 <div className="px-5 py-4 border-b border-slate-100">
                   <h2 className="text-sm font-semibold text-slate-800">Transaction Charges</h2>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Optional flat-fee charged on top of the data plan price at checkout (in GHS). Set to 0 to disable.
+                    Configure transaction charges as either fixed GHS fees or percentages. Set value to 0 to disable.
                   </p>
                 </div>
                 <div className="p-5 space-y-4">
@@ -518,37 +524,61 @@ export default function AdminPlatformSettings() {
                     <label className="block text-xs font-medium text-slate-600 mb-1.5">
                       <span className="flex items-center gap-1.5">
                         <Settings2 size={13} />
-                        Data Purchase Charge (GHS)
+                        Data Purchase Charge
                       </span>
                     </label>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      name="dataPurchaseCharge"
-                      value={formData.dataPurchaseCharge}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition"
-                    />
-                    <p className="text-[11px] text-slate-400 mt-1">Applied on all Paystack data purchases (guests, store buyers, and registered users paying via card/Momo). Not charged on wallet payments.</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-2">
+                      <select
+                        name="dataPurchaseChargeType"
+                        value={formData.dataPurchaseChargeType}
+                        onChange={handleChange}
+                        className="sm:col-span-1 px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition"
+                      >
+                        <option value="fixed">Fixed (GHS)</option>
+                        <option value="percentage">Percentage (%)</option>
+                      </select>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        name="dataPurchaseCharge"
+                        value={formData.dataPurchaseCharge}
+                        onChange={handleChange}
+                        className="sm:col-span-2 w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition"
+                      />
+                    </div>
+                    <p className="text-[11px] text-slate-400 mt-1">
+                      Applied on all Paystack data/checker purchases (guests, store buyers, and registered users paying via card/Momo). {formData.dataPurchaseChargeType === 'percentage' ? 'Example: 2.5 means 2.5% of order amount.' : 'Example: 0.20 means GHc 0.20 per transaction.'} Not charged on wallet data/checker payments.
+                    </p>
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-1.5">
                       <span className="flex items-center gap-1.5">
                         <Settings2 size={13} />
-                        Wallet Funding Charge (GHS)
+                        Wallet Funding Charge
                       </span>
                     </label>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      name="walletFundingCharge"
-                      value={formData.walletFundingCharge}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition"
-                    />
-                    <p className="text-[11px] text-slate-400 mt-1">Applied every time a user funds their wallet via Paystack. Only the base amount is credited to the wallet.</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-2">
+                      <select
+                        name="walletFundingChargeType"
+                        value={formData.walletFundingChargeType}
+                        onChange={handleChange}
+                        className="sm:col-span-1 px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition"
+                      >
+                        <option value="fixed">Fixed (GHS)</option>
+                        <option value="percentage">Percentage (%)</option>
+                      </select>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        name="walletFundingCharge"
+                        value={formData.walletFundingCharge}
+                        onChange={handleChange}
+                        className="sm:col-span-2 w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition"
+                      />
+                    </div>
+                    <p className="text-[11px] text-slate-400 mt-1">Applied every time a user funds their wallet via Paystack. {formData.walletFundingChargeType === 'percentage' ? 'Example: 1.5 means 1.5% of funding amount.' : 'Only fixed GHS value is added.'} Only the base amount is credited to the wallet.</p>
                   </div>
                 </div>
               </div>

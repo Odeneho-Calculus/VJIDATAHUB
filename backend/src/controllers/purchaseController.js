@@ -13,6 +13,7 @@ const { createNotification } = require('./notificationController');
 const { isValidNetworkNumber } = require('../utils/validation');
 const { processRefund } = require('../utils/refund');
 const { resolvePlanPrice } = require('../utils/planPricing');
+const { calculateDataPurchaseCharge } = require('../utils/transactionCharges');
 
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 const PAYSTACK_BASE_URL = process.env.PAYSTACK_BASE_URL || 'https://api.paystack.co';
@@ -263,7 +264,13 @@ exports.buyDataBundle = async (req, res) => {
     if (paymentMethod === 'wallet') {
       return handleWalletPayment(req, res, user, plan, order, activeProvider);
     } else if (paymentMethod === 'paystack') {
-      const dataPurchaseCharge = Number(settings.transactionCharges?.dataPurchaseCharge) || 0;
+      const dataPurchaseCharge = calculateDataPurchaseCharge({
+        dataPurchaseChargeType: settings.transactionCharges?.dataPurchaseChargeType,
+        dataPurchaseCharge: settings.transactionCharges?.dataPurchaseCharge,
+        isRegisteredUser: true,
+        paymentMethod,
+        baseAmount: plan.sellingPrice,
+      });
       return handlePaystackPayment(req, res, user, plan, order, activeProvider, dataPurchaseCharge);
     }
   } catch (error) {

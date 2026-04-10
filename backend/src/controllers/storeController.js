@@ -14,6 +14,7 @@ const TopzaOffer = require('../models/TopzaOffer');
 const Transaction = require('../models/Transaction');
 const { creditCommissionForOrder, getOrCreateLedger, moveToPending } = require('../services/commissionService');
 const { isPositivePrice, resolvePlanPrice } = require('../utils/planPricing');
+const { calculateDataPurchaseCharge } = require('../utils/transactionCharges');
 
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 const PAYSTACK_BASE_URL = process.env.PAYSTACK_BASE_URL || 'https://api.paystack.co';
@@ -1557,7 +1558,13 @@ exports.purchasePublicStoreBundle = async (req, res) => {
     });
 
     const sysSettings = await SystemSettings.getSettings();
-    const dataPurchaseCharge = Number(sysSettings.transactionCharges?.dataPurchaseCharge) || 0;
+    const dataPurchaseCharge = calculateDataPurchaseCharge({
+      dataPurchaseChargeType: sysSettings.transactionCharges?.dataPurchaseChargeType,
+      dataPurchaseCharge: sysSettings.transactionCharges?.dataPurchaseCharge,
+      isStoreBuyer: true,
+      paymentMethod: 'paystack',
+      baseAmount: storePlan.customPrice,
+    });
     const storeTotal = storePlan.customPrice + dataPurchaseCharge;
 
     const paystackPayload = {

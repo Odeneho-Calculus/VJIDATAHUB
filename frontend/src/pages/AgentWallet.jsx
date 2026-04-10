@@ -22,6 +22,11 @@ import PaymentModal from '../components/PaymentModal';
 import AgentLayout from '../components/AgentLayout';
 import Modal from '../components/Modal';
 import { wallet as walletAPI, publicAPI } from '../services/api';
+import {
+  formatChargeDescriptor,
+  getWalletFundingChargeAmount,
+  parseTransactionCharges,
+} from '../utils/transactionCharges';
 
 export default function AgentWallet() {
   const { user, refreshUser } = useAuth();
@@ -39,7 +44,7 @@ export default function AgentWallet() {
   const [showTxDetails, setShowTxDetails] = useState(false);
   const [txPage, setTxPage] = useState(1);
   const [txHasMore, setTxHasMore] = useState(false);
-  const [walletFundingCharge, setWalletFundingCharge] = useState(0);
+  const [transactionCharges, setTransactionCharges] = useState(parseTransactionCharges());
 
   const TX_LIMIT = 10;
 
@@ -110,9 +115,7 @@ export default function AgentWallet() {
           setBusinessStatus(statusRes.data);
         }
 
-        if (settingsRes?.settings?.transactionCharges?.walletFundingCharge !== undefined) {
-          setWalletFundingCharge(Number(settingsRes.settings.transactionCharges.walletFundingCharge) || 0);
-        }
+        setTransactionCharges(parseTransactionCharges(settingsRes?.settings?.transactionCharges));
       } catch (err) {
         console.error('Failed to check business status:', err);
       }
@@ -126,6 +129,14 @@ export default function AgentWallet() {
   }, [txPage]);
 
   const quickAmounts = [10, 20, 50, 100, 200, 500];
+  const parsedAmount = Number(amount || 0);
+  const walletFundingCharge = getWalletFundingChargeAmount(transactionCharges, parsedAmount);
+  const totalAmountCharged = parsedAmount + walletFundingCharge;
+  const walletChargeDescriptor = formatChargeDescriptor(
+    transactionCharges.walletFundingChargeType,
+    transactionCharges.walletFundingCharge,
+    'GHS'
+  );
 
   const handleTopUp = async () => {
     const parsedAmount = Number.parseFloat(amount);
@@ -315,20 +326,20 @@ export default function AgentWallet() {
                   </div>
                 </div>
 
-                {walletFundingCharge > 0 && Number(amount || 0) > 0 && (
+                {walletFundingCharge > 0 && parsedAmount > 0 && (
                   <div className="mb-4 sm:mb-6 rounded-lg sm:rounded-xl border border-slate-100 bg-slate-50 px-3.5 sm:px-4 py-3 space-y-1.5">
                     <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
                       <span>Amount to credit</span>
-                      <span>GHS {Number(amount || 0).toFixed(2)}</span>
+                      <span>GHS {parsedAmount.toFixed(2)}</span>
                     </div>
                     <div className="flex items-center justify-between text-xs font-semibold text-amber-600">
                       <span>Service charge</span>
-                      <span>+ GHS {walletFundingCharge.toFixed(2)}</span>
+                      <span>+ GHS {walletFundingCharge.toFixed(2)} ({walletChargeDescriptor})</span>
                     </div>
                     <div className="h-px bg-slate-200" />
                     <div className="flex items-center justify-between text-sm font-bold text-slate-900">
                       <span>Total charged</span>
-                      <span>GHS {(Number(amount || 0) + walletFundingCharge).toFixed(2)}</span>
+                      <span>GHS {totalAmountCharged.toFixed(2)}</span>
                     </div>
                   </div>
                 )}

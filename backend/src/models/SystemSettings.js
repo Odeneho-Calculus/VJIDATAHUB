@@ -41,10 +41,20 @@ const systemSettingsSchema = new mongoose.Schema(
       },
     },
     transactionCharges: {
+      dataPurchaseChargeType: {
+        type: String,
+        enum: ['fixed', 'percentage'],
+        default: 'fixed',
+      },
       dataPurchaseCharge: {
         type: Number,
         default: 0,
         min: 0,
+      },
+      walletFundingChargeType: {
+        type: String,
+        enum: ['fixed', 'percentage'],
+        default: 'fixed',
       },
       walletFundingCharge: {
         type: Number,
@@ -117,9 +127,15 @@ systemSettingsSchema.statics.getSettings = async function () {
   if (!settings.transactionCharges) {
     settings.transactionCharges = {};
   }
+  if (!['fixed', 'percentage'].includes(settings.transactionCharges.dataPurchaseChargeType)) {
+    settings.transactionCharges.dataPurchaseChargeType = 'fixed';
+  }
   const dataPurchaseCharge = Number(settings.transactionCharges.dataPurchaseCharge);
   if (Number.isNaN(dataPurchaseCharge) || dataPurchaseCharge < 0) {
     settings.transactionCharges.dataPurchaseCharge = 0;
+  }
+  if (!['fixed', 'percentage'].includes(settings.transactionCharges.walletFundingChargeType)) {
+    settings.transactionCharges.walletFundingChargeType = 'fixed';
   }
   const walletFundingCharge = Number(settings.transactionCharges.walletFundingCharge);
   if (Number.isNaN(walletFundingCharge) || walletFundingCharge < 0) {
