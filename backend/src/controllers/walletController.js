@@ -13,6 +13,16 @@ const paystackAPI = axios.create({
   },
 });
 
+const normalizeCurrencyAmount = (value) => {
+  const parsedValue = Number.parseFloat(value);
+
+  if (!Number.isFinite(parsedValue) || parsedValue <= 0) {
+    return null;
+  }
+
+  return Math.round(parsedValue * 100) / 100;
+};
+
 exports.getBalance = async (req, res) => {
   try {
     const user = await User.findById(req.userId);
@@ -27,9 +37,9 @@ exports.getBalance = async (req, res) => {
 
 exports.initializePayment = async (req, res) => {
   try {
-    const { amount } = req.body;
+    const normalizedAmount = normalizeCurrencyAmount(req.body?.amount);
 
-    if (!amount || amount <= 0) {
+    if (normalizedAmount === null) {
       return res.status(400).json({
         success: false,
         message: 'Invalid amount',
@@ -45,7 +55,7 @@ exports.initializePayment = async (req, res) => {
     const recentPending = await Transaction.findOne({
       userId: req.userId,
       type: 'wallet_topup',
-      amount,
+      amount: normalizedAmount,
       status: 'pending',
       createdAt: { $gt: new Date(Date.now() - 30 * 1000) }
     });
@@ -62,22 +72,23 @@ exports.initializePayment = async (req, res) => {
     const reference = 'TXN' + Date.now() + Math.random().toString(36).substr(2, 9);
 
     const sysSettings = await SystemSettings.getSettings();
-    const walletFundingCharge = Number(sysSettings.transactionCharges?.walletFundingCharge) || 0;
-    const totalAmount = amount + walletFundingCharge;
+    const walletFundingCharge = Math.round(((Number(sysSettings.transactionCharges?.walletFundingCharge) || 0) * 100)) / 100;
+    const totalAmount = Math.round((normalizedAmount + walletFundingCharge) * 100) / 100;
+    const paystackAmount = Math.round(totalAmount * 100);
 
     const transaction = await Transaction.create({
       userId: req.userId,
       type: 'wallet_topup',
-      amount,
+      amount: normalizedAmount,
       reference,
       status: 'pending',
       paymentStatus: 'pending',
-      description: `Wallet top-up of ${amount}`,
+      description: `Wallet top-up of ${normalizedAmount.toFixed(2)}`,
     });
 
     const paystackPayload = {
       email: user.email,
-      amount: totalAmount * 100,
+      amount: paystackAmount,
       reference,
       metadata: {
         userId: req.userId.toString(),

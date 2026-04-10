@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { formatCurrencyAbbreviated } from '../utils/formatCurrency';
+import { formatCurrency, formatCurrencyAbbreviated } from '../utils/formatCurrency';
 import {
   CreditCard,
   Loader,
@@ -10,8 +10,13 @@ import {
   AlertCircle,
   CheckCircle2,
   Layout,
+  History,
+  Eye,
+  ArrowUpCircle,
+  ArrowDownCircle,
 } from 'lucide-react';
 import PaymentModal from '../components/PaymentModal';
+import Modal from '../components/Modal';
 import { wallet, publicAPI } from '../services/api';
 import UserLayout from '../components/UserLayout';
 
@@ -26,6 +31,71 @@ export default function TopUp() {
   const [businessStatus, setBusinessStatus] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [walletFundingCharge, setWalletFundingCharge] = useState(0);
+  const [transactions, setTransactions] = useState([]);
+  const [txLoading, setTxLoading] = useState(false);
+  const [txTotal, setTxTotal] = useState(0);
+  const [txPage, setTxPage] = useState(1);
+  const [txHasMore, setTxHasMore] = useState(false);
+  const [selectedTx, setSelectedTx] = useState(null);
+  const [showTxDetails, setShowTxDetails] = useState(false);
+
+  const TX_LIMIT = 10;
+
+  const typeLabelMap = {
+    wallet_topup: 'Wallet Funding',
+    wallet_funding: 'Wallet Funding',
+    data_purchase: 'Data Purchase',
+    checker_purchase: 'Checker Purchase',
+    refund: 'Refund',
+    purchase_refund: 'Refund',
+    referral_bonus: 'Referral Bonus',
+    admin_adjustment: 'Admin Adjustment',
+  };
+
+  const statusBadgeMap = {
+    completed: 'bg-emerald-100 text-emerald-700',
+    successful: 'bg-emerald-100 text-emerald-700',
+    processing: 'bg-blue-100 text-blue-700',
+    pending: 'bg-amber-100 text-amber-700',
+    failed: 'bg-rose-100 text-rose-700',
+    cancelled: 'bg-slate-100 text-slate-700',
+  };
+
+  const normalizeStatus = (value) => String(value || '').trim().toLowerCase();
+
+  const getResolvedPaymentStatus = (tx) => {
+    if (tx?.paymentStatus) return normalizeStatus(tx.paymentStatus);
+    const raw = normalizeStatus(tx?.status);
+    if (raw === 'completed' || raw === 'successful' || raw === 'success') return 'completed';
+    if (raw === 'failed' || raw === 'cancelled') return 'failed';
+    return 'pending';
+  };
+
+  const getResolvedTransactionStatus = (tx) => {
+    const txType = normalizeStatus(tx?.type);
+    if (['data_purchase', 'checker_purchase'].includes(txType)) {
+      return normalizeStatus(tx?.status) || 'pending';
+    }
+    return getResolvedPaymentStatus(tx);
+  };
+
+  const isCreditTransaction = (tx) =>
+    ['wallet_topup', 'wallet_funding', 'refund', 'purchase_refund', 'referral_bonus'].includes(tx?.type);
+
+  const fetchTransactions = async (page = 1) => {
+    try {
+      setTxLoading(true);
+      const offset = (page - 1) * TX_LIMIT;
+      const res = await wallet.getTransactions(TX_LIMIT, offset);
+      setTransactions(res?.transactions || []);
+      setTxHasMore(!!(res?.pagination?.hasMore));
+      setTxTotal(res?.pagination?.total || 0);
+    } catch (err) {
+      console.error('Failed to fetch wallet transactions:', err);
+    } finally {
+      setTxLoading(false);
+    }
+  };
 
   const quickAmounts = [10, 20, 50, 100, 200, 500];
 
@@ -52,15 +122,20 @@ export default function TopUp() {
     checkStatus();
   }, []);
 
+  useEffect(() => {
+    fetchTransactions(txPage);
+  }, [txPage]);
+
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await refreshUser();
-    await checkStatus();
+    await Promise.all([refreshUser(), checkStatus(), fetchTransactions(txPage)]);
     setIsRefreshing(false);
   };
 
   const handleTopUp = async () => {
-    if (!amount || Number(amount) <= 0) {
+    const parsedAmount = Number.parseFloat(amount);
+
+    if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
       setError('Please enter a valid amount');
       return;
     }
@@ -74,7 +149,7 @@ export default function TopUp() {
     setError(null);
 
     try {
-      const result = await wallet.initializePayment({ amount: parseFloat(amount) });
+      const result = await wallet.initializePayment({ amount: parsedAmount });
 
       if (result.success) {
         setPaymentData(result.data);
@@ -90,9 +165,11 @@ export default function TopUp() {
   };
 
   const handlePaymentSuccess = async (result) => {
-    setSuccess(`Successfully topped up GHS ${amount}! Your new balance is GHS ${result.balance}`);
+    setSuccess(`Successfully topped up GHS ${Number.parseFloat(amount).toFixed(2)}! Your new balance is GHS ${Number(result.balance || 0).toFixed(2)}`);
     setAmount('');
     await refreshUser();
+    await fetchTransactions(1);
+    setTxPage(1);
     setTimeout(() => setSuccess(null), 5000);
   };
 
@@ -217,7 +294,7 @@ export default function TopUp() {
                       }}
                       placeholder="Enter amount"
                       disabled={loading}
-                      min="1"
+                      min="0.01"
                       step="0.01"
                       className="flex-1 px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-lg sm:rounded-xl border border-slate-200 text-sm bg-slate-50 text-slate-900 disabled:opacity-50 disabled:cursor-not-allowed"
                       style={{
@@ -284,8 +361,214 @@ export default function TopUp() {
               </div>
             </div>
           </div>
+
+          {/* Transaction History */}
+          <div className="bg-white rounded-xl sm:rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="px-4 sm:px-5 py-3.5 sm:py-4 border-b border-slate-100 flex items-center justify-between gap-3">
+              <h3 className="font-bold text-sm sm:text-base text-slate-900 flex items-center gap-2">
+                <History size={18} className="text-primary-600" />
+                Wallet Transaction History
+              </h3>
+              <span className="text-xs font-semibold text-slate-600">Page {txPage} &bull; {txTotal} total</span>
+            </div>
+
+            {txLoading ? (
+              <div className="py-10 flex items-center justify-center text-slate-600">
+                <Loader size={18} className="animate-spin mr-2" />
+                Loading transactions...
+              </div>
+            ) : transactions.length === 0 ? (
+              <div className="py-10 text-center text-slate-500 text-sm">No wallet transactions yet.</div>
+            ) : (
+              <>
+                {/* Desktop table */}
+                <div className="hidden md:block overflow-x-auto">
+                  <table className="w-full min-w-[660px]">
+                    <thead className="bg-slate-50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Reference</th>
+                        <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Type</th>
+                        <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Amount</th>
+                        <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Payment Status</th>
+                        <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Transaction Status</th>
+                        <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Date</th>
+                        <th className="px-4 py-3 text-right text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {transactions.map((tx) => {
+                        const isCredit = isCreditTransaction(tx);
+                        const amountTone = isCredit ? 'text-emerald-600' : 'text-rose-600';
+                        const amountIcon = isCredit ? <ArrowUpCircle size={14} /> : <ArrowDownCircle size={14} />;
+                        return (
+                          <tr key={tx._id} className="hover:bg-slate-50 transition-colors">
+                            <td className="px-4 py-3 text-sm font-semibold text-slate-900 whitespace-nowrap">{tx.reference || '-'}</td>
+                            <td className="px-4 py-3 text-sm text-slate-700 whitespace-nowrap">{typeLabelMap[tx.type] || tx.type || '-'}</td>
+                            <td className={`px-4 py-3 text-sm font-bold ${amountTone} whitespace-nowrap`}>
+                              <span className="inline-flex items-center gap-1">
+                                {amountIcon}
+                                {isCredit ? '+' : '-'}{formatCurrency(Math.abs(Number(tx.amount || 0)))}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap">
+                              <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${statusBadgeMap[getResolvedPaymentStatus(tx)] || 'bg-slate-100 text-slate-700'}`}>
+                                {getResolvedPaymentStatus(tx)}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap">
+                              <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${statusBadgeMap[getResolvedTransactionStatus(tx)] || 'bg-slate-100 text-slate-700'}`}>
+                                {getResolvedTransactionStatus(tx)}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-sm text-slate-600 whitespace-nowrap">
+                              {new Date(tx.createdAt).toLocaleDateString()}{' '}
+                              {new Date(tx.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </td>
+                            <td className="px-4 py-3 text-right whitespace-nowrap">
+                              <button
+                                onClick={() => { setSelectedTx(tx); setShowTxDetails(true); }}
+                                className="p-2 text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all"
+                                title="View Details"
+                              >
+                                <Eye size={16} strokeWidth={2.5} />
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile cards */}
+                <div className="md:hidden divide-y divide-slate-100">
+                  {transactions.map((tx) => {
+                    const isCredit = isCreditTransaction(tx);
+                    return (
+                      <div key={tx._id} className="p-3.5 space-y-2">
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="text-sm font-bold text-slate-900 truncate max-w-[52%]">{tx.reference || '-'}</p>
+                          <div className="flex flex-col gap-1 items-end">
+                            <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${statusBadgeMap[getResolvedPaymentStatus(tx)] || 'bg-slate-100 text-slate-700'}`}>
+                              Pay: {getResolvedPaymentStatus(tx)}
+                            </span>
+                            <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${statusBadgeMap[getResolvedTransactionStatus(tx)] || 'bg-slate-100 text-slate-700'}`}>
+                              Tx: {getResolvedTransactionStatus(tx)}
+                            </span>
+                          </div>
+                        </div>
+                        <p className="text-xs text-slate-600">{typeLabelMap[tx.type] || tx.type || '-'}</p>
+                        <p className={`text-sm font-bold ${isCredit ? 'text-emerald-600' : 'text-rose-600'}`}>
+                          {isCredit ? '+' : '-'}{formatCurrency(Math.abs(Number(tx.amount || 0)))}
+                        </p>
+                        <p className="text-xs text-slate-500">
+                          {new Date(tx.createdAt).toLocaleDateString()}{' '}
+                          {new Date(tx.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                        <button
+                          onClick={() => { setSelectedTx(tx); setShowTxDetails(true); }}
+                          className="w-full mt-1 px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                        >
+                          View Details
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Pagination */}
+                <div className="px-4 sm:px-5 py-3.5 sm:py-4 border-t border-slate-100 flex items-center justify-between gap-3">
+                  <button
+                    onClick={() => setTxPage((p) => Math.max(1, p - 1))}
+                    disabled={txPage === 1 || txLoading}
+                    className="flex-1 sm:flex-none px-4 py-2 rounded-lg border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    onClick={() => setTxPage((p) => p + 1)}
+                    disabled={!txHasMore || txLoading}
+                    className="flex-1 sm:flex-none px-4 py-2 rounded-lg bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Transaction Detail Modal */}
+      <Modal
+        isOpen={showTxDetails}
+        onClose={() => setShowTxDetails(false)}
+        title="Transaction Details"
+        icon={<History size={20} className="text-primary-600" />}
+        maxWidth="max-w-lg"
+      >
+        {selectedTx && (
+          <div className="space-y-4 sm:space-y-5">
+            <div className="flex justify-between items-start gap-3">
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.16em] mb-1">Reference</p>
+                <p className="font-mono text-xs sm:text-sm font-bold text-slate-900 uppercase break-all">{selectedTx.reference || 'N/A'}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.16em] mb-1">Status</p>
+                <div className="flex flex-col gap-1">
+                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${statusBadgeMap[getResolvedPaymentStatus(selectedTx)] || 'bg-slate-100 text-slate-700'}`}>
+                    Payment: {getResolvedPaymentStatus(selectedTx)}
+                  </span>
+                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${statusBadgeMap[getResolvedTransactionStatus(selectedTx)] || 'bg-slate-100 text-slate-700'}`}>
+                    Transaction: {getResolvedTransactionStatus(selectedTx)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100/60">
+              <div className="flex items-center justify-between mb-3 pb-3 border-b border-slate-200/60">
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.16em] leading-none">Transaction Value</p>
+                <div className={`flex items-center gap-1.5 font-bold text-base sm:text-lg ${isCreditTransaction(selectedTx) ? 'text-emerald-600' : 'text-rose-600'}`}>
+                  {isCreditTransaction(selectedTx) ? <ArrowUpCircle size={18} /> : <ArrowDownCircle size={18} />}
+                  {isCreditTransaction(selectedTx) ? '+' : '-'}{formatCurrency(Math.abs(Number(selectedTx.amount || 0)))}
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center text-xs gap-3">
+                  <span className="font-semibold text-slate-500 uppercase">Type</span>
+                  <span className="font-semibold text-slate-900 uppercase text-right">{typeLabelMap[selectedTx.type] || selectedTx.type}</span>
+                </div>
+                <div className="flex justify-between items-center text-xs gap-3">
+                  <span className="font-semibold text-slate-500 uppercase">Description</span>
+                  <span className="font-semibold text-slate-900 text-right max-w-[62%] break-words">{selectedTx.description || 'N/A'}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2.5">
+              <div className="flex justify-between items-center py-2 border-b border-slate-50 gap-3">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.16em]">Date &amp; Time</span>
+                <span className="text-xs font-semibold text-slate-900 text-right">{new Date(selectedTx.createdAt).toLocaleString()}</span>
+              </div>
+              {selectedTx.paymentMethod && (
+                <div className="flex justify-between items-center py-2 border-b border-slate-50 gap-3">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.16em]">Method</span>
+                  <span className="text-xs font-semibold text-slate-900 uppercase text-right">{selectedTx.paymentMethod}</span>
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={() => setShowTxDetails(false)}
+              className="w-full py-2.5 bg-slate-100 text-slate-700 rounded-xl font-bold uppercase text-[11px] tracking-[0.12em] hover:bg-slate-200 transition-all"
+            >
+              Close Details
+            </button>
+          </div>
+        )}
+      </Modal>
 
       {paymentData && (
         <PaymentModal
