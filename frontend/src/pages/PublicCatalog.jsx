@@ -554,7 +554,12 @@ function GuestCheckoutModal({ plan, store, primaryColor, transactionCharges, onC
                             <InputGroup
                                 label="Phone Number"
                                 value={formData.phone}
-                                onChange={(v) => setFormData({ ...formData, phone: v })}
+                                onChange={(v) => {
+                                    const cleaned = v.replace(/\D/g, '');
+                                    if (cleaned.length <= 10) {
+                                        setFormData({ ...formData, phone: cleaned });
+                                    }
+                                }}
                                 placeholder="05x xxx xxxx"
                                 type="tel"
                                 required
@@ -724,7 +729,17 @@ function GuestCheckerCheckoutModal({ checker, store, primaryColor, transactionCh
 
                     <div className="space-y-3">
                         <InputGroup label="Full Name" value={formData.name} onChange={(v) => setFormData({ ...formData, name: v })} required />
-                        <InputGroup label="Phone Number" value={formData.phone} onChange={(v) => setFormData({ ...formData, phone: v })} required />
+                        <InputGroup
+                            label="Phone Number"
+                            value={formData.phone}
+                            onChange={(v) => {
+                                const cleaned = v.replace(/\D/g, '');
+                                if (cleaned.length <= 10) {
+                                    setFormData({ ...formData, phone: cleaned });
+                                }
+                            }}
+                            required
+                        />
                         <InputGroup label="Email Address" value={formData.email} onChange={(v) => setFormData({ ...formData, email: v })} required />
                         <label className="flex items-center gap-2 text-xs text-slate-700">
                             <input

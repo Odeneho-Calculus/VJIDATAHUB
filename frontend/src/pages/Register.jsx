@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 import { useAuth } from '../hooks/useAuth';
 import { useSettings } from '../context/SettingsContext';
 import { AlertCircle, Eye, EyeOff, UserPlus, Store, Lock, ArrowLeft, ShieldCheck, ChevronRight, Wallet, Activity } from 'lucide-react';
 import { publicAPI } from '../services/api';
+import { validatePhoneNumber } from '../utils/phoneValidation';
 
 export default function Register() {
   const [name, setName] = useState('');
@@ -11,6 +13,7 @@ export default function Register() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [phone, setPhone] = useState('');
+  const [phoneError, setPhoneError] = useState('');
   const [referralCode, setReferralCode] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -46,11 +49,21 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setPhoneError('');
     setLoading(true);
 
     try {
-      if (!name || !email || !password || !confirmPassword) {
+      if (!name || !email || !password || !confirmPassword || !phone) {
         setError('Please fill in all fields');
+        setLoading(false);
+        return;
+      }
+
+      // Validate phone number
+      const phoneValidation = validatePhoneNumber(phone);
+      if (!phoneValidation.isValid) {
+        setPhoneError(phoneValidation.error);
+        toast.error(phoneValidation.error, { duration: 5000 });
         setLoading(false);
         return;
       }
@@ -67,9 +80,11 @@ export default function Register() {
         return;
       }
 
-      const data = await register(email, password, name, phone, referralCode, userType === 'agent' ? 'agent' : 'user');
+      const data = await register(email, password, name, phoneValidation.formatted, referralCode, userType === 'agent' ? 'agent' : 'user');
       // Refresh global settings immediately after registration to ensure synced state
       await refreshSettings();
+
+      toast.success('Account created successfully!', { duration: 3000 });
 
       if (data.user.role === 'admin') {
         navigate('/admin');
@@ -264,11 +279,32 @@ export default function Register() {
                     id="phone"
                     type="tel"
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3.5 text-slate-900 placeholder-slate-400 outline-none transition-all focus:border-slate-900 focus:bg-white focus:ring-4 focus:ring-slate-200"
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '');
+                      if (value.length <= 10) {
+                        setPhone(value);
+                      }
+                      setPhoneError(''); // Clear error on change
+                    }}
+                    onBlur={() => {
+                      if (phone) {
+                        const validation = validatePhoneNumber(phone);
+                        if (!validation.isValid) {
+                          setPhoneError(validation.error);
+                        }
+                      }
+                    }}
+                    className={`w-full rounded-2xl border-2 bg-slate-50 px-4 py-3.5 text-slate-900 placeholder-slate-400 outline-none transition-all focus:bg-white focus:ring-4 ${
+                      phoneError
+                        ? 'border-red-400 focus:border-red-400 focus:ring-red-200'
+                        : 'border-slate-300 focus:border-slate-900 focus:ring-slate-200'
+                    }`}
                     placeholder="e.g. 0244123456"
                     disabled={loading}
                   />
+                  {phoneError && (
+                    <p className="text-xs text-red-500 font-semibold mt-1.5 ml-1">{phoneError}</p>
+                  )}
                 </div>
 
                 <div>

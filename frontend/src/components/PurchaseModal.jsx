@@ -217,7 +217,12 @@ export default function PurchaseModal({ bundle, isOpen, onClose, userBalance, us
               <input
                 type="tel"
                 value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, '');
+                  if (value.length <= 10) {
+                    setPhoneNumber(value);
+                  }
+                }}
                 placeholder="Enter 10-digit number"
                 className={`w-full pl-4 pr-12 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:outline-none ${ns.focusBorder} focus:bg-white transition-all text-sm font-bold placeholder:text-slate-300`}
               />

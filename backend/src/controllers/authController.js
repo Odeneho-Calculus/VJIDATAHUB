@@ -32,6 +32,7 @@ const SystemSettings = require('../models/SystemSettings');
 const Store = require('../models/Store');
 const jwt = require('jsonwebtoken');
 const { createNotification } = require('./notificationController');
+const { validatePhoneNumber } = require('../utils/phoneValidation');
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -62,10 +63,19 @@ exports.register = async (req, res) => {
       }
     }
 
-    if (!email || !password || !name) {
+    if (!email || !password || !name || !phone) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide email, password, and name'
+        message: 'Please provide email, password, name, and phone'
+      });
+    }
+
+    // Validate phone number
+    const phoneValidation = validatePhoneNumber(phone);
+    if (!phoneValidation.isValid) {
+      return res.status(400).json({
+        success: false,
+        message: phoneValidation.error
       });
     }
 
@@ -89,7 +99,7 @@ exports.register = async (req, res) => {
       email,
       password,
       name,
-      phone,
+      phone: phoneValidation.normalized,
       referredBy,
       role,
       agentFeeStatus: role === 'agent' ? 'pending' : undefined,

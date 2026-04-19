@@ -364,9 +364,14 @@ export const UserEditModal = ({ isOpen, onClose, user, onUpdate, loading }) => {
           <div>
             <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Phone</label>
             <input
-              type="text"
+              type="tel"
               value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, '');
+                if (value.length <= 10) {
+                  setFormData({ ...formData, phone: value });
+                }
+              }}
               className="w-full px-3 py-2 bg-slate-50 border-2 border-slate-200 rounded-xl text-slate-900 font-bold focus:border-blue-600 outline-none transition-all text-sm"
             />
           </div>

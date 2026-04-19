@@ -10,6 +10,7 @@ const { resolvePlanPrice, hasAnyConfiguredPrice, toPriceNumber } = require('../u
 const { creditCommissionForOrder } = require('../services/commissionService');
 const { processRefund } = require('../utils/refund');
 const { calculateDataPurchaseCharge } = require('../utils/transactionCharges');
+const { validatePhoneNumber } = require('../utils/phoneValidation');
 const axios = require('axios');
 
 const allowedCheckerTypes = ['WAEC', 'NECO', 'JAMB', 'BECE'];
@@ -479,6 +480,12 @@ exports.buyChecker = async (req, res) => {
       return res.status(400).json({ success: false, message: 'checkerType and phoneNumber are required' });
     }
 
+    // Validate phone number
+    const phoneValidation = validatePhoneNumber(phoneNumber);
+    if (!phoneValidation.isValid) {
+      return res.status(400).json({ success: false, message: phoneValidation.error });
+    }
+
     if (!['wallet', 'paystack'].includes(paymentMethod)) {
       return res.status(400).json({ success: false, message: 'Invalid payment method. Must be wallet or paystack' });
     }
@@ -511,7 +518,7 @@ exports.buyChecker = async (req, res) => {
       orderKind: 'checker',
       orderNumber,
       network: 'CHECKER',
-      phoneNumber: String(phoneNumber).trim(),
+      phoneNumber: phoneValidation.normalized,
       dataAmount: null,
       planName: offer.displayName || offer.checkerType,
       amount: price,

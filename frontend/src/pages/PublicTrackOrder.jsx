@@ -212,7 +212,12 @@ export default function PublicTrackOrder() {
                                     type="tel"
                                     placeholder="e.g. 0534359912"
                                     value={phoneNumber}
-                                    onChange={(e) => setPhoneNumber(e.target.value)}
+                                    onChange={(e) => {
+                                        const value = e.target.value.replace(/\D/g, '');
+                                        if (value.length <= 10) {
+                                            setPhoneNumber(value);
+                                        }
+                                    }}
                                     className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-200 focus:border-slate-400 transition-all text-base font-semibold text-slate-900 placeholder:text-slate-400"
                                     style={{ focusBorderColor: primaryColor }}
                                 />

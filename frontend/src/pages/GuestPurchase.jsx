@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 import { ShoppingCart, Wifi, Phone, Mail, User, ArrowLeft, Layout, Zap, Check, AlertCircle, Home, Clock } from 'lucide-react';
 import { guest, publicAPI } from '../services/api';
 import { formatCurrencyAbbreviated } from '../utils/formatCurrency';
 import { getNetworkStyles } from '../utils/networkStyles';
+import { validatePhoneNumber } from '../utils/phoneValidation';
 import {
   formatChargeDescriptor,
   getDataPurchaseChargeAmount,
@@ -16,6 +18,7 @@ export default function GuestPurchase() {
   const [grouped, setGrouped] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
   const [selectedNetwork, setSelectedNetwork] = useState('MTN');
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [showCheckout, setShowCheckout] = useState(false);
@@ -114,13 +117,17 @@ export default function GuestPurchase() {
   };
 
   const validateForm = () => {
+    setPhoneError('');
+    
     if (!formData.name || !formData.phoneNumber || !formData.email) {
       return 'Name, phone number and email are required';
     }
 
-    const phoneRegex = /^0\d{9}$/;
-    if (!phoneRegex.test(formData.phoneNumber)) {
-      return 'Please enter a valid 10-digit phone number starting with 0';
+    // Validate phone number
+    const phoneValidation = validatePhoneNumber(formData.phoneNumber);
+    if (!phoneValidation.isValid) {
+      setPhoneError(phoneValidation.error);
+      return phoneValidation.error;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -136,12 +143,14 @@ export default function GuestPurchase() {
 
     if (businessStatus && !businessStatus.isOpen) {
       setError(businessStatus.message || 'Business is currently closed. Please try again later.');
+      toast.error(businessStatus.message || 'Business is currently closed', { duration: 5000 });
       return;
     }
 
     const validationError = validateForm();
     if (validationError) {
       setError(validationError);
+      toast.error(validationError, { duration: 5000 });
       return;
     }
 
@@ -149,16 +158,20 @@ export default function GuestPurchase() {
       setSubmitting(true);
       setError('');
 
+      // Normalize phone number
+      const phoneValidation = validatePhoneNumber(formData.phoneNumber);
+      const normalizedPhone = phoneValidation.formatted;
+
       const response = await guest.initializePurchase({
         dataPlanId: selectedPlan._id,
-        phoneNumber: formData.phoneNumber,
+        phoneNumber: normalizedPhone,
         email: formData.email,
         name: formData.name || null,
       });
 
       if (response.success && response.data.authorizationUrl) {
         localStorage.setItem('guestOrderNumber', response.data.orderNumber);
-        localStorage.setItem('guestPhoneNumber', formData.phoneNumber);
+        localStorage.setItem('guestPhoneNumber', normalizedPhone);
         window.location.href = response.data.authorizationUrl;
       } else {
         setError(response?.message || 'Failed to initialize payment. Please try again.');
@@ -310,13 +323,40 @@ export default function GuestPurchase() {
                       type="tel"
                       name="phoneNumber"
                       value={formData.phoneNumber}
-                      onChange={handleInputChange}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, '');
+                        if (value.length <= 10) {
+                          handleInputChange({
+                            target: {
+                              name: 'phoneNumber',
+                              value: value
+                            }
+                          });
+                        }
+                        setPhoneError(''); // Clear error on change
+                      }}
+                      onBlur={() => {
+                        if (formData.phoneNumber) {
+                          const validation = validatePhoneNumber(formData.phoneNumber);
+                          if (!validation.isValid) {
+                            setPhoneError(validation.error);
+                          }
+                        }
+                      }}
                       placeholder="0241234567"
                       required
-                      className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium"
+                      className={`w-full pl-12 pr-4 py-3 border rounded-xl font-medium focus:ring-2 transition-all ${
+                        phoneError
+                          ? 'border-red-400 focus:ring-red-500 focus:border-red-500'
+                          : 'border-slate-300 focus:ring-blue-500 focus:border-blue-500'
+                      }`}
                     />
                   </div>
-                  <p className="text-xs text-slate-500 mt-1.5">Data will be sent to this number</p>
+                  {phoneError ? (
+                    <p className="text-xs text-red-500 font-semibold mt-1.5">{phoneError}</p>
+                  ) : (
+                    <p className="text-xs text-slate-500 mt-1.5">Data will be sent to this number</p>
+                  )}
                 </div>
 
                 <div>

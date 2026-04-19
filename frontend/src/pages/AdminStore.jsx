@@ -619,8 +619,29 @@ function OverviewTab({ data, loading, onRefresh, navigate, showAlert }) {
 
           <SectionCard title="Social Links" icon={Share2}>
             <div className="space-y-3">
-              <IconInput icon={MessageSquare} label="Whatsapp" value={formData.socialLinks.whatsapp} onChange={(v) => setFormData({ ...formData, socialLinks: { ...formData.socialLinks, whatsapp: v } })} prefix="https://wa.me/" />
-              <IconInput icon={Phone} label="Phone" value={formData.socialLinks.phone} onChange={(v) => setFormData({ ...formData, socialLinks: { ...formData.socialLinks, phone: v } })} />
+              <IconInput 
+                icon={MessageSquare} 
+                label="Whatsapp" 
+                value={formData.socialLinks.whatsapp} 
+                onChange={(v) => {
+                  const cleaned = v.replace(/\D/g, '');
+                  if (cleaned.length <= 15) {
+                    setFormData({ ...formData, socialLinks: { ...formData.socialLinks, whatsapp: cleaned } });
+                  }
+                }} 
+                prefix="https://wa.me/" 
+              />
+              <IconInput 
+                icon={Phone} 
+                label="Phone" 
+                value={formData.socialLinks.phone} 
+                onChange={(v) => {
+                  const cleaned = v.replace(/\D/g, '');
+                  if (cleaned.length <= 15) {
+                    setFormData({ ...formData, socialLinks: { ...formData.socialLinks, phone: cleaned } });
+                  }
+                }} 
+              />
               <IconInput icon={Mail} label="Email" value={formData.socialLinks.email} onChange={(v) => setFormData({ ...formData, socialLinks: { ...formData.socialLinks, email: v } })} />
               <IconInput icon={Facebook} label="Facebook" value={formData.socialLinks.facebook} onChange={(v) => setFormData({ ...formData, socialLinks: { ...formData.socialLinks, facebook: v } })} />
               <IconInput icon={Instagram} label="Instagram" value={formData.socialLinks.instagram} onChange={(v) => setFormData({ ...formData, socialLinks: { ...formData.socialLinks, instagram: v } })} />

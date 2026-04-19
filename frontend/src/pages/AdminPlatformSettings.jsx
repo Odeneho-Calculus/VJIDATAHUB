@@ -280,7 +280,12 @@ export default function AdminPlatformSettings() {
                       type="tel"
                       name="phone"
                       value={formData.phone}
-                      onChange={handleChange}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/[^\d+]/g, '');
+                        if (value.length <= 15) {
+                          setFormData((prev) => ({ ...prev, phone: value }));
+                        }
+                      }}
                       placeholder="+233534359912"
                       className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition"
                     />
@@ -298,7 +303,12 @@ export default function AdminPlatformSettings() {
                       type="tel"
                       name="whatsapp"
                       value={formData.whatsapp}
-                      onChange={handleChange}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, '');
+                        if (value.length <= 15) {
+                          setFormData((prev) => ({ ...prev, whatsapp: value }));
+                        }
+                      }}
                       placeholder="233534359912"
                       className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition"
                     />

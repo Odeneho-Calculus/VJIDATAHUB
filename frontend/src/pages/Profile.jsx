@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { toast } from 'react-hot-toast';
 import { useAuth } from '../hooks/useAuth';
 import { formatCurrencyAbbreviated } from '../utils/formatCurrency';
+import { validatePhoneNumber } from '../utils/phoneValidation';
 import { User, Mail, Phone, Copy, Shield, LogOut, Check, ChevronRight, Bell, Settings, Lock, Smartphone, Wallet, Gift, ExternalLink, ReceiptText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import UserLayout from '../components/UserLayout';
@@ -10,6 +12,7 @@ export default function Profile() {
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
   const [editMode, setEditMode] = useState(false);
+  const [phoneError, setPhoneError] = useState('');
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
@@ -33,7 +36,24 @@ export default function Profile() {
   };
 
   const handleSaveChanges = () => {
-    alert('Profile updated successfully!');
+    setPhoneError('');
+    
+    if (!formData.name || !formData.email || !formData.phone) {
+      toast.error('Please fill in all fields', { duration: 5000 });
+      return;
+    }
+
+    // Validate phone number
+    const phoneValidation = validatePhoneNumber(formData.phone);
+    if (!phoneValidation.isValid) {
+      setPhoneError(phoneValidation.error);
+      toast.error(phoneValidation.error, { duration: 5000 });
+      return;
+    }
+
+    // Update with normalized phone
+    setFormData(prev => ({ ...prev, phone: phoneValidation.formatted }));
+    toast.success('Profile updated successfully!', { duration: 3000 });
     setEditMode(false);
   };
 
@@ -239,12 +259,33 @@ export default function Profile() {
                         <input
                           type="tel"
                           value={formData.phone}
-                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, '');
+                            if (value.length <= 10) {
+                              setFormData({ ...formData, phone: value });
+                            }
+                            setPhoneError(''); // Clear error on change
+                          }}
+                          onBlur={() => {
+                            if (editMode && formData.phone) {
+                              const validation = validatePhoneNumber(formData.phone);
+                              if (!validation.isValid) {
+                                setPhoneError(validation.error);
+                              }
+                            }
+                          }}
                           disabled={!editMode}
                           placeholder="0XX-XXX-XXXX"
-                          className="w-full pl-14 pr-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl text-sm font-bold text-slate-700 focus:bg-white focus:border-indigo-400 transition-all outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+                          className={`w-full pl-14 pr-6 py-4 bg-slate-50 border-2 rounded-2xl text-sm font-bold text-slate-700 outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
+                            phoneError
+                              ? 'border-red-400 focus:bg-white focus:border-red-400'
+                              : 'border-slate-100 focus:bg-white focus:border-indigo-400'
+                          }`}
                         />
                       </div>
+                      {phoneError && editMode && (
+                        <p className="text-xs text-red-500 font-semibold ml-4">{phoneError}</p>
+                      )}
                     </div>
                   </div>
 

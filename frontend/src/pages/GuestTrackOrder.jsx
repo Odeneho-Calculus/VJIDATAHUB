@@ -173,7 +173,12 @@ export default function GuestTrackOrder() {
                   <input
                     type="tel"
                     value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '');
+                      if (value.length <= 10) {
+                        setPhoneNumber(value);
+                      }
+                    }}
                     placeholder="0241234567"
                     className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium"
                   />
