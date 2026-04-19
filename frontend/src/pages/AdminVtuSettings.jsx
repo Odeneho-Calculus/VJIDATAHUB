@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { AlertCircle, RefreshCw, CheckCircle, DollarSign, X, Settings, Activity, Globe, Clock, Phone, Wifi, Eye, Wallet } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import { formatCurrencyAbbreviated } from '../utils/formatCurrency';
 import AdminSidebar from '../components/AdminSidebar';
 import { OrderDetailsModal } from '../components/AdminOrderModals';
@@ -32,8 +33,18 @@ export default function AdminVtuSettings() {
   const [pollingTopza, setPollingTopza] = useState(false);
   const [showOrderDetailsModal, setShowOrderDetailsModal] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [showRefundConfirm, setShowRefundConfirm] = useState(false);
+  const [refundLoading, setRefundLoading] = useState(false);
 
   const activeProvider = systemSettings?.vtuProvider || 'topza';
+
+  const showMessage = (msg, isError = false) => {
+    if (isError) {
+      toast.error(msg, { duration: 5000 });
+    } else {
+      toast.success(msg, { duration: 3000 });
+    }
+  };
   const activeProviderDisplayName = activeProvider === 'digimall'
     ? 'DigiMall'
     : (activeProvider === 'topza' ? 'Topza' : 'XpresData');
@@ -214,6 +225,51 @@ export default function AdminVtuSettings() {
 
     setSelectedTransaction(normalized);
     setShowOrderDetailsModal(true);
+  };
+
+  const handleRefund = (order) => {
+    setSelectedTransaction(order);
+    setShowRefundConfirm(true);
+    setShowOrderDetailsModal(false);
+  };
+
+  const confirmRefund = async () => {
+    if (!selectedTransaction) return;
+
+    try {
+      setRefundLoading(true);
+      const response = await adminAPI.refundOrder(
+        selectedTransaction.id || selectedTransaction._id,
+        'Refund processed by admin from VTU settings'
+      );
+
+      if (response.success) {
+        setShowRefundConfirm(false);
+        showMessage('Order refunded successfully', false);
+        
+        // Update the transaction with the new order data to reflect isRefunded status
+        if (response.order) {
+          const updatedTransaction = {
+            ...selectedTransaction,
+            ...response.order,
+            isRefunded: true,
+          };
+          setSelectedTransaction(updatedTransaction);
+          setShowOrderDetailsModal(true);
+        }
+        
+        // Refresh transactions to update the list
+        if (activeProvider === 'topza') {
+          await fetchTopzaTransactions();
+        }
+      } else {
+        showMessage(response.message || 'Failed to refund order', true);
+      }
+    } catch (err) {
+      showMessage(err?.message || 'Failed to refund order', true);
+    } finally {
+      setRefundLoading(false);
+    }
   };
 
   const fetchDigiMallNetworks = async (catalog) => {
@@ -833,7 +889,54 @@ export default function AdminVtuSettings() {
           setSelectedTransaction(null);
         }}
         order={selectedTransaction}
+        onRefund={handleRefund}
       />
+
+      {/* Refund Confirmation Modal */}
+      {showRefundConfirm && selectedTransaction && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full shadow-xl">
+            <div className="p-6 border-b border-slate-200">
+              <h3 className="text-lg font-bold text-slate-900">Confirm Refund</h3>
+            </div>
+            <div className="p-6 space-y-4">
+              <p className="text-slate-700">
+                Are you sure you want to refund order <span className="font-bold">{selectedTransaction.orderNumber}</span>?
+              </p>
+              <div className="bg-slate-50 p-3 rounded-lg">
+                <p className="text-sm text-slate-600">
+                  <span className="font-semibold">Amount:</span> GHS {formatPrice2dpNoRound(selectedTransaction.amount)}
+                </p>
+              </div>
+            </div>
+            <div className="p-6 border-t border-slate-200 flex gap-3">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShowRefundConfirm(false);
+                  setSelectedTransaction(null);
+                }}
+                disabled={refundLoading}
+                className="flex-1 px-4 py-2 bg-slate-200 text-slate-900 rounded-lg font-semibold hover:bg-slate-300 disabled:opacity-50 transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  confirmRefund();
+                }}
+                disabled={refundLoading}
+                className="flex-1 px-4 py-2 bg-amber-600 text-white rounded-lg font-semibold hover:bg-amber-700 disabled:opacity-50 transition"
+              >
+                {refundLoading ? 'Processing...' : 'Refund'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

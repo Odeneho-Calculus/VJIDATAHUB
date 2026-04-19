@@ -118,6 +118,29 @@ export const OrderDetailsModal = ({ isOpen, onClose, order, onRefund }) => {
           </div>
         </div>
 
+        {order.store && (
+          <div>
+            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+              <div className="w-1.5 h-1.5 bg-slate-900 rounded-full"></div>
+              Store Information
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="p-2.5 bg-white border border-slate-200 rounded-xl">
+                <p className="text-[9px] font-bold text-slate-400 uppercase">Store Name</p>
+                <p className="text-xs font-black text-slate-900">{order.store?.name || 'N/A'}</p>
+              </div>
+              <div className="p-2.5 bg-white border border-slate-200 rounded-xl">
+                <p className="text-[9px] font-bold text-slate-400 uppercase">Owner</p>
+                <p className="text-xs font-black text-slate-900">{order.store?.owner?.name || 'N/A'}</p>
+              </div>
+              <div className="p-2.5 bg-white border border-slate-200 rounded-xl sm:col-span-2">
+                <p className="text-[9px] font-bold text-slate-400 uppercase">Owner Email</p>
+                <p className="text-xs font-black text-slate-900 truncate">{order.store?.owner?.email || 'N/A'}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div>
           <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
             <div className="w-1.5 h-1.5 bg-slate-900 rounded-full"></div>

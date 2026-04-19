@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Eye, Edit2, Trash2, AlertCircle, Search, ShoppingCart, CheckCircle, Clock, TrendingUp, Database, CheckCircle2, RotateCcw } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import { formatNumberAbbreviated } from '../utils/formatCurrency';
 import AdminSidebar from '../components/AdminSidebar';
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -18,8 +19,6 @@ export default function AdminOrders() {
   const isAgentScope = scope === 'agent';
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
 
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
@@ -81,17 +80,16 @@ export default function AdminOrders() {
   const fetchOrders = useCallback(async ({ silent = false } = {}) => {
     try {
       if (!silent) setLoading(true);
-      setError('');
       const response = await adminAPI.getOrders(page, 10, statusFilter, networkFilter, scope);
 
       if (response.success) {
         setOrders(response.data?.orders || response.orders || []);
         setTotalPages(response.data?.pagination?.pages || response.pagination?.pages || 0);
       } else {
-        setError(response.message || 'Failed to fetch orders');
+        if (!silent) toast.error(response.message || 'Failed to fetch orders', { duration: 5000 });
       }
     } catch (err) {
-      setError(err?.message || 'Failed to fetch orders');
+      if (!silent) toast.error(err?.message || 'Failed to fetch orders', { duration: 5000 });
     } finally {
       if (!silent) setLoading(false);
     }
@@ -107,14 +105,10 @@ export default function AdminOrders() {
 
   const showMessage = (msg, isError = false) => {
     if (isError) {
-      setError(msg);
+      toast.error(msg, { duration: 5000 });
     } else {
-      setSuccess(msg);
+      toast.success(msg, { duration: 3000 });
     }
-    setTimeout(() => {
-      setError('');
-      setSuccess('');
-    }, 3000);
   };
 
   const getFilteredOrders = () => {
@@ -125,7 +119,10 @@ export default function AdminOrders() {
         (order.user?.email || order.userId?.email || '').toLowerCase().includes(term) ||
         (order.phoneNumber || '').toLowerCase().includes(term) ||
         (order.orderNumber || '').toLowerCase().includes(term) ||
-        (order.planName || '').toLowerCase().includes(term);
+        (order.planName || '').toLowerCase().includes(term) ||
+        (order.store?.name || '').toLowerCase().includes(term) ||
+        (order.store?.owner?.name || '').toLowerCase().includes(term) ||
+        (order.store?.owner?.email || '').toLowerCase().includes(term);
 
       const matchesNetwork = !networkFilter || networksMatch(order.network, networkFilter);
       return matchesSearch && matchesNetwork;
@@ -363,20 +360,6 @@ export default function AdminOrders() {
               <p className="text-sm text-slate-500">{isAgentScope ? 'Track all orders placed by buyers through agent stores' : 'Manage all customer orders and track their status'}</p>
             </div>
 
-            {error && (
-              <div className="p-3 sm:p-4 bg-red-50 border border-red-200 rounded-2xl text-red-700 text-sm flex items-center gap-3">
-                <AlertCircle size={18} className="flex-shrink-0" />
-                {error}
-              </div>
-            )}
-
-            {success && (
-              <div className="p-3 sm:p-4 bg-green-50 border border-green-200 rounded-2xl text-green-700 text-sm flex items-center gap-3">
-                <CheckCircle size={18} className="flex-shrink-0" />
-                {success}
-              </div>
-            )}
-
             {/* Stats */}
             <div className="grid grid-cols-2 xl:grid-cols-4 gap-2 sm:gap-4">
               <div className="bg-white rounded-2xl p-3 sm:p-5 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all">
@@ -427,7 +410,7 @@ export default function AdminOrders() {
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
                     type="text"
-                    placeholder="Search by order #, user name, email, phone..."
+                    placeholder="Search by order #, user name, email, phone, store name, store owner..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-slate-400 focus:ring-0 text-sm hover:border-slate-300"
@@ -548,6 +531,7 @@ export default function AdminOrders() {
                             />
                           </th>
                           <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-slate-900 whitespace-nowrap">Order</th>
+                          <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-slate-900 whitespace-nowrap">Store</th>
                           <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-slate-900 whitespace-nowrap">Customer</th>
                           <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-slate-900 whitespace-nowrap">Plan</th>
                           <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-slate-900 whitespace-nowrap">Amount</th>
@@ -578,6 +562,17 @@ export default function AdminOrders() {
                                 <p className="text-sm font-semibold text-slate-900">{order.orderNumber?.slice(-8) || order._id?.slice(-8) || 'N/A'}</p>
                                 <p className="text-[11px] text-slate-600 font-medium uppercase tracking-tight">{order.network || 'N/A'}</p>
                               </div>
+                            </td>
+                            <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
+                              {order.store ? (
+                                <div className="flex flex-col gap-1">
+                                  <p className="text-sm font-semibold text-slate-900">{order.store.name || 'N/A'}</p>
+                                  <p className="text-[11px] text-slate-500 font-medium">{order.store.owner?.name || 'N/A'}</p>
+                                  <p className="text-[10px] text-slate-400 truncate">{order.store.owner?.email || 'N/A'}</p>
+                                </div>
+                              ) : (
+                                <p className="text-sm text-slate-400 italic">No store</p>
+                              )}
                             </td>
                             <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                               <div className="flex flex-col gap-1">
@@ -730,6 +725,7 @@ export default function AdminOrders() {
       <ConfirmDialog
         isOpen={showRefundConfirm}
         onClose={() => setShowRefundConfirm(false)}
+        onCancel={() => setShowRefundConfirm(false)}
         onConfirm={confirmRefund}
         title="Refund Order"
         message={`Are you sure you want to refund GHS ${(selectedOrder?.amount + (selectedOrder?.transactionCharge || 0))?.toFixed(2)} for order #${selectedOrder?.orderNumber}? This will credit the user's wallet and reverse any commissions.`}

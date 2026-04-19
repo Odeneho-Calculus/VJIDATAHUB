@@ -1017,6 +1017,14 @@ exports.getOrders = async (req, res) => {
       .populate('guestInfo', 'name email phone')
       .populate('dataPlanId', 'network dataSize planName')
       .populate('transactionId', 'reference amount status')
+      .populate({
+        path: 'storeId',
+        select: 'name owner',
+        populate: {
+          path: 'owner',
+          select: 'name email',
+        },
+      })
       .limit(parseInt(limit))
       .skip(skip)
       .sort({ createdAt: -1 });
@@ -1049,6 +1057,11 @@ exports.getOrders = async (req, res) => {
           providerMessage: order.providerMessage,
           errorMessage: order.errorMessage,
           adminNotes: order.adminNotes,
+          store: order.storeId ? {
+            id: order.storeId._id,
+            name: order.storeId.name,
+            owner: order.storeId.owner,
+          } : null,
           date: order.createdAt,
         })),
         pagination: {
@@ -2829,10 +2842,14 @@ exports.refundOrder = async (req, res) => {
       severity: 'info',
     });
 
+    // Refresh order to get updated data
+    const updatedOrder = await Order.findById(id).populate('userId').populate('storeId');
+
     res.status(200).json({
       success: true,
       message: 'Order refunded successfully',
-      data: refundResult
+      data: refundResult,
+      order: updatedOrder
     });
   } catch (error) {
     console.error('[Admin Refund] Error:', error);

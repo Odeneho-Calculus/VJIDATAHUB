@@ -4,7 +4,7 @@ const notificationSchema = new mongoose.Schema(
   {
     type: {
       type: String,
-      enum: ['user_created', 'data_purchase', 'low_balance', 'system'],
+      enum: ['user_created', 'data_purchase', 'low_balance', 'system', 'refund'],
       required: true,
     },
     title: {
