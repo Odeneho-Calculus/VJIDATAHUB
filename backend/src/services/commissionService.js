@@ -208,6 +208,49 @@ const returnPendingToEarned = async ({ storeId, amount }) => {
   return ledger;
 };
 
+const reverseCommissionForOrder = async (orderOrId) => {
+  const order = typeof orderOrId === 'string'
+    ? await Order.findById(orderOrId)
+    : orderOrId;
+
+  if (!order) {
+    throw new Error('Order not found for commission reversal');
+  }
+
+  if (order.commissionStatus !== 'earned') {
+    return { reversed: false, reason: 'not_earned' };
+  }
+
+  const commission = await SellerCommission.findOne({ orderId: order._id });
+  if (!commission) {
+    order.commissionStatus = 'none';
+    await order.save();
+    return { reversed: false, reason: 'record_not_found' };
+  }
+
+  if (commission.status !== 'earned') {
+    return { reversed: false, reason: `commission_already_${commission.status}` };
+  }
+
+  const amountToReverse = commission.commissionEarned;
+
+  // Update Ledger
+  const ledger = await CommissionLedger.findOne({ storeId: order.storeId });
+  if (ledger) {
+    ledger.totalEarned = Math.max(0, ledger.totalEarned - amountToReverse);
+    ledger.totalCommissions = Math.max(0, ledger.totalCommissions - amountToReverse);
+    await ledger.save();
+  }
+
+  // Delete/Invalidate commission record
+  await SellerCommission.deleteOne({ _id: commission._id });
+
+  order.commissionStatus = 'none';
+  await order.save();
+
+  return { reversed: true, amount: amountToReverse };
+};
+
 module.exports = {
   creditCommissionForOrder,
   getOrCreateLedger,
@@ -216,4 +259,5 @@ module.exports = {
   returnPendingToEarned,
   resolveAdminPriceForOrder,
   calculateStoreOrderCommission,
+  reverseCommissionForOrder,
 };

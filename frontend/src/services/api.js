@@ -109,6 +109,8 @@ export const admin = {
     api.get(`/admin/orders?page=${page}&limit=${limit}&status=${status}&network=${network}&scope=${scope}`),
   updateOrderStatus: (id, status, adminNotes = '') =>
     api.patch(`/admin/orders/${id}/status`, { status, adminNotes }),
+  refundOrder: (id, reason = 'Manual admin refund') =>
+    api.post(`/admin/orders/${id}/refund`, { reason }),
   deleteOrder: (id) => api.delete(`/admin/orders/${id}`),
   bulkDeleteOrdersByIds: (ids) => api.delete('/admin/orders/bulk', { data: { ids } }),
   bulkDeleteOrdersByStatus: (status) =>

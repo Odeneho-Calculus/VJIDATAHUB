@@ -2794,3 +2794,48 @@ exports.getXpresWalletTransactions = async (req, res) => {
     });
   }
 };
+
+/**
+ * Manually refund an order (Admin only)
+ */
+exports.refundOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason = 'Manual admin refund' } = req.body;
+
+    const order = await Order.findById(id);
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    if (order.isRefunded) {
+      return res.status(400).json({ success: false, message: 'Order is already refunded' });
+    }
+
+    const refundResult = await processRefund(order, reason);
+
+    if (!refundResult.success) {
+      return res.status(400).json({ success: false, message: refundResult.message || 'Refund failed' });
+    }
+
+    // Notify user
+    await Notification.create({
+      userId: order.userId,
+      type: 'refund',
+      title: 'Order Refunded',
+      message: `Your order ${order.orderNumber} has been refunded (GHS ${(order.amount + (order.transactionCharge || 0)).toFixed(2)})`,
+      description: `Reason: ${reason}. The amount has been credited to your wallet.`,
+      severity: 'info',
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Order refunded successfully',
+      data: refundResult
+    });
+  } catch (error) {
+    console.error('[Admin Refund] Error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

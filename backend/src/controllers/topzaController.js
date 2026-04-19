@@ -5,6 +5,9 @@ const TopzaWebhookLog = require('../models/TopzaWebhookLog');
 const SystemSettings = require('../models/SystemSettings');
 const topzaApi = require('../utils/topzaApi');
 const { hasAnyConfiguredPrice, toPriceNumber } = require('../utils/planPricing');
+const { processRefund } = require('../utils/refund');
+const { createNotification } = require('./notificationController');
+const User = require('../models/User');
 
 const mapTopzaStatusToOrderStatus = (status = '') => {
   const normalized = String(status || '').trim().toLowerCase();
@@ -211,7 +214,32 @@ exports.handleWebhook = async (req, res) => {
       });
     }
 
-    await order.save();
+    // Trigger refund IF order failed AND was paid AND not already refunded
+    if (mappedStatus === 'failed' && order.paymentStatus === 'completed' && !order.isRefunded) {
+      // processRefund handles saving the order document internally
+      const refundResult = await processRefund(order, providerStatus || 'Topza webhook failure');
+      console.log(`[Topza Webhook] Auto-refund result for order ${order.orderNumber}:`, refundResult);
+
+      if (refundResult.success) {
+        // Notify user about refund
+        await createNotification({
+          type: 'refund',
+          title: 'Order Failed - Refunded',
+          message: `Your order ${order.orderNumber} failed and GHS ${(order.amount + (order.transactionCharge || 0)).toFixed(2)} has been refunded to your wallet.`,
+          description: `The data purchase for ${order.phoneNumber} (${order.dataAmount}) failed. We have automatically refunded the full amount to your wallet.`,
+          severity: 'warning',
+          data: {
+            userId: order.userId.toString(),
+            amount: order.amount + (order.transactionCharge || 0),
+            orderId: order._id.toString(),
+          },
+          actionUrl: `/orders/${order._id}`,
+        });
+      }
+    } else {
+      // Regular save if no refund was triggered
+      await order.save();
+    }
 
     await createWebhookLog({
       req,

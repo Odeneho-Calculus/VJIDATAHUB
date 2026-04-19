@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const Transaction = require('../models/Transaction');
+const { reverseCommissionForOrder } = require('../services/commissionService');
 
 /**
  * Processes a refund for a failed data purchase order
@@ -15,18 +16,24 @@ const processRefund = async (order, reason = 'Data purchase failed') => {
       return { success: false, message: 'Already refunded' };
     }
 
-    // 2. Only refund if payment was successful and it was Paystack or wallet
-    // For wallet, we only need to refund if the balance was already deducted.
-    // In our system, wallet deduction happens after provider success in purchaseController.
-    // HOWEVER, if an order was marked as 'processing' and then later fails, 
-    // we need to check if the balance was deducted.
-    
-    // For Paystack, the user definitely paid Paystack, so we MUST refund to wallet.
-    
-    const amountToRefund = order.amount;
+    // 2. Determine amount to refund (base amount + any charges)
+    const amountToRefund = (order.amount || 0) + (order.transactionCharge || 0);
     const userId = order.userId;
 
-    // 3. Create refund transaction
+    if (!userId) {
+      return { success: false, message: 'No user associated with this order' };
+    }
+
+    // 3. Reverse agent commission if it was credited
+    let commissionReversed = false;
+    let reversedAmount = 0;
+    if (order.commissionStatus === 'earned') {
+      const reversalResult = await reverseCommissionForOrder(order);
+      commissionReversed = reversalResult.reversed;
+      reversedAmount = reversalResult.amount || 0;
+    }
+
+    // 4. Create refund transaction
     const reference = 'REF' + Date.now() + Math.random().toString(36).substr(2, 9);
     
     const refundTransaction = await Transaction.create({
@@ -35,24 +42,26 @@ const processRefund = async (order, reason = 'Data purchase failed') => {
       amount: amountToRefund,
       reference,
       status: 'completed',
-      description: `Refund for failed order ${order.orderNumber}: ${reason}`,
+      description: `Refund for failed order ${order.orderNumber}: ${reason}${commissionReversed ? ` (Commission of GHS ${reversedAmount} reversed)` : ''}`,
     });
 
-    // 4. Update user balance
+    // 5. Update user balance
     await User.findByIdAndUpdate(userId, {
       $inc: { balance: amountToRefund }
     });
 
-    // 5. Update order status
+    // 6. Update order status
     order.isRefunded = true;
     order.adminNotes = (order.adminNotes ? order.adminNotes + '\n' : '') + `Auto-refunded GHS ${amountToRefund} on ${new Date().toISOString()}. Reason: ${reason}`;
     await order.save();
 
-    console.log(`[Refund] Successfully refunded GHS ${amountToRefund} to user ${userId} for order ${order.orderNumber}`);
+    console.log(`[Refund] Successfully refunded GHS ${amountToRefund} to user ${userId} for order ${order.orderNumber}. Commission reversed: ${commissionReversed}`);
 
     return { 
       success: true, 
-      transaction: refundTransaction 
+      transaction: refundTransaction,
+      amountRefunded: amountToRefund,
+      commissionReversed
     };
   } catch (error) {
     console.error(`[Refund] Error processing refund for order ${order._id}:`, error);

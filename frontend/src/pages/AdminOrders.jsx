@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Eye, Edit2, Trash2, AlertCircle, Search, ShoppingCart, CheckCircle, Clock, TrendingUp, Database, CheckCircle2 } from 'lucide-react';
+import { Eye, Edit2, Trash2, AlertCircle, Search, ShoppingCart, CheckCircle, Clock, TrendingUp, Database, CheckCircle2, RotateCcw } from 'lucide-react';
 import { formatNumberAbbreviated } from '../utils/formatCurrency';
 import AdminSidebar from '../components/AdminSidebar';
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -30,6 +30,7 @@ export default function AdminOrders() {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showStatusModal, setShowStatusModal] = useState(false);
+  const [showRefundConfirm, setShowRefundConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
   const [selectedIds, setSelectedIds] = useState(new Set());
@@ -248,6 +249,37 @@ export default function AdminOrders() {
       }
     } catch (err) {
       showMessage(err?.message || 'Failed to update status', true);
+    } finally {
+      setUpdateLoading(false);
+    }
+  };
+
+  const handleRefund = (order) => {
+    setSelectedOrder(order);
+    setShowRefundConfirm(true);
+    setShowDetailsModal(false);
+  };
+
+  const confirmRefund = async () => {
+    if (!selectedOrder) return;
+
+    try {
+      setUpdateLoading(true);
+      const response = await adminAPI.refundOrder(
+        selectedOrder.id || selectedOrder._id,
+        'Refund processed by admin from dashboard'
+      );
+
+      if (response.success) {
+        setShowRefundConfirm(false);
+        await fetchOrders();
+        setSelectedOrder(null);
+        showMessage('Order refunded successfully');
+      } else {
+        showMessage(response.message || 'Failed to refund order', true);
+      }
+    } catch (err) {
+      showMessage(err?.message || 'Failed to refund order', true);
     } finally {
       setUpdateLoading(false);
     }
@@ -677,6 +709,7 @@ export default function AdminOrders() {
           setSelectedOrder(null);
         }}
         order={selectedOrder}
+        onRefund={handleRefund}
       />
 
       <OrderStatusModal
@@ -692,6 +725,18 @@ export default function AdminOrders() {
         setAdminNotes={setAdminNotes}
         updateLoading={updateLoading}
         onUpdate={handleUpdateStatus}
+      />
+
+      <ConfirmDialog
+        isOpen={showRefundConfirm}
+        onClose={() => setShowRefundConfirm(false)}
+        onConfirm={confirmRefund}
+        title="Refund Order"
+        message={`Are you sure you want to refund GHS ${(selectedOrder?.amount + (selectedOrder?.transactionCharge || 0))?.toFixed(2)} for order #${selectedOrder?.orderNumber}? This will credit the user's wallet and reverse any commissions.`}
+        confirmText={updateLoading ? 'Refunding...' : 'Confirm Refund'}
+        cancelText="Cancel"
+        variant="warning"
+        loading={updateLoading}
       />
 
       <ConfirmDialog

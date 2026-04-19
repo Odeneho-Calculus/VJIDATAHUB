@@ -469,10 +469,17 @@ const handleWalletPayment = async (req, res, user, plan, order, provider = 'xpre
     });
   } catch (error) {
     console.error('[Wallet Payment] Error:', error);
-    order.status = 'failed';
-    order.paymentStatus = 'failed';
-    order.errorMessage = error.message;
-    await order.save();
+    
+    // If order was already in processing, it might have deducted funds.
+    // Safety check: if paymentStatus was set to completed, we should refund.
+    if (order.paymentStatus === 'completed' && !order.isRefunded) {
+      await processRefund(order, `System error during fulfillment: ${error.message}`);
+    } else {
+      order.status = 'failed';
+      order.paymentStatus = 'failed';
+      order.errorMessage = error.message;
+      await order.save();
+    }
 
     res.status(500).json({
       success: false,

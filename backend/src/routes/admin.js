@@ -24,6 +24,7 @@ const {
   getPurchases,
   getOrders,
   updateOrderStatus,
+  refundOrder,
   deleteOrder,
   bulkDeleteOrdersByStatus,
   bulkDeleteOrdersByIds,
@@ -80,6 +81,7 @@ router.post('/transactions/bulk-delete', bulkDeleteTransactionsByStatus);
 router.get('/purchases', getPurchases);
 router.get('/orders', getOrders);
 router.patch('/orders/:id/status', updateOrderStatus);
+router.post('/orders/:id/refund', refundOrder);
 router.delete('/orders/bulk', bulkDeleteOrdersByIds);
 router.delete('/orders/:id', deleteOrder);
 router.post('/orders/bulk-delete', bulkDeleteOrdersByStatus);

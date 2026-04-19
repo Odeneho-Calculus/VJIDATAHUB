@@ -1,9 +1,9 @@
 import React from 'react';
-import { ShoppingCart, Edit2 } from 'lucide-react';
+import { ShoppingCart, Edit2, RotateCcw } from 'lucide-react';
 import Modal from './Modal';
 import { formatNumberAbbreviated } from '../utils/formatCurrency';
 
-export const OrderDetailsModal = ({ isOpen, onClose, order }) => {
+export const OrderDetailsModal = ({ isOpen, onClose, order, onRefund }) => {
   if (!order) return null;
 
   const isCheckerOrder =
@@ -17,6 +17,7 @@ export const OrderDetailsModal = ({ isOpen, onClose, order }) => {
     : (order?.dataAmount || 'N/A');
 
   const isFailedOrder = order.status === 'failed' || order.paymentStatus === 'failed';
+  const canRefund = order.paymentStatus === 'completed' && !order.isRefunded;
   const failedContext = [
     order.errorMessage,
     order.providerMessage,
@@ -31,12 +32,23 @@ export const OrderDetailsModal = ({ isOpen, onClose, order }) => {
       icon={ShoppingCart}
       maxWidth="max-w-xl"
       footer={
-        <button
-          onClick={onClose}
-          className="w-full px-4 py-2.5 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition text-sm"
-        >
-          Close Details
-        </button>
+        <div className="flex w-full gap-3">
+          {canRefund && onRefund && (
+            <button
+              onClick={() => onRefund(order)}
+              className="flex-1 px-4 py-2.5 bg-amber-600 text-white rounded-xl font-bold hover:bg-amber-700 transition text-sm flex items-center justify-center gap-2"
+            >
+              <RotateCcw size={16} />
+              Refund Order
+            </button>
+          )}
+          <button
+            onClick={onClose}
+            className={`${canRefund ? 'flex-1' : 'w-full'} px-4 py-2.5 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition text-sm`}
+          >
+            Close Details
+          </button>
+        </div>
       }
     >
       <div className="space-y-4">
