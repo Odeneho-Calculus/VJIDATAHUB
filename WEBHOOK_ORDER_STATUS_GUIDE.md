@@ -256,7 +256,7 @@ duplicate processing:
 | Order ID field              | `data.orderId`                        |
 | Order number field          | `data.orderNumber`                    |
 | Status field                | `data.status`                         |
-| Base API URL                | `https://api.topza.culustech.com/api/v1` |
+| Base API URL                | `https://api.topzagh.com/api/v1` |
 
 ---
 

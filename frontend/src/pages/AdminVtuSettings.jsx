@@ -9,7 +9,7 @@ import { admin as adminAPI, digimall as digimallAPI, topza as topzaAPI } from '.
 import { useSettings } from '../context/SettingsContext';
 
 export default function AdminVtuSettings() {
-  const TOPZA_WALLET_URL = 'https://topza.culustech.com/wallet';
+  const TOPZA_WALLET_URL = 'https://www.topzagh.com/wallet';
   const { sidebarOpen, closeSidebar } = useSidebar();
   const { settings: globalSettings, updateVtuProvider } = useSettings();
   const [walletData, setWalletData] = useState(null);
