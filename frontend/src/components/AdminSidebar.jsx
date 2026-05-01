@@ -45,7 +45,6 @@ export default function AdminSidebar({ isOpen, onClose }) {
     { path: '/admin/commissions', label: 'Agent Withdrawals', icon: HandCoins },
     { path: '/admin/agent-settings', label: 'Agent Settings', icon: Settings2 },
     { path: '/admin/referrals', label: 'Referral Program', icon: Gift },
-    { path: '/admin/purchases', label: 'Purchases', icon: ShoppingCart },
     { path: '/admin/vtu-settings', label: 'VTU Settings', icon: Wallet },
     { path: '/admin/notifications', label: 'Notifications', icon: Bell },
     { path: '/admin/platform-settings', label: 'Platform Settings', icon: Globe },

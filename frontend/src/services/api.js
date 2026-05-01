@@ -102,9 +102,6 @@ export const admin = {
     generatePasswordResetLink: (id) => api.post(`/admin/users/${id}/generate-reset-link`),
   bulkDeleteTransactionsByStatus: (status) =>
     api.post('/admin/transactions/bulk-delete', { status }),
-  getPurchases: (page = 1, limit = 10) =>
-    api.get(`/admin/purchases?page=${page}&limit=${limit}`),
-  deletePurchase: (id) => api.delete(`/admin/purchases/${id}`),
   getOrders: (page = 1, limit = 10, status = '', network = '', scope = '') =>
     api.get(`/admin/orders?page=${page}&limit=${limit}&status=${status}&network=${network}&scope=${scope}`),
   updateOrderStatus: (id, status, adminNotes = '') =>

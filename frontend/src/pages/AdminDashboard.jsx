@@ -122,7 +122,7 @@ export default function AdminDashboard() {
         iconColor: 'text-amber-700',
       },
       meta: 'Across all channels',
-      action: () => navigate('/admin/purchases'),
+      action: () => navigate('/admin/orders'),
     },
     {
       title: 'Referral Earnings',

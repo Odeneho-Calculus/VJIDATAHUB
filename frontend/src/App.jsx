@@ -27,7 +27,6 @@ import AdminDataPlans from './pages/AdminDataPlans';
 import AdminOrders from './pages/AdminOrders';
 import AdminReferrals from './pages/AdminReferrals';
 import AdminTransactions from './pages/AdminTransactions';
-import AdminPurchases from './pages/AdminPurchases';
 import AdminVtuSettings from './pages/AdminVtuSettings';
 import AdminNotifications from './pages/AdminNotifications';
 import AdminOffers from './pages/AdminOffers';
@@ -297,14 +296,6 @@ function AppContent() {
           element={
             <AdminProtectedRoute>
               <AdminTransactions />
-            </AdminProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/purchases"
-          element={
-            <AdminProtectedRoute>
-              <AdminPurchases />
             </AdminProtectedRoute>
           }
         />

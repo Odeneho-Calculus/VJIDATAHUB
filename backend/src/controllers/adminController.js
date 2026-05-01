@@ -206,7 +206,7 @@ exports.getDashboardStats = async (req, res) => {
         bannedUsers: userStats.banned,
         suspendedUsers: userStats.suspended,
         totalTransactions: totalTransactions + totalOrders,
-        totalPurchases,
+        totalPurchases: totalOrders,
         totalOrders,
         completedOrders,
         totalBalance: userStats.totalBalance,
