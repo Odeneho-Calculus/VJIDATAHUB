@@ -282,10 +282,7 @@ export default function Register() {
                     type="tel"
                     value={phone}
                     onChange={(e) => {
-                      const value = e.target.value.replace(/\D/g, '');
-                      if (value.length <= 10) {
-                        setPhone(value);
-                      }
+                      setPhone(e.target.value);
                       setPhoneError(''); // Clear error on change
                     }}
                     onBlur={() => {

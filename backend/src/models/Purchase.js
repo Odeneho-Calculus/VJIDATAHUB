@@ -22,6 +22,7 @@ const purchaseSchema = new mongoose.Schema(
     recipient: {
       type: String,
       required: true,
+      match: [/^\d{10}$/, 'Phone number must be exactly 10 digits and contain only numeric characters'],
     },
     reference: {
       type: String,

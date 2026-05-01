@@ -13,28 +13,25 @@ const validatePhoneNumber = (phone) => {
     return { isValid: false, error: 'Phone number is required', normalized: null };
   }
 
-  // Convert to string and remove all non-digit characters
-  const cleaned = String(phone).replace(/\D/g, '');
+  const phoneStr = String(phone);
 
-  // Handle +233 country code - convert to 0 format
-  let normalized;
-  if (cleaned.startsWith('233')) {
-    normalized = '0' + cleaned.slice(3);
-  } else {
-    normalized = cleaned;
-  }
-
-  // Check if it's exactly 10 digits
-  if (normalized.length !== 10) {
+  // Check if it's exactly 10 digits and contains only numeric characters
+  if (!/^\d{10}$/.test(phoneStr)) {
+    let error;
+    if (phoneStr.length !== 10) {
+      error = `Phone number must be exactly 10 digits (received ${phoneStr.length})`;
+    } else {
+      error = 'Phone number must contain only numeric characters (no letters, spaces, dashes, or special characters)';
+    }
     return {
       isValid: false,
-      error: `Phone number must be 10 digits (received ${normalized.length})`,
+      error,
       normalized: null
     };
   }
 
   // Check if it starts with 0
-  if (!normalized.startsWith('0')) {
+  if (!phoneStr.startsWith('0')) {
     return {
       isValid: false,
       error: 'Phone number must start with 0',
@@ -42,19 +39,10 @@ const validatePhoneNumber = (phone) => {
     };
   }
 
-  // Validate that all characters are digits
-  if (!/^\d+$/.test(normalized)) {
-    return {
-      isValid: false,
-      error: 'Phone number must contain only digits',
-      normalized: null
-    };
-  }
-
   return {
     isValid: true,
     error: null,
-    normalized // Returns in format: 0XXXXXXXXX
+    normalized: phoneStr // Returns in format: 0XXXXXXXXX
   };
 };
 

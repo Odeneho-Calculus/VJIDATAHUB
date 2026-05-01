@@ -11,6 +11,7 @@ const digimallApi = require('../utils/digimallApi');
 const topzaApi = require('../utils/topzaApi');
 const { createNotification } = require('./notificationController');
 const { isValidNetworkNumber } = require('../utils/validation');
+const { validatePhoneNumber } = require('../utils/phoneValidation');
 const { processRefund } = require('../utils/refund');
 const { resolvePlanPrice } = require('../utils/planPricing');
 const { calculateDataPurchaseCharge } = require('../utils/transactionCharges');
@@ -113,6 +114,17 @@ exports.buyDataBundle = async (req, res) => {
       });
     }
 
+    // Validate phone number format
+    const phoneValidation = validatePhoneNumber(phoneNumber);
+    if (!phoneValidation.isValid) {
+      return res.status(400).json({
+        success: false,
+        message: phoneValidation.error,
+      });
+    }
+
+    const normalizedPhone = phoneValidation.normalized;
+
     const user = await User.findById(req.userId);
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
@@ -212,17 +224,17 @@ exports.buyDataBundle = async (req, res) => {
     }
 
     // Validate phone number and network match
-    if (!isValidNetworkNumber(phoneNumber, plan.network)) {
+    if (!isValidNetworkNumber(normalizedPhone, plan.network)) {
       return res.status(400).json({
         success: false,
-        message: `The phone number ${phoneNumber} does not belong to the ${plan.network} network.`
+        message: `The phone number ${normalizedPhone} does not belong to the ${plan.network} network.`
       });
     }
 
     const cooldownMinutes = await getOrderDuplicateCooldownMinutes();
     const existingInFlightOrder = await findInFlightOrderByPhone({
       provider: activeProvider,
-      phoneNumber,
+      phoneNumber: normalizedPhone,
       cooldownMinutes,
     });
 
@@ -249,7 +261,7 @@ exports.buyDataBundle = async (req, res) => {
       apiPlanId: plan.apiPlanId,
       orderNumber,
       network: plan.network,
-      phoneNumber,
+      phoneNumber: normalizedPhone,
       dataAmount: plan.dataSize,
       planName: plan.planName,
       amount: plan.sellingPrice,

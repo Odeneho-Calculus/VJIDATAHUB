@@ -324,15 +324,7 @@ export default function GuestPurchase() {
                       name="phoneNumber"
                       value={formData.phoneNumber}
                       onChange={(e) => {
-                        const value = e.target.value.replace(/\D/g, '');
-                        if (value.length <= 10) {
-                          handleInputChange({
-                            target: {
-                              name: 'phoneNumber',
-                              value: value
-                            }
-                          });
-                        }
+                        handleInputChange(e);
                         setPhoneError(''); // Clear error on change
                       }}
                       onBlur={() => {

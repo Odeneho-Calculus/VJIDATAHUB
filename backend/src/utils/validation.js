@@ -11,15 +11,12 @@
 const isValidNetworkNumber = (number, network) => {
     if (!number || !network) return false;
     
-    // Normalize number: remove spaces and non-digits
-    const cleanNumber = number.replace(/\D/g, '');
-    
-    // Ghanaian numbers should be 10 digits starting with 0
-    if (cleanNumber.length !== 10 || !cleanNumber.startsWith('0')) {
+    // Ugandan/Ghanaian numbers should be exactly 10 digits starting with 0 and numeric only
+    if (!/^\d{10}$/.test(number) || !number.startsWith('0')) {
         return false;
     }
     
-    const prefix = cleanNumber.substring(0, 3);
+    const prefix = number.substring(0, 3);
     const normalizedNetwork = network.toLowerCase();
     
     const mtnPrefixes = ['024', '025', '053', '054', '055', '059', '023'];

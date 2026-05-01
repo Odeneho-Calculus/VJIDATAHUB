@@ -10,6 +10,7 @@ const xpresDataApi = require('../utils/xpresDataApi');
 const digimallApi = require('../utils/digimallApi');
 const topzaApi = require('../utils/topzaApi');
 const { isValidNetworkNumber } = require('../utils/validation');
+const { validatePhoneNumber } = require('../utils/phoneValidation');
 const { isPositivePrice } = require('../utils/planPricing');
 const { calculateDataPurchaseCharge } = require('../utils/transactionCharges');
 
@@ -276,6 +277,20 @@ exports.initializeGuestPurchase = async (req, res) => {
       });
     }
 
+    // Validate phone number format
+    const phoneValidation = validatePhoneNumber(phoneNumber);
+    if (!phoneValidation.isValid) {
+      log('validation_error', { reason: 'invalid_phone_format', error: phoneValidation.error });
+      return res.status(400).json({
+        success: false,
+        message: phoneValidation.error,
+        debugId,
+        debugStage: 'validation_error',
+      });
+    }
+
+    const normalizedPhone = phoneValidation.normalized;
+
     // Get system settings
     const settings = await SystemSettings.getSettings();
     const activeProvider = settings.vtuProvider || 'topza';
@@ -390,9 +405,9 @@ exports.initializeGuestPurchase = async (req, res) => {
     }
 
     // Validate phone number
-    const isNetworkNumberValid = isValidNetworkNumber(phoneNumber, plan.network);
+    const isNetworkNumberValid = isValidNetworkNumber(normalizedPhone, plan.network);
     if (!isNetworkNumberValid) {
-      log('validation_error', { reason: 'network_phone_mismatch', network: plan.network, phoneNumber });
+      log('validation_error', { reason: 'network_phone_mismatch', network: plan.network, phoneNumber: normalizedPhone });
       return res.status(400).json({
         success: false,
         message: `Phone number does not match ${plan.network} network`,
@@ -405,7 +420,7 @@ exports.initializeGuestPurchase = async (req, res) => {
     const cooldownSince = new Date(Date.now() - cooldownMinutes * 60 * 1000);
     const existingInFlightOrder = await Order.findOne({
       provider: plan.provider,
-      phoneNumber: { $in: phoneVariants(phoneNumber) },
+      phoneNumber: { $in: phoneVariants(normalizedPhone) },
       status: { $in: ['pending', 'processing'] },
       paymentStatus: { $ne: 'failed' },
       createdAt: { $gte: cooldownSince },
@@ -415,7 +430,7 @@ exports.initializeGuestPurchase = async (req, res) => {
       log('duplicate_guard', {
         orderNumber: existingInFlightOrder.orderNumber,
         status: existingInFlightOrder.status,
-        phoneNumber,
+        phoneNumber: normalizedPhone,
       });
       return res.status(409).json({
         success: false,
@@ -434,14 +449,14 @@ exports.initializeGuestPurchase = async (req, res) => {
 
     // Find or create guest
     let guest = await Guest.findOne({
-      phone: phoneNumber,
+      phone: normalizedPhone,
       $or: [{ store: null }, { store: { $exists: false } }],
     });
 
     if (!guest) {
       guest = await Guest.create({
         email: email.toLowerCase(),
-        phone: phoneNumber,
+        phone: normalizedPhone,
         name: name || null,
         store: null,
         orders: [],
@@ -469,7 +484,7 @@ exports.initializeGuestPurchase = async (req, res) => {
       apiPlanId: plan.apiPlanId,
       orderNumber: orderNumber,
       network: plan.network,
-      phoneNumber: phoneNumber,
+      phoneNumber: normalizedPhone,
       dataAmount: plan.dataAmount,
       planName: plan.planName,
       amount: plan.sellingPrice,
@@ -505,7 +520,7 @@ exports.initializeGuestPurchase = async (req, res) => {
       reference: txReference,
       status: 'pending',
       paymentStatus: 'pending',
-      description: `Guest data purchase - ${plan.planName} for ${phoneNumber}`,
+      description: `Guest data purchase - ${plan.planName} for ${normalizedPhone}`,
     });
     log('transaction_created', { transactionId: transaction._id.toString(), txReference });
 
@@ -531,7 +546,7 @@ exports.initializeGuestPurchase = async (req, res) => {
         metadata: {
           orderId: order._id.toString(),
           orderNumber: orderNumber,
-          phoneNumber: phoneNumber,
+          phoneNumber: normalizedPhone,
           dataPlan: plan.planName,
           network: plan.network,
           isGuest: true,

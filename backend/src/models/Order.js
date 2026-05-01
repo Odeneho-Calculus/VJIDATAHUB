@@ -32,6 +32,7 @@ const orderSchema = new mongoose.Schema(
     phoneNumber: {
       type: String,
       required: true,
+      match: [/^\d{10}$/, 'Phone number must be exactly 10 digits and contain only numeric characters'],
     },
     dataAmount: {
       type: String,

@@ -7,7 +7,6 @@ const topzaApi = require('../utils/topzaApi');
 const { hasAnyConfiguredPrice, toPriceNumber } = require('../utils/planPricing');
 const { processRefund } = require('../utils/refund');
 const { createNotification } = require('./notificationController');
-const User = require('../models/User');
 
 const mapTopzaStatusToOrderStatus = (status = '') => {
   const normalized = String(status || '').trim().toLowerCase();

@@ -11,11 +11,14 @@ import {
   parseTransactionCharges,
 } from '../utils/transactionCharges';
 
+import { validatePhoneNumber } from '../utils/phoneValidation';
+
 export default function PurchaseModal({ bundle, isOpen, onClose, userBalance, user, onPurchaseSuccess }) {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('wallet');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
   const [paystackLoading, setPaystackLoading] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentData, setPaymentData] = useState(null);
@@ -88,13 +91,19 @@ export default function PurchaseModal({ bundle, isOpen, onClose, userBalance, us
       return;
     }
 
+    const validation = validatePhoneNumber(phoneNumber);
+    if (!validation.isValid) {
+      setPhoneError(validation.error);
+      return;
+    }
+
     try {
       setLoading(true);
       setError('');
 
       const response = await purchases.buyDataBundle({
         dataPlanId: bundle._id,
-        phoneNumber,
+        phoneNumber: validation.formatted,
         paymentMethod: 'wallet',
       });
 
@@ -118,13 +127,19 @@ export default function PurchaseModal({ bundle, isOpen, onClose, userBalance, us
       return;
     }
 
+    const validation = validatePhoneNumber(phoneNumber);
+    if (!validation.isValid) {
+      setPhoneError(validation.error);
+      return;
+    }
+
     try {
       setPaystackLoading(true);
       setError('');
 
       const response = await purchases.buyDataBundle({
         dataPlanId: bundle._id,
-        phoneNumber,
+        phoneNumber: validation.formatted,
         paymentMethod: 'paystack',
       });
 
@@ -218,18 +233,31 @@ export default function PurchaseModal({ bundle, isOpen, onClose, userBalance, us
                 type="tel"
                 value={phoneNumber}
                 onChange={(e) => {
-                  const value = e.target.value.replace(/\D/g, '');
-                  if (value.length <= 10) {
-                    setPhoneNumber(value);
+                  setPhoneNumber(e.target.value);
+                  setPhoneError('');
+                }}
+                onBlur={() => {
+                  if (phoneNumber) {
+                    const validation = validatePhoneNumber(phoneNumber);
+                    if (!validation.isValid) {
+                      setPhoneError(validation.error);
+                    }
                   }
                 }}
                 placeholder="Enter 10-digit number"
-                className={`w-full pl-4 pr-12 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:outline-none ${ns.focusBorder} focus:bg-white transition-all text-sm font-bold placeholder:text-slate-300`}
+                className={`w-full pl-4 pr-12 py-4 bg-slate-50 border-2 rounded-2xl focus:outline-none ${ns.focusBorder} focus:bg-white transition-all text-sm font-bold placeholder:text-slate-300 ${
+                  phoneError ? 'border-red-400' : 'border-slate-100'
+                }`}
               />
               <div className={`absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-white rounded-xl border border-slate-100 text-slate-400 ${ns.focusGroupText} transition-colors`}>
                 <Smartphone size={16} />
               </div>
             </div>
+            {phoneError && (
+              <p className="text-[10px] font-bold text-red-500 mt-1 ml-1 uppercase tracking-tight">
+                {phoneError}
+              </p>
+            )}
           </div>
 
           <div className="space-y-3">

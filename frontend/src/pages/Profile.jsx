@@ -260,10 +260,7 @@ export default function Profile() {
                           type="tel"
                           value={formData.phone}
                           onChange={(e) => {
-                            const value = e.target.value.replace(/\D/g, '');
-                            if (value.length <= 10) {
-                              setFormData({ ...formData, phone: value });
-                            }
+                            setFormData({ ...formData, phone: e.target.value });
                             setPhoneError(''); // Clear error on change
                           }}
                           onBlur={() => {
@@ -275,7 +272,7 @@ export default function Profile() {
                             }
                           }}
                           disabled={!editMode}
-                          placeholder="0XX-XXX-XXXX"
+                          placeholder="0XXXXXXXXX"
                           className={`w-full pl-14 pr-6 py-4 bg-slate-50 border-2 rounded-2xl text-sm font-bold text-slate-700 outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
                             phoneError
                               ? 'border-red-400 focus:bg-white focus:border-red-400'

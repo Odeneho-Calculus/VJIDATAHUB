@@ -42,6 +42,7 @@ const xpresDataApi = require('../utils/xpresDataApi');
 const digimallApi = require('../utils/digimallApi');
 const topzaApi = require('../utils/topzaApi');
 const { processRefund } = require('../utils/refund');
+const { validatePhoneNumber } = require('../utils/phoneValidation');
 
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 const PAYSTACK_BASE_URL = process.env.PAYSTACK_BASE_URL || 'https://api.paystack.co';
@@ -193,7 +194,6 @@ exports.getDashboardStats = async (req, res) => {
 
     const totalAdmins = await User.countDocuments({ role: 'admin' });
     const totalTransactions = await Transaction.countDocuments();
-    const totalPurchases = await Purchase.countDocuments();
     const totalOrders = await Order.countDocuments();
     const completedOrders = await Order.countDocuments({ status: 'completed' });
 
@@ -1473,7 +1473,20 @@ exports.updateUser = async (req, res) => {
 
     if (name !== undefined) user.name = name;
     if (email !== undefined) user.email = email;
-    if (phone !== undefined) user.phone = phone;
+    if (phone !== undefined) {
+      if (phone !== null && phone !== '') {
+        const phoneValidation = validatePhoneNumber(phone);
+        if (!phoneValidation.isValid) {
+          return res.status(400).json({
+            success: false,
+            message: phoneValidation.error,
+          });
+        }
+        user.phone = phoneValidation.normalized;
+      } else {
+        user.phone = null;
+      }
+    }
     if (role !== undefined) user.role = role;
 
     // Handle wallet operations (Credit/Deduct/Set)

@@ -25,6 +25,7 @@ const userSchema = new mongoose.Schema(
       default: null,
       unique: true,
       sparse: true,
+      match: [/^\d{10}$/, 'Phone number must be exactly 10 digits and contain only numeric characters'],
     },
     balance: {
       type: Number,
