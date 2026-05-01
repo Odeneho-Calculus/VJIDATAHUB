@@ -94,7 +94,16 @@ export default function Register() {
         navigate('/dashboard');
       }
     } catch (err) {
-      setError(err.message || 'Registration failed');
+      const msg = err.message || 'Registration failed';
+      setError(msg);
+      toast.error(msg, {
+        duration: 5000,
+        className: 'rounded-full bg-rose-50 border border-rose-200 text-rose-700 font-medium px-6 py-3 shadow-xl shadow-rose-200/50',
+        iconTheme: {
+          primary: '#be123c',
+          secondary: '#fff',
+        },
+      });
     } finally {
       setLoading(false);
     }
@@ -229,13 +238,6 @@ export default function Register() {
                 <p className="text-sm font-medium text-slate-600">
                   Agent registration is currently closed by the platform administration. Please check back later or register as a buyer.
                 </p>
-              </div>
-            )}
-
-            {error && (
-              <div className="mb-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 flex gap-3">
-                <AlertCircle className="mt-0.5 shrink-0 text-rose-600" size={18} />
-                <p className="text-sm font-medium text-rose-700">{error}</p>
               </div>
             )}
 

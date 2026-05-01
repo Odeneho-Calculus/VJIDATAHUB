@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 import { useAuth } from '../hooks/useAuth';
 import { useSettings } from '../context/SettingsContext';
 import { AlertCircle, Eye, EyeOff, ArrowLeft, ShieldCheck, Wallet, Activity, ChevronRight } from 'lucide-react';
@@ -35,7 +36,16 @@ export default function Login() {
         navigate('/dashboard');
       }
     } catch (err) {
-      setError(err.message || 'Login failed');
+      const msg = err.message || 'Login failed';
+      setError(msg);
+      toast.error(msg, {
+        duration: 5000,
+        className: 'rounded-full bg-rose-50 border border-rose-200 text-rose-700 font-medium px-6 py-3 shadow-xl shadow-rose-200/50',
+        iconTheme: {
+          primary: '#be123c',
+          secondary: '#fff',
+        },
+      });
     } finally {
       setLoading(false);
     }
@@ -121,13 +131,6 @@ export default function Login() {
                 <p className="text-sm leading-6 text-slate-600">Sign in to continue into your workspace.</p>
               </div>
             </div>
-
-            {error && (
-              <div className="mb-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 flex gap-3">
-                <AlertCircle className="mt-0.5 shrink-0 text-rose-600" size={18} />
-                <p className="text-sm font-medium text-rose-700">{error}</p>
-              </div>
-            )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
