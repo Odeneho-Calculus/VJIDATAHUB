@@ -19,6 +19,7 @@ export default function AdminUsers() {
   const [roleFilter, setRoleFilter] = useState('all');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+  const [stats, setStats] = useState({ total: 0, active: 0, banned: 0, suspended: 0, totalBalance: 0 });
   const [selectedUser, setSelectedUser] = useState(null);
 
   const [showBanModal, setShowBanModal] = useState(false);
@@ -56,6 +57,9 @@ export default function AdminUsers() {
       if (response.success) {
         setUsers(response.users);
         setTotalPages(response.pagination.pages);
+        if (response.stats) {
+          setStats(response.stats);
+        }
       }
     } catch (err) {
       setError(err?.message || 'Failed to fetch users');
@@ -214,11 +218,11 @@ export default function AdminUsers() {
     return 'Active';
   };
 
-  const activeUsers = users.filter(u => u.status === 'active').length;
-  const bannedUsers = users.filter(u => u.status === 'banned').length;
-  const suspendedUsers = users.filter(u => u.status === 'suspended').length;
-  const totalAccounts = users.length || 1;
-  const totalBalance = users.reduce((sum, u) => sum + (u.balance || 0), 0);
+  const activeUsers = stats.active;
+  const bannedUsers = stats.banned;
+  const suspendedUsers = stats.suspended;
+  const totalAccounts = stats.total || 1;
+  const totalBalance = stats.totalBalance;
 
   return (
     <div className="flex h-screen bg-slate-100">
@@ -342,7 +346,7 @@ export default function AdminUsers() {
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <input
                       type="text"
-                      placeholder="Search by name or email"
+                      placeholder="Search by name, email or phone number"
                       value={search}
                       onChange={(e) => {
                         setSearch(e.target.value);

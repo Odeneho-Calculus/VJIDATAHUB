@@ -113,7 +113,9 @@ export default function AdminReferrals() {
   const filteredReferrals = referrals.filter(ref =>
     ref.referrer?.name.toLowerCase().includes(search.toLowerCase()) ||
     ref.referredUser?.name.toLowerCase().includes(search.toLowerCase()) ||
-    ref.referrer?.email.toLowerCase().includes(search.toLowerCase())
+    ref.referrer?.email.toLowerCase().includes(search.toLowerCase()) ||
+    ref.referrer?.phone?.toLowerCase().includes(search.toLowerCase()) ||
+    ref.referredUser?.phone?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (

@@ -165,36 +165,52 @@ const processOrderAfterVerifiedPayment = async (order, paystackReference = null)
 
 exports.getDashboardStats = async (req, res) => {
   try {
-    const totalUsers = await User.countDocuments({ $or: [{ role: 'user' }, { role: { $exists: false } }] });
+    const userQuery = { $or: [{ role: 'user' }, { role: { $exists: false } }, { role: 'agent' }] };
+    
+    const userStatsResult = await User.aggregate([
+      { $match: userQuery },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          active: { $sum: { $cond: [{ $eq: ['$status', 'active'] }, 1, 0] } },
+          banned: { $sum: { $cond: [{ $eq: ['$status', 'banned'] }, 1, 0] } },
+          suspended: { $sum: { $cond: [{ $eq: ['$status', 'suspended'] }, 1, 0] } },
+          totalBalance: { $sum: '$balance' },
+          totalReferralEarnings: { $sum: '$referralEarnings' }
+        }
+      }
+    ]);
+
+    const userStats = userStatsResult[0] || { 
+      total: 0, 
+      active: 0, 
+      banned: 0, 
+      suspended: 0, 
+      totalBalance: 0, 
+      totalReferralEarnings: 0 
+    };
+
     const totalAdmins = await User.countDocuments({ role: 'admin' });
-    const activeUsers = await User.countDocuments({ $and: [{ $or: [{ role: 'user' }, { role: { $exists: false } }] }, { isActive: true }] });
     const totalTransactions = await Transaction.countDocuments();
     const totalPurchases = await Purchase.countDocuments();
     const totalOrders = await Order.countDocuments();
     const completedOrders = await Order.countDocuments({ status: 'completed' });
 
-    const totalBalance = await User.aggregate([
-      { $match: { $or: [{ role: 'user' }, { role: { $exists: false } }] } },
-      { $group: { _id: null, total: { $sum: '$balance' } } }
-    ]);
-
-    const totalReferralEarnings = await User.aggregate([
-      { $match: { $or: [{ role: 'user' }, { role: { $exists: false } }] } },
-      { $group: { _id: null, total: { $sum: '$referralEarnings' } } }
-    ]);
-
     res.status(200).json({
       success: true,
       stats: {
-        totalUsers,
+        totalUsers: userStats.total,
         totalAdmins,
-        activeUsers,
+        activeUsers: userStats.active,
+        bannedUsers: userStats.banned,
+        suspendedUsers: userStats.suspended,
         totalTransactions: totalTransactions + totalOrders,
         totalPurchases,
         totalOrders,
         completedOrders,
-        totalBalance: totalBalance[0]?.total || 0,
-        totalReferralEarnings: totalReferralEarnings[0]?.total || 0,
+        totalBalance: userStats.totalBalance,
+        totalReferralEarnings: userStats.totalReferralEarnings,
       },
     });
   } catch (error) {
@@ -228,7 +244,8 @@ exports.getAllUsers = async (req, res) => {
           {
             $or: [
               { email: { $regex: search, $options: 'i' } },
-              { name: { $regex: search, $options: 'i' } }
+              { name: { $regex: search, $options: 'i' } },
+              { phone: { $regex: search, $options: 'i' } }
             ]
           }
         ]
@@ -243,9 +260,25 @@ exports.getAllUsers = async (req, res) => {
 
     const total = await User.countDocuments(query);
 
+    const statsResult = await User.aggregate([
+      { $match: query },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          active: { $sum: { $cond: [{ $eq: ['$status', 'active'] }, 1, 0] } },
+          banned: { $sum: { $cond: [{ $eq: ['$status', 'banned'] }, 1, 0] } },
+          suspended: { $sum: { $cond: [{ $eq: ['$status', 'suspended'] }, 1, 0] } },
+          totalBalance: { $sum: '$balance' }
+        }
+      }
+    ]);
+    const stats = statsResult[0] || { total: 0, active: 0, banned: 0, suspended: 0, totalBalance: 0 };
+
     res.status(200).json({
       success: true,
       users,
+      stats,
       pagination: {
         total,
         page: parseInt(page),
@@ -397,7 +430,7 @@ exports.getTransactions = async (req, res) => {
 
     if (!type || isOrderTypeFilter) {
       const orders = await Order.find(orderFilter)
-        .populate('userId', 'name email')
+        .populate('userId', 'name email phone')
         .populate('guestInfo', 'name email phone')
         .sort({ createdAt: -1 });
 
@@ -443,7 +476,7 @@ exports.getTransactions = async (req, res) => {
       }
 
       const transactions = await Transaction.find(txFilter)
-        .populate('userId', 'name email')
+        .populate('userId', 'name email phone')
         .populate('guestId', 'name email phone')
         .sort({ createdAt: -1 });
 
@@ -453,11 +486,28 @@ exports.getTransactions = async (req, res) => {
     allTransactions.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     const total = allTransactions.length;
+
+    const stats = {
+      total: allTransactions.length,
+      successful: allTransactions.filter(t => {
+        const status = String(t.status || '').toLowerCase();
+        const pStatus = String(t.paymentStatus || '').toLowerCase();
+        return status === 'successful' || status === 'completed' || status === 'success' || pStatus === 'completed' || pStatus === 'success';
+      }).length,
+      pending: allTransactions.filter(t => {
+        const status = String(t.status || '').toLowerCase();
+        const pStatus = String(t.paymentStatus || '').toLowerCase();
+        return status === 'pending' || (pStatus === 'pending' && status !== 'failed');
+      }).length,
+      totalAmount: allTransactions.reduce((sum, t) => sum + (Number(t.amount) || 0), 0)
+    };
+
     const paginatedTransactions = allTransactions.slice(skip, skip + parseInt(limit));
 
     res.status(200).json({
       success: true,
       transactions: paginatedTransactions,
+      stats,
       pagination: {
         total,
         page: parseInt(page),
@@ -1022,7 +1072,7 @@ exports.getOrders = async (req, res) => {
         select: 'name owner',
         populate: {
           path: 'owner',
-          select: 'name email',
+          select: 'name email phone',
         },
       })
       .limit(parseInt(limit))
@@ -1030,6 +1080,20 @@ exports.getOrders = async (req, res) => {
       .sort({ createdAt: -1 });
 
     const total = await Order.countDocuments(filter);
+
+    const statsResult = await Order.aggregate([
+      { $match: filter },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          completed: { $sum: { $cond: [{ $eq: ['$status', 'completed'] }, 1, 0] } },
+          pending: { $sum: { $cond: [{ $eq: ['$status', 'pending'] }, 1, 0] } },
+          processing: { $sum: { $cond: [{ $eq: ['$status', 'processing'] }, 1, 0] } }
+        }
+      }
+    ]);
+    const stats = statsResult[0] || { total: 0, completed: 0, pending: 0, processing: 0 };
 
     res.status(200).json({
       success: true,
@@ -1064,6 +1128,7 @@ exports.getOrders = async (req, res) => {
           } : null,
           date: order.createdAt,
         })),
+        stats,
         pagination: {
           total,
           page: parseInt(page),
@@ -1503,6 +1568,7 @@ exports.getAllReferrals = async (req, res) => {
             $or: [
               { email: { $regex: search, $options: 'i' } },
               { name: { $regex: search, $options: 'i' } },
+              { phone: { $regex: search, $options: 'i' } },
               { referralCode: { $regex: search, $options: 'i' } }
             ]
           }

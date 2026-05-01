@@ -21,6 +21,7 @@ export default function AdminTransactions() {
 
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+  const [stats, setStats] = useState({ total: 0, successful: 0, pending: 0, totalAmount: 0 });
   const [typeFilter, setTypeFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -47,6 +48,9 @@ export default function AdminTransactions() {
       if (response.success) {
         setTransactions(response.transactions || []);
         setTotalPages(response.pagination?.pages || 0);
+        if (response.stats) {
+          setStats(response.stats);
+        }
       } else {
         setError(response.message || 'Failed to fetch transactions');
       }
@@ -238,6 +242,7 @@ export default function AdminTransactions() {
       !searchTerm ||
       tx.userId?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       tx.userId?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      tx.userId?.phone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       tx.reference?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesPendingVerification =
@@ -246,12 +251,10 @@ export default function AdminTransactions() {
     return matchesSearch && matchesPendingVerification;
   });
 
+  const statsData = stats;
+
   const allSelected = filteredTransactions.length > 0 && filteredTransactions.every(tx => selectedIds.has(tx._id));
   const someSelected = selectedIds.size > 0;
-
-  const successCount = filteredTransactions.filter(t => getResolvedPaymentStatus(t) === 'completed').length;
-  const pendingCount = filteredTransactions.filter(t => getResolvedPaymentStatus(t) === 'pending').length;
-  const totalAmount = filteredTransactions.reduce((sum, t) => sum + (t.amount || 0), 0);
 
   return (
     <div className="flex h-screen bg-slate-100">
@@ -292,7 +295,7 @@ export default function AdminTransactions() {
                   </div>
                 </div>
                 <p className="text-[11px] sm:text-sm text-slate-500 mb-0.5">Total Transactions</p>
-                <p className="text-xl sm:text-3xl font-bold text-slate-900">{filteredTransactions.length}</p>
+                <p className="text-xl sm:text-3xl font-bold text-slate-900">{statsData.total}</p>
               </div>
 
               <div className="bg-white rounded-2xl p-3 sm:p-5 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all">
@@ -302,7 +305,7 @@ export default function AdminTransactions() {
                   </div>
                 </div>
                 <p className="text-[11px] sm:text-sm text-slate-500 mb-0.5">Successful</p>
-                <p className="text-xl sm:text-3xl font-bold text-slate-900">{successCount}</p>
+                <p className="text-xl sm:text-3xl font-bold text-slate-900">{statsData.successful}</p>
               </div>
 
               <div className="bg-white rounded-2xl p-3 sm:p-5 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all">
@@ -312,7 +315,7 @@ export default function AdminTransactions() {
                   </div>
                 </div>
                 <p className="text-[11px] sm:text-sm text-slate-500 mb-0.5">Pending</p>
-                <p className="text-xl sm:text-3xl font-bold text-slate-900">{pendingCount}</p>
+                <p className="text-xl sm:text-3xl font-bold text-slate-900">{statsData.pending}</p>
               </div>
 
               <div className="bg-white rounded-2xl p-3 sm:p-5 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all">
@@ -322,7 +325,7 @@ export default function AdminTransactions() {
                   </div>
                 </div>
                 <p className="text-[11px] sm:text-sm text-slate-500 mb-0.5">Total Amount</p>
-                <p className="text-xl sm:text-3xl font-bold text-slate-900">GHS {formatNumberAbbreviated(totalAmount)}</p>
+                <p className="text-xl sm:text-3xl font-bold text-slate-900">GHS {formatNumberAbbreviated(statsData.totalAmount)}</p>
               </div>
             </div>
 
@@ -334,7 +337,7 @@ export default function AdminTransactions() {
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
                     type="text"
-                    placeholder="Search by user name, email, or reference..."
+                    placeholder="Search by user name, email, phone or reference..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-slate-400 focus:ring-0 text-sm hover:border-slate-300"

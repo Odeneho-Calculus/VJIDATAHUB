@@ -22,6 +22,7 @@ export default function AdminOrders() {
 
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+  const [stats, setStats] = useState({ total: 0, completed: 0, pending: 0, processing: 0 });
   const [statusFilter, setStatusFilter] = useState('');
   const [networkFilter, setNetworkFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -85,6 +86,9 @@ export default function AdminOrders() {
       if (response.success) {
         setOrders(response.data?.orders || response.orders || []);
         setTotalPages(response.data?.pagination?.pages || response.pagination?.pages || 0);
+        if (response.data?.stats) {
+          setStats(response.data.stats);
+        }
       } else {
         if (!silent) toast.error(response.message || 'Failed to fetch orders', { duration: 5000 });
       }
@@ -117,12 +121,14 @@ export default function AdminOrders() {
       const matchesSearch = !term ||
         (order.user?.name || order.userId?.name || '').toLowerCase().includes(term) ||
         (order.user?.email || order.userId?.email || '').toLowerCase().includes(term) ||
+        (order.user?.phone || order.userId?.phone || '').toLowerCase().includes(term) ||
         (order.phoneNumber || '').toLowerCase().includes(term) ||
         (order.orderNumber || '').toLowerCase().includes(term) ||
         (order.planName || '').toLowerCase().includes(term) ||
         (order.store?.name || '').toLowerCase().includes(term) ||
         (order.store?.owner?.name || '').toLowerCase().includes(term) ||
-        (order.store?.owner?.email || '').toLowerCase().includes(term);
+        (order.store?.owner?.email || '').toLowerCase().includes(term) ||
+        (order.store?.owner?.phone || '').toLowerCase().includes(term);
 
       const matchesNetwork = !networkFilter || networksMatch(order.network, networkFilter);
       return matchesSearch && matchesNetwork;
@@ -137,7 +143,7 @@ export default function AdminOrders() {
     return { total, completed, pending, processing };
   };
 
-  const stats = calculateStats();
+  const statsData = stats;
   const filteredOrders = getFilteredOrders();
   const allSelected = filteredOrders.length > 0 && filteredOrders.every(order => selectedIds.has(order.id || order._id));
   const someSelected = selectedIds.size > 0;
@@ -369,7 +375,7 @@ export default function AdminOrders() {
                   </div>
                 </div>
                 <p className="text-[11px] sm:text-sm text-slate-500 mb-0.5">Total Orders</p>
-                <p className="text-xl sm:text-3xl font-bold text-slate-900">{stats.total}</p>
+                <p className="text-xl sm:text-3xl font-bold text-slate-900">{statsData.total}</p>
               </div>
 
               <div className="bg-white rounded-2xl p-3 sm:p-5 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all">
@@ -379,7 +385,7 @@ export default function AdminOrders() {
                   </div>
                 </div>
                 <p className="text-[11px] sm:text-sm text-slate-500 mb-0.5">Completed</p>
-                <p className="text-xl sm:text-3xl font-bold text-slate-900">{stats.completed}</p>
+                <p className="text-xl sm:text-3xl font-bold text-slate-900">{statsData.completed}</p>
               </div>
 
               <div className="bg-white rounded-2xl p-3 sm:p-5 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all">
@@ -389,7 +395,7 @@ export default function AdminOrders() {
                   </div>
                 </div>
                 <p className="text-[11px] sm:text-sm text-slate-500 mb-0.5">Pending</p>
-                <p className="text-xl sm:text-3xl font-bold text-slate-900">{stats.pending}</p>
+                <p className="text-xl sm:text-3xl font-bold text-slate-900">{statsData.pending}</p>
               </div>
 
               <div className="bg-white rounded-2xl p-3 sm:p-5 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all">
@@ -399,7 +405,7 @@ export default function AdminOrders() {
                   </div>
                 </div>
                 <p className="text-[11px] sm:text-sm text-slate-500 mb-0.5">Processing</p>
-                <p className="text-xl sm:text-3xl font-bold text-slate-900">{stats.processing}</p>
+                <p className="text-xl sm:text-3xl font-bold text-slate-900">{statsData.processing}</p>
               </div>
             </div>
 

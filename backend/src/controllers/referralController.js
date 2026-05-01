@@ -57,8 +57,8 @@ exports.getReferralLeaderboard = async (req, res) => {
 exports.getAllReferrals = async (req, res) => {
   try {
     const referrals = await Referral.find()
-      .populate('referrer', 'name email')
-      .populate('referredUser', 'name email')
+      .populate('referrer', 'name email phone')
+      .populate('referredUser', 'name email phone')
       .sort({ createdAt: -1 });
 
     res.status(200).json({
