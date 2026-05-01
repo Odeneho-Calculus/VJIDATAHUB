@@ -79,12 +79,26 @@ exports.register = async (req, res) => {
       });
     }
 
-    const userExists = await User.findOne({ email });
+    const userExists = await User.findOne({ 
+      $or: [
+        { email: email.toLowerCase() },
+        { phone: phoneValidation.normalized }
+      ]
+    });
+
     if (userExists) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email already registered'
-      });
+      if (userExists.email === email.toLowerCase()) {
+        return res.status(400).json({
+          success: false,
+          message: 'Email already registered. Please login instead.'
+        });
+      }
+      if (userExists.phone === phoneValidation.normalized) {
+        return res.status(400).json({
+          success: false,
+          message: 'Phone number already exists with an account. Please login instead.'
+        });
+      }
     }
 
     let referredBy = null;
