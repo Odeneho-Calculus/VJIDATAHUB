@@ -54,7 +54,7 @@ export default function PublicCatalog() {
                 socketRef.current.disconnect();
             }
         };
-    }, [slug, fetchStoreData, setupSocket]);
+    }, [slug]);
 
     useEffect(() => {
         // keep URL in sync with selected network
