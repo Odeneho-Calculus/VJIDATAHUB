@@ -121,7 +121,7 @@ export default function Home() {
     },
     {
       icon: Wallet,
-      title: 'Wallet and Payout Engine',
+      title: 'Wallet & Payout Engine',
       desc: 'Track balances, commissions, fees, and payout history from one financial workspace.',
     },
     {
@@ -131,12 +131,12 @@ export default function Home() {
     },
     {
       icon: LayoutDashboard,
-      title: 'Unified Operational Dashboard',
+      title: 'Unified Dashboard',
       desc: 'Agents work from focused views with role-based actions, reports, and controls.',
     },
     {
       icon: Settings,
-      title: 'Policy and Settings Governance',
+      title: 'Policy Governance',
       desc: 'Manage referral rules, provider settings, and operational safeguards centrally.',
     },
     {
@@ -165,12 +165,8 @@ export default function Home() {
   ];
 
   const heroCount = (value) => {
-    if (value >= 1000000) {
-      return `${(value / 1000000).toFixed(1)}M+`;
-    }
-    if (value >= 1000) {
-      return `${Math.round(value / 1000)}K+`;
-    }
+    if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M+`;
+    if (value >= 1000) return `${Math.round(value / 1000)}K+`;
     return value.toLocaleString();
   };
 
@@ -189,133 +185,553 @@ export default function Home() {
   }, [user]);
 
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div style={{ fontFamily: "'DM Sans', 'Nunito', sans-serif", background: '#f5f5f0', minHeight: '100vh' }}>
       <style>{`
-        @keyframes homeShorelineWave {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@500&display=swap');
+
+        .vji-hero {
+          position: relative;
+          overflow: hidden;
+          background: #111;
+          min-height: 400px;
         }
-        .home-shoreline-wave {
+        .vji-hero-img {
           position: absolute;
-          left: 0;
-          width: 200%;
+          inset: 0;
+          width: 100%;
           height: 100%;
-          will-change: transform;
+          object-fit: cover;
+          object-position: 70% center;
+          opacity: 0.38;
         }
-        .home-shoreline-wave--back {
-          animation: homeShorelineWave 14s linear infinite;
-          opacity: 0.55;
+        .vji-hero-content {
+          position: relative;
+          z-index: 2;
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 48px 20px 56px;
         }
-        .home-shoreline-wave--front {
-          animation: homeShorelineWave 8s linear infinite reverse;
-          opacity: 0.9;
+        .vji-tag {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          background: #f0a500;
+          color: #111;
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          padding: 5px 12px;
+          border-radius: 4px;
+          margin-bottom: 20px;
+        }
+        .vji-hero h1 {
+          font-size: clamp(28px, 5vw, 52px);
+          font-weight: 800;
+          color: #fff;
+          line-height: 1.15;
+          margin: 0 0 16px;
+          max-width: 640px;
+        }
+        .vji-hero p {
+          font-size: clamp(14px, 2vw, 16px);
+          color: #ccc;
+          max-width: 520px;
+          line-height: 1.6;
+          margin: 0 0 28px;
+        }
+        .vji-btn-primary {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          background: #f0a500;
+          color: #111;
+          font-weight: 700;
+          font-size: 14px;
+          padding: 12px 22px;
+          border-radius: 6px;
+          text-decoration: none;
+          transition: background 0.15s;
+        }
+        .vji-btn-primary:hover { background: #d49200; }
+        .vji-btn-outline {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          background: transparent;
+          color: #fff;
+          font-weight: 700;
+          font-size: 14px;
+          padding: 12px 22px;
+          border-radius: 6px;
+          border: 1.5px solid rgba(255,255,255,0.3);
+          text-decoration: none;
+          transition: border-color 0.15s, background 0.15s;
+        }
+        .vji-btn-outline:hover { border-color: #fff; background: rgba(255,255,255,0.07); }
+        .vji-btn-dark {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          background: #111;
+          color: #fff;
+          font-weight: 700;
+          font-size: 14px;
+          padding: 12px 22px;
+          border-radius: 6px;
+          text-decoration: none;
+          transition: background 0.15s;
+        }
+        .vji-btn-dark:hover { background: #222; }
+
+        .vji-main {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 28px 20px;
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+        }
+
+        /* Section wrapper */
+        .vji-card {
+          background: #fff;
+          border: 1.5px solid #e4e4de;
+          border-radius: 10px;
+          padding: 20px;
+        }
+        .vji-section-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          margin-bottom: 16px;
+          flex-wrap: wrap;
+        }
+        .vji-section-title {
+          font-size: 18px;
+          font-weight: 800;
+          color: #111;
+          margin: 0;
+        }
+        .vji-badge {
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          padding: 4px 10px;
+          border-radius: 4px;
+          background: #111;
+          color: #f0a500;
+        }
+        .vji-badge-muted {
+          background: #f0f0ea;
+          color: #555;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          padding: 4px 10px;
+          border-radius: 4px;
+        }
+
+        /* Plan grid */
+        .vji-plans-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 10px;
+        }
+        @media (min-width: 1024px) {
+          .vji-plans-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+        .vji-plan-card {
+          border: 1.5px solid #e4e4de;
+          border-radius: 8px;
+          padding: 14px;
+          background: #fafaf7;
+          transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .vji-plan-card:hover {
+          border-color: #f0a500;
+          box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        }
+        .vji-plan-card-lg-only {
+          display: none;
+        }
+        @media (min-width: 1024px) {
+          .vji-plan-card-lg-only { display: block; }
+        }
+        .vji-network-pill {
+          display: inline-block;
+          background: #111;
+          color: #fff;
+          font-size: 9px;
+          font-weight: 800;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          padding: 3px 8px;
+          border-radius: 3px;
+        }
+        .vji-data-pill {
+          display: inline-block;
+          background: #f0f0ea;
+          color: #333;
+          font-size: 9px;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          padding: 3px 8px;
+          border-radius: 3px;
+          border: 1px solid #e0e0d8;
+        }
+        .vji-plan-price-label {
+          font-size: 10px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          color: #888;
+          margin-top: 10px;
+          margin-bottom: 2px;
+        }
+        .vji-plan-price {
+          font-family: 'DM Mono', monospace;
+          font-size: 17px;
+          font-weight: 600;
+          color: #111;
+        }
+
+        /* Skeleton */
+        .vji-skeleton {
+          background: #ececea;
+          border-radius: 4px;
+          animation: vji-pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes vji-pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.45; }
+        }
+
+        /* Features grid */
+        .vji-features-grid {
+          display: grid;
+          grid-template-columns: repeat(1, 1fr);
+          gap: 10px;
+        }
+        @media (min-width: 640px) {
+          .vji-features-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (min-width: 1024px) {
+          .vji-features-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        .vji-feature-item {
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+          padding: 14px;
+          border: 1.5px solid #e4e4de;
+          border-radius: 8px;
+          background: #fafaf7;
+          transition: border-color 0.15s;
+        }
+        .vji-feature-item:hover { border-color: #ccc; }
+        .vji-feature-icon {
+          width: 36px;
+          height: 36px;
+          background: #111;
+          color: #f0a500;
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+        .vji-feature-title {
+          font-size: 14px;
+          font-weight: 700;
+          color: #111;
+          margin: 0 0 4px;
+        }
+        .vji-feature-desc {
+          font-size: 12.5px;
+          color: #666;
+          line-height: 1.5;
+          margin: 0;
+        }
+
+        /* Stats + performance section */
+        .vji-perf-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+        @media (min-width: 1024px) {
+          .vji-perf-grid { grid-template-columns: 2fr 3fr; align-items: start; }
+        }
+        .vji-stats-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 10px;
+        }
+        .vji-stat-box {
+          border: 1.5px solid #e4e4de;
+          border-radius: 8px;
+          padding: 14px 16px;
+          background: #fafaf7;
+        }
+        .vji-stat-label {
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: #888;
+          margin-bottom: 6px;
+        }
+        .vji-stat-value {
+          font-family: 'DM Mono', monospace;
+          font-size: 22px;
+          font-weight: 600;
+          color: #111;
+        }
+        .vji-stat-box-accent {
+          border-color: #111;
+          background: #111;
+        }
+        .vji-stat-box-accent .vji-stat-label { color: #f0a500; }
+        .vji-stat-box-accent .vji-stat-value { color: #fff; }
+        .vji-stat-box-accent p {
+          font-size: 11px;
+          color: #aaa;
+          margin: 4px 0 0;
+        }
+
+        /* Columns layout */
+        .vji-two-col {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+        @media (min-width: 1024px) {
+          .vji-two-col { grid-template-columns: 3fr 2fr; }
+        }
+
+        /* Workflow items */
+        .vji-workflow-item {
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+          padding: 14px;
+          border: 1.5px solid #e4e4de;
+          border-radius: 8px;
+          background: #fafaf7;
+        }
+        .vji-workflow-icon {
+          width: 36px;
+          height: 36px;
+          background: #f0a500;
+          color: #111;
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+        .vji-workflow-title {
+          font-size: 14px;
+          font-weight: 700;
+          color: #111;
+          margin: 0 0 3px;
+        }
+        .vji-workflow-desc {
+          font-size: 12.5px;
+          color: #666;
+          line-height: 1.5;
+          margin: 0;
+        }
+
+        /* Role outcomes */
+        .vji-role-box {
+          border: 1.5px solid #e4e4de;
+          border-radius: 8px;
+          padding: 14px;
+          background: #fafaf7;
+          margin-bottom: 10px;
+        }
+        .vji-role-box:last-child { margin-bottom: 0; }
+        .vji-role-header {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 6px;
+        }
+        .vji-role-title {
+          font-size: 14px;
+          font-weight: 700;
+          color: #111;
+          margin: 0;
+        }
+        .vji-role-desc {
+          font-size: 12.5px;
+          color: #666;
+          line-height: 1.5;
+          margin: 0;
+        }
+        .vji-referral-box {
+          border: 1.5px solid #f0a500;
+          border-radius: 8px;
+          padding: 14px;
+          background: #fffbf0;
+          display: flex;
+          align-items: flex-start;
+          gap: 8px;
+        }
+        .vji-referral-box p {
+          font-size: 12.5px;
+          color: #333;
+          margin: 0;
+          line-height: 1.5;
+        }
+
+        /* CTA section */
+        .vji-cta {
+          background: #111;
+          border-radius: 10px;
+          padding: 24px 20px;
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+        }
+        @media (min-width: 768px) {
+          .vji-cta {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+          }
+        }
+        .vji-cta h2 {
+          font-size: 18px;
+          font-weight: 800;
+          color: #fff;
+          margin: 0 0 6px;
+        }
+        .vji-cta p {
+          font-size: 13px;
+          color: #aaa;
+          margin: 0;
+        }
+        .vji-cta-btns {
+          display: flex;
+          gap: 10px;
+          flex-wrap: wrap;
+          flex-shrink: 0;
+        }
+
+        /* Divider line */
+        .vji-divider-label {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: #999;
+          margin-bottom: 4px;
+        }
+        .vji-divider-label::before,
+        .vji-divider-label::after {
+          content: '';
+          flex: 1;
+          height: 1px;
+          background: #e0e0d8;
+        }
+
+        /* perf checklist */
+        .vji-check-list {
+          list-style: none;
+          margin: 12px 0 0;
+          padding: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+        .vji-check-list li {
+          display: flex;
+          align-items: flex-start;
+          gap: 8px;
+          font-size: 13px;
+          color: #444;
+        }
+        .vji-check-list li svg {
+          flex-shrink: 0;
+          margin-top: 1px;
+          color: #f0a500;
         }
       `}</style>
 
-      <section className="relative w-full overflow-hidden border-y border-slate-900/10 shadow-2xl min-h-[420px] sm:min-h-[480px] lg:min-h-0">
-        {/* Background image — absolutely fills the section and never crops subject */}
+      {/* ── HERO ── */}
+      <section className="vji-hero">
         <img
           src="/banner/homebanner.png"
           alt=""
           aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover object-[70%_center] sm:object-center"
+          className="vji-hero-img"
         />
-        {/* Gradient overlay */}
-        <div
-          className="absolute inset-0"
-          style={{ background: 'linear-gradient(112deg, rgba(2, 6, 23, 0.97) 0%, rgba(15, 23, 42, 0.82) 45%, rgba(2, 132, 199, 0.18) 100%)' }}
-        />
-        <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full bg-cyan-300/15 blur-3xl" />
-        <div className="absolute -bottom-10 -left-10 w-44 h-44 rounded-full bg-amber-300/20 blur-3xl" />
-
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-14">
-          <div className="max-w-3xl space-y-5">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-cyan-200/40 bg-cyan-100/10 backdrop-blur-sm text-cyan-100 whitespace-nowrap w-fit">
-              <Sparkles className="w-3.5 h-3.5 flex-shrink-0" />
-              <span className="text-[11px] font-semibold tracking-wide uppercase">Data Reselling Control Center</span>
-            </div>
-
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight text-white">
-              Built for Agents Who Run Data Operations at Scale
-            </h1>
-
-            <p className="text-sm sm:text-base lg:text-lg text-slate-100 max-w-2xl">
-              One compact platform for storefront management, order processing, commissions, and oversight. Browse plans in view-only mode here, then continue to purchase in the right flow.
-            </p>
-
-            <div className="grid grid-cols-2 gap-3 pt-1 max-w-md">
-              <Link
-                to={user ? dashboardRoute : '/register'}
-                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white text-slate-900 font-semibold hover:bg-slate-100 transition"
-              >
-                {user ? 'Dashboard' : 'Join Now'}
-                <ArrowUpRight className="w-4 h-4" />
-              </Link>
-              <Link
-                to={user ? myStoreRoute : '/login'}
-                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-slate-200/40 bg-slate-900/35 text-white font-semibold hover:bg-slate-900/50 backdrop-blur-sm transition"
-              >
-                {user ? 'My Store' : 'Sign In'}
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
+        <div className="vji-hero-content">
+          <div className="vji-tag">
+            <Sparkles style={{ width: 11, height: 11 }} />
+            Data Reselling Control Center
           </div>
-        </div>
-
-        <div className="pointer-events-none absolute inset-x-0 bottom-[-1px] h-12 sm:h-16 overflow-hidden z-20">
-          <svg
-            viewBox="0 0 1200 120"
-            preserveAspectRatio="none"
-            className="home-shoreline-wave home-shoreline-wave--back bottom-0"
-          >
-            <path
-              d="M0,72 C100,94 220,24 340,46 C470,72 560,118 690,98 C810,80 920,26 1040,44 C1120,56 1160,70 1200,78 L1200,120 L0,120 Z"
-              fill="rgba(241, 245, 249, 0.55)"
-            />
-          </svg>
-          <svg
-            viewBox="0 0 1200 120"
-            preserveAspectRatio="none"
-            className="home-shoreline-wave home-shoreline-wave--front bottom-[-6px]"
-          >
-            <path
-              d="M0,84 C120,118 230,34 350,58 C480,84 570,112 700,94 C820,78 920,30 1040,52 C1120,66 1160,84 1200,92 L1200,120 L0,120 Z"
-              fill="rgba(248, 250, 252, 0.96)"
-            />
-          </svg>
+          <h1>Built for Agents Who Run Data Operations at Scale</h1>
+          <p>
+            One compact platform for storefront management, order processing, commissions, and oversight. Browse plans here, then continue to purchase in the right flow.
+          </p>
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <Link to={user ? dashboardRoute : '/register'} className="vji-btn-primary">
+              {user ? 'Dashboard' : 'Join Now'}
+              <ArrowUpRight style={{ width: 16, height: 16 }} />
+            </Link>
+            <Link to={user ? myStoreRoute : '/login'} className="vji-btn-outline">
+              {user ? 'My Store' : 'Sign In'}
+              <ArrowRight style={{ width: 16, height: 16 }} />
+            </Link>
+          </div>
         </div>
       </section>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
+      <main className="vji-main">
 
-        <section className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+        {/* ── DATA PLANS PREVIEW ── */}
+        <div className="vji-card">
+          <div className="vji-section-header">
             <div>
-              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900">Data Plans Preview</h2>
-              <p className="text-sm text-slate-600 mt-1">View-only plans. Purchase starts on the next page.</p>
+              <h2 className="vji-section-title">Data Plans Preview</h2>
+              <p style={{ fontSize: 12.5, color: '#888', margin: '3px 0 0' }}>View-only. Purchase starts on the next page.</p>
             </div>
             <Link
               to={user ? '/buy-data' : '/guest/purchase'}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-700 text-white font-semibold hover:bg-cyan-800 transition w-full sm:w-auto"
+              className="vji-btn-dark"
+              style={{ fontSize: 13, padding: '9px 16px', whiteSpace: 'nowrap' }}
             >
               View All Plans
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight style={{ width: 14, height: 14 }} />
             </Link>
           </div>
 
           {previewPlansLoading ? (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
-              {Array.from({ length: 8 }).map((_, index) => (
-                <div key={index} className={`rounded-xl border border-slate-200 bg-slate-50 p-3 sm:p-4 animate-pulse ${index >= 4 ? 'hidden lg:block' : ''}`}>
-                  <div className="h-5 w-16 bg-slate-200 rounded mb-3" />
-                  <div className="h-4 w-3/4 bg-slate-200 rounded mb-2" />
-                  <div className="h-3 w-1/2 bg-slate-200 rounded mb-4" />
-                  <div className="h-6 w-20 bg-slate-200 rounded" />
+            <div className="vji-plans-grid">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div
+                  key={i}
+                  className={`vji-plan-card${i >= 4 ? ' vji-plan-card-lg-only' : ''}`}
+                >
+                  <div className="vji-skeleton" style={{ height: 16, width: 60, marginBottom: 10 }} />
+                  <div className="vji-skeleton" style={{ height: 12, width: '70%', marginBottom: 8 }} />
+                  <div className="vji-skeleton" style={{ height: 20, width: 80 }} />
                 </div>
               ))}
             </div>
           ) : previewPlans.length > 0 ? (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+            <div className="vji-plans-grid">
               {previewPlans.map((plan, index) => {
                 const displayPrice = Number(plan?.sellingPrice ?? plan?.price ?? 0);
                 const displayDataSize = plan?.dataSize
@@ -324,177 +740,171 @@ export default function Home() {
                   || (plan?.planName?.match(/\d+(?:\.\d+)?\s*GB/i)?.[0] ?? '')
                   || 'Data';
                 return (
-                  <div key={plan._id || `${plan.network}-${plan.name}-${plan.dataAmount}`} className={`relative overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-3 sm:p-4 ring-1 ring-slate-200/60 shadow-[0_8px_22px_rgba(2,6,23,0.12),0_2px_6px_rgba(2,6,23,0.06)] hover:shadow-[0_18px_36px_rgba(2,6,23,0.18),0_6px_14px_rgba(6,95,130,0.14)] hover:-translate-y-0.5 hover:border-cyan-300 transition-all duration-300 ${index >= 4 ? 'hidden lg:block' : ''}`}>
-                    <div className="pointer-events-none absolute -right-7 -top-7 h-16 w-16 rounded-full bg-cyan-100/65 blur-xl" />
-
-                    <div className="relative flex items-center justify-between gap-2 mb-2 sm:mb-3">
-                      <span className="inline-flex items-center rounded-full px-2 py-0.5 sm:px-2.5 sm:py-1 text-[9px] sm:text-[10px] font-extrabold uppercase tracking-widest bg-slate-900 text-white">
-                        {plan.network || 'Network'}
-                      </span>
-                      <span className="inline-flex items-center rounded-full border border-cyan-200 bg-cyan-50 px-2 py-0.5 text-[9px] sm:text-[10px] font-bold uppercase tracking-wide text-cyan-800">
-                        {displayDataSize}
-                      </span>
+                  <div
+                    key={plan._id || `${plan.network}-${plan.name}-${plan.dataAmount}`}
+                    className={`vji-plan-card${index >= 4 ? ' vji-plan-card-lg-only' : ''}`}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
+                      <span className="vji-network-pill">{plan.network || 'Network'}</span>
+                      <span className="vji-data-pill">{displayDataSize}</span>
                     </div>
-
-                    <div className="relative mt-3 rounded-xl border border-slate-100 bg-slate-50/80 px-2.5 py-2">
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Price</p>
-                      <p className="text-base sm:text-lg font-black text-slate-900 leading-tight mt-0.5">GHS {displayPrice.toFixed(2)}</p>
-                    </div>
+                    <p className="vji-plan-price-label">Price</p>
+                    <p className="vji-plan-price">GHS {displayPrice.toFixed(2)}</p>
                   </div>
                 );
               })}
             </div>
           ) : (
-            <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-5 text-center">
-              <p className="text-sm text-slate-600">No plans available for preview right now.</p>
+            <div style={{ border: '1.5px dashed #ddd', borderRadius: 8, padding: 20, textAlign: 'center' }}>
+              <p style={{ fontSize: 13, color: '#888', margin: 0 }}>No plans available for preview right now.</p>
             </div>
           )}
-        </section>
+        </div>
 
-        <section className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6">
-          <div className="flex items-center justify-between gap-3 mb-4">
-            <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900">Platform Capabilities</h2>
-            <span className="text-xs sm:text-sm font-semibold text-cyan-700 bg-cyan-50 border border-cyan-100 rounded-full px-3 py-1">Agent Focus</span>
+        {/* ── PLATFORM CAPABILITIES ── */}
+        <div className="vji-card">
+          <div className="vji-section-header">
+            <h2 className="vji-section-title">Platform Capabilities</h2>
+            <span className="vji-badge-muted">Agent Focus</span>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+          <div className="vji-features-grid">
             {features.map((feature) => (
-              <div key={feature.title} className="group rounded-xl border border-slate-200 bg-slate-50 p-4 hover:border-cyan-300 hover:bg-cyan-50/40 transition-all">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-10 h-10 rounded-lg bg-slate-900 text-white flex items-center justify-center flex-shrink-0 group-hover:bg-cyan-700 transition-colors">
-                    <feature.icon className="w-5 h-5" />
-                  </div>
-                  <h3 className="text-base font-bold text-slate-900">{feature.title}</h3>
+              <div key={feature.title} className="vji-feature-item">
+                <div className="vji-feature-icon">
+                  <feature.icon style={{ width: 18, height: 18 }} />
                 </div>
-                <p className="text-sm text-slate-600 leading-relaxed">{feature.desc}</p>
+                <div>
+                  <p className="vji-feature-title">{feature.title}</p>
+                  <p className="vji-feature-desc">{feature.desc}</p>
+                </div>
               </div>
             ))}
           </div>
-        </section>
+        </div>
 
-        <section className="relative overflow-hidden rounded-2xl border border-cyan-100 bg-gradient-to-r from-cyan-50/70 via-white to-slate-50 p-4 sm:p-5">
-          <div className="absolute -top-20 right-0 h-52 w-52 rounded-full bg-cyan-200/35 blur-3xl" />
-
-          <div className="relative grid grid-cols-1 lg:grid-cols-5 gap-4 items-start">
-            <div className="lg:col-span-2 space-y-3">
-              <span className="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-cyan-700">
-                <CheckCircle2 className="h-4 w-4" />
-                Platform Performance
-              </span>
-              <h2 className="text-xl sm:text-2xl font-black leading-tight text-slate-900">Operational Confidence, Backed by Live Numbers</h2>
-              <p className="text-sm text-slate-600 leading-relaxed">
+        {/* ── PERFORMANCE / STATS ── */}
+        <div className="vji-card">
+          <div className="vji-perf-grid">
+            <div>
+              <span className="vji-badge" style={{ marginBottom: 12, display: 'inline-block' }}>Platform Performance</span>
+              <h2 className="vji-section-title" style={{ marginBottom: 8 }}>Operational Confidence, Backed by Numbers</h2>
+              <p style={{ fontSize: 13, color: '#666', lineHeight: 1.6, margin: 0 }}>
                 Dependable processing, clear transaction trails, and predictable availability for daily sales operations.
               </p>
-              <div className="space-y-1.5 text-sm text-slate-700">
-                <div className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 mt-0.5 text-cyan-600 flex-shrink-0" />
-                  <p>Real-time order visibility.</p>
-                </div>
-                <div className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 mt-0.5 text-cyan-600 flex-shrink-0" />
-                  <p>Clean wallet and payout reconciliation.</p>
-                </div>
-                <div className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 mt-0.5 text-cyan-600 flex-shrink-0" />
-                  <p>Reliable uptime with responsive support.</p>
-                </div>
-              </div>
+              <ul className="vji-check-list">
+                <li>
+                  <CheckCircle2 style={{ width: 14, height: 14 }} />
+                  Real-time order visibility.
+                </li>
+                <li>
+                  <CheckCircle2 style={{ width: 14, height: 14 }} />
+                  Clean wallet and payout reconciliation.
+                </li>
+                <li>
+                  <CheckCircle2 style={{ width: 14, height: 14 }} />
+                  Reliable uptime with responsive support.
+                </li>
+              </ul>
             </div>
-
-            <div className="lg:col-span-3 grid grid-cols-2 gap-2.5 sm:gap-3">
-              <div className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4">
-                <p className="text-[11px] uppercase tracking-wider text-slate-500">Agents</p>
-                <p className="text-xl sm:text-2xl font-black text-slate-900 mt-1.5">{heroCount(stats.totalUsers)}</p>
+            <div className="vji-stats-grid">
+              <div className="vji-stat-box">
+                <p className="vji-stat-label">Agents</p>
+                <p className="vji-stat-value">{heroCount(stats.totalUsers)}</p>
               </div>
-              <div className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4">
-                <p className="text-[11px] uppercase tracking-wider text-slate-500">Transactions</p>
-                <p className="text-xl sm:text-2xl font-black text-slate-900 mt-1.5">{heroCount(stats.transactions)}</p>
+              <div className="vji-stat-box">
+                <p className="vji-stat-label">Transactions</p>
+                <p className="vji-stat-value">{heroCount(stats.transactions)}</p>
               </div>
-              <div className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4">
-                <p className="text-[11px] uppercase tracking-wider text-slate-500">Completed Orders</p>
-                <p className="text-xl sm:text-2xl font-black text-slate-900 mt-1.5">{heroCount(stats.totalOrdersCompleted)}</p>
+              <div className="vji-stat-box">
+                <p className="vji-stat-label">Completed Orders</p>
+                <p className="vji-stat-value">{heroCount(stats.totalOrdersCompleted)}</p>
               </div>
-              <div className="rounded-xl border border-cyan-200 bg-cyan-50 p-3 sm:p-4">
-                <p className="text-[11px] uppercase tracking-wider text-cyan-700">Uptime</p>
-                <p className="text-xl sm:text-2xl font-black text-cyan-900 mt-1.5">{stats.uptime}%</p>
-                <p className="mt-1 text-xs text-cyan-800">Reliable processing for day-to-day operations.</p>
+              <div className="vji-stat-box vji-stat-box-accent">
+                <p className="vji-stat-label">Uptime</p>
+                <p className="vji-stat-value">{stats.uptime}%</p>
+                <p>Reliable for day-to-day operations.</p>
               </div>
             </div>
           </div>
-        </section>
+        </div>
 
-        <section className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-5">
-          <div className="lg:col-span-3 bg-white border border-slate-200 rounded-2xl p-5 sm:p-6">
-            <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 mb-4">How Operations Flow</h2>
-            <div className="space-y-3">
+        {/* ── HOW IT WORKS + ROLES ── */}
+        <div className="vji-two-col">
+          <div className="vji-card">
+            <h2 className="vji-section-title" style={{ marginBottom: 14 }}>How Operations Flow</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {workflow.map((item) => (
-                <div key={item.title} className="rounded-xl border border-slate-200 p-4 flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0">
-                    <item.icon className="w-5 h-5" />
+                <div key={item.title} className="vji-workflow-item">
+                  <div className="vji-workflow-icon">
+                    <item.icon style={{ width: 18, height: 18 }} />
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-900">{item.title}</h3>
-                    <p className="text-sm text-slate-600">{item.desc}</p>
+                    <p className="vji-workflow-title">{item.title}</p>
+                    <p className="vji-workflow-desc">{item.desc}</p>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="lg:col-span-2 bg-white rounded-2xl p-5 sm:p-6 border border-slate-200">
-            <h2 className="text-xl font-extrabold text-slate-900 mb-4">Role Outcomes</h2>
-            <div className="space-y-3">
-              <div className="rounded-xl bg-slate-50 border border-slate-200 p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Users className="w-4 h-4 text-cyan-700" />
-                  <h3 className="font-bold text-slate-900">For Agents</h3>
-                </div>
-                <p className="text-sm text-slate-600">Run storefront orders, track commissions, and manage wallet activity in one focused workspace.</p>
+          <div className="vji-card">
+            <h2 className="vji-section-title" style={{ marginBottom: 14 }}>Role Outcomes</h2>
+            <div className="vji-role-box">
+              <div className="vji-role-header">
+                <Users style={{ width: 15, height: 15, color: '#f0a500' }} />
+                <p className="vji-role-title">For Agents</p>
               </div>
-              <div className="rounded-xl bg-slate-50 border border-slate-200 p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Shield className="w-4 h-4 text-cyan-700" />
-                  <h3 className="font-bold text-slate-900">For Agent Operations</h3>
-                </div>
-                <p className="text-sm text-slate-600">Oversee teams, providers, orders, referrals, and financial controls with complete visibility.</p>
+              <p className="vji-role-desc">Run storefront orders, track commissions, and manage wallet activity in one focused workspace.</p>
+            </div>
+            <div className="vji-role-box">
+              <div className="vji-role-header">
+                <Shield style={{ width: 15, height: 15, color: '#f0a500' }} />
+                <p className="vji-role-title">For Agent Operations</p>
               </div>
-              <div className="rounded-xl bg-cyan-50 border border-cyan-200 p-4">
-                <div className="flex items-start gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-cyan-700 flex-shrink-0 mt-0.5" />
-                  <p className="text-sm text-cyan-900">
-                    {referralSettings
-                      ? `Referral bonus is configured at GHS ${referralSettings.amountPerReferral} per successful signup.`
-                      : 'Referral incentives can be configured and tracked from operations settings.'}
-                  </p>
-                </div>
-              </div>
+              <p className="vji-role-desc">Oversee teams, providers, orders, referrals, and financial controls with complete visibility.</p>
+            </div>
+            <div className="vji-referral-box">
+              <CheckCircle2 style={{ width: 16, height: 16, color: '#f0a500', flexShrink: 0, marginTop: 1 }} />
+              <p>
+                {referralSettings
+                  ? `Referral bonus configured at GHS ${referralSettings.amountPerReferral} per successful signup.`
+                  : 'Referral incentives can be configured and tracked from operations settings.'}
+              </p>
             </div>
           </div>
-        </section>
+        </div>
 
+        {/* ── CTA (only for guests) ── */}
         {!user && (
-          <section className="bg-gradient-to-r from-cyan-50 to-slate-100 rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div>
-                <h2 className="text-2xl font-extrabold text-slate-900">Start Building Your Reselling Operation</h2>
-                <p className="text-slate-600 text-sm sm:text-base mt-1">Join as an agent to manage performance, orders, commissions, and earnings from one workspace.</p>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Link
-                  to="/register"
-                  className="inline-flex items-center justify-center px-5 py-3 rounded-xl bg-cyan-700 text-white font-semibold hover:bg-cyan-800 transition"
-                >
-                  Create Account
-                </Link>
-                <Link
-                  to="/login"
-                  className="inline-flex items-center justify-center px-5 py-3 rounded-xl border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 transition"
-                >
-                  Sign In
-                </Link>
-              </div>
+          <div className="vji-cta">
+            <div>
+              <h2>Start Building Your Reselling Operation</h2>
+              <p>Join as an agent to manage performance, orders, commissions, and earnings from one workspace.</p>
             </div>
-          </section>
+            <div className="vji-cta-btns">
+              <Link to="/register" className="vji-btn-primary">Create Account</Link>
+              <Link
+                to="/login"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  background: 'transparent',
+                  color: '#fff',
+                  fontWeight: 700,
+                  fontSize: 14,
+                  padding: '12px 22px',
+                  borderRadius: 6,
+                  border: '1.5px solid rgba(255,255,255,0.25)',
+                  textDecoration: 'none',
+                }}
+              >
+                Sign In
+              </Link>
+            </div>
+          </div>
         )}
+
       </main>
     </div>
   );
