@@ -9,7 +9,7 @@ import {
   RefreshCw, Save, X, Palette, Smartphone, CreditCard, Search, Filter,
   TrendingUp, Wallet, Send
 } from 'lucide-react';
-import { store as storeAPI, dataplans as globalPlansAPI, wallet as walletAPI } from '../services/api';
+import { store as storeAPI, wallet as walletAPI } from '../services/api';
 import { checkers as checkersAPI } from '../services/api';
 import AgentLayout from '../components/AgentLayout';
 import AlertModal from '../components/AlertModal';
@@ -21,7 +21,6 @@ export default function AdminStore() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('general');
-  const [savingStore, setSavingStore] = useState(false);
   const [alertConfig, setAlertConfig] = useState({ isOpen: false, type: 'info', title: '', message: '' });
 
   const showAlert = (type, message, title = '') => {
@@ -31,6 +30,8 @@ export default function AdminStore() {
   useEffect(() => {
     fetchStore();
   }, []);
+
+  const navigate = useNavigate();
 
   const fetchStore = async () => {
     try {
@@ -48,8 +49,6 @@ export default function AdminStore() {
       setLoading(false);
     }
   };
-
-  const navigate = useNavigate();
 
   if (loading) {
     return (
@@ -210,7 +209,6 @@ export default function AdminStore() {
             {activeTab === 'plans' && (
               <InventoryTab
                 plans={storeData.plans || []}
-                storeId={storeData._id}
                 activeProvider={settings?.vtuProvider || 'xpresdata'}
                 onRefresh={fetchStore}
                 showAlert={showAlert}
@@ -223,10 +221,10 @@ export default function AdminStore() {
               />
             )}
             {activeTab === 'orders' && (
-              <OrdersTab storeId={storeData._id} />
+              <OrdersTab />
             )}
             {activeTab === 'commissions' && (
-              <CommissionsTab storeId={storeData._id} />
+              <CommissionsTab />
             )}
             {activeTab === 'billing' && (
               <BillingTab
@@ -276,7 +274,7 @@ export default function AdminStore() {
 
 // --- TAB COMPONENTS ---
 
-function OverviewTab({ data, loading, onRefresh, navigate, showAlert }) {
+function OverviewTab({ data, onRefresh, showAlert }) {
   const maxFeatures = 3;
   const emptyFeature = { title: '', description: '', icon: '' };
 
@@ -666,7 +664,7 @@ function OverviewTab({ data, loading, onRefresh, navigate, showAlert }) {
   );
 }
 
-function InventoryTab({ plans, storeId, activeProvider = 'xpresdata', onRefresh, showAlert }) {
+function InventoryTab({ plans, activeProvider = 'xpresdata', onRefresh, showAlert }) {
   const [showAdd, setShowAdd] = useState(false);
   const [globalPlans, setGlobalPlans] = useState([]);
   const [loadingGlobal, setLoadingGlobal] = useState(false);
@@ -1172,6 +1170,7 @@ function ColorInput({ label, value = '', onChange }) {
   );
 }
 
+// eslint-disable-next-line no-unused-vars
 function IconInput({ icon: Icon, label, value = '', onChange, prefix = '' }) {
   const displayValue = (typeof value === 'string' ? value : '').replace(prefix, '');
 
@@ -1264,7 +1263,7 @@ function PlanCard({ plan, onRemove, onEdit, isActiveForCurrentVtu = true }) {
   );
 }
 
-function OrdersTab({ storeId }) {
+function OrdersTab() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -1418,7 +1417,7 @@ function OrdersTab({ storeId }) {
   );
 }
 
-function CommissionsTab({ storeId }) {
+function CommissionsTab() {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);

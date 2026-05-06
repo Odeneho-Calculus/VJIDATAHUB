@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { ShoppingCart, Wifi, Phone, Mail, User, ArrowLeft, Layout, Zap, Check, AlertCircle, Home, Clock } from 'lucide-react';
 import { guest, publicAPI } from '../services/api';
@@ -13,8 +13,6 @@ import {
 } from '../utils/transactionCharges';
 
 export default function GuestPurchase() {
-  const navigate = useNavigate();
-  const [plans, setPlans] = useState([]);
   const [grouped, setGrouped] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -35,6 +33,7 @@ export default function GuestPurchase() {
 
   useEffect(() => {
     fetchPlans();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -76,7 +75,6 @@ export default function GuestPurchase() {
       const response = await guest.getDataPlans();
       if (response.success) {
         const allPlans = response.data || [];
-        setPlans(allPlans);
         
         // Group by network
         const groupedByNetwork = {};

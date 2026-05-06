@@ -45,6 +45,7 @@ export default function Home() {
     fetchReferralSettings();
     fetchPublicStats();
     fetchPreviewPlans();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const flattenNetworkBundles = (networkEntry) => {

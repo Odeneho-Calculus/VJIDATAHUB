@@ -4,7 +4,7 @@ import { purchases, publicAPI } from '../services/api';
 import PurchasePaymentModal from './PurchasePaymentModal';
 import Modal from './Modal';
 import { getNetworkStyles } from '../utils/networkStyles';
-import { formatCurrencyAbbreviated, formatNumberAbbreviated } from '../utils/formatCurrency';
+import { formatCurrencyAbbreviated } from '../utils/formatCurrency';
 import {
   formatChargeDescriptor,
   getDataPurchaseChargeAmount,

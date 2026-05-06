@@ -3,12 +3,12 @@ import { DollarSign, Save, X } from 'lucide-react';
 import Modal from './Modal';
 
 export default function EditXpresPricesModal({ plan, isOpen, onClose, onSave, loading = false }) {
-  const [sellingPrice, setSellingPrice] = useState(Number(plan?.sellingPrice) || 0);
-  const [agentPrice, setAgentPrice] = useState(Number(plan?.agentPrice) || 0);
-  const [vendorPrice, setVendorPrice] = useState(Number(plan?.vendorPrice) || 0);
+  const [sellingPrice, setSellingPrice] = useState(0);
+  const [agentPrice, setAgentPrice] = useState(0);
+  const [vendorPrice, setVendorPrice] = useState(0);
 
-  // Fix: Reset prices when modal opens or plan changes
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSellingPrice(Number(plan?.sellingPrice) || 0);
     setAgentPrice(Number(plan?.agentPrice) || 0);
     setVendorPrice(Number(plan?.vendorPrice) || 0);

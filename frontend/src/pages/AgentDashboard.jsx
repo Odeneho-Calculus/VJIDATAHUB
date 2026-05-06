@@ -40,7 +40,6 @@ export default function AgentDashboard() {
   const [agentFeeStatus, setAgentFeeStatus] = useState(null);
   const [accessStatus, setAccessStatus] = useState(null);
   const [adminContact, setAdminContact] = useState(null);
-  const [error, setError] = useState('');
   const [copiedLink, setCopiedLink] = useState(false);
 
   useEffect(() => {
@@ -70,7 +69,6 @@ export default function AgentDashboard() {
       setAgentFeeStatus(feeStatusRes?.feeStatus || null);
     } catch (err) {
       console.error('Failed to fetch dashboard data:', err);
-      setError(err.message || 'Failed to load dashboard data');
     } finally {
       setLoading(false);
     }

@@ -113,6 +113,7 @@ export default function AdminVtuSettings() {
     }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchSystemSettings(); }, []);
   useEffect(() => { fetchWalletSettings(activeProvider); }, [activeProvider]); // eslint-disable-line
   useEffect(() => {
@@ -179,7 +180,7 @@ export default function AdminVtuSettings() {
           fetchWalletSettings('topza', { silent: true }),
           fetchTopzaTransactions({ silent: true }),
         ]);
-      } catch (_) {
+      } catch {
         // Ignore background polling errors; existing UI error handling remains in fetch helpers.
       }
     };

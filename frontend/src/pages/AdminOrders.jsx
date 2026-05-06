@@ -135,14 +135,6 @@ export default function AdminOrders() {
     });
   };
 
-  const calculateStats = () => {
-    const total = orders.length;
-    const completed = orders.filter(o => o.status === 'completed').length;
-    const pending = orders.filter(o => o.status === 'pending').length;
-    const processing = orders.filter(o => o.status === 'processing').length;
-    return { total, completed, pending, processing };
-  };
-
   const statsData = stats;
   const filteredOrders = getFilteredOrders();
   const allSelected = filteredOrders.length > 0 && filteredOrders.every(order => selectedIds.has(order.id || order._id));

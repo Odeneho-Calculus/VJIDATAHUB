@@ -83,6 +83,7 @@ export default function PurchasePaymentModal({ isOpen, onClose, accessCode, refe
         paystackRef.current.cancelTransaction(reference);
       }
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, accessCode, reference, onClose, onSuccess]);
 
   if (!isOpen) return null;

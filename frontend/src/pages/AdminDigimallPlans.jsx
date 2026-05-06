@@ -259,6 +259,7 @@ export default function AdminDigimallPlans() {
                 { label: 'Total Plans', value: stats.totalPlans, color: 'from-blue-500 to-blue-600', Icon: Database },
                 { label: 'Active Plans', value: stats.activePlans, color: 'from-green-500 to-green-600', Icon: CheckCircle },
                 { label: 'Out of Stock', value: stats.outOfStockPlans, color: 'from-red-500 to-red-600', Icon: AlertCircle },
+              // eslint-disable-next-line no-unused-vars
               ].map(({ label, value, color, Icon }) => (
                 <div key={label} className="bg-white rounded-2xl p-4 sm:p-6 border-2 border-slate-200 hover:shadow-lg transition-all">
                   <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center mb-3`}>

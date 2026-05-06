@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { AlertCircle, Send, TrendingUp, Wallet, CheckCircle, Layout, RefreshCw, Landmark, History, PlusCircle, Smartphone, Eye } from 'lucide-react';
 import { store as storeAPI } from '../services/api';
 import { formatCurrency, formatCurrencyAbbreviated } from '../utils/formatCurrency';
@@ -9,7 +8,6 @@ import Pagination from '../components/Pagination';
 
 
 export default function AgentCommissions() {
-  const navigate = useNavigate();
   const [commissionSummary, setCommissionSummary] = useState(null);
   const [payouts, setPayouts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,7 +16,6 @@ export default function AgentCommissions() {
   const [error, setError] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalPayouts, setTotalPayouts] = useState(0);
   const [showPayoutForm, setShowPayoutForm] = useState(false);
   const [payoutSubmitting, setPayoutSubmitting] = useState(false);
   const [payoutFormData, setPayoutFormData] = useState({
@@ -59,6 +56,7 @@ export default function AgentCommissions() {
 
   useEffect(() => {
     fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage]);
 
   const fetchData = async () => {
@@ -71,7 +69,6 @@ export default function AgentCommissions() {
       setCommissionSummary(summaryData.summary);
       setPayouts(payoutsData.payouts || []);
       setTotalPages(payoutsData.pagination?.pages || 1);
-      setTotalPayouts(payoutsData.pagination?.total || 0);
       setError('');
     } catch (err) {
       setError(err.message || 'Failed to load commission data');

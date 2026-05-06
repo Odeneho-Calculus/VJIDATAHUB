@@ -42,6 +42,7 @@ export default function PublicStore() {
         socketRef.current.disconnect();
       }
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
 
   const setupSocket = () => {

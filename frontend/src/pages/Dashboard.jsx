@@ -23,7 +23,7 @@ import {
   Phone,
   User
 } from 'lucide-react';
-import { dataplans, wallet, purchases, publicAPI } from '../services/api';
+import { wallet, purchases, publicAPI } from '../services/api';
 import UserLayout from '../components/UserLayout';
 
 export default function Dashboard() {

@@ -25,6 +25,7 @@ export default function PublicTrackOrder() {
 
     useEffect(() => {
         fetchStoreInfo();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [slug]);
 
     const fetchStoreInfo = async () => {

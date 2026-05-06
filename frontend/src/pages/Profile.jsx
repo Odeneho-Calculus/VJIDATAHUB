@@ -296,42 +296,7 @@ export default function Profile() {
                   )}
                 </div>
 
-                {/* Security Section */}
-                <div className="bg-white p-8 sm:p-10 rounded-[3rem] border border-slate-200/60 shadow-sm relative overflow-hidden">
-                  <div className="flex items-center gap-4 mb-8">
-                    <div className="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400">
-                      <Shield size={28} />
-                    </div>
-                    <div>
-                      <h2 className="text-xl font-black text-slate-900 tracking-tight">Security & Privacy</h2>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Protect your session</p>
-                    </div>
-                  </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols- gap-4">
-                    {[
-                      { title: 'Passphrase Security', desc: 'Manage your access password', icon: Lock, color: 'text-amber-500', bg: 'bg-amber-50' },
-                      { title: '2-Step Verification', desc: 'Extra layer of authentication', icon: Shield, color: 'text-indigo-500', bg: 'bg-indigo-50' },
-                      { title: 'Device Management', desc: 'Secure your logged-in devices', icon: Smartphone, color: 'text-emerald-500', bg: 'bg-emerald-50' },
-                      { title: 'Data & Privacy', desc: 'Control your visibility settings', icon: ReceiptText, color: 'text-blue-500', bg: 'bg-blue-50' }
-                    ].map((item, i) => (
-                      <button key={i} className="flex items-center justify-between p-6 rounded-[2rem] bg-slate-50/50 border border-slate-100 hover:bg-white hover:border-blue-200 hover:shadow-xl hover:shadow-blue-500/5 transition-all group/sec text-left">
-                        <div className="flex items-center gap-5">
-                          <div className={`w-12 h-12 rounded-2xl ${item.bg} ${item.color} flex items-center justify-center transition-transform group-hover/sec:scale-110`}>
-                            <item.icon size={22} />
-                          </div>
-                          <div>
-                            <p className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-0.5">{item.title}</p>
-                            <p className="text-[11px] font-bold text-slate-400 leading-none">{item.desc}</p>
-                          </div>
-                        </div>
-                        <div className="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400 group-hover/sec:bg-slate-900 group-hover/sec:text-white group-hover/sec:border-slate-900 transition-all">
-                          <ChevronRight size={18} strokeWidth={3} />
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
               </div>
             </div>
           </div>

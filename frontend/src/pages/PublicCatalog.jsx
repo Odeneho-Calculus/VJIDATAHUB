@@ -54,7 +54,7 @@ export default function PublicCatalog() {
                 socketRef.current.disconnect();
             }
         };
-    }, [slug]);
+    }, [slug, fetchStoreData, setupSocket]);
 
     useEffect(() => {
         // keep URL in sync with selected network
@@ -65,8 +65,9 @@ export default function PublicCatalog() {
             searchParams.delete('network');
             setSearchParams(searchParams, { replace: true });
         }
-    }, [selectedNetwork]);
+    }, [selectedNetwork, searchParams, setSearchParams]);
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const setupSocket = () => {
         const socketUrl = getSocketBaseUrl();
 
@@ -79,6 +80,7 @@ export default function PublicCatalog() {
         });
     };
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const fetchStoreData = async (showLoading = true) => {
         try {
             if (showLoading) setLoading(true);

@@ -16,7 +16,7 @@ const normalizeApiBaseUrl = (rawUrl) => {
     const pathname = parsed.pathname.replace(/\/+$/, '');
     parsed.pathname = pathname.endsWith('/api') ? pathname : `${pathname || ''}/api`;
     return parsed.toString().replace(/\/+$/, '');
-  } catch (_error) {
+  } catch {
     return null;
   }
 };

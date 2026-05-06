@@ -14,7 +14,7 @@ import {
   Zap,
   TrendingUp
 } from 'lucide-react';
-import { dataplans, publicAPI } from '../services/api';
+import { publicAPI } from '../services/api';
 import PurchaseModal from '../components/PurchaseModal';
 import PurchaseVerificationModal from '../components/PurchaseVerificationModal';
 import UserLayout from '../components/UserLayout';
@@ -41,6 +41,7 @@ export default function BuyData() {
     return !!entry && typeof entry === 'object' && !Array.isArray(entry);
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const flattenNetworkBundles = (networkEntry) => {
     if (!networkEntry) return [];
     if (Array.isArray(networkEntry)) return networkEntry;
@@ -105,7 +106,7 @@ export default function BuyData() {
         }
       }
     }
-  }, [loading, bundles, searchParams, initializedFromParams]);
+  }, [loading, bundles, searchParams, initializedFromParams, flattenNetworkBundles]);
 
   useEffect(() => {
     const pending = localStorage.getItem('pendingPurchaseVerification');

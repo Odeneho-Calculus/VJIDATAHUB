@@ -3,7 +3,7 @@ import Modal from './Modal';
 import { Database, Calendar, CreditCard, Tag, Info, Hash } from 'lucide-react';
 import { formatNumberAbbreviated } from '../utils/formatCurrency';
 
-export const VtuTransactionDetailsModal = ({ isOpen, onClose, transaction, provider = 'XpresData' }) => {
+export const VtuTransactionDetailsModal = ({ isOpen, onClose, transaction }) => {
   if (!transaction) return null;
 
   const formatDate = (dateString) => {

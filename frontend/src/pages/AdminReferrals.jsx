@@ -28,7 +28,6 @@ export default function AdminReferrals() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [search, setSearch] = useState('');
-  const [activeTab, setActiveTab] = useState('events');
 
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [settingsForm, setSettingsForm] = useState({

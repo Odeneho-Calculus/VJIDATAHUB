@@ -15,6 +15,7 @@ const TABS = [
   { id: 'adjust',        label: 'Adjust',         icon: SlidersHorizontal },
 ];
 
+// eslint-disable-next-line no-unused-vars
 function LedgerCard({ title, value, icon: Icon, iconBg, iconColor }) {
   return (
     <div className="bg-white rounded-xl p-3 sm:p-4 border border-slate-200 hover:border-slate-300 hover:shadow-sm transition-all">
@@ -88,7 +89,8 @@ export default function AdminAgentStoreDetailsModal({
   const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
-    if (!isOpen) setActiveTab('overview');
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setActiveTab('overview');
   }, [isOpen]);
 
   if (!isOpen || !store) return null;

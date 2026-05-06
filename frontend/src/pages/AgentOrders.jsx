@@ -57,6 +57,7 @@ export default function AgentOrders() {
 
   useEffect(() => {
     fetchOrders();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, statusFilter, searchQuery, networkFilter]);
 
   useEffect(() => {
@@ -105,21 +106,6 @@ export default function AgentOrders() {
     return `GHS ${(amount || 0).toFixed(2)}`;
   };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'completed':
-        return 'bg-green-100 text-green-700';
-      case 'processing':
-        return 'bg-blue-100 text-blue-700';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-700';
-      case 'failed':
-        return 'bg-red-100 text-red-700';
-      default:
-        return 'bg-slate-100 text-slate-700';
-    }
-  };
-
   const getPaymentStatusColor = (status) => {
     switch (status) {
       case 'completed':
@@ -145,47 +131,6 @@ export default function AgentOrders() {
         return 'bg-red-100 text-red-700';
       default:
         return 'bg-slate-100 text-slate-700';
-    }
-  };
-
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'completed':
-        return <CheckCircle size={16} />;
-      case 'processing':
-        return <Clock size={16} />;
-      case 'failed':
-        return <XCircle size={16} />;
-      default:
-        return <Clock size={16} />;
-    }
-  };
-
-  const getStatusColor_OLD = (status) => {
-    switch (status) {
-      case 'completed':
-        return 'bg-green-100 text-green-700';
-      case 'processing':
-        return 'bg-blue-100 text-blue-700';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-700';
-      case 'failed':
-        return 'bg-red-100 text-red-700';
-      default:
-        return 'bg-slate-100 text-slate-700';
-    }
-  };
-
-  const getStatusIcon_OLD = (status) => {
-    switch (status) {
-      case 'completed':
-        return <CheckCircle size={16} />;
-      case 'processing':
-        return <Clock size={16} />;
-      case 'failed':
-        return <XCircle size={16} />;
-      default:
-        return <Clock size={16} />;
     }
   };
 

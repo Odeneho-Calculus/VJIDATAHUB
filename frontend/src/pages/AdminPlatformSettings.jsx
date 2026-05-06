@@ -180,9 +180,9 @@ export default function AdminPlatformSettings() {
 
   const filteredWebhookLogs = webhookLogs.filter((log) => {
     if (logFilter === 'all') return true;
-    if (logFilter === 'updated') return Boolean(log.handled);
-    if (logFilter === 'ignored') return !Boolean(log.handled);
-    if (logFilter === 'invalid') return !Boolean(log.signatureValid);
+    if (logFilter === 'updated') return log.handled;
+    if (logFilter === 'ignored') return !log.handled;
+    if (logFilter === 'invalid') return !log.signatureValid;
     return true;
   });
 

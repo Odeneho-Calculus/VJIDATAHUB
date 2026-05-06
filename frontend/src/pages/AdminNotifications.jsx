@@ -419,6 +419,7 @@ export default function AdminNotifications() {
   );
 }
 
+// eslint-disable-next-line no-unused-vars
 function StatCard({ title, value, icon: Icon, iconBg, iconColor }) {
   return (
     <div className="bg-white rounded-2xl p-3 sm:p-5 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all">

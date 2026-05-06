@@ -13,7 +13,6 @@ export default function Transactions() {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [retryingId, setRetryingId] = useState(null);
   const [selectedTx, setSelectedTx] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);

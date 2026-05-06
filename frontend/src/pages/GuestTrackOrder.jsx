@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Package, Phone, Search, CheckCircle, Clock, XCircle, AlertCircle, ShoppingCart, Home } from 'lucide-react';
 import { guest } from '../services/api';
 import { formatCurrencyAbbreviated } from '../utils/formatCurrency';
 
 export default function GuestTrackOrder() {
-  const navigate = useNavigate();
   const [phoneNumber, setPhoneNumber] = useState('');
   const [orders, setOrders] = useState([]);
   const [guestInfo, setGuestInfo] = useState(null);

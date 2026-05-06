@@ -12,7 +12,6 @@ export default function Navbar() {
   const location = useLocation();
 
   const showSidebarToggle = user && !['/'].includes(location.pathname) && !location.pathname.startsWith('/login') && !location.pathname.startsWith('/register');
-  const isAgentPage = location.pathname.startsWith('/agent');
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);

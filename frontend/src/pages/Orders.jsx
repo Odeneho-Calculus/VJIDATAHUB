@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Eye, RotateCw, Copy, Check, Filter, Search, Calendar, ChevronRight, Hash, Smartphone, CreditCard, Layout, Zap, ArrowLeft, RefreshCw, AlertCircle, ShoppingBag } from 'lucide-react';
 import { formatCurrencyAbbreviated } from '../utils/formatCurrency';
-import { purchases, dataplans, wallet } from '../services/api';
+import { purchases, dataplans } from '../services/api';
 import UserLayout from '../components/UserLayout';
 import Modal from '../components/Modal';
 import AlertModal from '../components/AlertModal';
@@ -11,7 +11,7 @@ export default function Orders() {
   const { user } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [, setError] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [networkFilter, setNetworkFilter] = useState('all');
   const [availableNetworksFromPlans, setAvailableNetworksFromPlans] = useState([]);
@@ -136,23 +136,6 @@ export default function Orders() {
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  };
-
-  const getStatusStyles = (status) => {
-    switch (status?.toLowerCase()) {
-      case 'completed':
-      case 'success':
-        return 'bg-emerald-50 text-emerald-600 border-emerald-100';
-      case 'processing':
-        return 'bg-blue-50 text-blue-600 border-blue-100';
-      case 'pending':
-        return 'bg-amber-50 text-amber-600 border-amber-100';
-      case 'failed':
-      case 'cancelled':
-        return 'bg-rose-50 text-rose-600 border-rose-100';
-      default:
-        return 'bg-slate-50 text-slate-600 border-slate-100';
-    }
   };
 
   const getPaymentStatusStyles = (status) => {

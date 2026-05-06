@@ -19,7 +19,7 @@ import { toast } from 'react-hot-toast';
 
 export default function BecomeAgent() {
     const navigate = useNavigate();
-    const { user, setUser, logout } = useAuth();
+    const { user, logout } = useAuth();
     const { settings } = useSettings();
     const [loading, setLoading] = useState(true);
     const [status, setStatus] = useState(null);

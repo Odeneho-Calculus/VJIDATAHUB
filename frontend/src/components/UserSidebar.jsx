@@ -55,7 +55,7 @@ export default function UserSidebar({ isOpen, onClose }) {
         }
         navigate('/agent/dashboard');
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to switch role');
     }
   };

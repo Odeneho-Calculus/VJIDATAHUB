@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Users,
@@ -26,6 +26,32 @@ import AdminSidebar from '../components/AdminSidebar';
 import { useSidebar } from '../hooks/useSidebar';
 import { useSettings } from '../context/SettingsContext';
 import { admin as adminAPI } from '../services/api';
+
+const styles = `
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+  .dash-wrapper { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  .dash-container { background-color: #f5f5f0; }
+  .dash-content { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
+  .dash-header { background-color: #fff; border: 1.5px solid #e4e4de; border-radius: 14px; padding: 20px; box-shadow: 0 8px 40px rgba(0,0,0,0.10); margin-bottom: 24px; }
+  .dash-title { font-size: 26px; font-weight: 800; color: #111; margin: 0; }
+  .dash-subtitle { font-size: 14px; color: #666; margin: 8px 0 0 0; }
+  .dash-error { background-color: #fff5f5; border: 1.5px solid #fecaca; border-radius: 7px; color: #b91c1c; padding: 14px 16px; font-size: 14px; display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+  .dash-stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .dash-stat-card { background-color: #fff; border: 1.5px solid #e4e4de; border-radius: 14px; padding: 20px; cursor: pointer; transition: all 0.2s ease; }
+  .dash-stat-card:hover { border-color: #d4d4ce; box-shadow: 0 8px 40px rgba(0,0,0,0.10); }
+  .dash-stat-icon { width: 36px; height: 36px; background-color: rgba(240,165,0,0.15); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #f0a500; margin-bottom: 8px; }
+  .dash-stat-label { font-size: 11px; color: #999; margin-bottom: 4px; }
+  .dash-stat-value { font-size: 24px; font-weight: 800; color: #111; }
+  .dash-card { background-color: #fff; border: 1.5px solid #e4e4de; border-radius: 14px; padding: 20px; box-shadow: 0 8px 40px rgba(0,0,0,0.10); margin-bottom: 24px; }
+  .dash-card-title { font-size: 16px; font-weight: 700; color: #111; margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px; }
+  .dash-info-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; font-size: 14px; }
+  .dash-info-item:last-child { border-bottom: none; }
+  .dash-action-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+  .dash-action-btn { padding: 12px 16px; border: 1.5px solid #e0e0d8; border-radius: 7px; background-color: #fafaf7; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; }
+  .dash-action-btn:hover { background-color: #f0f0ed; border-color: #d0d0c8; }
+  @media (max-width: 768px) { .dash-content { padding: 16px 12px; } .dash-stat-grid { grid-template-columns: repeat(2, 1fr); } .dash-action-grid { grid-template-columns: repeat(2, 1fr); } }
+`;
+
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -160,7 +186,8 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="flex min-h-[calc(100vh-56px)] sm:min-h-[calc(100vh-64px)] bg-slate-100">
+    <div className="flex min-h-[calc(100vh-56px)] sm:min-h-[calc(100vh-64px)] bg-slate-100 dash-wrapper">
+      <style>{styles}</style>
       <AdminSidebar isOpen={sidebarOpen} onClose={closeSidebar} />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <div className="flex-1 overflow-auto">
@@ -191,27 +218,28 @@ export default function AdminDashboard() {
               )}
 
               <section>
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2.5 sm:gap-4">
+                <div className="dash-stat-grid">
                   {statCards.slice(0, 4).map((card, idx) => {
                     const Icon = card.icon;
                     return (
                       <button
                         key={idx}
                         onClick={card.action}
-                        className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all duration-200 cursor-pointer text-left"
+                        className="dash-stat-card"
+                        style={{ display: 'flex', flexDirection: 'column' }}
                       >
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <p className="text-[11px] sm:text-sm font-medium text-slate-600 mb-1 leading-tight">
+                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
+                          <div style={{ flex: 1 }}>
+                            <p className="dash-stat-label">
                               {card.title}
                             </p>
-                            <p className="text-xl sm:text-3xl font-bold text-slate-900 leading-tight">
+                            <p className="dash-stat-value">
                               {typeof card.value === 'number' ? card.value.toLocaleString() : card.value}
                             </p>
-                            <p className="text-[11px] sm:text-xs text-slate-500 mt-1.5 leading-tight">{card.meta}</p>
+                            <p style={{ fontSize: '12px', color: '#999', marginTop: '8px' }}>{card.meta}</p>
                           </div>
-                          <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl ${card.tone.iconBg} flex items-center justify-center flex-shrink-0`}>
-                            <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${card.tone.iconColor}`} />
+                          <div className="dash-stat-icon">
+                            <Icon size={18} />
                           </div>
                         </div>
                       </button>
@@ -223,21 +251,22 @@ export default function AdminDashboard() {
               <section>
                 <button
                   onClick={statCards[4].action}
-                  className="w-full bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all duration-200 text-left"
+                  className="dash-card"
+                  style={{ width: '100%', padding: '20px', textAlign: 'left' }}
                 >
-                  <div className="flex items-center justify-between gap-3 sm:gap-4">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-rose-50 flex items-center justify-center">
-                        <Gift className="w-5 h-5 sm:w-6 sm:h-6 text-rose-700" />
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                      <div className="dash-stat-icon" style={{ width: '40px', height: '40px', background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444' }}>
+                        <Gift size={20} />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-slate-600">Referral Earnings</p>
-                        <p className="text-xl sm:text-3xl font-bold text-slate-900 mt-0.5">
+                        <p style={{ fontSize: '14px', color: '#666', margin: '0 0 8px 0' }}>Referral Earnings</p>
+                        <p className="dash-stat-value">
                           GHS {formatNumberAbbreviated(totalReferralEarnings)}
                         </p>
                       </div>
                     </div>
-                    <ArrowRight className="w-5 h-5 text-slate-400" />
+                    <ArrowRight size={20} style={{ color: '#999' }} />
                   </div>
                 </button>
               </section>
@@ -326,22 +355,23 @@ export default function AdminDashboard() {
                 </div>
               </section>
 
-              <section className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-slate-200 shadow-sm">
-                <h2 className="text-lg sm:text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-                  <Zap size={22} className="text-amber-600" />
+              <section className="dash-card">
+                <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '16px', fontWeight: 700, color: '#111', marginBottom: '16px', margin: '0 0 16px 0' }}>
+                  <Zap size={18} style={{ color: '#f0a500' }} />
                   Quick Actions
                 </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+                <div className="dash-action-grid">
                   {quickActions.map((action) => {
                     const Icon = action.icon;
                     return (
                       <button
                         key={action.label}
                         onClick={() => action.handler ? action.handler() : navigate(action.path)}
-                        className="px-3.5 py-2.5 sm:px-4 sm:py-3 bg-slate-50 border border-slate-200 text-slate-900 rounded-xl font-semibold hover:bg-slate-100 hover:border-slate-300 transition-all duration-200 text-sm flex items-center justify-center gap-2"
+                        className="dash-action-btn"
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                       >
-                        <Icon size={16} className="text-slate-600" />
-                        <span className="truncate">{action.label}</span>
+                        <Icon size={14} style={{ color: '#666' }} />
+                        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{action.label}</span>
                       </button>
                     );
                   })}

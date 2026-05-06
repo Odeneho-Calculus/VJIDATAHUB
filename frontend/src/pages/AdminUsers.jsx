@@ -29,7 +29,6 @@ export default function AdminUsers() {
   const [updatingUser, setUpdatingUser] = useState(false);
   const [banningUser, setBanningUser] = useState(false);
   const [suspendingUser, setSuspendingUser] = useState(false);
-  const [updatingRole, setUpdatingRole] = useState(false);
 
   const [showUnbanConfirm, setShowUnbanConfirm] = useState(false);
   const [showUnsuspendConfirm, setShowUnsuspendConfirm] = useState(false);
@@ -150,10 +149,6 @@ export default function AdminUsers() {
       setShowUnsuspendConfirm(false);
       setConfirmingUserId(null);
     }
-  };
-
-  const handleDeleteUser = () => {
-    setShowDeleteConfirm(true);
   };
 
   const confirmDeleteUser = async () => {

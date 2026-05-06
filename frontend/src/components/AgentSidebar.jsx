@@ -19,7 +19,7 @@ import { toast } from 'react-hot-toast';
 export default function AgentSidebar({ isOpen, onClose }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { logout, user, setUser, refreshUser } = useAuth();
+  const { logout, user, setUser } = useAuth();
 
   const isActive = (path) => location.pathname === path;
 
@@ -50,7 +50,7 @@ export default function AgentSidebar({ isOpen, onClose }) {
         }
         navigate('/dashboard');
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to switch role');
     }
   };

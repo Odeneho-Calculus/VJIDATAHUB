@@ -5,8 +5,38 @@ import ConfirmDialog from '../components/ConfirmDialog';
 import ViewPlanModal from '../components/ViewPlanModal';
 import EditPricesModal from '../components/EditPricesModal';
 import { useSidebar } from '../hooks/useSidebar';
-import { dataplans, admin as adminAPI } from '../services/api';
+import { dataplans } from '../services/api';
 import { useSettings } from '../context/SettingsContext';
+
+const styles = `
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+  .plan-wrapper { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  .plan-container { background-color: #f5f5f0; }
+  .plan-content { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
+  .plan-header { background-color: #fff; border: 1.5px solid #e4e4de; border-radius: 14px; padding: 20px; box-shadow: 0 8px 40px rgba(0,0,0,0.10); margin-bottom: 24px; }
+  .plan-title { font-size: 26px; font-weight: 800; color: #111; margin: 0; }
+  .plan-subtitle { font-size: 14px; color: #666; margin: 8px 0 0 0; }
+  .plan-error { background-color: #fff5f5; border: 1.5px solid #fecaca; border-radius: 7px; color: #b91c1c; padding: 14px 16px; font-size: 14px; display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+  .plan-success { background-color: #f0fdf4; border: 1.5px solid #86efac; border-radius: 7px; color: #166534; padding: 14px 16px; font-size: 14px; display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+  .plan-stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .plan-stat-card { background-color: #fff; border: 1.5px solid #e4e4de; border-radius: 14px; padding: 20px; }
+  .plan-stat-card:hover { border-color: #d4d4ce; box-shadow: 0 8px 40px rgba(0,0,0,0.10); }
+  .plan-stat-icon { width: 36px; height: 36px; background-color: rgba(240,165,0,0.15); border-radius: 6px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; color: #f0a500; }
+  .plan-stat-label { font-size: 12px; color: #999; margin-bottom: 4px; }
+  .plan-stat-value { font-size: 20px; font-weight: 700; color: #111; }
+  .plan-card { background-color: #fff; border: 1.5px solid #e4e4de; border-radius: 14px; box-shadow: 0 8px 40px rgba(0,0,0,0.10); margin-bottom: 24px; }
+  .plan-search { width: 100%; padding: 11px 14px; border: 1.5px solid #e0e0d8; border-radius: 7px; background-color: #fafaf7; font-size: 14px; font-family: 'DM Sans', sans-serif; color: #111; }
+  .plan-search:focus { outline: none; border-color: #111; background-color: #fff; box-shadow: 0 0 0 3px rgba(17,17,17,0.07); }
+  .plan-btn { padding: 11px 14px; border: 1.5px solid #e0e0d8; border-radius: 7px; background-color: #fafaf7; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; }
+  .plan-btn-primary { background-color: #111; color: #fff; border-color: #111; }
+  .plan-btn-primary:hover { background-color: #222; }
+  .plan-table { width: 100%; border-collapse: collapse; }
+  .plan-table th { padding: 12px 20px; text-align: left; font-size: 13px; font-weight: 700; color: #333; background-color: #fafaf7; border-bottom: 1.5px solid #e4e4de; }
+  .plan-table td { padding: 12px 20px; border-bottom: 1px solid #eee; font-size: 14px; }
+  .plan-table tbody tr:hover { background-color: #f9f9f7; }
+  @media (max-width: 768px) { .plan-content { padding: 16px 12px; } .plan-stat-grid { grid-template-columns: repeat(2, 1fr); } }
+`;
+
 
 export default function AdminDataPlans() {
   const { sidebarOpen, closeSidebar } = useSidebar();
@@ -22,7 +52,6 @@ export default function AdminDataPlans() {
   const [totalPages, setTotalPages] = useState(0);
   const [stats, setStats] = useState({ totalPlans: 0, activePlans: 0, outOfStockPlans: 0, avgMargin: 0 });
 
-  const activeProvider = 'xpresdata';
   const activeProviderDisplayName = 'XpresData';
 
   const networkCatalog = (settings?.networkCatalog || []).filter(n => n?.isActive !== false);
@@ -201,7 +230,8 @@ export default function AdminDataPlans() {
   const filteredPlans = getFilteredPlans();
 
   return (
-    <div className="flex h-screen bg-slate-100">
+    <div className="flex h-screen bg-slate-100 plan-wrapper">
+      <style>{styles}</style>
       <AdminSidebar isOpen={sidebarOpen} onClose={closeSidebar} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <div className="flex-1 overflow-auto">
@@ -237,45 +267,37 @@ export default function AdminDataPlans() {
               )}
 
               <section>
-                <div className="grid grid-cols-2 xl:grid-cols-4 gap-2 sm:gap-4">
-                  <div className="bg-white rounded-2xl p-3 sm:p-5 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all">
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <p className="text-[11px] sm:text-sm text-slate-600 leading-tight">Total Plans</p>
-                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                        <Database className="w-4 h-4 sm:w-5 sm:h-5 text-blue-700" />
-                      </div>
+                <div className="plan-stat-grid">
+                  <div className="plan-stat-card">
+                    <div className="plan-stat-icon">
+                      <Database size={18} />
                     </div>
-                    <p className="text-xl sm:text-3xl font-bold text-slate-900 leading-tight">{stats.totalPlans}</p>
+                    <p className="plan-stat-label">Total Plans</p>
+                    <p className="plan-stat-value">{stats.totalPlans}</p>
                   </div>
 
-                  <div className="bg-white rounded-2xl p-3 sm:p-5 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all">
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <p className="text-[11px] sm:text-sm text-slate-600 leading-tight">Active Plans</p>
-                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-                        <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-700" />
-                      </div>
+                  <div className="plan-stat-card">
+                    <div className="plan-stat-icon">
+                      <CheckCircle size={18} />
                     </div>
-                    <p className="text-xl sm:text-3xl font-bold text-slate-900 leading-tight">{stats.activePlans}</p>
+                    <p className="plan-stat-label">Active Plans</p>
+                    <p className="plan-stat-value">{stats.activePlans}</p>
                   </div>
 
-                  <div className="bg-white rounded-2xl p-3 sm:p-5 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all">
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <p className="text-[11px] sm:text-sm text-slate-600 leading-tight">Out of Stock</p>
-                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-red-50 flex items-center justify-center">
-                        <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-700" />
-                      </div>
+                  <div className="plan-stat-card">
+                    <div className="plan-stat-icon">
+                      <AlertCircle size={18} />
                     </div>
-                    <p className="text-xl sm:text-3xl font-bold text-slate-900 leading-tight">{stats.outOfStockPlans}</p>
+                    <p className="plan-stat-label">Out of Stock</p>
+                    <p className="plan-stat-value">{stats.outOfStockPlans}</p>
                   </div>
 
-                  <div className="bg-white rounded-2xl p-3 sm:p-5 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all">
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <p className="text-[11px] sm:text-sm text-slate-600 leading-tight">Avg Margin</p>
-                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
-                        <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-700" />
-                      </div>
+                  <div className="plan-stat-card">
+                    <div className="plan-stat-icon">
+                      <TrendingUp size={18} />
                     </div>
-                    <p className="text-xl sm:text-3xl font-bold text-slate-900 leading-tight">{stats.avgMargin}%</p>
+                    <p className="plan-stat-label">Avg Margin</p>
+                    <p className="plan-stat-value">{stats.avgMargin}%</p>
                   </div>
                 </div>
               </section>

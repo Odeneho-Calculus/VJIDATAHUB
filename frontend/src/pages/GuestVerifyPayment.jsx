@@ -1,19 +1,14 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { CheckCircle, XCircle, Loader, Package, ShoppingCart, Home } from 'lucide-react';
 import { guest } from '../services/api';
 import { formatCurrencyAbbreviated } from '../utils/formatCurrency';
 
 export default function GuestVerifyPayment() {
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState('verifying'); // verifying, success, failed
   const [message, setMessage] = useState('');
   const [orderDetails, setOrderDetails] = useState(null);
-
-  useEffect(() => {
-    verifyPayment();
-  }, []);
 
   const verifyPayment = async () => {
     const reference = searchParams.get('reference');
@@ -45,6 +40,11 @@ export default function GuestVerifyPayment() {
       setMessage(error?.message || 'An error occurred while verifying payment');
     }
   };
+
+  useEffect(() => {
+    verifyPayment();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-50/50 flex items-center justify-center p-4">

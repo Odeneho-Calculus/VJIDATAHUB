@@ -3,6 +3,7 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const cors = require('cors');
+const helmet = require('helmet');
 const connectDB = require('./config/database');
 const { startProviderBalanceCheckJob } = require('./jobs/checkProviderBalance');
 const { startTopzaOrderStatusSyncJob } = require('./jobs/syncTopzaOrderStatus');
@@ -63,6 +64,21 @@ app.use(cors({
   origin: allowedOrigins,
   credentials: true
 }));
+
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+      styleSrc: ["'self'", "'unsafe-inline'", 'fonts.googleapis.com'],
+      fontSrc: ["'self'", 'fonts.gstatic.com', 'data:'],
+      connectSrc: ["'self'", 'fonts.gstatic.com', 'fonts.googleapis.com'],
+      imgSrc: ["'self'", 'data:', 'https:'],
+      frameSrc: ["'self'"],
+    },
+  },
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

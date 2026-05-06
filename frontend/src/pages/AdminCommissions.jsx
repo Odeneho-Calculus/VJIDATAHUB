@@ -6,6 +6,42 @@ import { useSidebar } from '../hooks/useSidebar';
 import { adminStore } from '../services/api';
 import ConfirmDialog from '../components/ConfirmDialog';
 
+const styles = `
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+  .comm-wrapper { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  .comm-container { background-color: #f5f5f0; min-height: 100vh; }
+  .comm-content { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
+  .comm-title { font-size: 28px; font-weight: 800; color: #111; margin: 0 0 8px 0; }
+  .comm-subtitle { font-size: 14px; color: #666; margin: 0; }
+  .comm-error { background-color: #fff5f5; border: 1.5px solid #fecaca; border-radius: 7px; color: #b91c1c; padding: 14px 16px; font-size: 14px; display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+  .comm-success { background-color: #f0fdf4; border: 1.5px solid #86efac; border-radius: 7px; color: #166534; padding: 14px 16px; font-size: 14px; display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+  .comm-stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .comm-stat-card { background-color: #fff; border: 1.5px solid #e4e4de; border-radius: 14px; padding: 20px; }
+  .comm-stat-card:hover { border-color: #d4d4ce; box-shadow: 0 8px 40px rgba(0,0,0,0.10); }
+  .comm-stat-icon { width: 36px; height: 36px; background-color: rgba(240,165,0,0.15); border-radius: 6px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; color: #f0a500; }
+  .comm-stat-label { font-size: 12px; color: #999; margin-bottom: 4px; }
+  .comm-stat-value { font-size: 20px; font-weight: 700; color: #111; }
+  .comm-card { background-color: #fff; border: 1.5px solid #e4e4de; border-radius: 14px; padding: 20px; box-shadow: 0 8px 40px rgba(0,0,0,0.10); margin-bottom: 24px; }
+  .comm-filter-btn { padding: 8px 16px; border: 1.5px solid #e0e0d8; border-radius: 7px; background-color: #fafaf7; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; }
+  .comm-filter-btn.active { background-color: #111; color: #fff; border-color: #111; }
+  .comm-table { width: 100%; border-collapse: collapse; }
+  .comm-table th { text-align: left; padding: 12px 20px; font-size: 13px; font-weight: 700; color: #333; background-color: #fafaf7; border-bottom: 1.5px solid #e4e4de; }
+  .comm-table td { padding: 12px 20px; border-bottom: 1px solid #eee; font-size: 14px; color: #111; }
+  .comm-table tbody tr:hover { background-color: #f9f9f7; }
+  .comm-btn-icon { width: 28px; height: 28px; padding: 0; border: 1.5px solid #e0e0d8; border-radius: 6px; background-color: #fff; color: #666; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+  .comm-btn-icon:hover { background-color: #fafaf7; border-color: #d0d0c8; }
+  .comm-modal-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .comm-modal { background-color: #fff; border-radius: 14px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); max-width: 600px; width: 100%; padding: 20px; max-height: 90vh; overflow-y: auto; }
+  .comm-modal-title { font-size: 18px; font-weight: 700; color: #111; margin: 0 0 12px 0; }
+  .comm-badge { display: inline-flex; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; }
+  .comm-badge-pending { background-color: #fef3c7; color: #92400e; }
+  .comm-badge-paid { background-color: #dcfce7; color: #166534; }
+  .comm-badge-rejected { background-color: #fee2e2; color: #991b1b; }
+  .comm-badge-processing { background-color: #dbeafe; color: #1e40af; }
+  @media (max-width: 768px) { .comm-content { padding: 16px 12px; } .comm-stat-grid { grid-template-columns: repeat(2, 1fr); } }
+`;
+
+
 export default function AdminCommissions() {
   const { sidebarOpen, closeSidebar } = useSidebar();
   const [payouts, setPayouts] = useState([]);
@@ -200,7 +236,8 @@ export default function AdminCommissions() {
   );
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen comm-wrapper">
+      <style>{styles}</style>
       <AdminSidebar isOpen={sidebarOpen} onClose={closeSidebar} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <div className="flex-1 overflow-auto bg-slate-100">
@@ -224,11 +261,11 @@ export default function AdminCommissions() {
               </div>
             )}
 
-            <div className="grid grid-cols-2 xl:grid-cols-4 gap-2 sm:gap-4 mb-6 sm:mb-8">
-              <StatCard title="Requests On Page" value={payouts.length} icon={HandCoins} iconBg="bg-blue-50" iconColor="text-blue-700" />
-              <StatCard title="Pending" value={pendingCount} icon={Clock} iconBg="bg-amber-50" iconColor="text-amber-700" />
-              <StatCard title="Gross Amount" value={formatCurrencyAbbreviated(totalAmount)} icon={HandCoins} iconBg="bg-indigo-50" iconColor="text-indigo-700" />
-              <StatCard title="Net Amount" value={formatCurrencyAbbreviated(totalNetAmount)} icon={CheckCircle} iconBg="bg-emerald-50" iconColor="text-emerald-700" />
+            <div className="comm-stat-grid">
+              <StatCard title="Requests On Page" value={payouts.length} icon={HandCoins} />
+              <StatCard title="Pending" value={pendingCount} icon={Clock} />
+              <StatCard title="Gross Amount" value={formatCurrencyAbbreviated(totalAmount)} icon={HandCoins} />
+              <StatCard title="Net Amount" value={formatCurrencyAbbreviated(totalNetAmount)} icon={CheckCircle} />
             </div>
 
             <div className="bg-white rounded-2xl p-4 sm:p-6 border border-slate-200 shadow-sm mb-6 sm:mb-8">
@@ -617,17 +654,15 @@ export default function AdminCommissions() {
 }
 
 function StatCard(props) {
-  const { title, value, icon: Icon, iconBg, iconColor } = props;
+  const { title, value, icon: Icon } = props;
 
   return (
-    <div className="bg-white rounded-2xl p-3 sm:p-5 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all">
-      <div className="mb-2 sm:mb-3">
-        <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl ${iconBg} flex items-center justify-center`}>
-          <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${iconColor}`} />
-        </div>
+    <div className="comm-stat-card">
+      <div className="comm-stat-icon">
+        <Icon size={18} />
       </div>
-      <p className="text-[11px] sm:text-sm text-slate-500 mb-0.5">{title}</p>
-      <p className="text-lg sm:text-2xl font-bold text-slate-900">{value}</p>
+      <p className="comm-stat-label">{title}</p>
+      <p className="comm-stat-value">{value}</p>
     </div>
   );
 }
