@@ -35,8 +35,8 @@ export default function Home() {
   });
 
   useMetaTags({
-    title: 'Data Reseller Platform for Agents',
-    description: 'Professional platform for agent storefronts, centralized order operations, payouts, and growth oversight.',
+    title: 'VJI Data Hub - Buy Mobile Data Bundles - Easy and Fast',
+    description: 'Buy data bundles with VJI Data Hub. Get cheap prices. Quick delivery. Sell data too. Start your own store and earn money.',
     url: `${import.meta.env.VITE_APP_URL || 'https://www.vjidatahub.com'}/`,
     type: 'website',
   });
