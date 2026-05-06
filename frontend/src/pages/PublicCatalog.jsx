@@ -401,7 +401,7 @@ function InputGroup({ label, value = '', onChange, placeholder = '', type = 'tex
 }
 
 function GuestCheckoutModal({ plan, store, primaryColor, transactionCharges, onClose }) {
-    const [formData, setFormData] = useState({ email: '', phone: '', name: '' });
+    const [formData, setFormData] = useState({ phone: '' });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
@@ -415,10 +415,22 @@ function GuestCheckoutModal({ plan, store, primaryColor, transactionCharges, onC
         'GH₵'
     );
 
+    const generateEmail = (phone) => `${phone}@vjidatahub.com`;
+    
+    const generateName = (phone) => {
+        const storeInitials = (store?.name || '')
+            .split(' ')
+            .map(word => word[0])
+            .join('')
+            .toUpperCase();
+        const lastFourDigits = phone.slice(-4);
+        return `${storeInitials}${lastFourDigits}`;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!formData.name || !formData.email || !formData.phone) {
-            setError('Please fill all required fields.');
+        if (!formData.phone || formData.phone.length < 10) {
+            setError('Please enter a valid phone number.');
             return;
         }
 
@@ -426,11 +438,13 @@ function GuestCheckoutModal({ plan, store, primaryColor, transactionCharges, onC
             setLoading(true);
             setError('');
             setSuccessMessage('');
+            const generatedEmail = generateEmail(formData.phone);
+            const generatedName = generateName(formData.phone);
             const res = await storeAPI.purchasePublicBundle(store.slug, {
                 planId: plan.planId,
-                email: formData.email,
+                email: generatedEmail,
                 phone: formData.phone,
-                name: formData.name
+                name: generatedName
             });
 
             const accessCode = res?.data?.accessCode;
@@ -546,35 +560,18 @@ function GuestCheckoutModal({ plan, store, primaryColor, transactionCharges, onC
 
                     <div className="space-y-4">
                         <InputGroup
-                            label="Full Name"
-                            value={formData.name}
-                            onChange={(v) => setFormData({ ...formData, name: v })}
-                            placeholder="e.g. John Mensah"
+                            label="Phone Number"
+                            value={formData.phone}
+                            onChange={(v) => {
+                                const cleaned = v.replace(/\D/g, '');
+                                if (cleaned.length <= 10) {
+                                    setFormData({ ...formData, phone: cleaned });
+                                }
+                            }}
+                            placeholder="05x xxx xxxx"
+                            type="tel"
                             required
                         />
-                        <div className="grid grid-cols-2 gap-4">
-                            <InputGroup
-                                label="Phone Number"
-                                value={formData.phone}
-                                onChange={(v) => {
-                                    const cleaned = v.replace(/\D/g, '');
-                                    if (cleaned.length <= 10) {
-                                        setFormData({ ...formData, phone: cleaned });
-                                    }
-                                }}
-                                placeholder="05x xxx xxxx"
-                                type="tel"
-                                required
-                            />
-                            <InputGroup
-                                label="Email Address"
-                                value={formData.email}
-                                onChange={(v) => setFormData({ ...formData, email: v })}
-                                placeholder="mail@host.com"
-                                type="email"
-                                required
-                            />
-                        </div>
                     </div>
 
                     <button
@@ -605,7 +602,7 @@ function GuestCheckoutModal({ plan, store, primaryColor, transactionCharges, onC
 }
 
 function GuestCheckerCheckoutModal({ checker, store, primaryColor, transactionCharges, onClose }) {
-    const [formData, setFormData] = useState({ email: '', phone: '', name: '', skipSms: false });
+    const [formData, setFormData] = useState({ phone: '', skipSms: false });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
@@ -618,10 +615,22 @@ function GuestCheckerCheckoutModal({ checker, store, primaryColor, transactionCh
         'GH₵'
     );
 
+    const generateEmail = (phone) => `${phone}@vjidatahub.com`;
+    
+    const generateName = (phone) => {
+        const storeInitials = (store?.name || '')
+            .split(' ')
+            .map(word => word[0])
+            .join('')
+            .toUpperCase();
+        const lastFourDigits = phone.slice(-4);
+        return `${storeInitials}${lastFourDigits}`;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!formData.name || !formData.email || !formData.phone) {
-            setError('Please fill all required fields.');
+        if (!formData.phone || formData.phone.length < 10) {
+            setError('Please enter a valid phone number.');
             return;
         }
 
@@ -630,11 +639,14 @@ function GuestCheckerCheckoutModal({ checker, store, primaryColor, transactionCh
             setError('');
             setSuccessMessage('');
 
+            const generatedEmail = generateEmail(formData.phone);
+            const generatedName = generateName(formData.phone);
+
             const initRes = await checkersAPI.initializePublicStoreCheckerPurchase(store.slug, {
                 checkerId: checker.checkerId,
-                email: formData.email,
+                email: generatedEmail,
                 phone: formData.phone,
-                name: formData.name,
+                name: generatedName,
                 skipSms: Boolean(formData.skipSms),
             });
 
@@ -730,7 +742,6 @@ function GuestCheckerCheckoutModal({ checker, store, primaryColor, transactionCh
                     )}
 
                     <div className="space-y-3">
-                        <InputGroup label="Full Name" value={formData.name} onChange={(v) => setFormData({ ...formData, name: v })} required />
                         <InputGroup
                             label="Phone Number"
                             value={formData.phone}
@@ -742,7 +753,6 @@ function GuestCheckerCheckoutModal({ checker, store, primaryColor, transactionCh
                             }}
                             required
                         />
-                        <InputGroup label="Email Address" value={formData.email} onChange={(v) => setFormData({ ...formData, email: v })} required />
                         <label className="flex items-center gap-2 text-xs text-slate-700">
                             <input
                                 type="checkbox"
