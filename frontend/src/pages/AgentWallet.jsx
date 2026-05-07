@@ -6,7 +6,7 @@ import {
   Loader,
   Clock,
   Wallet,
-  Layout,
+  Layout as LayoutIcon,
   RefreshCw,
   TrendingUp,
   ArrowDownCircle,
@@ -17,6 +17,9 @@ import {
   Eye,
   ShoppingBag,
   Zap,
+  ChevronRight,
+  Loader2,
+  CheckCircle
 } from 'lucide-react';
 import PaymentModal from '../components/PaymentModal';
 import AgentLayout from '../components/AgentLayout';
@@ -27,6 +30,233 @@ import {
   getWalletFundingChargeAmount,
   parseTransactionCharges,
 } from '../utils/transactionCharges';
+
+const styles = `
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
+  
+  .dash-wrapper {
+    font-family: 'DM Sans', sans-serif;
+    background-color: #f5f5f0;
+    min-height: 100vh;
+  }
+
+  .dash-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .dash-header {
+    background: #fff;
+    border: 1.5px solid #e4e4de;
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  @media (min-width: 768px) {
+    .dash-header {
+      padding: 24px;
+    }
+  }
+
+  .dash-heading-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .dash-icon-box {
+    width: 40px;
+    height: 40px;
+    background: #111;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #f0a500;
+    flex-shrink: 0;
+  }
+
+  .dash-h2 {
+    font-size: 18px;
+    font-weight: 800;
+    color: #111;
+    margin: 0;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  @media (min-width: 768px) {
+    .dash-h2 {
+      font-size: 26px;
+    }
+    .dash-icon-box {
+      width: 46px;
+      height: 46px;
+    }
+  }
+
+  .dash-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  @media (min-width: 768px) {
+    .dash-stat-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+  }
+
+  .dash-stat-card {
+    background: #fff;
+    border: 1.5px solid #e4e4de;
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    transition: all 0.2s;
+  }
+
+  .dash-stat-card:hover {
+    border-color: #d4d4ce;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.06);
+  }
+
+  .dash-stat-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .dash-stat-value {
+    font-size: 20px;
+    font-weight: 800;
+    color: #111;
+  }
+
+  .dash-card {
+    background: #fff;
+    border: 1.5px solid #e4e4de;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.06);
+  }
+
+  .dash-card-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: #111;
+    margin: 0 0 20px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dash-btn-primary {
+    background: #111;
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .dash-btn-primary:hover:not(:disabled) {
+    background: #333;
+    transform: translateY(-1px);
+  }
+
+  .dash-btn-outline {
+    background: #fff;
+    color: #111;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
+    border: 1.5px solid #e4e4de;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .dash-btn-outline:hover {
+    background: #fafaf7;
+    border-color: #d4d4ce;
+  }
+
+  .dash-table-container {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1.5px solid #e4e4de;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .dash-table-container::-webkit-scrollbar {
+    display: none;
+  }
+
+  .dash-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .dash-th {
+    background: #fafaf7;
+    text-align: left;
+    padding: 12px 16px;
+    font-weight: 700;
+    color: #333;
+    border-bottom: 1.5px solid #e4e4de;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .dash-td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    color: #444;
+  }
+
+  .dash-badge {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+`;
 
 export default function AgentWallet() {
   const { user, refreshUser } = useAuth();
@@ -192,102 +422,88 @@ export default function AgentWallet() {
 
   return (
     <AgentLayout>
-      <div className="min-h-screen bg-[#F8FAFC] overflow-x-hidden">
-        <div className="sticky top-0 z-20 app-pro-header px-4 py-3 sm:px-6 sm:py-4">
-          <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-3">
-            <div>
-              <div className="flex items-center gap-1.5 text-primary-600 mb-1">
-                <Layout size={14} className="sm:w-4 sm:h-4" />
-                <span className="text-xs font-bold uppercase tracking-wider">Wallet Center</span>
+      <div className="dash-wrapper overflow-x-hidden">
+        <style>{styles}</style>
+        
+        <div className="dash-content">
+          {/* Header Card */}
+          <div className="dash-header !p-4">
+            <div className="flex items-center justify-between gap-4">
+              <div className="dash-heading-row">
+                <div className="dash-icon-box !w-10 !h-10">
+                  <LayoutIcon size={20} />
+                </div>
+                <div className="min-w-0">
+                  <h2 className="dash-h2 !text-base sm:!text-xl">Wallet Center</h2>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold text-slate-400 font-mono uppercase truncate">Fund wallet & view history</span>
+                  </div>
+                </div>
               </div>
-              <h1 className="text-lg sm:text-2xl font-bold text-slate-900">Agent Wallet</h1>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={() => fetchTransactions(txPage)}
+                  className="p-1.5 text-slate-400 hover:text-[#f0a500] transition-colors"
+                  title="Refresh wallet"
+                >
+                  <RefreshCw size={16} className={txLoading ? 'animate-spin' : ''} />
+                </button>
+              </div>
             </div>
-            <button
-              onClick={() => fetchTransactions(txPage)}
-              className="p-2 text-slate-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
-              title="Refresh wallet"
-            >
-              <RefreshCw size={18} className={txLoading ? 'animate-spin' : ''} />
-            </button>
           </div>
-        </div>
 
-        <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
-            <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-blue-200/70 shadow-sm">
-              <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center mb-2 sm:mb-3">
-                <Wallet size={16} className="sm:w-[18px] sm:h-[18px]" />
-              </div>
-              <p className="text-xs text-slate-600 mb-1">Current Balance</p>
-              <p className="text-base sm:text-2xl font-bold text-slate-900 break-words">{formatCurrencyAbbreviated(Number(user?.balance || 0))}</p>
-            </div>
-            <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-emerald-200/70 shadow-sm">
-              <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center mb-2 sm:mb-3">
-                <ArrowDownCircle size={16} className="sm:w-[18px] sm:h-[18px]" />
-              </div>
-              <p className="text-xs text-slate-600 mb-1">Recent Credits</p>
-              <p className="text-base sm:text-2xl font-bold text-slate-900 break-words">{formatCurrencyAbbreviated(getTotalCredits())}</p>
-            </div>
-            <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-amber-200/70 shadow-sm">
-              <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center mb-2 sm:mb-3">
-                <Clock size={16} className="sm:w-[18px] sm:h-[18px]" />
-              </div>
-              <p className="text-xs text-slate-600 mb-1">Pending</p>
-              <p className="text-base sm:text-2xl font-bold text-slate-900">{getPendingTransactions()}</p>
-            </div>
-            <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-indigo-200/70 shadow-sm">
-              <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center mb-2 sm:mb-3">
-                <TrendingUp size={16} className="sm:w-[18px] sm:h-[18px]" />
-              </div>
-              <p className="text-xs text-slate-600 mb-1">Transactions</p>
-              <p className="text-base sm:text-2xl font-bold text-slate-900">{txTotal}</p>
-            </div>
+          <div className="dash-stat-grid">
+            <StatsCard title="Current Balance" value={user?.balance || 0} icon={Wallet} />
+            <StatsCard title="Recent Credits" value={getTotalCredits()} icon={ArrowDownCircle} />
+            <StatsCard title="Pending" value={getPendingTransactions()} icon={Clock} isRaw />
+            <StatsCard title="Transactions" value={txTotal} icon={TrendingUp} isRaw />
           </div>
 
           {businessStatus && !businessStatus.isOpen && (
-            <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl flex items-start gap-2.5 sm:gap-3 border border-orange-300 bg-white text-orange-700">
+            <div className="dash-card flex items-start gap-3 py-4 border-orange-200 bg-orange-50 text-orange-700">
               <Clock size={20} className="flex-shrink-0" />
               <div>
                 <p className="font-bold text-sm">Business Closed</p>
-                <p className="text-sm">{businessStatus.message}</p>
+                <p className="text-xs">{businessStatus.message}</p>
               </div>
             </div>
           )}
 
           {error && (
-            <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl flex items-start gap-2.5 sm:gap-3 border border-rose-300 bg-white text-rose-700">
+            <div className="dash-card flex items-start gap-3 py-4 border-rose-200 bg-rose-50 text-rose-700">
               <AlertCircle size={20} className="flex-shrink-0" />
               <div>
                 <p className="font-bold text-sm">Error</p>
-                <p className="text-sm">{error}</p>
+                <p className="text-xs">{error}</p>
               </div>
             </div>
           )}
 
           {success && (
-            <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl flex items-start gap-2.5 sm:gap-3 border border-emerald-300 bg-white text-emerald-700">
-              <CheckCircle2 size={20} className="flex-shrink-0" />
+            <div className="dash-card flex items-start gap-3 py-4 border-emerald-200 bg-emerald-50 text-emerald-700">
+              <CheckCircle size={20} className="flex-shrink-0" />
               <div>
                 <p className="font-bold text-sm">Success</p>
-                <p className="text-sm">{success}</p>
+                <p className="text-xs">{success}</p>
               </div>
             </div>
           )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm">
-                <h2 className="font-bold text-sm mb-3 text-slate-900">Quick Amounts</h2>
-                <div className="grid grid-cols-3 sm:grid-cols-2 gap-2">
+              <div className="dash-card !p-5">
+                <h3 className="dash-card-title !mb-4 !text-xs uppercase tracking-widest">Quick Amounts</h3>
+                <div className="grid grid-cols-2 gap-2">
                   {quickAmounts.map((quickAmount) => (
                     <button
                       key={quickAmount}
                       onClick={() => setAmount(quickAmount.toString())}
                       disabled={loading || (businessStatus && !businessStatus.isOpen)}
-                      className={`py-2 rounded-lg sm:rounded-xl transition text-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed ${amount === quickAmount.toString()
-                        ? 'bg-primary-600 text-white'
-                        : 'bg-slate-100 text-slate-900 hover:bg-slate-200'
-                        }`}
+                      className={`py-2.5 rounded-xl transition text-[10px] font-bold uppercase tracking-wider disabled:opacity-50 ${
+                        amount === quickAmount.toString()
+                        ? 'bg-[#111] text-white shadow-md'
+                        : 'bg-[#fafaf7] text-slate-600 border border-[#e4e4de] hover:border-slate-400'
+                      }`}
                     >
                       GH₵ {quickAmount}
                     </button>
@@ -297,16 +513,16 @@ export default function AgentWallet() {
             </div>
 
             <div className="lg:col-span-2">
-              <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-slate-200 shadow-sm">
-                <h2 className="font-bold text-base sm:text-lg mb-4 sm:mb-5 text-slate-900 flex items-center gap-2">
-                  <Wallet size={18} className="text-blue-600 sm:w-5 sm:h-5" />
+              <div className="dash-card !p-5">
+                <h3 className="dash-card-title !mb-6">
+                  <Wallet size={18} className="text-[#f0a500]" />
                   Fund Agent Wallet
-                </h2>
+                </h3>
 
-                <div className="mb-4 sm:mb-6">
-                  <label className="block text-sm font-semibold mb-2 text-slate-900">Amount (GHS)</label>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold whitespace-nowrap text-slate-900">GH₵</span>
+                <div className="mb-6 flex flex-col gap-2">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Amount (GHS)</label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-400 text-sm">GHS</span>
                     <input
                       type="number"
                       value={amount}
@@ -314,31 +530,26 @@ export default function AgentWallet() {
                         setAmount(e.target.value);
                         setError(null);
                       }}
-                      placeholder="Enter amount"
+                      placeholder="0.00"
                       disabled={loading}
-                      min="0.01"
-                      step="0.01"
-                      className="flex-1 px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-lg sm:rounded-xl border border-slate-200 text-sm bg-slate-50 text-slate-900 disabled:opacity-50 disabled:cursor-not-allowed"
-                      style={{
-                        appearance: 'textfield',
-                      }}
+                      className="w-full pl-14 pr-4 py-4 bg-[#fafaf7] border-2 border-[#e4e4de] rounded-xl text-[#111] font-black text-xl focus:outline-none focus:border-[#111] transition-all"
                     />
                   </div>
                 </div>
 
                 {walletFundingCharge > 0 && parsedAmount > 0 && (
-                  <div className="mb-4 sm:mb-6 rounded-lg sm:rounded-xl border border-slate-100 bg-slate-50 px-3.5 sm:px-4 py-3 space-y-1.5">
-                    <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
-                      <span>Amount to credit</span>
+                  <div className="mb-6 p-4 bg-slate-50 border border-[#e4e4de] rounded-xl space-y-2">
+                    <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase">
+                      <span>Credit</span>
                       <span>GHS {parsedAmount.toFixed(2)}</span>
                     </div>
-                    <div className="flex items-center justify-between text-xs font-semibold text-amber-600">
-                      <span>Service charge</span>
-                      <span>+ GHS {walletFundingCharge.toFixed(2)} ({walletChargeDescriptor})</span>
+                    <div className="flex justify-between text-[10px] font-bold text-[#f0a500] uppercase">
+                      <span>Fee</span>
+                      <span>+ GHS {walletFundingCharge.toFixed(2)}</span>
                     </div>
-                    <div className="h-px bg-slate-200" />
-                    <div className="flex items-center justify-between text-sm font-bold text-slate-900">
-                      <span>Total charged</span>
+                    <div className="h-px bg-[#e4e4de]" />
+                    <div className="flex justify-between text-base font-black text-[#111]">
+                      <span>Total Charged</span>
                       <span>GHS {totalAmountCharged.toFixed(2)}</span>
                     </div>
                   </div>
@@ -347,257 +558,176 @@ export default function AgentWallet() {
                 <button
                   onClick={handleTopUp}
                   disabled={loading || !amount || (businessStatus && !businessStatus.isOpen)}
-                  className="w-full text-sm font-bold py-2.5 sm:py-3 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed bg-primary-600 text-white rounded-lg sm:rounded-xl hover:bg-primary-700 transition-all"
-                  title={businessStatus && !businessStatus.isOpen ? 'Business is currently closed' : ''}
+                  className="dash-btn-primary w-full !py-4 !rounded-xl !text-sm"
                 >
-                  {loading ? (
-                    <>
-                      <Loader size={18} className="animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <CreditCard size={18} />
-                      Proceed to Payment
-                    </>
-                  )}
+                  {loading ? <Loader2 className="animate-spin" size={20} /> : <CreditCard size={20} />}
+                  Proceed to Payment
                 </button>
 
-                <p className="text-xs text-center mt-3 sm:mt-4 text-slate-600">
-                  Your transaction is secure and encrypted with Paystack
+                <p className="text-[10px] text-center mt-4 text-slate-400 font-bold uppercase tracking-widest">
+                  Securely powered by Paystack
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl sm:rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="px-4 sm:px-5 py-3.5 sm:py-4 border-b border-slate-100 flex items-center justify-between gap-3">
-              <h3 className="font-bold text-sm sm:text-base text-slate-900 flex items-center gap-2">
-                <History size={18} className="text-primary-600" />
-                Wallet Transaction History
-              </h3>
-              <span className="text-xs font-semibold text-slate-600">Page {txPage}</span>
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-2">
+              <History size={16} className="text-[#f0a500]" />
+              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Transaction History</h3>
             </div>
-
-            {txLoading ? (
-              <div className="py-10 flex items-center justify-center text-slate-600">
-                <Loader size={18} className="animate-spin mr-2" />
-                Loading transactions...
-              </div>
-            ) : transactions.length === 0 ? (
-              <div className="py-10 text-center text-slate-600">No wallet transactions yet.</div>
-            ) : (
-              <>
-                <div className="hidden md:block overflow-x-auto scrollbar-hide">
-                  <table className="w-full min-w-[720px]">
-                    <thead className="bg-slate-50">
-                      <tr>
-                        <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Reference</th>
-                        <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Type</th>
-                        <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Amount</th>
-                        <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Payment Status</th>
-                        <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Transaction Status</th>
-                        <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Date</th>
-                        <th className="px-4 py-3 text-right text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {transactions.map((transaction) => {
-                        const isCredit = isCreditTransaction(transaction);
-                        const amountTone = isCredit ? 'text-emerald-600' : 'text-rose-600';
-                        const amountPrefixIcon = isCredit ? <ArrowUpCircle size={14} /> : <ArrowDownCircle size={14} />;
-
-                        return (
-                          <tr key={transaction._id} className="hover:bg-slate-50 transition-colors">
-                            <td className="px-4 py-3 text-sm font-semibold text-slate-900 whitespace-nowrap">{transaction.reference || '-'}</td>
-                            <td className="px-4 py-3 text-sm text-slate-700 whitespace-nowrap">{typeLabelMap[transaction.type] || transaction.type || '-'}</td>
-                            <td className={`px-4 py-3 text-sm font-bold ${amountTone} whitespace-nowrap`}>
-                              <span className="inline-flex items-center gap-1">
-                                {amountPrefixIcon}
-                                {isCredit ? '+' : '-'}{formatCurrency(Math.abs(Number(transaction.amount || 0)))}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3 whitespace-nowrap">
-                              <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${statusBadgeMap[getResolvedPaymentStatus(transaction)] || 'bg-slate-100 text-slate-700'}`}>
-                                {getResolvedPaymentStatus(transaction)}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3 whitespace-nowrap">
-                              <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${statusBadgeMap[getResolvedTransactionStatus(transaction)] || 'bg-slate-100 text-slate-700'}`}>
-                                {getResolvedTransactionStatus(transaction)}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3 text-sm text-slate-600 whitespace-nowrap">
-                              {new Date(transaction.createdAt).toLocaleDateString()} {' '}
-                              {new Date(transaction.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </td>
-                            <td className="px-4 py-3 text-right whitespace-nowrap">
-                              <button
-                                onClick={() => {
-                                  setSelectedTx(transaction);
-                                  setShowTxDetails(true);
-                                }}
-                                className="p-2 text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all"
-                                title="View Details"
-                              >
-                                <Eye size={16} strokeWidth={2.5} />
-                              </button>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-
-                <div className="md:hidden divide-y divide-slate-100">
-                  {transactions.map((transaction) => {
-                    const isCredit = isCreditTransaction(transaction);
-                    return (
-                      <div key={transaction._id} className="p-3.5 sm:p-4 space-y-2">
-                        <div className="flex items-center justify-between gap-2">
-                          <p className="text-sm font-bold text-slate-900 truncate max-w-[52%]">{transaction.reference || '-'}</p>
-                          <div className="flex flex-col gap-1 items-end">
-                            <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${statusBadgeMap[getResolvedPaymentStatus(transaction)] || 'bg-slate-100 text-slate-700'}`}>
-                              Pay: {getResolvedPaymentStatus(transaction)}
-                            </span>
-                            <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${statusBadgeMap[getResolvedTransactionStatus(transaction)] || 'bg-slate-100 text-slate-700'}`}>
-                              Tx: {getResolvedTransactionStatus(transaction)}
-                            </span>
-                          </div>
-                        </div>
-                        <p className="text-xs text-slate-600">{typeLabelMap[transaction.type] || transaction.type || '-'}</p>
-                        <p className={`text-sm font-bold ${isCredit ? 'text-emerald-600' : 'text-rose-600'}`}>
-                          {isCredit ? '+' : '-'}{formatCurrency(Math.abs(Number(transaction.amount || 0)))}
-                        </p>
-                        <p className="text-xs text-slate-600">
-                          {new Date(transaction.createdAt).toLocaleDateString()} {' '}
-                          {new Date(transaction.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </p>
+            
+            <div className="dash-table-container">
+              <table className="dash-table">
+                <thead>
+                  <tr>
+                    <th className="dash-th">Transaction</th>
+                    <th className="dash-th">Amount</th>
+                    <th className="dash-th">Balance</th>
+                    <th className="dash-th">Status</th>
+                    <th className="dash-th text-right">Details</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {transactions.map((tx) => (
+                    <tr key={tx._id}>
+                      <td className="dash-td">
+                        <p className="font-bold text-slate-900">{typeLabelMap[tx.type] || 'Transaction'}</p>
+                        <p className="text-[10px] text-slate-400 font-medium">{new Date(tx.createdAt).toLocaleString()}</p>
+                      </td>
+                      <td className={`dash-td font-black ${isCreditTransaction(tx) ? 'text-emerald-600' : 'text-slate-900'}`}>
+                        {isCreditTransaction(tx) ? '+' : '-'}{formatCurrencyAbbreviated(Math.abs(tx.amount))}
+                      </td>
+                      <td className="dash-td font-bold text-slate-600">{formatCurrencyAbbreviated(tx.balanceAfter)}</td>
+                      <td className="dash-td">
+                        <span className={`dash-badge ${statusBadgeMap[getResolvedTransactionStatus(tx)] || 'bg-slate-100 text-slate-700'}`}>
+                          {getResolvedTransactionStatus(tx)}
+                        </span>
+                      </td>
+                      <td className="dash-td text-right">
                         <button
                           onClick={() => {
-                            setSelectedTx(transaction);
+                            setSelectedTx(tx);
                             setShowTxDetails(true);
                           }}
-                          className="w-full mt-2 px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                          className="p-2 text-slate-400 hover:text-[#111] hover:bg-slate-50 rounded-lg transition-all"
                         >
-                          View Details
+                          <Eye size={18} />
                         </button>
-                      </div>
-                    );
-                  })}
-                </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {transactions.length === 0 && !txLoading && (
+                    <tr>
+                      <td colSpan="5" className="dash-td py-12 text-center text-slate-400 font-bold uppercase text-xs">No transaction history found</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
 
-                <div className="px-4 sm:px-5 py-3.5 sm:py-4 border-t border-slate-100 flex items-center justify-between gap-3">
-                  <button
-                    onClick={() => setTxPage((prev) => Math.max(1, prev - 1))}
-                    disabled={txPage === 1 || txLoading}
-                    className="flex-1 sm:flex-none px-4 py-2 rounded-lg sm:rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Previous
-                  </button>
-                  <button
-                    onClick={() => setTxPage((prev) => prev + 1)}
-                    disabled={!txHasMore || txLoading}
-                    className="flex-1 sm:flex-none px-4 py-2 rounded-lg sm:rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Next
-                  </button>
-                </div>
-              </>
-            )}
+            <div className="flex items-center justify-between gap-4 mt-2">
+              <button
+                disabled={txPage <= 1 || txLoading}
+                onClick={() => setTxPage(p => p - 1)}
+                className="dash-btn-outline !py-2 !px-4 disabled:opacity-50"
+              >
+                Previous
+              </button>
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Page {txPage}</span>
+              <button
+                disabled={!txHasMore || txLoading}
+                onClick={() => setTxPage(p => p + 1)}
+                className="dash-btn-outline !py-2 !px-4 disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
           </div>
         </div>
+      </div>
 
-        {paymentData && (
-          <PaymentModal
-            key={paymentData?.reference}
-            isOpen={showPaymentModal}
-            onClose={() => {
-              setShowPaymentModal(false);
-              setPaymentData(null);
-            }}
-            accessCode={paymentData?.accessCode}
-            reference={paymentData?.reference}
-            amount={parseFloat(amount)}
-            onSuccess={handlePaymentSuccess}
-            onRefresh={() => {
-              refreshUser();
-              fetchTransactions(1);
-            }}
-          />
-        )}
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        paymentData={paymentData}
+        onSuccess={handlePaymentSuccess}
+      />
 
+      {showTxDetails && selectedTx && (
         <Modal
           isOpen={showTxDetails}
           onClose={() => setShowTxDetails(false)}
-          title="Transaction Details"
-          icon={<History size={20} className="text-primary-600" />}
-          maxWidth="max-w-lg"
+          title="Transaction Receipt"
         >
-          {selectedTx && (
-            <div className="space-y-4 sm:space-y-5">
-              <div className="flex justify-between items-start gap-3">
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.16em] mb-1">Reference</p>
-                  <p className="font-mono text-xs sm:text-sm font-bold text-slate-900 uppercase break-all">{selectedTx.reference || 'N/A'}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.16em] mb-1">Status</p>
-                  <div className="flex flex-col gap-1">
-                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${statusBadgeMap[getResolvedPaymentStatus(selectedTx)] || 'bg-slate-100 text-slate-700'}`}>
-                      Payment: {getResolvedPaymentStatus(selectedTx)}
-                    </span>
-                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${statusBadgeMap[getResolvedTransactionStatus(selectedTx)] || 'bg-slate-100 text-slate-700'}`}>
-                      Transaction: {getResolvedTransactionStatus(selectedTx)}
-                    </span>
-                  </div>
-                </div>
+          <div className="flex flex-col gap-6">
+            <div className="flex justify-between items-start border-b border-[#f0f0f0] pb-4">
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Reference</p>
+                <p className="font-bold text-sm text-slate-900 break-all">#{selectedTx.reference || selectedTx._id}</p>
               </div>
-
-              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100/60">
-                <div className="flex items-center justify-between mb-3 pb-3 border-b border-slate-200/60">
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.16em] leading-none">Transaction Value</p>
-                  <div className={`flex items-center gap-1.5 font-bold text-base sm:text-lg ${isCreditTransaction(selectedTx) ? 'text-emerald-600' : 'text-rose-600'}`}>
-                    {isCreditTransaction(selectedTx) ? <ArrowUpCircle size={18} /> : <ArrowDownCircle size={18} />}
-                    {isCreditTransaction(selectedTx) ? '+' : '-'}{formatCurrency(Math.abs(Number(selectedTx.amount || 0)))}
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center text-xs gap-3">
-                    <span className="font-semibold text-slate-500 uppercase">Type</span>
-                    <span className="font-semibold text-slate-900 uppercase text-right max-w-[62%]">{typeLabelMap[selectedTx.type] || selectedTx.type}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-xs gap-3">
-                    <span className="font-semibold text-slate-500 uppercase">Description</span>
-                    <span className="font-semibold text-slate-900 text-right max-w-[62%] break-words">{selectedTx.description || 'N/A'}</span>
-                  </div>
-                </div>
+              <div className="text-right flex-shrink-0">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Status</p>
+                <span className={`dash-badge ${statusBadgeMap[getResolvedTransactionStatus(selectedTx)]} !px-3 !py-1`}>
+                  {getResolvedTransactionStatus(selectedTx)}
+                </span>
               </div>
-
-              <div className="space-y-2.5">
-                <div className="flex justify-between items-center py-2 border-b border-slate-50 gap-3">
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.16em]">Date & Time</span>
-                  <span className="text-xs font-semibold text-slate-900 text-right">{new Date(selectedTx.createdAt).toLocaleString()}</span>
-                </div>
-                {selectedTx.paymentMethod && (
-                  <div className="flex justify-between items-center py-2 border-b border-slate-50 gap-3">
-                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.16em]">Method</span>
-                    <span className="text-xs font-semibold text-slate-900 uppercase text-right">{selectedTx.paymentMethod}</span>
-                  </div>
-                )}
-              </div>
-
-              <button
-                onClick={() => setShowTxDetails(false)}
-                className="w-full py-2.5 bg-slate-100 text-slate-700 rounded-xl font-bold uppercase text-[11px] tracking-[0.12em] hover:bg-slate-200 transition-all"
-              >
-                Close Details
-              </button>
             </div>
-          )}
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 bg-[#fafaf7] rounded-xl border border-[#e4e4de]">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Amount</p>
+                <p className={`font-black text-lg ${isCreditTransaction(selectedTx) ? 'text-emerald-600' : 'text-slate-900'}`}>
+                  {isCreditTransaction(selectedTx) ? '+' : '-'}{formatCurrencyAbbreviated(Math.abs(selectedTx.amount))}
+                </p>
+              </div>
+              <div className="p-4 bg-[#fafaf7] rounded-xl border border-[#e4e4de]">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">New Balance</p>
+                <p className="font-black text-slate-900 text-lg">{formatCurrencyAbbreviated(selectedTx.balanceAfter)}</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <DetailRow label="Type" value={typeLabelMap[selectedTx.type] || selectedTx.type} />
+              <DetailRow label="Description" value={selectedTx.description || 'No description available'} />
+              <DetailRow label="Date" value={new Date(selectedTx.createdAt).toLocaleString()} />
+              {selectedTx.paymentReference && <DetailRow label="Paystack Ref" value={selectedTx.paymentReference} />}
+            </div>
+
+            <button
+              onClick={() => setShowTxDetails(false)}
+              className="dash-btn-primary w-full py-4 mt-2 !rounded-xl"
+            >
+              Done
+            </button>
+          </div>
         </Modal>
-      </div>
+      )}
     </AgentLayout>
+  );
+}
+
+// --- MICRO UTILS ---
+
+function StatsCard({ title, value, icon: Icon, isRaw = false }) {
+  return (
+    <div className="dash-stat-card">
+      <div className="flex items-center justify-between mb-1">
+        <span className="dash-stat-label">{title}</span>
+        {Icon && <Icon size={14} className="text-slate-300" />}
+      </div>
+      <div className="dash-stat-value">
+        {isRaw ? value : formatCurrencyAbbreviated(Number(value || 0))}
+      </div>
+    </div>
+  );
+}
+
+function DetailRow({ label, value }) {
+  return (
+    <div className="flex justify-between items-center py-2 border-b border-[#f0f0f0]">
+      <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">{label}</span>
+      <span className="text-sm font-bold text-slate-900 text-right ml-4">{value}</span>
+    </div>
   );
 }
