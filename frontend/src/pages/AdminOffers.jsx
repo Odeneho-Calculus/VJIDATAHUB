@@ -1,13 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Edit2, Trash2, RefreshCw, Eye, Database, TrendingUp, AlertCircle, CheckCircle, Search, Tag, Filter } from 'lucide-react';
-import { formatNumberAbbreviated } from '../utils/formatCurrency';
+import { Edit2, Trash2, RefreshCw, Eye, Database, AlertCircle, CheckCircle, Search, Filter, Database as DbIcon } from 'lucide-react';
 import AdminSidebar from '../components/AdminSidebar';
 import ConfirmDialog from '../components/ConfirmDialog';
 import ViewXpresOfferModal from '../components/ViewXpresOfferModal';
 import EditXpresPricesModal from '../components/EditXpresPricesModal';
 import { useSidebar } from '../hooks/useSidebar';
-import { xpresdata } from '../services/api';
+import { xpresdata, admin as adminAPI } from '../services/api';
 import { useSettings } from '../context/SettingsContext';
 
 export default function AdminOffers() {
@@ -20,11 +19,10 @@ export default function AdminOffers() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [selectedNetwork, setSelectedNetwork] = useState('');
-  const [selectedType, setSelectedType] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
-  const [stats, setStats] = useState({ totalPlans: 0, activePlans: 0, outOfStockPlans: 0, avgMargin: 0 });
+  const [stats, setStats] = useState({ totalPlans: 0, activePlans: 0, outOfStockPlans: 0 });
+  const [networkCatalog, setNetworkCatalog] = useState([]);
 
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [showViewModal, setShowViewModal] = useState(false);
@@ -32,20 +30,26 @@ export default function AdminOffers() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [editPricesSaving, setEditPricesSaving] = useState(false);
 
+  useEffect(() => {
+    adminAPI.getSystemSettings().then((res) => {
+      const catalog = res?.settings?.networkCatalog || [];
+      setNetworkCatalog(catalog.filter((n) => n?.isActive !== false));
+    }).catch(() => {});
+  }, []);
+
   const fetchDataPlans = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await xpresdata.list(selectedNetwork, '', page, 20, selectedType);
+      const response = await xpresdata.list(selectedNetwork, '', page, 20);
       if (response.success) {
-        setPlans(response.plans);
-        setTotalPages(response.pagination?.pages || 0);
+        setPlans(response.plans || []);
       }
     } catch (err) {
       setError(err.message || 'Failed to fetch offers');
     } finally {
       setLoading(false);
     }
-  }, [selectedNetwork, page, selectedType]);
+  }, [selectedNetwork, page]);
 
   const fetchStats = useCallback(async () => {
     try {
@@ -60,12 +64,12 @@ export default function AdminOffers() {
 
   useEffect(() => {
     setPage(1);
-  }, [selectedNetwork, searchTerm, selectedType]);
+  }, [selectedNetwork, searchTerm]);
 
   useEffect(() => {
     fetchDataPlans();
     fetchStats();
-  }, [page, selectedNetwork, selectedType, fetchDataPlans, fetchStats]);
+  }, [page, selectedNetwork, fetchDataPlans, fetchStats]);
 
   useEffect(() => {
     const provider = settings?.vtuProvider || 'xpresdata';
@@ -74,22 +78,8 @@ export default function AdminOffers() {
   }, [settings?.vtuProvider, navigate]);
 
   const showMessage = (msg, isError = false) => {
-    if (isError) {
-      setError(msg);
-    } else {
-      setSuccess(msg);
-    }
-    setTimeout(() => {
-      setError('');
-      setSuccess('');
-    }, 3000);
-  };
-
-  const getFilteredPlans = () => {
-    if (!searchTerm) return plans;
-    return plans.filter(plan =>
-      plan.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    if (isError) setError(msg); else setSuccess(msg);
+    setTimeout(() => { setError(''); setSuccess(''); }, 4000);
   };
 
   const handleSync = async () => {
@@ -100,7 +90,7 @@ export default function AdminOffers() {
         setPage(1);
         await fetchDataPlans();
         await fetchStats();
-        showMessage(`Sync complete: ${response.stats.synced} new, ${response.stats.updated} updated`);
+        showMessage(`Sync complete: ${response.stats?.synced ?? 0} new, ${response.stats?.updated ?? 0} updated`);
       }
     } catch (err) {
       showMessage(`Sync failed: ${err.message}`, true);
@@ -144,11 +134,6 @@ export default function AdminOffers() {
     }
   };
 
-  const handleOpenDelete = (plan) => {
-    setSelectedPlan(plan);
-    setShowDeleteConfirm(true);
-  };
-
   const confirmDelete = async () => {
     if (!selectedPlan) return;
     try {
@@ -164,319 +149,357 @@ export default function AdminOffers() {
     }
   };
 
-  const filteredPlans = getFilteredPlans();
-  const networks = ['MTN', 'Telecel', 'AirtelTigo'];
-  const types = ['Data', 'Airtime'];
+  const filteredPlans = plans.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   return (
-    <div className="flex h-screen">
+    <div className="off-page-container" style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f5f5f0' }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
+        
+        .off-page-container {
+          font-family: 'DM Sans', sans-serif;
+        }
+
+        .off-content {
+          flex: 1;
+          padding: 24px 16px;
+          overflow-y: auto;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .off-main-card {
+          background: #fff;
+          border: 1.5px solid #e4e4de;
+          border-radius: 14px;
+          box-shadow: 0 8px 40px rgba(0,0,0,0.10);
+          width: 100%;
+          max-width: 1100px;
+          padding: 24px;
+          margin-bottom: 24px;
+        }
+
+        .off-heading-section {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          margin-bottom: 32px;
+        }
+
+        .off-icon-box {
+          width: 46px;
+          height: 46px;
+          background: #111;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #f0a500;
+          flex-shrink: 0;
+        }
+
+        .off-h2 {
+          font-size: 26px;
+          font-weight: 800;
+          color: #111;
+          margin: 0;
+          letter-spacing: -0.02em;
+        }
+
+        .off-stats-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 12px;
+          width: 100%;
+          margin-bottom: 24px;
+        }
+
+        @media (min-width: 768px) {
+          .off-stats-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+          }
+        }
+
+        .off-stat-card {
+          background: #fff;
+          border: 1.5px solid #e4e4de;
+          border-radius: 14px;
+          padding: 16px;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .off-stat-label {
+          font-size: 11.5px;
+          font-weight: 700;
+          color: #666;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+
+        .off-stat-value {
+          font-size: 20px;
+          font-weight: 800;
+          color: #111;
+        }
+
+        .off-search-box {
+          position: relative;
+          width: 100%;
+          margin-bottom: 20px;
+        }
+
+        .off-input {
+          background: #fafaf7;
+          border: 1.5px solid #e0e0d8;
+          border-radius: 7px;
+          padding: 11px 14px 11px 40px;
+          font-size: 14px;
+          width: 100%;
+          color: #111;
+          transition: all 0.2s;
+        }
+
+        .off-input:focus {
+          border-color: #111;
+          box-shadow: 0 0 0 3px rgba(17,17,17,0.07);
+          background: #fff;
+          outline: none;
+        }
+
+        .off-btn-primary {
+          background: #111;
+          color: #fff;
+          border-radius: 7px;
+          padding: 12px 20px;
+          font-size: 14px;
+          font-weight: 700;
+          border: none;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+        }
+
+        .off-btn-outline {
+          background: #fff;
+          color: #111;
+          border: 1.5px solid #e4e4de;
+          border-radius: 7px;
+          padding: 10px 16px;
+          font-size: 13px;
+          font-weight: 700;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .off-filter-btn {
+          background: #fff;
+          border: 1.5px solid #e4e4de;
+          border-radius: 7px;
+          padding: 6px 14px;
+          font-size: 12.5px;
+          font-weight: 700;
+          color: #444;
+          cursor: pointer;
+          transition: all 0.2s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .off-filter-btn:hover {
+          border-color: #111;
+          background: #fafaf7;
+        }
+
+        .off-filter-btn.active {
+          background: #111;
+          border-color: #111;
+          color: #fff;
+        }
+
+        .off-table-container {
+          width: 100%;
+          overflow-x: auto;
+          border-radius: 8px;
+          border: 1.5px solid #e4e4de;
+        }
+
+        .off-table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 13.5px;
+        }
+
+        .off-th {
+          background: #fafaf7;
+          text-align: left;
+          padding: 12px 16px;
+          font-weight: 700;
+          color: #333;
+          border-bottom: 1.5px solid #e4e4de;
+          font-size: 11.5px;
+          text-transform: uppercase;
+        }
+
+        .off-td {
+          padding: 14px 16px;
+          border-bottom: 1px solid #f0f0f0;
+          color: #444;
+        }
+
+        .off-btn-icon {
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 6px;
+          border: 1px solid #e4e4de;
+          background: #fff;
+          color: #444;
+          cursor: pointer;
+        }
+
+        .off-btn-icon:hover {
+          background: #111;
+          color: #fff;
+        }
+
+        .off-spinner {
+          width: 18px;
+          height: 18px;
+          border: 2.5px solid rgba(17,17,17,0.1);
+          border-top-color: #111;
+          border-radius: 50%;
+          animation: off-spin 0.8s linear infinite;
+        }
+
+        @keyframes off-spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
+
       <AdminSidebar isOpen={sidebarOpen} onClose={closeSidebar} />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex-1 overflow-auto bg-gradient-to-br from-slate-50 via-white to-blue-50">
-          <div className="w-full px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
-            <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 mb-2">
-                  Manage Xpresdata Offers
-                </h1>
-                <p className="text-sm sm:text-base text-slate-600">
-                  Sync and manage Xpresdata offers pricing and availability
-                </p>
+
+      <div className="off-content">
+        <div className="off-main-card">
+          <div className="off-heading-section">
+            <div className="off-icon-box">
+              <DbIcon size={24} />
+            </div>
+            <div>
+              <h2 className="off-h2">Xpresdata Offers</h2>
+              <p style={{ fontSize: '14px', color: '#666', margin: '4px 0 0' }}>Sync and manage Xpresdata pricing and stock</p>
+            </div>
+          </div>
+
+          {error && <div style={{ background: '#fff5f5', border: '1.5px solid #fecaca', color: '#b91c1c', borderRadius: '7px', padding: '12px', marginBottom: '20px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}><AlertCircle size={16} /> {error}</div>}
+          {success && <div style={{ background: '#ecfdf5', border: '1.5px solid #a7f3d0', color: '#047857', borderRadius: '7px', padding: '12px', marginBottom: '20px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}><CheckCircle size={16} /> {success}</div>}
+
+          <div className="off-stats-grid">
+            <div className="off-stat-card">
+              <span className="off-stat-label">Total Plans</span>
+              <span className="off-stat-value">{stats.totalPlans}</span>
+            </div>
+            <div className="off-stat-card">
+              <span className="off-stat-label">Active</span>
+              <span className="off-stat-value" style={{ color: '#059669' }}>{stats.activePlans}</span>
+            </div>
+            <div className="off-stat-card">
+              <span className="off-stat-label">Out of Stock</span>
+              <span className="off-stat-value" style={{ color: '#b91c1c' }}>{stats.outOfStockPlans}</span>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <div className="off-search-box" style={{ flex: '1', minWidth: '240px', marginBottom: 0 }}>
+                <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#999' }} />
+                <input
+                  className="off-input"
+                  placeholder="Search offers by name..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
               </div>
-              <div className="flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-xl border-2 border-blue-100 self-start">
-                <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
-                <span className="text-sm font-semibold text-blue-700">Provider: Xpresdata</span>
-              </div>
+              <button className="off-btn-primary" onClick={handleSync} disabled={syncing}>
+                <RefreshCw size={16} className={syncing ? 'animate-spin' : ''} />
+                {syncing ? 'Syncing...' : 'Sync Xpresdata'}
+              </button>
             </div>
 
-            {error && (
-              <div className="mb-6 p-3 sm:p-4 bg-red-50 border-2 border-red-200 rounded-2xl text-red-700 text-sm sm:text-base flex items-center gap-3">
-                <AlertCircle size={20} className="flex-shrink-0" />
-                {error}
-              </div>
-            )}
-
-            {success && (
-              <div className="mb-6 p-3 sm:p-4 bg-green-50 border-2 border-green-200 rounded-2xl text-green-700 text-sm sm:text-base flex items-center gap-3">
-                <CheckCircle size={20} className="flex-shrink-0" />
-                {success}
-              </div>
-            )}
-
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-5 mb-6 sm:mb-8">
-              <div className="bg-white rounded-2xl p-4 sm:p-6 border-2 border-slate-200 hover:shadow-lg transition-all">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-                    <Database className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                  </div>
-                </div>
-                <p className="text-xs sm:text-sm text-slate-600 mb-1">Total Offers</p>
-                <p className="text-2xl sm:text-3xl font-bold text-slate-900">{stats.totalPlans}</p>
-              </div>
-
-              <div className="bg-white rounded-2xl p-4 sm:p-6 border-2 border-slate-200 hover:shadow-lg transition-all">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
-                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                  </div>
-                </div>
-                <p className="text-xs sm:text-sm text-slate-600 mb-1">Active Offers</p>
-                <p className="text-2xl sm:text-3xl font-bold text-slate-900">{stats.activePlans}</p>
-              </div>
-
-              <div className="bg-white rounded-2xl p-4 sm:p-6 border-2 border-slate-200 hover:shadow-lg transition-all">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center">
-                    <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                  </div>
-                </div>
-                <p className="text-xs sm:text-sm text-slate-600 mb-1">Out of Stock</p>
-                <p className="text-2xl sm:text-3xl font-bold text-slate-900">{stats.outOfStockPlans}</p>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-2xl p-4 sm:p-6 border-2 border-slate-200 hover:border-slate-300 hover:shadow-lg transition-all mb-6 sm:mb-8">
-              <div className="flex flex-col sm:flex-row gap-3 mb-6">
-                <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
-                  <input
-                    type="text"
-                    placeholder="Search offers by name..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border-2 border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-blue-400 focus:ring-0 text-sm hover:border-slate-300"
-                  />
-                </div>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+              <span style={{ fontSize: '11px', fontWeight: '800', color: '#666', textTransform: 'uppercase' }}>Network:</span>
+              <button className={`off-filter-btn ${selectedNetwork === '' ? 'active' : ''}`} onClick={() => setSelectedNetwork('')}>All</button>
+              {networkCatalog.map(n => (
                 <button
-                  onClick={handleSync}
-                  disabled={syncing}
-                  className="px-4 sm:px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2 text-sm sm:text-base whitespace-nowrap"
+                  key={n.slug || n.name}
+                  className={`off-filter-btn ${selectedNetwork === (n.name || n.slug) ? 'active' : ''}`}
+                  onClick={() => setSelectedNetwork(n.name || n.slug)}
                 >
-                  <RefreshCw size={18} className={syncing ? 'animate-spin' : ''} />
-                  {syncing ? 'Syncing...' : 'Sync Xpresdata'}
+                  {n.name || n.slug}
                 </button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Filter size={16} className="text-slate-400" />
-                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Network Filter</p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      onClick={() => setSelectedNetwork('')}
-                      className={`px-4 py-2 rounded-lg font-bold transition text-[10px] uppercase tracking-wider ${selectedNetwork === ''
-                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-100'
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                        }`}
-                    >
-                      All Networks
-                    </button>
-                    {networks.map(network => (
-                      <button
-                        key={network}
-                        onClick={() => setSelectedNetwork(network)}
-                        className={`px-4 py-2 rounded-lg font-bold transition text-[10px] uppercase tracking-wider ${selectedNetwork === network
-                          ? 'bg-blue-600 text-white shadow-lg shadow-blue-100'
-                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                          }`}
-                      >
-                        {network}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Tag size={16} className="text-slate-400" />
-                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Offer Type</p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      onClick={() => setSelectedType('')}
-                      className={`px-4 py-2 rounded-lg font-bold transition text-[10px] uppercase tracking-wider ${selectedType === ''
-                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100'
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                        }`}
-                    >
-                      All Types
-                    </button>
-                    {types.map(type => (
-                      <button
-                        key={type}
-                        onClick={() => setSelectedType(type)}
-                        className={`px-4 py-2 rounded-lg font-bold transition text-[10px] uppercase tracking-wider ${selectedType === type
-                          ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100'
-                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                          }`}
-                      >
-                        {type}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
+          </div>
 
-            <div className="bg-white rounded-2xl border-2 border-slate-200 hover:border-slate-300 transition-all overflow-hidden">
-              {loading ? (
-                <div className="flex justify-center py-16">
-                  <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <p className="text-slate-600">Loading offers...</p>
-                  </div>
-                </div>
-              ) : filteredPlans.length === 0 ? (
-                <div className="text-center py-16">
-                  <Database size={48} className="mx-auto text-slate-300 mb-4" />
-                  <p className="text-slate-600 text-lg">No offers found</p>
-                  <p className="text-slate-500 text-sm">Try adjusting your filters or search term</p>
-                </div>
-              ) : (
-                <>
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="bg-gradient-to-r from-slate-100 to-blue-50 border-b-2 border-slate-200">
-                          <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-slate-900 whitespace-nowrap">Plan</th>
-                          <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-slate-900 whitespace-nowrap">Pricing</th>
-                          <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-slate-900 whitespace-nowrap">Status</th>
-                          <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-slate-900 whitespace-nowrap">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-200">
-                        {filteredPlans.map(plan => (
-                          <tr key={plan._id} className={`hover:bg-blue-50 transition ${!plan.inStock ? 'opacity-60 bg-slate-50' : ''}`}>
-                            <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                              <div className="flex flex-col gap-1">
-                                <div className="flex items-center gap-2">
-                                  <p className="text-sm font-semibold text-slate-900">{plan.name}</p>
-                                  {!plan.inStock && (
-                                    <span className="bg-red-100 text-red-800 text-[10px] px-2 py-0.5 rounded-full font-medium uppercase tracking-tight">OOS</span>
-                                  )}
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <span className="px-1.5 py-0.5 bg-blue-50 text-blue-700 rounded-md text-[9px] font-black uppercase border border-blue-100">
-                                    {plan.isp}
-                                  </span>
-                                  <span className="text-[10px] font-bold text-slate-400 uppercase">
-                                    {plan.volume}GB • {plan.type}
-                                  </span>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                              <div className="flex flex-col gap-0.5">
-                                <p className="text-sm font-bold text-blue-600">Admin: GHS {formatNumberAbbreviated(plan.sellingPrice)}</p>
-                                <p className="text-[10px] text-slate-500 font-medium">Agt: GHS {formatNumberAbbreviated(plan.agentPrice)} • Ven: GHS {formatNumberAbbreviated(plan.vendorPrice)}</p>
-                              </div>
-                            </td>
-                            <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                              <span className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-tight ${plan.status === 'active'
-                                ? 'bg-green-100 text-green-700'
-                                : 'bg-red-100 text-red-700'
-                                }`}>
-                                {plan.status}
-                              </span>
-                            </td>
-                            <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                              <div className="flex gap-1 items-center">
-                                <button
-                                  onClick={() => { setSelectedPlan(plan); setShowViewModal(true); }}
-                                  className="p-2 hover:bg-slate-100 rounded-lg transition"
-                                  title="View Details"
-                                >
-                                  <Eye size={18} className="text-cyan-600" />
-                                </button>
-                                <button
-                                  onClick={() => handleOpenEditPrices(plan)}
-                                  disabled={!plan.inStock}
-                                  className="p-2 hover:bg-slate-100 rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed"
-                                  title="Edit Prices"
-                                >
-                                  <Edit2 size={18} className="text-blue-600" />
-                                </button>
-                                <button
-                                  onClick={() => handleToggleStatus(plan)}
-                                  disabled={!plan.inStock}
-                                  className={`p-2 rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed ${plan.status === 'active'
-                                    ? 'hover:bg-slate-100'
-                                    : 'hover:bg-slate-100'
-                                    }`}
-                                  title={plan.status === 'active' ? 'Deactivate' : 'Activate'}
-                                >
-                                  <Tag size={18} className={plan.status === 'active' ? 'text-green-600' : 'text-slate-400'} />
-                                </button>
-                                <button
-                                  onClick={() => handleOpenDelete(plan)}
-                                  className="p-2 hover:bg-slate-100 rounded-lg transition"
-                                  title="Delete"
-                                >
-                                  <Trash2 size={18} className="text-red-600" />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  {totalPages > 1 && (
-                    <div className="px-6 py-6 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
-                      <p className="text-xs font-black text-slate-400 uppercase tracking-widest">
-                        Page <span className="text-slate-900">{page}</span> of <span className="text-slate-900">{totalPages}</span>
-                      </p>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => setPage(p => Math.max(1, p - 1))}
-                          disabled={page === 1}
-                          className="px-6 py-2 bg-white border-2 border-slate-200 rounded-xl text-[10px] font-black text-slate-600 hover:border-slate-300 disabled:opacity-50 transition-all uppercase tracking-widest"
-                        >
-                          Previous
-                        </button>
-                        <button
-                          onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                          disabled={page === totalPages}
-                          className="px-6 py-2 bg-slate-900 border-2 border-slate-900 rounded-xl text-[10px] font-black text-white hover:bg-slate-800 disabled:opacity-50 transition-all uppercase tracking-widest"
-                        >
-                          Next
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
+          <div className="off-table-container">
+            {loading ? (
+              <div style={{ padding: '40px', display: 'flex', justifyContent: 'center' }}><div className="off-spinner"></div></div>
+            ) : (
+              <table className="off-table">
+                <thead>
+                  <tr>
+                    <th className="off-th">Plan</th>
+                    <th className="off-th">Pricing (GHS)</th>
+                    <th className="off-th">Status</th>
+                    <th className="off-th" style={{ textAlign: 'right' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredPlans.map(plan => (
+                    <tr key={plan._id}>
+                      <td className="off-td" style={{ whiteSpace: 'nowrap' }}>
+                        <div style={{ fontWeight: '700', color: '#111' }}>{plan.name}</div>
+                        <div style={{ fontSize: '11px', color: '#888' }}>{plan.network} • {plan.type}</div>
+                      </td>
+                      <td className="off-td" style={{ whiteSpace: 'nowrap' }}>
+                        <div style={{ fontSize: '12px' }}>Admin: <span style={{ fontWeight: '700' }}>{Number(plan.sellingPrice || 0).toFixed(2)}</span></div>
+                        <div style={{ fontSize: '11px', color: '#666' }}>Agent: {Number(plan.agentPrice || 0).toFixed(2)}</div>
+                      </td>
+                      <td className="off-td" style={{ whiteSpace: 'nowrap' }}>
+                        <span style={{ fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', color: plan.status === 'active' ? '#059669' : '#666' }}>
+                          {plan.status}
+                        </span>
+                      </td>
+                      <td className="off-td">
+                        <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
+                          <button className="off-btn-icon" onClick={() => { setSelectedPlan(plan); setShowViewModal(true); }} title="View"><Eye size={14} /></button>
+                          <button className="off-btn-icon" onClick={() => handleOpenEditPrices(plan)} title="Edit Prices"><Edit2 size={14} /></button>
+                          <button className="off-btn-icon" onClick={() => handleToggleStatus(plan)} title="Toggle Status"><CheckCircle size={14} style={{ color: plan.status === 'active' ? '#059669' : '#ccc' }} /></button>
+                          <button className="off-btn-icon" onClick={() => handleOpenDelete(plan)} title="Delete"><Trash2 size={14} style={{ color: '#b91c1c' }} /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       </div>
 
-      <ViewXpresOfferModal
-        plan={selectedPlan}
-        isOpen={showViewModal}
-        onClose={() => { setShowViewModal(false); setSelectedPlan(null); }}
-      />
-
-      <EditXpresPricesModal
-        isOpen={showEditPricesModal}
-        onClose={() => { setShowEditPricesModal(false); setSelectedPlan(null); }}
-        plan={selectedPlan}
-        onSave={handleSavePrices}
-        loading={editPricesSaving}
-      />
-
-      <ConfirmDialog
-        isOpen={showDeleteConfirm}
-        onClose={() => { setShowDeleteConfirm(false); setSelectedPlan(null); }}
-        onConfirm={confirmDelete}
-        title="Delete Xpresdata Offer"
-        message={`Are you sure you want to delete "${selectedPlan?.name}"? This action cannot be undone and will permanently remove this offer from the local database.`}
-        confirmText="Delete Permanently"
-        confirmColor="bg-rose-600"
-      />
+      <ViewXpresOfferModal isOpen={showViewModal} onClose={() => setShowViewModal(false)} plan={selectedPlan} />
+      <EditXpresPricesModal isOpen={showEditPricesModal} onClose={() => setShowEditPricesModal(false)} plan={selectedPlan} onSave={handleSavePrices} loading={editPricesSaving} />
+      <ConfirmDialog isOpen={showDeleteConfirm} onClose={() => setShowDeleteConfirm(false)} onConfirm={confirmDelete} title="Delete Offer" message="Remove this offer from your database?" type="danger" />
     </div>
   );
 }

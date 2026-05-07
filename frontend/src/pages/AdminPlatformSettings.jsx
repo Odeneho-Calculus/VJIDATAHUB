@@ -28,12 +28,8 @@ export default function AdminPlatformSettings() {
   const [activeTab, setActiveTab] = useState('contact');
   const [webhookLogs, setWebhookLogs] = useState([]);
   const [logsLoading, setLogsLoading] = useState(false);
-  const [logsError, setLogsError] = useState('');
-  const [logFilter, setLogFilter] = useState('all');
   const [selectedLog, setSelectedLog] = useState(null);
   const [showLogModal, setShowLogModal] = useState(false);
-  const [clearingLogs, setClearingLogs] = useState(false);
-  const [webhookSecretConfigured, setWebhookSecretConfigured] = useState(true);
   const [formData, setFormData] = useState({
     phone: '',
     whatsapp: '',
@@ -133,18 +129,14 @@ export default function AdminPlatformSettings() {
   const fetchWebhookLogs = async () => {
     try {
       setLogsLoading(true);
-      setLogsError('');
       const response = await adminAPI.getTopzaWebhookLogs(1, 20);
       if (response.success) {
         setWebhookLogs(Array.isArray(response.logs) ? response.logs : []);
-        setWebhookSecretConfigured(Boolean(response.secretConfigured));
       } else {
         setWebhookLogs([]);
-        setLogsError(response.message || 'Failed to fetch webhook logs');
       }
-    } catch (err) {
+    } catch {
       setWebhookLogs([]);
-      setLogsError(err?.message || 'Failed to fetch webhook logs');
     } finally {
       setLogsLoading(false);
     }
@@ -154,37 +146,6 @@ export default function AdminPlatformSettings() {
     setSelectedLog(log);
     setShowLogModal(true);
   };
-
-  const handleClearWebhookLogs = async () => {
-    const confirmed = window.confirm('Clear all Topza webhook logs? This cannot be undone.');
-    if (!confirmed) return;
-
-    try {
-      setClearingLogs(true);
-      await adminAPI.clearTopzaWebhookLogs();
-      showMessage('Webhook logs cleared successfully');
-      await fetchWebhookLogs();
-    } catch (err) {
-      showMessage(err?.message || 'Failed to clear webhook logs', true);
-    } finally {
-      setClearingLogs(false);
-    }
-  };
-
-  const formatDateTime = (value) => {
-    if (!value) return 'N/A';
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return 'N/A';
-    return date.toLocaleString();
-  };
-
-  const filteredWebhookLogs = webhookLogs.filter((log) => {
-    if (logFilter === 'all') return true;
-    if (logFilter === 'updated') return log.handled;
-    if (logFilter === 'ignored') return !log.handled;
-    if (logFilter === 'invalid') return !log.signatureValid;
-    return true;
-  });
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f5f5f0', fontFamily: "'DM Sans', sans-serif" }}>

@@ -19,7 +19,6 @@ export default function AdminTopzaPlans() {
   const [selectedNetwork, setSelectedNetwork] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
   const [stats, setStats] = useState({ totalPlans: 0, activePlans: 0, outOfStockPlans: 0 });
 
   const [editingPlan, setEditingPlan] = useState(null);
@@ -32,24 +31,6 @@ export default function AdminTopzaPlans() {
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [updatingStock, setUpdatingStock] = useState(false);
   const [networkCatalog, setNetworkCatalog] = useState([]);
-
-  const formatPrice2dpNoRound = (value) => {
-    const numeric = Number(value);
-    if (!Number.isFinite(numeric)) return '0.00';
-
-    const sign = numeric < 0 ? '-' : '';
-    let absString = Math.abs(numeric).toString();
-
-    if (absString.includes('e')) {
-      absString = Math.abs(numeric).toLocaleString('en-US', {
-        useGrouping: false,
-        maximumFractionDigits: 20,
-      });
-    }
-
-    const [whole, fraction = ''] = absString.split('.');
-    return `${sign}${whole}.${(fraction + '00').slice(0, 2)}`;
-  };
 
   useEffect(() => {
     adminAPI.getSystemSettings().then((res) => {
@@ -64,7 +45,6 @@ export default function AdminTopzaPlans() {
       const response = await topzaAPI.list(selectedNetwork, '', page, 20);
       if (response.success) {
         setPlans(response.plans || []);
-        setTotalPages(response.pagination?.pages || 0);
       }
     } catch (err) {
       setError(err.message || 'Failed to fetch Topza plans');
@@ -98,30 +78,6 @@ export default function AdminTopzaPlans() {
     if (isError) setError(msg); else setSuccess(msg);
     setTimeout(() => { setError(''); setSuccess(''); }, 4000);
   };
-
-  const getNumericVolume = (plan) => {
-    const direct = Number(plan?.volume);
-    if (Number.isFinite(direct)) return direct;
-
-    const fallbackText = `${plan?.name || ''} ${plan?.dataAmount || ''}`;
-    const match = fallbackText.match(/(\d+(?:\.\d+)?)/);
-    return match ? Number(match[1]) : Number.POSITIVE_INFINITY;
-  };
-
-  const filteredPlans = (searchTerm
-    ? plans.filter((p) => (p.name || `${p.isp} ${p.volume}GB`).toLowerCase().includes(searchTerm.toLowerCase()))
-    : plans
-  )
-    .slice()
-    .sort((a, b) => {
-      const networkOrder = String(a.isp || '').localeCompare(String(b.isp || ''));
-      if (networkOrder !== 0) return networkOrder;
-
-      const volumeOrder = getNumericVolume(a) - getNumericVolume(b);
-      if (volumeOrder !== 0) return volumeOrder;
-
-      return String(a.name || '').localeCompare(String(b.name || ''));
-    });
 
   const handleSync = async () => {
     try {
@@ -196,14 +152,6 @@ export default function AdminTopzaPlans() {
     }
   };
 
-  const toggleSelectAll = () => {
-    if (selectedIds.size === filteredPlans.length && filteredPlans.length > 0) {
-      setSelectedIds(new Set());
-    } else {
-      setSelectedIds(new Set(filteredPlans.map((p) => p._id)));
-    }
-  };
-
   const toggleSelect = (id) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
@@ -222,7 +170,7 @@ export default function AdminTopzaPlans() {
         setBulkDeleteTarget(null);
         await fetchPlans();
         await fetchStats();
-        showMessage(`${response.deleted} plan${response.deleted !== 1 ? 's' : ''} deleted`);
+        showMessage(`${response.deleted} plan(s) deleted`);
       }
     } catch (err) {
       showMessage(`Bulk delete failed: ${err.message}`, true);
@@ -252,401 +200,426 @@ export default function AdminTopzaPlans() {
     }
   };
 
+  const filteredPlans = plans.filter((p) => (p.name || `${p.isp} ${p.volume}GB`).toLowerCase().includes(searchTerm.toLowerCase()));
+
   return (
-    <div className="flex h-screen">
+    <div className="topza-page-container" style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f5f5f0' }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
+        
+        .topza-page-container {
+          font-family: 'DM Sans', sans-serif;
+        }
+
+        .topza-content {
+          flex: 1;
+          padding: 24px 16px;
+          overflow-y: auto;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .topza-main-card {
+          background: #fff;
+          border: 1.5px solid #e4e4de;
+          border-radius: 14px;
+          box-shadow: 0 8px 40px rgba(0,0,0,0.10);
+          width: 100%;
+          max-width: 1100px;
+          padding: 24px;
+          margin-bottom: 24px;
+        }
+
+        .topza-heading-section {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          margin-bottom: 32px;
+        }
+
+        .topza-icon-box {
+          width: 46px;
+          height: 46px;
+          background: #111;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #f0a500;
+          flex-shrink: 0;
+        }
+
+        .topza-h2 {
+          font-size: 26px;
+          font-weight: 800;
+          color: #111;
+          margin: 0;
+          letter-spacing: -0.02em;
+        }
+
+        .topza-stats-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 12px;
+          width: 100%;
+          margin-bottom: 24px;
+        }
+
+        @media (min-width: 768px) {
+          .topza-stats-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+          }
+        }
+
+        .topza-stat-card {
+          background: #fff;
+          border: 1.5px solid #e4e4de;
+          border-radius: 14px;
+          padding: 16px;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .topza-stat-label {
+          font-size: 11.5px;
+          font-weight: 700;
+          color: #666;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+
+        .topza-stat-value {
+          font-size: 20px;
+          font-weight: 800;
+          color: #111;
+        }
+
+        .topza-search-box {
+          position: relative;
+          width: 100%;
+          margin-bottom: 20px;
+        }
+
+        .topza-input {
+          background: #fafaf7;
+          border: 1.5px solid #e0e0d8;
+          border-radius: 7px;
+          padding: 11px 14px 11px 40px;
+          font-size: 14px;
+          width: 100%;
+          color: #111;
+          transition: all 0.2s;
+        }
+
+        .topza-input:focus {
+          border-color: #111;
+          box-shadow: 0 0 0 3px rgba(17,17,17,0.07);
+          background: #fff;
+          outline: none;
+        }
+
+        .topza-btn-primary {
+          background: #111;
+          color: #fff;
+          border-radius: 7px;
+          padding: 12px 20px;
+          font-size: 14px;
+          font-weight: 700;
+          border: none;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+        }
+
+        .topza-btn-outline {
+          background: #fff;
+          color: #111;
+          border: 1.5px solid #e4e4de;
+          border-radius: 7px;
+          padding: 10px 16px;
+          font-size: 13px;
+          font-weight: 700;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .topza-table-container {
+          width: 100%;
+          overflow-x: auto;
+          border-radius: 8px;
+          border: 1.5px solid #e4e4de;
+        }
+
+        .topza-table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 13.5px;
+        }
+
+        .topza-th {
+          background: #fafaf7;
+          text-align: left;
+          padding: 12px 16px;
+          font-weight: 700;
+          color: #333;
+          border-bottom: 1.5px solid #e4e4de;
+          font-size: 11.5px;
+          text-transform: uppercase;
+        }
+
+        .topza-td {
+          padding: 14px 16px;
+          border-bottom: 1px solid #f0f0f0;
+          color: #444;
+        }
+
+        .topza-btn-icon {
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 6px;
+          border: 1px solid #e4e4de;
+          background: #fff;
+          color: #444;
+          cursor: pointer;
+        }
+
+        .topza-btn-icon:hover {
+          background: #111;
+          color: #fff;
+        }
+
+        .topza-filter-btn {
+          background: #fff;
+          border: 1.5px solid #e4e4de;
+          border-radius: 7px;
+          padding: 6px 14px;
+          font-size: 12.5px;
+          font-weight: 700;
+          color: #444;
+          cursor: pointer;
+          transition: all 0.2s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .topza-filter-btn:hover {
+          border-color: #111;
+          background: #fafaf7;
+        }
+
+        .topza-filter-btn.active {
+          background: #111;
+          border-color: #111;
+          color: #fff;
+        }
+
+        .topza-spinner {
+          width: 18px;
+          height: 18px;
+          border: 2.5px solid rgba(17,17,17,0.1);
+          border-top-color: #111;
+          border-radius: 50%;
+          animation: topza-spin 0.8s linear infinite;
+        }
+
+        @keyframes topza-spin {
+          to { transform: rotate(360deg); }
+        }
+
+        .topza-modal-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.4);
+          z-index: 100;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 16px;
+        }
+
+        .topza-modal-card {
+          background: #fff;
+          border-radius: 14px;
+          width: 100%;
+          max-width: 400px;
+          padding: 24px;
+          box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+        }
+      `}</style>
+
       <AdminSidebar isOpen={sidebarOpen} onClose={closeSidebar} />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex-1 overflow-auto bg-gradient-to-br from-slate-50 via-white to-orange-50">
-          <div className="w-full px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
-            <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 mb-2">Topza Offers</h1>
-                <p className="text-sm sm:text-base text-slate-600">Sync and manage Topza offers pricing and availability</p>
+
+      <div className="topza-content">
+        <div className="topza-main-card">
+          <div className="topza-heading-section">
+            <div className="topza-icon-box">
+              <Database size={24} />
+            </div>
+            <div>
+              <h2 className="topza-h2">Topza Offers</h2>
+              <p style={{ fontSize: '14px', color: '#666', margin: '4px 0 0' }}>Sync and manage Topza pricing and stock</p>
+            </div>
+          </div>
+
+          {error && <div style={{ background: '#fff5f5', border: '1.5px solid #fecaca', color: '#b91c1c', borderRadius: '7px', padding: '12px', marginBottom: '20px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}><AlertCircle size={16} /> {error}</div>}
+          {success && <div style={{ background: '#ecfdf5', border: '1.5px solid #a7f3d0', color: '#047857', borderRadius: '7px', padding: '12px', marginBottom: '20px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}><CheckCircle size={16} /> {success}</div>}
+
+          <div className="topza-stats-grid">
+            <div className="topza-stat-card">
+              <span className="topza-stat-label">Total Plans</span>
+              <span className="topza-stat-value">{stats.totalPlans}</span>
+            </div>
+            <div className="topza-stat-card">
+              <span className="topza-stat-label">Active</span>
+              <span className="topza-stat-value" style={{ color: '#059669' }}>{stats.activePlans}</span>
+            </div>
+            <div className="topza-stat-card">
+              <span className="topza-stat-label">Out of Stock</span>
+              <span className="topza-stat-value" style={{ color: '#b91c1c' }}>{stats.outOfStockPlans}</span>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <div className="topza-search-box" style={{ flex: '1', minWidth: '240px', marginBottom: 0 }}>
+                <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#999' }} />
+                <input
+                  className="topza-input"
+                  placeholder="Search plans..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
               </div>
-              <div className="flex items-center gap-2 bg-orange-50 px-4 py-2 rounded-xl border-2 border-orange-100 self-start">
-                <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></div>
-                <span className="text-sm font-semibold text-orange-700">Provider: Topza</span>
-              </div>
+              <button className="topza-btn-primary" onClick={handleSync} disabled={syncing}>
+                <RefreshCw size={16} className={syncing ? 'animate-spin' : ''} />
+                {syncing ? 'Syncing...' : 'Sync Topza'}
+              </button>
             </div>
 
-            {error && (
-              <div className="mb-6 p-3 sm:p-4 bg-red-50 border-2 border-red-200 rounded-2xl text-red-700 text-sm flex items-center gap-3">
-                <AlertCircle size={20} className="flex-shrink-0" />
-                {error}
-              </div>
-            )}
-            {success && (
-              <div className="mb-6 p-3 sm:p-4 bg-green-50 border-2 border-green-200 rounded-2xl text-green-700 text-sm flex items-center gap-3">
-                <CheckCircle size={20} className="flex-shrink-0" />
-                {success}
-              </div>
-            )}
-
-            <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
-              {[
-                { label: 'Total Plans', value: stats.totalPlans, color: 'from-blue-500 to-blue-600', Icon: Database },
-                { label: 'Active Plans', value: stats.activePlans, color: 'from-green-500 to-green-600', Icon: CheckCircle },
-                { label: 'Out of Stock', value: stats.outOfStockPlans, color: 'from-red-500 to-red-600', Icon: AlertCircle },
-              // eslint-disable-next-line no-unused-vars
-              ].map(({ label, value, color, Icon }) => (
-                <div key={label} className="bg-white rounded-2xl p-4 sm:p-6 border-2 border-slate-200 hover:shadow-lg transition-all">
-                  <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center mb-3`}>
-                    <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                  </div>
-                  <p className="text-xs sm:text-sm text-slate-600 mb-1">{label}</p>
-                  <p className="text-2xl sm:text-3xl font-bold text-slate-900">{value ?? 0}</p>
-                </div>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+              <span style={{ fontSize: '11px', fontWeight: '800', color: '#666', textTransform: 'uppercase' }}>Network:</span>
+              <button className={`topza-filter-btn ${selectedNetwork === '' ? 'active' : ''}`} onClick={() => setSelectedNetwork('')}>All</button>
+              {networkCatalog.map(n => (
+                <button
+                  key={n.slug || n.name}
+                  className={`topza-filter-btn ${selectedNetwork === (n.name || n.slug) ? 'active' : ''}`}
+                  onClick={() => setSelectedNetwork(n.name || n.slug)}
+                >
+                  {n.name || n.slug}
+                </button>
               ))}
             </div>
 
-            <div className="bg-white rounded-2xl p-4 sm:p-6 border-2 border-slate-200 mb-6 sm:mb-8">
-              <div className="flex flex-col sm:flex-row gap-3 mb-4">
-                <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                  <input
-                    type="text"
-                    placeholder="Search plans by name or size..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border-2 border-slate-200 rounded-xl text-slate-900 text-sm focus:outline-none focus:border-orange-400"
-                  />
-                </div>
-                {selectedIds.size > 0 && (
-                  <button
-                    onClick={() => setBulkDeleteTarget('selected')}
-                    className="px-4 sm:px-6 py-3 bg-rose-600 text-white rounded-xl font-semibold hover:bg-rose-700 transition-all flex items-center justify-center gap-2 text-sm whitespace-nowrap"
-                  >
-                    <Trash2 size={16} />
-                    Delete Selected ({selectedIds.size})
-                  </button>
-                )}
-                {selectedIds.size > 0 && (
-                  <>
-                    <button
-                      onClick={() => handleStockOverride([...selectedIds], true)}
-                      disabled={updatingStock}
-                      className="px-4 py-3 bg-emerald-100 text-emerald-700 border-2 border-emerald-200 rounded-xl font-semibold hover:bg-emerald-200 transition-all flex items-center gap-2 text-sm whitespace-nowrap disabled:opacity-50"
-                    >
-                      <Package size={15} /> Mark In Stock
-                    </button>
-                    <button
-                      onClick={() => handleStockOverride([...selectedIds], false)}
-                      disabled={updatingStock}
-                      className="px-4 py-3 bg-orange-100 text-orange-700 border-2 border-orange-200 rounded-xl font-semibold hover:bg-orange-200 transition-all flex items-center gap-2 text-sm whitespace-nowrap disabled:opacity-50"
-                    >
-                      <Package size={15} /> Mark Out of Stock
-                    </button>
-                    <button
-                      onClick={() => handleStockOverride([...selectedIds], false, true)}
-                      disabled={updatingStock}
-                      className="px-4 py-3 bg-slate-100 text-slate-600 border-2 border-slate-200 rounded-xl font-semibold hover:bg-slate-200 transition-all flex items-center gap-2 text-sm whitespace-nowrap disabled:opacity-50"
-                      title="Clear admin override - let Topza status decide"
-                    >
-                      <RotateCcw size={15} /> Reset to Topza
-                    </button>
-                  </>
-                )}
-                <button
-                  onClick={() => setBulkDeleteTarget('all')}
-                  className="px-4 sm:px-6 py-3 bg-rose-100 text-rose-700 border-2 border-rose-200 rounded-xl font-semibold hover:bg-rose-200 transition-all flex items-center justify-center gap-2 text-sm whitespace-nowrap"
-                >
-                  <Trash2 size={16} />
-                  Delete All
-                </button>
-                <button
-                  onClick={handleSync}
-                  disabled={syncing}
-                  className="px-4 sm:px-6 py-3 bg-gradient-to-r from-orange-600 to-amber-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2 text-sm whitespace-nowrap"
-                >
-                  <RefreshCw size={18} className={syncing ? 'animate-spin' : ''} />
-                  {syncing ? 'Syncing...' : 'Sync Topza'}
-                </button>
+            {selectedIds.size > 0 && (
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', padding: '12px', background: '#fafaf7', borderRadius: '8px', border: '1.5px solid #e4e4de' }}>
+                <button className="topza-btn-outline" style={{ borderColor: '#059669', color: '#059669' }} onClick={() => handleStockOverride([...selectedIds], true)} disabled={updatingStock}><Package size={14} /> In Stock</button>
+                <button className="topza-btn-outline" style={{ borderColor: '#f0a500', color: '#f0a500' }} onClick={() => handleStockOverride([...selectedIds], false)} disabled={updatingStock}><Package size={14} /> Out of Stock</button>
+                <button className="topza-btn-outline" onClick={() => handleStockOverride([...selectedIds], false, true)} disabled={updatingStock}><RotateCcw size={14} /> Reset</button>
+                <button className="topza-btn-outline" style={{ borderColor: '#b91c1c', color: '#b91c1c', marginLeft: 'auto' }} onClick={() => setBulkDeleteTarget('selected')}><Trash2 size={14} /> Delete Selected</button>
               </div>
+            )}
+          </div>
 
-              {networkCatalog.length > 0 && (
-                <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Filter size={16} className="text-slate-400" />
-                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Network Filter</p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      onClick={() => setSelectedNetwork('')}
-                      className={`px-4 py-2 rounded-lg font-bold transition text-[10px] uppercase tracking-wider ${selectedNetwork === '' ? 'bg-orange-600 text-white shadow-lg' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
-                    >
-                      All Networks
-                    </button>
-                    {networkCatalog.map((n) => (
-                      <button
-                        key={n.name}
-                        onClick={() => setSelectedNetwork(n.name)}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold transition text-[10px] uppercase tracking-wider ${selectedNetwork === n.name ? 'bg-orange-600 text-white shadow-lg' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
-                      >
-                        {n.logoUrl && (
-                          <img src={n.logoUrl} alt={n.name} className="w-4 h-4 object-contain rounded-sm flex-shrink-0" />
-                        )}
-                        {n.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="bg-white rounded-2xl border-2 border-slate-200 overflow-hidden">
-              {loading ? (
-                <div className="flex justify-center py-16">
-                  <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
-                    <p className="text-slate-600">Loading Topza offers...</p>
-                  </div>
-                </div>
-              ) : filteredPlans.length === 0 ? (
-                <div className="text-center py-16">
-                  <Database size={48} className="mx-auto text-slate-300 mb-4" />
-                  <p className="text-slate-600 text-lg">No Topza offers found</p>
-                  <p className="text-slate-500 text-sm mt-1">Sync from Topza to populate offers</p>
-                </div>
-              ) : (
-                <>
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="bg-gradient-to-r from-slate-100 to-orange-50 border-b-2 border-slate-200">
-                          <th className="px-4 sm:px-6 py-4 w-10">
-                            <input
-                              type="checkbox"
-                              className="w-4 h-4 accent-orange-600 cursor-pointer"
-                              checked={filteredPlans.length > 0 && selectedIds.size === filteredPlans.length}
-                              onChange={toggleSelectAll}
-                            />
-                          </th>
-                          <th className="px-4 sm:px-6 py-4 text-left text-xs font-semibold text-slate-900 whitespace-nowrap">Plan</th>
-                          <th className="px-4 sm:px-6 py-4 text-left text-xs font-semibold text-slate-900 whitespace-nowrap">Pricing</th>
-                          <th className="px-4 sm:px-6 py-4 text-left text-xs font-semibold text-slate-900 whitespace-nowrap">Status</th>
-                          <th className="px-4 sm:px-6 py-4 text-left text-xs font-semibold text-slate-900 whitespace-nowrap">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-200">
-                        {filteredPlans.map((plan) => (
-                          <tr key={plan._id} className={`hover:bg-orange-50 transition ${selectedIds.has(plan._id) ? 'bg-orange-50' : !plan.inStock ? 'opacity-60 bg-slate-50' : ''}`}>
-                            <td className="px-4 sm:px-6 py-4 w-10">
-                              <input
-                                type="checkbox"
-                                className="w-4 h-4 accent-orange-600 cursor-pointer"
-                                checked={selectedIds.has(plan._id)}
-                                onChange={() => toggleSelect(plan._id)}
-                              />
-                            </td>
-                            <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                              <div className="flex flex-col gap-1">
-                                <div className="flex items-center gap-2">
-                                  <p className="text-sm font-semibold text-slate-900">{plan.name || `${plan.isp} ${plan.volume}GB`}</p>
-                                  {!plan.inStock && (
-                                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium uppercase ${plan.stockOverriddenByAdmin ? 'bg-orange-100 text-orange-700' : 'bg-red-100 text-red-800'}`}>
-                                      {plan.stockOverriddenByAdmin ? 'OOS (Admin)' : 'OOS'}
-                                    </span>
-                                  )}
-                                  {plan.inStock && plan.stockOverriddenByAdmin && (
-                                    <span className="bg-emerald-100 text-emerald-700 text-[10px] px-2 py-0.5 rounded-full font-medium uppercase">In Stock (Admin)</span>
-                                  )}
-                                  {plan.isEdited && (
-                                    <span className="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded-full font-medium uppercase">Edited</span>
-                                  )}
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <span className="px-1.5 py-0.5 bg-orange-50 text-orange-700 rounded-md text-[9px] font-black uppercase border border-orange-100">
-                                    {plan.isp}
-                                  </span>
-                                  <span className="text-[10px] font-bold text-slate-400 uppercase">
-                                    {plan.volume}GB - ID {plan.providerPlanId}
-                                  </span>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                              <div className="flex flex-col gap-1.5">
-                                <div className="inline-flex items-center gap-1.5 w-fit">
-                                  <span className="text-[9px] font-black text-slate-500 uppercase tracking-wider">Cost:</span>
-                                  <span className="px-2.5 py-1 bg-purple-100 text-purple-700 rounded-lg text-xs font-black">GH₵{formatPrice2dpNoRound(plan.costPrice || 0)}</span>
-                                </div>
-                                <p className="text-sm font-bold text-orange-600">Admin: GH₵{formatPrice2dpNoRound(plan.sellingPrice || 0)}</p>
-                                <p className="text-[10px] text-slate-500 font-medium">
-                                  Agt: GH₵{formatPrice2dpNoRound(plan.agentPrice || 0)} - Vendor: GH₵{formatPrice2dpNoRound(plan.vendorPrice || 0)}
-                                </p>
-                              </div>
-                            </td>
-                            <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                              <span className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase ${plan.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                                {plan.status}
-                              </span>
-                            </td>
-                            <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                              <div className="flex gap-1 items-center">
-                                <button
-                                  onClick={() => openEditPrices(plan)}
-                                  className="p-2 hover:bg-slate-100 rounded-lg transition"
-                                  title="Edit Prices"
-                                >
-                                  <Edit2 size={18} className="text-orange-600" />
-                                </button>
-                                <button
-                                  onClick={() => handleToggleStatus(plan)}
-                                  className="p-2 hover:bg-slate-100 rounded-lg transition"
-                                  title={plan.status === 'active' ? 'Deactivate' : 'Activate'}
-                                >
-                                  <CheckCircle size={18} className={plan.status === 'active' ? 'text-green-600' : 'text-slate-400'} />
-                                </button>
-                                <button
-                                  onClick={() => handleStockOverride([plan._id], !plan.inStock)}
-                                  disabled={updatingStock}
-                                  className="p-2 hover:bg-slate-100 rounded-lg transition disabled:opacity-50"
-                                  title={plan.inStock ? 'Mark Out of Stock (admin override)' : 'Mark In Stock (admin override)'}
-                                >
-                                  <Package size={18} className={plan.inStock ? 'text-emerald-600' : 'text-orange-500'} />
-                                </button>
-                                {plan.stockOverriddenByAdmin && (
-                                  <button
-                                    onClick={() => handleStockOverride([plan._id], false, true)}
-                                    disabled={updatingStock}
-                                    className="p-2 hover:bg-slate-100 rounded-lg transition disabled:opacity-50"
-                                    title="Reset to Topza status"
-                                  >
-                                    <RotateCcw size={15} className="text-slate-400" />
-                                  </button>
-                                )}
-                                <button
-                                  onClick={() => { setDeletingPlan(plan); setShowDeleteConfirm(true); }}
-                                  className="p-2 hover:bg-slate-100 rounded-lg transition"
-                                  title="Delete"
-                                >
-                                  <Trash2 size={18} className="text-red-600" />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  {totalPages > 1 && (
-                    <div className="px-6 py-6 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
-                      <p className="text-xs font-black text-slate-400 uppercase tracking-widest">
-                        Page <span className="text-slate-900">{page}</span> of <span className="text-slate-900">{totalPages}</span>
-                      </p>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => setPage((p) => Math.max(1, p - 1))}
-                          disabled={page === 1}
-                          className="px-6 py-2 bg-white border-2 border-slate-200 rounded-xl text-[10px] font-black text-slate-600 hover:border-slate-300 disabled:opacity-50 transition-all uppercase tracking-widest"
-                        >
-                          Previous
-                        </button>
-                        <button
-                          onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                          disabled={page === totalPages}
-                          className="px-6 py-2 bg-slate-900 border-2 border-slate-900 rounded-xl text-[10px] font-black text-white hover:bg-slate-800 disabled:opacity-50 transition-all uppercase tracking-widest"
-                        >
-                          Next
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
+          <div className="topza-table-container">
+            {loading ? (
+              <div style={{ padding: '40px', display: 'flex', justifyContent: 'center' }}><div className="topza-spinner"></div></div>
+            ) : (
+              <table className="topza-table">
+                <thead>
+                  <tr>
+                    <th className="topza-th" style={{ width: '40px' }}>
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.size === filteredPlans.length && filteredPlans.length > 0}
+                        onChange={() => {
+                          if (selectedIds.size === filteredPlans.length) setSelectedIds(new Set());
+                          else setSelectedIds(new Set(filteredPlans.map(p => p._id)));
+                        }}
+                      />
+                    </th>
+                    <th className="topza-th">Plan</th>
+                    <th className="topza-th">Pricing (GHS)</th>
+                    <th className="topza-th">Stock</th>
+                    <th className="topza-th">Status</th>
+                    <th className="topza-th" style={{ textAlign: 'right' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredPlans.map(plan => (
+                    <tr key={plan._id}>
+                      <td className="topza-td">
+                        <input type="checkbox" checked={selectedIds.has(plan._id)} onChange={() => toggleSelect(plan._id)} />
+                      </td>
+                      <td className="topza-td" style={{ whiteSpace: 'nowrap' }}>
+                        <div style={{ fontWeight: '700', color: '#111' }}>{plan.name || `${plan.isp} ${plan.volume}GB`}</div>
+                        <div style={{ fontSize: '11px', color: '#888' }}>{plan.isp} • {plan.dataAmount || plan.volume}</div>
+                      </td>
+                      <td className="topza-td" style={{ whiteSpace: 'nowrap' }}>
+                        <div style={{ fontSize: '12px' }}>Admin: <span style={{ fontWeight: '700' }}>{Number(plan.sellingPrice || 0).toFixed(2)}</span></div>
+                        <div style={{ fontSize: '11px', color: '#666' }}>Agent: {Number(plan.agentPrice || 0).toFixed(2)}</div>
+                      </td>
+                      <td className="topza-td" style={{ whiteSpace: 'nowrap' }}>
+                        <span style={{ fontSize: '12px', fontWeight: '700', color: plan.inStock ? '#059669' : '#b91c1c' }}>
+                          {plan.inStock ? 'In Stock' : 'Out of Stock'}
+                        </span>
+                        {plan.stockOverriddenByAdmin && <div style={{ fontSize: '10px', color: '#f0a500' }}>Admin Override</div>}
+                      </td>
+                      <td className="topza-td" style={{ whiteSpace: 'nowrap' }}>
+                        <span style={{ fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', color: plan.status === 'active' ? '#059669' : '#666' }}>
+                          {plan.status}
+                        </span>
+                      </td>
+                      <td className="topza-td">
+                        <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
+                          <button className="topza-btn-icon" onClick={() => openEditPrices(plan)} title="Edit Prices"><Edit2 size={14} /></button>
+                          <button className="topza-btn-icon" onClick={() => handleToggleStatus(plan)} title="Toggle Status"><CheckCircle size={14} style={{ color: plan.status === 'active' ? '#059669' : '#ccc' }} /></button>
+                          <button className="topza-btn-icon" onClick={() => { setDeletingPlan(plan); setShowDeleteConfirm(true); }}><Trash2 size={14} style={{ color: '#b91c1c' }} /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       </div>
 
       {editingPlan && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
-            <div className="flex items-center justify-between mb-6">
+        <div className="topza-modal-overlay">
+          <div className="topza-modal-card">
+            <h3 style={{ fontSize: '18px', fontWeight: '800', marginBottom: '20px' }}>Update Prices</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
-                <h3 className="text-lg font-bold text-slate-900">Edit Prices</h3>
-                <p className="text-sm text-slate-500">{editingPlan.name || `${editingPlan.isp} ${editingPlan.volume}GB`}</p>
+                <label style={{ fontSize: '12px', fontWeight: '700', color: '#333', display: 'block', marginBottom: '6px' }}>Admin Selling Price</label>
+                <input className="topza-input" style={{ paddingLeft: '14px' }} type="number" value={editPrices.sellingPrice} onChange={(e) => setEditPrices({ ...editPrices, sellingPrice: e.target.value })} />
               </div>
-              <button onClick={() => setEditingPlan(null)} className="p-2 hover:bg-slate-100 rounded-lg">
-                <X size={20} className="text-slate-500" />
-              </button>
-            </div>
-
-            <div className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-amber-700 mb-1 uppercase tracking-wider">Cost Price / Console Price (GHC)</label>
-                <input
-                  type="number"
-                  value={formatPrice2dpNoRound(editingPlan.costPrice || 0)}
-                  readOnly
-                  disabled
-                  className="w-full px-4 py-3 border-2 border-amber-200 rounded-xl text-amber-800 bg-amber-50 text-sm font-bold cursor-not-allowed"
-                />
+                <label style={{ fontSize: '12px', fontWeight: '700', color: '#333', display: 'block', marginBottom: '6px' }}>Agent Price</label>
+                <input className="topza-input" style={{ paddingLeft: '14px' }} type="number" value={editPrices.agentPrice} onChange={(e) => setEditPrices({ ...editPrices, agentPrice: e.target.value })} />
               </div>
-
-              {[
-                { key: 'sellingPrice', label: 'Admin Selling Price (GHC)' },
-                { key: 'agentPrice', label: 'Agent Price (GHC)' },
-                { key: 'vendorPrice', label: 'Vendor Price (GHC)' },
-              ].map(({ key, label }) => (
-                <div key={key}>
-                  <label className="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">{label}</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={editPrices[key]}
-                    onChange={(e) => setEditPrices((prev) => ({ ...prev, [key]: e.target.value }))}
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-slate-900 text-sm focus:outline-none focus:border-orange-400"
-                  />
-                </div>
-              ))}
-            </div>
-
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={() => setEditingPlan(null)}
-                className="flex-1 px-4 py-3 border-2 border-slate-200 text-slate-700 rounded-xl font-semibold hover:bg-slate-50 transition text-sm"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSavePrices}
-                disabled={savingPrices}
-                className="flex-1 px-4 py-3 bg-orange-600 text-white rounded-xl font-semibold hover:bg-orange-700 transition disabled:opacity-50 flex items-center justify-center gap-2 text-sm"
-              >
-                {savingPrices ? <RefreshCw size={16} className="animate-spin" /> : <Save size={16} />}
-                {savingPrices ? 'Saving...' : 'Save Prices'}
-              </button>
+              <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                <button className="topza-btn-primary" style={{ flex: '1' }} onClick={handleSavePrices} disabled={savingPrices}>{savingPrices ? 'Saving...' : 'Save Prices'}</button>
+                <button className="topza-btn-outline" style={{ flex: '1', justifyContent: 'center' }} onClick={() => setEditingPlan(null)}>Cancel</button>
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      <ConfirmDialog
-        isOpen={showDeleteConfirm}
-        onClose={() => { setShowDeleteConfirm(false); setDeletingPlan(null); }}
-        onConfirm={confirmDelete}
-        title="Delete Topza Plan"
-        message={`Delete "${deletingPlan?.name || `${deletingPlan?.isp} ${deletingPlan?.volume}GB`}"? This cannot be undone.`}
-        confirmText="Delete"
-        confirmColor="bg-rose-600"
-      />
-
-      <ConfirmDialog
-        isOpen={!!bulkDeleteTarget}
-        onClose={() => setBulkDeleteTarget(null)}
-        onConfirm={handleBulkDelete}
-        title={bulkDeleteTarget === 'all' ? 'Delete All Plans' : `Delete ${selectedIds.size} Plan${selectedIds.size !== 1 ? 's' : ''}`}
-        message={
-          bulkDeleteTarget === 'all'
-            ? 'This will permanently delete ALL Topza plans. This cannot be undone.'
-            : `Permanently delete ${selectedIds.size} selected plan${selectedIds.size !== 1 ? 's' : ''}? This cannot be undone.`
-        }
-        confirmText={bulkDeleting ? 'Deleting...' : 'Delete'}
-        confirmColor="bg-rose-600"
-      />
+      <ConfirmDialog isOpen={showDeleteConfirm} onClose={() => setShowDeleteConfirm(false)} onConfirm={confirmDelete} title="Delete Plan" message="Remove this plan from your database?" type="danger" />
+      <ConfirmDialog isOpen={!!bulkDeleteTarget} onClose={() => setBulkDeleteTarget(null)} onConfirm={handleBulkDelete} title="Bulk Delete" message="Remove all selected plans?" type="danger" loading={bulkDeleting} />
     </div>
   );
 }

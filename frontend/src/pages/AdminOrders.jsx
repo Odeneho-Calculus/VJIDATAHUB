@@ -38,10 +38,9 @@ export default function AdminOrders() {
   const [newStatus, setNewStatus] = useState('pending');
   const [adminNotes, setAdminNotes] = useState('');
   const [updateLoading, setUpdateLoading] = useState(false);
-  const [verifyingId, setVerifyingId] = useState(null);
-  const [showVerifyingModal, setShowVerifyingModal] = useState(false);
+  const [showVerifyingModal] = useState(false);
   const [showVerifiedModal, setShowVerifiedModal] = useState(false);
-  const [verifiedMessage, setVerifiedMessage] = useState('Payment verified successfully.');
+  const [verifiedMessage] = useState('Payment verified successfully.');
 
   const normalizeNetwork = (val = '') => val.toString().trim().toLowerCase().replace(/\s+/g, '');
   const getNetworkFamily = (n = '') => {
@@ -182,36 +181,6 @@ export default function AdminOrders() {
     setNewStatus(order.status);
     setAdminNotes(order.adminNotes || '');
     setShowStatusModal(true);
-  };
-
-  const canVerifyPendingPayment = (order) => {
-    return order?.paymentStatus === 'pending' && order?.paymentMethod === 'paystack';
-  };
-
-  const handleVerifyPendingPayment = async (order) => {
-    const orderId = order?._id || order?.id;
-    if (!orderId) return;
-
-    try {
-      setVerifyingId(orderId);
-      setShowVerifyingModal(true);
-      const response = await adminAPI.verifyPendingPayment(orderId);
-
-      if (response.success) {
-        const successText = response.message || 'Payment verified and order processing started';
-        showMessage(successText);
-        setVerifiedMessage(successText);
-        setShowVerifiedModal(true);
-        await fetchOrders({ silent: true });
-      } else {
-        showMessage(response.message || 'Failed to verify pending payment', true);
-      }
-    } catch (err) {
-      showMessage(err?.message || 'Failed to verify pending payment', true);
-    } finally {
-      setShowVerifyingModal(false);
-      setVerifyingId(null);
-    }
   };
 
   const handleUpdateStatus = async () => {

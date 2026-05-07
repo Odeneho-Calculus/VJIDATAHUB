@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { formatCurrencyAbbreviated } from '../utils/formatCurrency';
 import {
@@ -17,7 +17,7 @@ import {
 
 export default function PublicCatalog() {
     const { slug } = useParams();
-    const [searchParams, setSearchParams] = useSearchParams();
+    const [searchParams] = useSearchParams();
     const [store, setStore] = useState(null);
     const [plans, setPlans] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -45,30 +45,7 @@ export default function PublicCatalog() {
         return '';
     };
 
-    useEffect(() => {
-        fetchStoreData();
-        setupSocket();
-
-        return () => {
-            if (socketRef.current) {
-                socketRef.current.disconnect();
-            }
-        };
-    }, [slug]);
-
-    useEffect(() => {
-        // keep URL in sync with selected network
-        if (selectedNetwork) {
-            searchParams.set('network', selectedNetwork);
-            setSearchParams(searchParams, { replace: true });
-        } else {
-            searchParams.delete('network');
-            setSearchParams(searchParams, { replace: true });
-        }
-    }, [selectedNetwork, searchParams, setSearchParams]);
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const setupSocket = () => {
+    const setupSocket = useCallback(() => {
         const socketUrl = getSocketBaseUrl();
 
         socketRef.current = io(socketUrl, { withCredentials: true });
@@ -78,10 +55,9 @@ export default function PublicCatalog() {
         socketRef.current.on('store_updated', () => {
             fetchStoreData(false);
         });
-    };
+    }, [slug, fetchStoreData]);
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const fetchStoreData = async (showLoading = true) => {
+    const fetchStoreData = useCallback(async (showLoading = true) => {
         try {
             if (showLoading) setLoading(true);
             const [storeData, plansData, systemSettings] = await Promise.all([
@@ -117,7 +93,18 @@ export default function PublicCatalog() {
         } finally {
             if (showLoading) setLoading(false);
         }
-    };
+    }, [slug]);
+
+    useEffect(() => {
+        fetchStoreData();
+        setupSocket();
+
+        return () => {
+            if (socketRef.current) {
+                socketRef.current.disconnect();
+            }
+        };
+    }, [slug, fetchStoreData, setupSocket]);
 
     const primaryColor = store?.theme?.primaryColor || '#2563eb';
     const phoneContact = getSocialValue(store?.socialLinks?.phone);

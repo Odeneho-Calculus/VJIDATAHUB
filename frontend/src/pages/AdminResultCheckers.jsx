@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { RefreshCw, Search, Edit2, CheckCircle, AlertCircle, Save, X, Lock, Unlock } from 'lucide-react';
+import { RefreshCw, Search, Edit2, CheckCircle, AlertCircle, Save, X, Lock, Unlock, CreditCard } from 'lucide-react';
 import AdminSidebar from '../components/AdminSidebar';
 import { useSidebar } from '../hooks/useSidebar';
 import { checkers as checkersAPI } from '../services/api';
@@ -28,7 +28,6 @@ export default function AdminResultCheckers() {
         checkersAPI.listOffers('', search, 1, 100),
         checkersAPI.getLockStatus(),
       ]);
-
       setOffers(offersRes.offers || []);
       setLocked(Boolean(lockRes?.data?.enabled));
     } catch (err) {
@@ -107,213 +106,320 @@ export default function AdminResultCheckers() {
   const formatAmount = (value) => `GHc ${Number(value || 0).toFixed(2)}`;
 
   return (
-    <div className="flex min-h-[calc(100vh-56px)] sm:min-h-[calc(100vh-64px)]">
+    <div className="chk-page-container" style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f5f5f0' }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
+        
+        .chk-page-container {
+          font-family: 'DM Sans', sans-serif;
+        }
+
+        .chk-content {
+          flex: 1;
+          padding: 24px 16px;
+          overflow-y: auto;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .chk-main-card {
+          background: #fff;
+          border: 1.5px solid #e4e4de;
+          border-radius: 14px;
+          box-shadow: 0 8px 40px rgba(0,0,0,0.10);
+          width: 100%;
+          max-width: 1000px;
+          padding: 24px;
+          margin-bottom: 24px;
+        }
+
+        .chk-heading-section {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          margin-bottom: 32px;
+        }
+
+        .chk-icon-box {
+          width: 46px;
+          height: 46px;
+          background: #111;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #f0a500;
+          flex-shrink: 0;
+        }
+
+        .chk-h2 {
+          font-size: 26px;
+          font-weight: 800;
+          color: #111;
+          margin: 0;
+          letter-spacing: -0.02em;
+        }
+
+        .chk-search-box {
+          position: relative;
+          width: 100%;
+          margin-bottom: 20px;
+        }
+
+        .chk-input {
+          background: #fafaf7;
+          border: 1.5px solid #e0e0d8;
+          border-radius: 7px;
+          padding: 11px 14px 11px 40px;
+          font-size: 14px;
+          width: 100%;
+          color: #111;
+          transition: all 0.2s;
+        }
+
+        .chk-input:focus {
+          border-color: #111;
+          box-shadow: 0 0 0 3px rgba(17,17,17,0.07);
+          background: #fff;
+          outline: none;
+        }
+
+        .chk-btn-primary {
+          background: #111;
+          color: #fff;
+          border-radius: 7px;
+          padding: 12px 20px;
+          font-size: 14px;
+          font-weight: 700;
+          border: none;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+        }
+
+        .chk-btn-outline {
+          background: #fff;
+          color: #111;
+          border: 1.5px solid #e4e4de;
+          border-radius: 7px;
+          padding: 10px 16px;
+          font-size: 13px;
+          font-weight: 700;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .chk-table-container {
+          width: 100%;
+          overflow-x: auto;
+          border-radius: 8px;
+          border: 1.5px solid #e4e4de;
+        }
+
+        .chk-table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 13.5px;
+        }
+
+        .chk-th {
+          background: #fafaf7;
+          text-align: left;
+          padding: 12px 16px;
+          font-weight: 700;
+          color: #333;
+          border-bottom: 1.5px solid #e4e4de;
+          font-size: 11.5px;
+          text-transform: uppercase;
+        }
+
+        .chk-td {
+          padding: 14px 16px;
+          border-bottom: 1px solid #f0f0f0;
+          color: #444;
+        }
+
+        .chk-badge {
+          padding: 4px 8px;
+          border-radius: 6px;
+          font-size: 10.5px;
+          font-weight: 700;
+          text-transform: uppercase;
+        }
+
+        .chk-btn-icon {
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 6px;
+          border: 1px solid #e4e4de;
+          background: #fff;
+          color: #444;
+          cursor: pointer;
+        }
+
+        .chk-modal-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.4);
+          z-index: 100;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 16px;
+        }
+
+        .chk-modal-card {
+          background: #fff;
+          border-radius: 14px;
+          width: 100%;
+          max-width: 400px;
+          padding: 24px;
+          box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+        }
+
+        .chk-spinner {
+          width: 20px;
+          height: 20px;
+          border: 2.5px solid rgba(17,17,17,0.1);
+          border-top-color: #111;
+          border-radius: 50%;
+          animation: chk-spin 0.8s linear infinite;
+        }
+
+        @keyframes chk-spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
+
       <AdminSidebar isOpen={sidebarOpen} onClose={closeSidebar} />
-      <div className="flex-1 overflow-auto bg-slate-50 p-3 sm:p-6">
-        <div className="max-w-6xl mx-auto space-y-4 sm:space-y-5">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h1 className="text-xl sm:text-3xl font-bold text-slate-900">Result Checker Config</h1>
-              <p className="text-sm text-slate-600 mt-1">Set admin and agent checker prices and availability</p>
+
+      <div className="chk-content">
+        <div className="chk-main-card">
+          <div className="chk-heading-section">
+            <div className="chk-icon-box">
+              <CreditCard size={24} />
             </div>
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <button
-                onClick={handleToggleLock}
-                disabled={savingLock}
-                className={`px-3 sm:px-4 py-2 rounded-xl text-sm font-semibold border transition flex items-center justify-center gap-2 flex-1 sm:flex-initial ${locked ? 'bg-rose-600 text-white border-rose-600' : 'bg-white text-slate-700 border-slate-200'}`}
-              >
-                {locked ? <Lock size={16} /> : <Unlock size={16} />}
-                {locked ? 'Locked' : 'Unlocked'}
-              </button>
-              <button
-                onClick={handleSync}
-                disabled={syncing}
-                className="px-3 sm:px-4 py-2 rounded-xl bg-slate-900 text-white text-sm font-semibold flex items-center justify-center gap-2 flex-1 sm:flex-initial"
-              >
-                <RefreshCw size={16} className={syncing ? 'animate-spin' : ''} />
-                {syncing ? 'Syncing...' : 'Sync Checkers'}
-              </button>
+            <div>
+              <h2 className="chk-h2">Result Checkers</h2>
+              <p style={{ fontSize: '14px', color: '#666', margin: '4px 0 0' }}>Manage prices and lock/unlock checker sales</p>
             </div>
           </div>
 
           {message.text && (
-            <div className={`p-3 rounded-xl text-sm font-semibold flex items-center gap-2 ${message.type === 'error' ? 'bg-rose-50 text-rose-700 border border-rose-100' : 'bg-emerald-50 text-emerald-700 border border-emerald-100'}`}>
+            <div style={{
+              background: message.type === 'error' ? '#fff5f5' : '#ecfdf5',
+              border: `1.5px solid ${message.type === 'error' ? '#fecaca' : '#a7f3d0'}`,
+              color: message.type === 'error' ? '#b91c1c' : '#047857',
+              borderRadius: '7px', padding: '12px', marginBottom: '20px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '700'
+            }}>
               {message.type === 'error' ? <AlertCircle size={16} /> : <CheckCircle size={16} />}
               {message.text}
             </div>
           )}
 
-          <div className="bg-white rounded-2xl border border-slate-200 p-4">
-            <div className="relative">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search checker types..."
-                className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 text-sm"
-              />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <div className="chk-search-box" style={{ flex: '1', minWidth: '240px', marginBottom: 0 }}>
+                <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#999' }} />
+                <input
+                  className="chk-input"
+                  placeholder="Search checkers..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button className={`chk-btn-outline ${locked ? 'active' : ''}`} style={{ borderColor: locked ? '#b91c1c' : '#e4e4de', color: locked ? '#b91c1c' : '#111' }} onClick={handleToggleLock} disabled={savingLock}>
+                  {locked ? <Lock size={16} /> : <Unlock size={16} />}
+                  {locked ? 'Locked' : 'Unlocked'}
+                </button>
+                <button className="chk-btn-primary" onClick={handleSync} disabled={syncing}>
+                  <RefreshCw size={16} className={syncing ? 'animate-spin' : ''} />
+                  {syncing ? 'Syncing...' : 'Sync'}
+                </button>
+              </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+          <div className="chk-table-container">
             {loading ? (
-              <div className="p-10 text-center text-slate-500">Loading checker offers...</div>
-            ) : offers.length === 0 ? (
-              <div className="p-10 text-center text-slate-500">No checker offers found</div>
+              <div style={{ padding: '40px', display: 'flex', justifyContent: 'center' }}><div className="chk-spinner"></div></div>
             ) : (
-              <>
-                <div className="md:hidden divide-y divide-slate-100">
+              <table className="chk-table">
+                <thead>
+                  <tr>
+                    <th className="chk-th">Checker</th>
+                    <th className="chk-th">Cost</th>
+                    <th className="chk-th">Admin/Agent Prices</th>
+                    <th className="chk-th">Stock</th>
+                    <th className="chk-th">Status</th>
+                    <th className="chk-th" style={{ textAlign: 'right' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
                   {offers.map((offer) => (
-                    <div key={offer._id} className="p-3.5 space-y-3">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className="font-semibold text-slate-900 truncate">{offer.displayName || offer.checkerType}</p>
-                          <p className="text-xs text-slate-500 truncate">{offer.checkerType}</p>
-                        </div>
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${offer.status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
+                    <tr key={offer._id}>
+                      <td className="chk-td" style={{ whiteSpace: 'nowrap' }}>
+                        <div style={{ fontWeight: '700', color: '#111' }}>{offer.displayName || offer.checkerType}</div>
+                        <div style={{ fontSize: '11px', color: '#888' }}>{offer.checkerType}</div>
+                      </td>
+                      <td className="chk-td" style={{ whiteSpace: 'nowrap' }}>{formatAmount(offer.costPrice)}</td>
+                      <td className="chk-td" style={{ whiteSpace: 'nowrap' }}>
+                        <div style={{ fontSize: '12px' }}>Admin: <span style={{ fontWeight: '700' }}>{formatAmount(offer.sellingPrice)}</span></div>
+                        <div style={{ fontSize: '11px', color: '#666' }}>Agent: {formatAmount(offer.agentPrice)}</div>
+                      </td>
+                      <td className="chk-td" style={{ whiteSpace: 'nowrap' }}>
+                        <div style={{ fontWeight: '700', color: offer.available ? '#059669' : '#b91c1c' }}>{offer.stockCount || 0}</div>
+                        <div style={{ fontSize: '11px', color: '#888' }}>{offer.available ? 'Available' : 'Out of stock'}</div>
+                      </td>
+                      <td className="chk-td">
+                        <span className="chk-badge" style={{ background: offer.status === 'active' ? '#ecfdf5' : '#f3f4f6', color: offer.status === 'active' ? '#059669' : '#666' }}>
                           {offer.status}
                         </span>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-2.5 text-xs">
-                        <div className="rounded-lg border border-slate-200 bg-slate-50 p-2.5">
-                          <p className="text-slate-500">Cost</p>
-                          <p className="font-semibold text-slate-800 mt-0.5">{formatAmount(offer.costPrice)}</p>
+                      </td>
+                      <td className="chk-td">
+                        <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
+                          <button className="chk-btn-icon" onClick={() => openEdit(offer)}><Edit2 size={14} /></button>
+                          <button className="chk-btn-icon" onClick={() => handleToggleStatus(offer)}>
+                            <CheckCircle size={14} style={{ color: offer.status === 'active' ? '#059669' : '#ccc' }} />
+                          </button>
                         </div>
-                        <div className="rounded-lg border border-slate-200 bg-slate-50 p-2.5">
-                          <p className="text-slate-500">Stock</p>
-                          <p className="font-semibold text-slate-800 mt-0.5">{Number(offer.stockCount || 0)}</p>
-                          <p className={`mt-0.5 ${offer.available ? 'text-emerald-700' : 'text-slate-500'}`}>{offer.available ? 'Available' : 'Unavailable'}</p>
-                        </div>
-                      </div>
-
-                      <div className="rounded-lg border border-slate-200 p-2.5 text-xs text-slate-600 space-y-1">
-                        <p><span className="font-semibold text-slate-700">Admin:</span> {formatAmount(offer.sellingPrice)}</p>
-                        <p><span className="font-semibold text-slate-700">Agent:</span> {formatAmount(offer.agentPrice)}</p>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => openEdit(offer)}
-                          className="px-3 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 bg-white hover:bg-slate-50"
-                          title="Edit prices"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleToggleStatus(offer)}
-                          className="px-3 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 bg-white hover:bg-slate-50"
-                          title="Toggle status"
-                        >
-                          {offer.status === 'active' ? 'Deactivate' : 'Activate'}
-                        </button>
-                      </div>
-                    </div>
+                      </td>
+                    </tr>
                   ))}
-                </div>
-
-                <div className="hidden md:block overflow-x-auto">
-                  <table className="w-full min-w-[760px]">
-                    <thead>
-                      <tr className="bg-slate-50 text-[11px] text-slate-600 uppercase tracking-wider">
-                        <th className="text-left px-4 py-3">Checker</th>
-                        <th className="text-left px-4 py-3">Cost</th>
-                        <th className="text-left px-4 py-3">Prices</th>
-                        <th className="text-left px-4 py-3">Stock</th>
-                        <th className="text-left px-4 py-3">Status</th>
-                        <th className="text-left px-4 py-3">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {offers.map((offer) => (
-                        <tr key={offer._id} className="border-t border-slate-100 align-top">
-                          <td className="px-4 py-3">
-                            <p className="font-semibold text-slate-900">{offer.displayName || offer.checkerType}</p>
-                            <p className="text-xs text-slate-500">{offer.checkerType}</p>
-                          </td>
-                          <td className="px-4 py-3 text-sm font-medium text-slate-700">{formatAmount(offer.costPrice)}</td>
-                          <td className="px-4 py-3 text-xs text-slate-600 space-y-1">
-                            <p>Admin: {formatAmount(offer.sellingPrice)}</p>
-                            <p>Agent: {formatAmount(offer.agentPrice)}</p>
-                          </td>
-                          <td className="px-4 py-3 text-xs text-slate-600 space-y-1">
-                            <p>{offer.available ? 'Available' : 'Unavailable'}</p>
-                            <p>Stock: {Number(offer.stockCount || 0)}</p>
-                          </td>
-                          <td className="px-4 py-3">
-                            <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${offer.status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
-                              {offer.status}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3">
-                            <div className="flex items-center gap-1">
-                              <button onClick={() => openEdit(offer)} className="p-2 rounded-lg hover:bg-slate-100" title="Edit prices">
-                                <Edit2 size={15} className="text-slate-700" />
-                              </button>
-                              <button onClick={() => handleToggleStatus(offer)} className="p-2 rounded-lg hover:bg-slate-100" title="Toggle status">
-                                <CheckCircle size={15} className={offer.status === 'active' ? 'text-emerald-600' : 'text-slate-400'} />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </>
+                </tbody>
+              </table>
             )}
           </div>
         </div>
       </div>
 
       {editing && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-5 w-full max-w-md">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-slate-900">Edit Checker Prices</h3>
-              <button onClick={() => setEditing(null)} className="p-1.5 rounded-lg hover:bg-slate-100"><X size={16} /></button>
+        <div className="chk-modal-overlay">
+          <div className="chk-modal-card">
+            <div style={{ display: 'flex', alignItems: 'center', justifyItems: 'space-between', marginBottom: '20px' }}>
+              <h3 style={{ fontSize: '18px', fontWeight: '800', flex: 1 }}>Update Prices</h3>
+              <button onClick={() => setEditing(null)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
             </div>
-
-            <div className="space-y-3">
-              <label className="block">
-                <span className="text-xs font-semibold text-slate-600">Admin price</span>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={prices.sellingPrice}
-                  onChange={(e) => setPrices((prev) => ({ ...prev, sellingPrice: e.target.value }))}
-                  className="w-full mt-1 px-3 py-2 rounded-xl border border-slate-200"
-                />
-              </label>
-              <label className="block">
-                <span className="text-xs font-semibold text-slate-600">Agent price</span>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={prices.agentPrice}
-                  onChange={(e) => setPrices((prev) => ({ ...prev, agentPrice: e.target.value }))}
-                  className="w-full mt-1 px-3 py-2 rounded-xl border border-slate-200"
-                />
-              </label>
-              <label className="block">
-                <span className="text-xs font-semibold text-slate-600">Vendor price</span>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={prices.vendorPrice}
-                  onChange={(e) => setPrices((prev) => ({ ...prev, vendorPrice: e.target.value }))}
-                  className="w-full mt-1 px-3 py-2 rounded-xl border border-slate-200"
-                />
-              </label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: '700', color: '#333', display: 'block', marginBottom: '6px' }}>Admin Selling Price</label>
+                <input className="chk-input" style={{ paddingLeft: '14px' }} type="number" value={prices.sellingPrice} onChange={(e) => setPrices({ ...prices, sellingPrice: e.target.value })} />
+              </div>
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: '700', color: '#333', display: 'block', marginBottom: '6px' }}>Agent Price</label>
+                <input className="chk-input" style={{ paddingLeft: '14px' }} type="number" value={prices.agentPrice} onChange={(e) => setPrices({ ...prices, agentPrice: e.target.value })} />
+              </div>
+              <button className="chk-btn-primary" style={{ marginTop: '8px' }} onClick={savePrices}><Save size={18} /> Save Prices</button>
             </div>
-
-            <button onClick={savePrices} className="mt-4 w-full py-2.5 rounded-xl bg-slate-900 text-white font-semibold flex items-center justify-center gap-2">
-              <Save size={15} />
-              Save prices
-            </button>
           </div>
         </div>
       )}
