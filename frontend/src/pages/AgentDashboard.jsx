@@ -21,12 +21,259 @@ import {
   Target,
   Layout,
   RefreshCw,
-  Eye
+  Eye,
+  Activity,
+  Wallet,
+  CheckCircle2,
+  ShieldCheck,
+  Store,
+  Loader2
 } from 'lucide-react';
 import { store as storeAPI } from '../services/api';
 import AgentLayout from '../components/AgentLayout';
 import Modal from '../components/Modal';
 import { useAuth } from '../hooks/useAuth';
+
+const styles = `
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
+  
+  .dash-wrapper {
+    font-family: 'DM Sans', sans-serif;
+    background-color: #f5f5f0;
+    min-height: 100vh;
+  }
+
+  .dash-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .dash-header {
+    background: #fff;
+    border: 1.5px solid #e4e4de;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .dash-heading-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .dash-icon-box {
+    width: 46px;
+    height: 46px;
+    background: #111;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #f0a500;
+    flex-shrink: 0;
+  }
+
+  .dash-h2 {
+    font-size: 26px;
+    font-weight: 800;
+    color: #111;
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+
+  .dash-p {
+    font-size: 14px;
+    color: #666;
+    margin: 4px 0 0 0;
+  }
+
+  .dash-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  @media (min-width: 768px) {
+    .dash-stat-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+  }
+
+  .dash-stat-card {
+    background: #fff;
+    border: 1.5px solid #e4e4de;
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    transition: all 0.2s;
+  }
+
+  .dash-stat-card:hover {
+    border-color: #d4d4ce;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.06);
+  }
+
+  .dash-stat-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .dash-stat-value {
+    font-size: 20px;
+    font-weight: 800;
+    color: #111;
+  }
+
+  .dash-card {
+    background: #fff;
+    border: 1.5px solid #e4e4de;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.06);
+  }
+
+  .dash-card-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: #111;
+    margin: 0 0 20px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dash-btn-primary {
+    background: #111;
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .dash-btn-primary:hover:not(:disabled) {
+    background: #333;
+    transform: translateY(-1px);
+  }
+
+  .dash-btn-outline {
+    background: #fff;
+    color: #111;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
+    border: 1.5px solid #e4e4de;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .dash-btn-outline:hover {
+    background: #fafaf7;
+    border-color: #d4d4ce;
+  }
+
+  @media (max-width: 640px) {
+    .dash-btn-primary, .dash-btn-outline {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+  }
+
+  .dash-premium-banner {
+    background: linear-gradient(135deg, #111111 0%, #1a1a1a 100%);
+    color: #fff;
+    border-radius: 14px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  }
+
+  .dash-banner-accent {
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    width: 100px;
+    height: 100px;
+    background: rgba(240, 165, 0, 0.05);
+    border-radius: 50%;
+    filter: blur(40px);
+  }
+
+  .dash-table-container {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1.5px solid #e4e4de;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .dash-table-container::-webkit-scrollbar {
+    display: none;
+  }
+
+  .dash-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .dash-th {
+    background: #fafaf7;
+    text-align: left;
+    padding: 12px 16px;
+    font-weight: 700;
+    color: #333;
+    border-bottom: 1.5px solid #e4e4de;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .dash-td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    color: #444;
+  }
+
+  .dash-badge {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+`;
 
 export default function AgentDashboard() {
   const navigate = useNavigate();
@@ -110,12 +357,8 @@ export default function AgentDashboard() {
   if (loading) {
     return (
       <AgentLayout>
-        <div className="flex items-center justify-center min-h-[60vh] relative">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-blue-100/30 blur-[100px] rounded-full"></div>
-          <div className="text-center relative">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600 mx-auto"></div>
-            <p className="mt-4 text-slate-600 font-bold uppercase tracking-widest text-[10px]">Loading your page...</p>
-          </div>
+        <div className="flex h-[80vh] items-center justify-center bg-[#f5f5f0]">
+          <Loader2 className="w-10 h-10 text-[#f0a500] animate-spin" />
         </div>
       </AgentLayout>
     );
@@ -130,342 +373,267 @@ export default function AgentDashboard() {
 
   return (
     <AgentLayout>
-      <div className="relative min-h-screen bg-[#F8FAFC]">
-        {/* Top Header - Glassmorphism */}
-        <div className="sticky top-0 z-20 app-pro-header px-6 py-4">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2 text-primary-600 min-w-0">
-                <Layout size={16} className="flex-shrink-0" />
-                <span className="text-xs font-bold uppercase tracking-wider whitespace-nowrap">Store Summary</span>
+      <div className="dash-wrapper">
+        <style>{styles}</style>
+        <div className="dash-content">
+          {/* Header Card */}
+          <div className="dash-header">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="dash-heading-row">
+                <div className="dash-icon-box">
+                  <Layout size={24} />
+                </div>
+                <div>
+                  <h2 className="dash-h2">{storeData?.name || 'My Store'}</h2>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-xs font-bold text-slate-400 font-mono uppercase">/{storeData?.slug}</span>
+                    <button onClick={handleCopyLink} className="text-[10px] font-bold text-indigo-600 hover:text-indigo-700">
+                      {copiedLink ? 'Copied!' : 'Copy Link'}
+                    </button>
+                  </div>
+                </div>
               </div>
-
-              <div className="flex items-center gap-2 flex-shrink-0">
+              <div className="flex items-center gap-2">
                 <a
                   href={`/store/${storeData?.slug}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-2 px-3 py-2 bg-white text-slate-700 rounded-xl border border-slate-200 hover:border-primary-400 hover:text-primary-600 transition-all font-medium text-sm shadow-sm whitespace-nowrap"
+                  className="dash-btn-outline"
                 >
                   <ExternalLink size={16} />
                   View Store
                 </a>
                 <button
                   onClick={fetchDashboardData}
-                  className="p-2 text-slate-500 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                  className="dash-btn-outline p-2"
                   title="Refresh Data"
                 >
-                  <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
+                  <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
                 </button>
               </div>
             </div>
-
-            <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2 mt-2 flex-wrap">
-              {storeData?.name || 'My Store'}
-              <span className="text-xs font-medium px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full border border-slate-200">
-                {storeData?.slug}
-              </span>
-            </h1>
           </div>
-        </div>
 
-        <div className="max-w-7xl mx-auto p-6 space-y-8">
-          {/* Dashboard Quick Navigation */}
+          {/* Quick Action Navigation */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <h2 className="text-lg font-bold text-slate-800">Quick Actions</h2>
+            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest">Quick Actions</h3>
             <div className="grid grid-cols-2 sm:flex items-center gap-3">
-              <Link
-                to="/agent/orders"
-                className="px-4 py-2.5 text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-100 transition-all font-bold text-xs shadow-sm flex items-center justify-center gap-2"
-              >
+              <Link to="/agent/orders" className="dash-btn-outline flex-1 sm:flex-none">
+                <ShoppingBag size={14} />
                 Sales History
-                <ArrowRight size={14} className="text-slate-600" />
               </Link>
-              <Link
-                to="/agent/wallet"
-                className="px-4 py-2.5 text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-100 transition-all font-bold text-xs shadow-sm flex items-center justify-center gap-2"
-              >
+              <Link to="/agent/wallet" className="dash-btn-outline flex-1 sm:flex-none">
+                <CreditCard size={14} style={{ color: '#059669' }} />
                 Add Funds
-                <CreditCard size={14} className="text-emerald-500" />
               </Link>
-              <Link
-                to="/agent/store"
-                className="col-span-2 sm:col-auto px-4 py-2.5 bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-all font-bold text-xs shadow-xl shadow-slate-200 flex items-center justify-center gap-2"
-              >
+              <Link to="/agent/store" className="dash-btn-primary w-full sm:w-auto">
+                <Zap size={14} style={{ color: '#f0a500' }} />
                 Edit Store
-                <Zap size={14} className="text-indigo-400" />
               </Link>
             </div>
           </div>
 
-          {/* Critical Alerts - Premium Banner */}
+          {/* Alerts */}
           {showBanBanner && (
-            <div className="mb-8 overflow-hidden rounded-3xl bg-gradient-to-r from-red-500 to-rose-600 p-[1px] shadow-lg shadow-red-200">
-              <div className="bg-white rounded-[23px] p-6 flex flex-col md:flex-row items-center gap-6">
-                <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center text-red-600 flex-shrink-0">
-                  <Lock size={30} />
+            <div className="dash-premium-banner" style={{ background: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)' }}>
+              <div className="dash-banner-accent"></div>
+              <div className="flex flex-col md:flex-row items-center gap-6 relative z-10">
+                <div className="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center backdrop-blur-md">
+                  <Lock size={28} />
                 </div>
                 <div className="flex-1 text-center md:text-left">
-                  <h3 className="text-xl font-black text-slate-900 leading-tight">Action Required</h3>
-                  <p className="text-slate-600 mt-1 font-medium">
-                    Store suspended: {storeData?.temporaryBanReason || 'Access suspended by admin.'}
+                  <h3 style={{ fontSize: '20px', fontWeight: '800' }}>Access Restricted</h3>
+                  <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.7)', marginTop: '4px' }}>
+                    {storeData?.temporaryBanReason || 'Your store access has been suspended by admin.'}
                   </p>
-                  <div className="mt-3 flex flex-wrap items-center justify-center md:justify-start gap-2">
-                    {/* Always show admin contact if available */}
-                    {adminContact?.email && (
-                      <a
-                        href={`mailto:${adminContact.email}`}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold hover:bg-slate-200 transition-colors"
-                      >
-                        <Mail size={12} />
-                        {adminContact.email}
-                      </a>
-                    )}
-                    {adminContact?.phone && (
-                      <a
-                        href={`tel:${adminContact.phone}`}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold hover:bg-slate-200 transition-colors"
-                      >
-                        <Phone size={12} />
-                        {adminContact.phone}
-                      </a>
-                    )}
-                  </div>
                 </div>
-                <button
-                  onClick={handleContinueActivation}
-                  className="px-8 py-3 bg-red-600 text-white rounded-2xl font-black hover:bg-red-700 shadow-xl shadow-red-200 transition-all"
-                >
-                  Open Store Settings
+                <button onClick={handleContinueActivation} className="dash-btn-primary" style={{ background: '#fff', color: '#b91c1c' }}>
+                  Open Settings
                 </button>
               </div>
             </div>
           )}
 
           {showActivationBanner && (
-            <div className="mb-8 overflow-hidden rounded-3xl bg-gradient-to-r from-orange-500 to-amber-600 p-[1px] shadow-lg shadow-orange-200">
-              <div className="bg-white rounded-[23px] p-6 flex flex-col md:flex-row items-center gap-6">
-                <div className="w-16 h-16 rounded-2xl bg-orange-50 flex items-center justify-center text-orange-600 flex-shrink-0 animate-pulse">
-                  <AlertCircle size={32} />
+            <div className="dash-premium-banner">
+              <div className="dash-banner-accent"></div>
+              <div className="flex flex-col md:flex-row items-center gap-6 relative z-10">
+                <div className="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center backdrop-blur-md">
+                  <AlertCircle size={28} style={{ color: '#f0a500' }} />
                 </div>
                 <div className="flex-1 text-center md:text-left">
-                  <h3 className="text-xl font-black text-slate-900 leading-tight">Complete Setup Payment</h3>
-                  <p className="text-slate-600 mt-1 font-medium">
-                    Pay your one-time setup fee to open your store and start selling.
+                  <h3 style={{ fontSize: '20px', fontWeight: '800' }}>Setup Payment Required</h3>
+                  <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.7)', marginTop: '4px' }}>
+                    Complete your one-time activation fee to start selling.
                   </p>
                   {isWalletBalanceLow && (
-                    <p className="text-xs font-bold text-orange-700 mt-2">
-                      Wallet balance is low ({formatCurrencyAbbreviated(walletBalance)} / {formatCurrencyAbbreviated(registrationFee)} required)
+                    <p style={{ fontSize: '11px', fontWeight: '700', color: '#f0a500', marginTop: '6px' }}>
+                      Low Balance: {formatCurrency(walletBalance)} / {formatCurrency(registrationFee)}
                     </p>
                   )}
                 </div>
-                <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                <div className="flex gap-3">
                   {isWalletBalanceLow && (
-                    <Link
-                      to="/agent/wallet"
-                      className="px-8 py-3 bg-white text-orange-700 rounded-2xl font-black border border-orange-200 hover:bg-orange-50 transition-all"
-                    >
+                    <Link to="/agent/wallet" className="dash-btn-outline" style={{ background: 'transparent', border: '1.5px solid rgba(255,255,255,0.2)', color: '#fff' }}>
                       Add Funds
                     </Link>
                   )}
-                  <button
-                    onClick={handleContinueActivation}
-                    className="px-10 py-4 bg-orange-600 text-white rounded-2xl font-black hover:bg-orange-700 shadow-xl shadow-orange-200 transition-all transform hover:scale-105"
-                  >
-                    Pay Setup Fee
+                  <button onClick={handleContinueActivation} className="dash-btn-primary" style={{ background: '#f0a500', color: '#111' }}>
+                    Pay Fee Now
                   </button>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Analytics Grid */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Stats Grid */}
+          <div className="dash-stat-grid">
             {[
-              { label: 'Total Sales', value: orderStats?.totalOrders || 0, icon: Target, color: 'blue' },
-              { label: 'Delivered', value: orderStats?.completedOrders || 0, icon: CheckCircle, color: 'emerald' },
-              { label: 'Processing', value: orderStats?.processingOrders || 0, icon: Layers, color: 'indigo' },
-              { label: 'Revenue', value: formatCurrency(orderStats?.totalRevenue), icon: TrendingUp, color: 'purple' }
+              { label: 'Total Sales', value: orderStats?.totalOrders || 0, icon: Target, color: '#3b82f6' },
+              { label: 'Delivered', value: orderStats?.completedOrders || 0, icon: CheckCircle, color: '#10b981' },
+              { label: 'Processing', value: orderStats?.processingOrders || 0, icon: Layers, color: '#6366f1' },
+              { label: 'Revenue', value: formatCurrency(orderStats?.totalRevenue), icon: TrendingUp, color: '#a855f7' }
             ].map((stat, i) => (
-              <div key={i} className="bg-white p-6 rounded-3xl border border-slate-200/60 shadow-sm hover:shadow-md transition-all">
-                <div className={`w-10 h-10 rounded-xl bg-${stat.color}-50 text-${stat.color}-600 flex items-center justify-center mb-4`}>
-                  <stat.icon size={20} />
+              <div key={i} className="dash-stat-card">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div>
+                    <p className="dash-stat-label">{stat.label}</p>
+                    <p className="dash-stat-value">{stat.value}</p>
+                  </div>
+                  <stat.icon size={18} style={{ color: stat.color }} />
                 </div>
-                <p className="text-slate-600 text-[10px] font-bold uppercase tracking-widest mb-1">{stat.label}</p>
-                <div className="text-xl font-black text-slate-900 tracking-tight">{stat.value}</div>
               </div>
             ))}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Store Details Card */}
-            <div className="lg:col-span-2 bg-white rounded-3xl border border-slate-200/60 shadow-sm overflow-hidden group">
-              <div className="px-6 py-4 bg-slate-50/50 border-b border-slate-100 flex items-center justify-between">
-                <h3 className="font-bold text-slate-700 flex items-center gap-2">
-                  <ExternalLink size={18} className="text-primary-500" />
-                  Store Details
-                </h3>
-                <div className="flex gap-1">
-                  <div className="w-2 h-2 rounded-full bg-slate-200"></div>
-                  <div className="w-2 h-2 rounded-full bg-slate-200"></div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Store Information */}
+            <div className="lg:col-span-2 dash-card">
+              <h3 className="dash-card-title">
+                <Store size={18} style={{ color: '#f0a500' }} />
+                Store Overview
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div style={{ background: '#fafaf7', padding: '16px', borderRadius: '12px', border: '1.5px solid #e4e4de' }}>
+                  <p className="dash-stat-label" style={{ marginBottom: '4px' }}>Live Catalog</p>
+                  <p style={{ fontSize: '18px', fontWeight: '800', color: '#111' }}>{plansCount} Packages</p>
+                  <p style={{ fontSize: '12px', color: '#666' }}>Currently visible to customers</p>
+                </div>
+                <div style={{ background: '#fafaf7', padding: '16px', borderRadius: '12px', border: '1.5px solid #e4e4de' }}>
+                  <p className="dash-stat-label" style={{ marginBottom: '4px' }}>Store URL</p>
+                  <p style={{ fontSize: '15px', fontWeight: '800', color: '#111', fontFamily: 'monospace' }}>/{storeData?.slug}</p>
+                  <button onClick={handleCopyLink} className="text-xs font-bold text-indigo-600 mt-1">Copy Public Link</button>
                 </div>
               </div>
-              <div className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                  <div className="space-y-0.5">
-                    <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Store Name</p>
-                    <p className="text-base font-black text-slate-900">{storeData?.name || 'N/A'}</p>
-                  </div>
-                  <div className="space-y-0.5">
-                    <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Public Store Link</p>
-                    <div className="flex items-center gap-2">
-                      <p className="text-base font-black font-mono text-indigo-600 tracking-tighter">/{storeData?.slug}</p>
-                      <button onClick={handleCopyLink} className="p-1 px-2 bg-indigo-50 text-indigo-600 rounded-lg text-[9px] font-bold hover:bg-indigo-100 transition-colors">
-                        {copiedLink ? 'Copied!' : 'Copy Link'}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-4 p-4 rounded-2xl bg-primary-50 text-primary-900 border border-primary-100 shadow-sm">
-                  <div className="w-10 h-10 bg-primary-600 text-white rounded-xl flex items-center justify-center flex-shrink-0">
-                    <BarChart3 size={20} />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-[9px] font-bold uppercase tracking-widest text-primary-600 opacity-80">Available Data Bundles</p>
-                    <p className="text-base font-black leading-tight">{plansCount} Bundles available</p>
-                  </div>
-                  <Link to="/agent/store" className="p-2.5 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all shadow-md shadow-primary-200">
-                    <ChevronRight size={18} />
-                  </Link>
-                </div>
-              </div>
+              <Link to="/agent/store" className="dash-btn-primary" style={{ width: 'fit-content' }}>
+                Manage Catalog
+                <ChevronRight size={14} />
+              </Link>
             </div>
 
-            {/* System Status Card */}
-            <div className="bg-white rounded-3xl border border-slate-200/60 shadow-sm overflow-hidden flex flex-col group">
-              <div className="px-6 py-4 bg-slate-50/50 border-b border-slate-100 flex items-center justify-between">
-                <h3 className="font-bold text-slate-700 flex items-center gap-2">
-                  <Zap size={18} className="text-primary-500" />
-                  Network Status
-                </h3>
-                <div className="flex gap-1">
-                  <div className="w-2 h-2 rounded-full bg-slate-200"></div>
-                  <div className="w-2 h-2 rounded-full bg-slate-200"></div>
-                </div>
-              </div>
-              <div className="p-8 flex-1 flex flex-col justify-between">
-                <div className="space-y-6">
-                  {[
-                    { net: 'MTN Network', status: 'Available', load: '12%', color: 'emerald' },
-                    { net: 'Telecel Network', status: 'Available', load: '24%', color: 'blue' },
-                    { net: 'AirtelTigo Network', status: 'Available', load: '18%', color: 'blue' }
-                  ].map((n, i) => (
-                    <div key={i} className="space-y-2">
-                      <div className="flex justify-between items-end">
-                        <p className="text-xs font-bold text-slate-600">{n.net}</p>
-                        <p className={`text-[9px] font-black uppercase tracking-widest ${n.status === 'Available' ? 'text-emerald-600' : 'text-primary-600'}`}>{n.status}</p>
-                      </div>
-                      <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                        <div className={`h-full bg-${n.color}-500 rounded-full group-hover:opacity-80 transition-all`} style={{ width: n.load }}></div>
-                      </div>
+            {/* System Health */}
+            <div className="dash-card">
+              <h3 className="dash-card-title">
+                <Activity size={18} style={{ color: '#059669' }} />
+                Network Health
+              </h3>
+              <div className="space-y-4">
+                {[
+                  { net: 'MTN Ghana', load: '12%', color: '#fbbf24' },
+                  { net: 'Telecel', load: '24%', color: '#ef4444' },
+                  { net: 'AirtelTigo', load: '18%', color: '#22c55e' }
+                ].map((n, i) => (
+                  <div key={i} style={{ marginBottom: '12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                      <span style={{ fontSize: '12px', fontWeight: '700', color: '#333' }}>{n.net}</span>
+                      <span style={{ fontSize: '10px', fontWeight: '800', color: '#059669', textTransform: 'uppercase' }}>Available</span>
                     </div>
-                  ))}
-                </div>
-
-                <div className="pt-6 mt-6 border-t border-slate-50 text-center">
-                  <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em]">Service Uptime 99.99%</p>
+                    <div style={{ height: '6px', width: '100%', background: '#f0f0f0', borderRadius: '10px', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: n.load, background: n.color, borderRadius: '10px' }}></div>
+                    </div>
+                  </div>
+                ))}
+                <div style={{ textAlign: 'center', paddingTop: '16px', borderTop: '1px solid #f0f0f0' }}>
+                  <p style={{ fontSize: '10px', fontWeight: '800', color: '#999', textTransform: 'uppercase', letterSpacing: '0.2em' }}>
+                    System Status: 100%
+                  </p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Recent Orders */}
-          <div className="bg-white rounded-3xl border border-slate-200/60 shadow-sm overflow-hidden">
-            <div className="px-8 py-6 bg-slate-50/50 border-b border-slate-100 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-primary-50 text-primary-600 rounded-xl">
-                  <ShoppingBag size={20} />
-                </div>
-                <div>
-                  <h3 className="font-black text-slate-900 tracking-tight leading-none uppercase text-[11px] tracking-widest text-slate-600">Order List</h3>
-                  <h3 className="text-lg font-black text-slate-900 tracking-tight">Recent Sales</h3>
-                </div>
-              </div>
-              <Link
-                to="/agent/orders"
-                className="group flex items-center gap-2 text-xs font-black text-primary-600 uppercase tracking-widest hover:gap-3 transition-all"
-              >
-                View All
-                <ChevronRight size={16} />
+          {/* Recent Orders Section */}
+          <div className="dash-card">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="dash-card-title" style={{ margin: 0 }}>
+                <ShoppingBag size={18} style={{ color: '#3b82f6' }} />
+                Recent Sales
+              </h3>
+              <Link to="/agent/orders" style={{ fontSize: '11px', fontWeight: '800', color: '#3b82f6', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                View All History
               </Link>
             </div>
 
             {recentOrders.length === 0 ? (
-              <div className="text-center py-20 space-y-6">
-                <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto text-slate-200">
-                  <ShoppingBag size={48} />
-                </div>
-                <p className="text-slate-600 font-bold text-lg">No sales yet.</p>
+              <div style={{ textAlign: 'center', padding: '60px', border: '1.5px dashed #e4e4de', borderRadius: '14px' }}>
+                <ShoppingBag size={40} style={{ color: '#e4e4de', margin: '0 auto 16px' }} />
+                <p style={{ fontSize: '14px', fontWeight: '700', color: '#999' }}>No sales recorded yet.</p>
               </div>
             ) : (
-              <div className="overflow-x-auto scrollbar-hide">
-                <table className="w-full text-left">
+              <div className="dash-table-container">
+                <table className="dash-table">
                   <thead>
-                    <tr className="border-b border-slate-100">
-                      <th className="py-4 px-8 font-bold text-[11px] uppercase text-slate-600 tracking-wider whitespace-nowrap">Network</th>
-                      <th className="py-4 px-4 font-bold text-[11px] uppercase text-slate-600 tracking-wider whitespace-nowrap">Destination</th>
-                      <th className="py-4 px-4 font-bold text-[11px] uppercase text-slate-600 tracking-wider whitespace-nowrap">Bundle</th>
-                      <th className="py-4 px-4 font-bold text-[11px] uppercase text-slate-600 tracking-wider whitespace-nowrap">Price</th>
-                      <th className="py-4 px-4 font-bold text-[11px] uppercase text-slate-600 tracking-wider whitespace-nowrap">Status</th>
-                      <th className="py-4 px-4 text-right font-bold text-[11px] uppercase text-slate-600 tracking-wider whitespace-nowrap">Date</th>
-                      <th className="py-4 px-8 text-right font-bold text-[11px] uppercase text-slate-600 tracking-wider whitespace-nowrap">Actions</th>
+                    <tr>
+                      <th className="dash-th">Network</th>
+                      <th className="dash-th">Recipient</th>
+                      <th className="dash-th">Bundle</th>
+                      <th className="dash-th">Amount</th>
+                      <th className="dash-th">Status</th>
+                      <th className="dash-th">Date</th>
+                      <th className="dash-th text-right">Action</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-50">
-                    {recentOrders.map((order) => (
-                      <tr key={order._id} className="group hover:bg-slate-50/50 transition-colors">
-                        <td className="py-4 px-8 whitespace-nowrap">
-                          <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200`}>
-                            {order.network}
-                          </span>
-                        </td>
-                        <td className="py-4 px-4 whitespace-nowrap">
-                          <p className="font-bold text-slate-900">{order.phoneNumber || 'N/A'}</p>
-                        </td>
-                        <td className="py-4 px-4 whitespace-nowrap">
-                          <p className="text-sm font-semibold text-slate-700">{getOrderPlanDisplay(order)}</p>
-                        </td>
-                        <td className="py-4 px-4 whitespace-nowrap">
-                          <p className="font-black text-slate-900">{formatCurrency(order.amount)}</p>
-                        </td>
-                        <td className="py-4 px-4 whitespace-nowrap">
-                          <span
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${order.status === 'completed' ? 'bg-green-100 text-green-700' :
-                              order.status === 'pending' || order.status === 'processing' ? 'bg-amber-100 text-amber-700' :
-                                'bg-rose-100 text-rose-700'
-                              }`}
-                          >
-                            {order.status}
-                          </span>
-                        </td>
-                        <td className="py-4 px-4 text-right whitespace-nowrap">
-                          <p className="text-xs font-bold text-slate-600">{formatDate(order.createdAt)}</p>
-                        </td>
-                        <td className="py-4 px-8 text-right whitespace-nowrap">
-                          <button
-                            onClick={() => {
-                              setSelectedOrder(order);
-                              setShowDetails(true);
-                            }}
-                            className="p-2 text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all"
-                            title="View Order"
-                          >
-                            <Eye size={16} />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                  <tbody>
+                    {recentOrders.map((order) => {
+                      const statusColor = order.status === 'completed' 
+                        ? { background: '#ecfdf5', color: '#059669', border: '1px solid #d1fae5' }
+                        : order.status === 'pending' || order.status === 'processing'
+                        ? { background: '#fffbeb', color: '#d97706', border: '1px solid #fef3c7' }
+                        : { background: '#fff5f5', color: '#b91c1c', border: '1px solid #fecaca' };
+
+                      return (
+                        <tr key={order._id}>
+                          <td className="dash-td">
+                            <span className="dash-badge" style={{ background: '#fafaf7', color: '#111', border: '1px solid #e4e4de' }}>
+                              {order.network}
+                            </span>
+                          </td>
+                          <td className="dash-td">
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <Phone size={12} style={{ color: '#999' }} />
+                              <span style={{ fontWeight: '700' }}>{order.phoneNumber || 'N/A'}</span>
+                            </div>
+                          </td>
+                          <td className="dash-td font-medium">{getOrderPlanDisplay(order)}</td>
+                          <td className="dash-td font-bold" style={{ color: '#059669' }}>{formatCurrency(order.amount)}</td>
+                          <td className="dash-td">
+                            <span className="dash-badge" style={statusColor}>{order.status}</span>
+                          </td>
+                          <td className="dash-td" style={{ fontSize: '11px', color: '#999' }}>{formatDate(order.createdAt)}</td>
+                          <td className="dash-td text-right">
+                            <button
+                              onClick={() => {
+                                setSelectedOrder(order);
+                                setShowDetails(true);
+                              }}
+                              style={{ padding: '6px', borderRadius: '6px', border: '1px solid #e4e4de', background: '#fff', cursor: 'pointer' }}
+                            >
+                              <Eye size={14} style={{ color: '#666' }} />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -479,65 +647,64 @@ export default function AgentDashboard() {
         isOpen={showDetails}
         onClose={() => setShowDetails(false)}
         title="Order Details"
-        icon={<ShoppingBag size={20} className="text-primary-600" />}
+        icon={<ShoppingBag size={20} style={{ color: '#3b82f6' }} />}
         maxWidth="max-w-lg"
       >
         {selectedOrder && (
-          <div className="space-y-6">
-            <div className="flex justify-between items-start">
+          <div style={{ fontFamily: 'DM Sans, sans-serif' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
               <div>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Order ID</p>
-                <p className="font-mono text-sm font-bold text-slate-900 uppercase">#{selectedOrder._id}</p>
+                <p style={{ fontSize: '10px', fontWeight: '800', color: '#999', textTransform: 'uppercase', marginBottom: '4px' }}>Reference</p>
+                <p style={{ fontSize: '14px', fontWeight: '800', color: '#111', fontFamily: 'monospace' }}>#{String(selectedOrder._id).slice(-10).toUpperCase()}</p>
               </div>
-              <div className="text-right">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Status</p>
-                <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${selectedOrder.status === 'completed' ? 'bg-green-100 text-green-700' :
-                  selectedOrder.status === 'pending' || selectedOrder.status === 'processing' ? 'bg-amber-100 text-amber-700' :
-                    'bg-rose-100 text-rose-700'
-                  }`}>
+              <div style={{ textAlign: 'right' }}>
+                <p style={{ fontSize: '10px', fontWeight: '800', color: '#999', textTransform: 'uppercase', marginBottom: '4px' }}>Order Status</p>
+                <span className="dash-badge" style={{ 
+                  background: selectedOrder.status === 'completed' ? '#ecfdf5' : '#fffbeb', 
+                  color: selectedOrder.status === 'completed' ? '#059669' : '#d97706' 
+                }}>
                   {selectedOrder.status}
                 </span>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
-              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Customer Details</p>
-                <p className="font-bold text-slate-900">{selectedOrder.phoneNumber}</p>
-                <p className="text-xs font-bold text-slate-600 uppercase mt-1">{selectedOrder.network}</p>
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div style={{ background: '#fafaf7', padding: '16px', borderRadius: '12px', border: '1.5px solid #e4e4de' }}>
+                <p className="dash-stat-label">Customer</p>
+                <p style={{ fontSize: '14px', fontWeight: '800', color: '#111' }}>{selectedOrder.phoneNumber}</p>
+                <p style={{ fontSize: '11px', color: '#666', marginTop: '2px' }}>{selectedOrder.network}</p>
               </div>
-              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{isCheckerOrder(selectedOrder) ? 'Checker Plan' : 'Data Package'}</p>
-                  <p className="font-bold text-slate-900">{getOrderPlanDisplay(selectedOrder)}</p>
-                <p className="text-xs font-bold text-slate-600 mt-1">{formatCurrency(selectedOrder.amount)}</p>
+              <div style={{ background: '#fafaf7', padding: '16px', borderRadius: '12px', border: '1.5px solid #e4e4de' }}>
+                <p className="dash-stat-label">Package</p>
+                <p style={{ fontSize: '14px', fontWeight: '800', color: '#111' }}>{getOrderPlanDisplay(selectedOrder)}</p>
+                <p style={{ fontSize: '11px', color: '#666', marginTop: '2px' }}>{formatCurrency(selectedOrder.amount)}</p>
               </div>
             </div>
 
-            <div className="space-y-3">
-              <div className="flex justify-between items-center py-2 border-b border-slate-50">
-                <span className="text-xs font-bold text-slate-500 uppercase">Purchase Date</span>
-                <span className="text-sm font-bold text-slate-900">{formatDate(selectedOrder.createdAt)}</span>
+            <div style={{ borderTop: '1.5px solid #f0f0f0', paddingTop: '16px' }}>
+              <div className="flex justify-between items-center py-2">
+                <span style={{ fontSize: '12px', fontWeight: '700', color: '#666' }}>Purchase Date</span>
+                <span style={{ fontSize: '12px', fontWeight: '800', color: '#111' }}>{formatDate(selectedOrder.createdAt)}</span>
               </div>
-              <div className="flex justify-between items-center py-2 border-b border-slate-50">
-                <span className="text-xs font-bold text-slate-500 uppercase">Commission Earned</span>
-                <span className="text-sm font-black text-emerald-600">+{formatCurrency(selectedOrder.agentCommission || 0)}</span>
+              <div className="flex justify-between items-center py-2">
+                <span style={{ fontSize: '12px', fontWeight: '700', color: '#666' }}>Net Commission</span>
+                <span style={{ fontSize: '14px', fontWeight: '800', color: '#059669' }}>+{formatCurrency(selectedOrder.agentCommission || 0)}</span>
               </div>
               {selectedOrder.transactionId && (
-                <div className="flex justify-between items-center py-2 border-b border-slate-50">
-                  <span className="text-xs font-bold text-slate-500 uppercase">Transaction ID</span>
-                  <span className="text-sm font-mono font-bold text-slate-900 uppercase">{selectedOrder.transactionId}</span>
+                <div className="flex justify-between items-center py-2">
+                  <span style={{ fontSize: '12px', fontWeight: '700', color: '#666' }}>API Transaction</span>
+                  <span style={{ fontSize: '11px', fontWeight: '800', color: '#111', fontFamily: 'monospace' }}>{selectedOrder.transactionId}</span>
                 </div>
               )}
             </div>
 
-            <div className="pt-4 flex gap-3">
-              <button
-                onClick={() => setShowDetails(false)}
-                className="flex-1 py-3 text-sm font-black text-slate-600 uppercase tracking-widest bg-slate-100 rounded-2xl hover:bg-slate-200 transition-all active:scale-[0.98]"
-              >
-                Close
-              </button>
-            </div>
+            <button
+              onClick={() => setShowDetails(false)}
+              className="dash-btn-primary"
+              style={{ width: '100%', padding: '12px', marginTop: '24px' }}
+            >
+              Close Details
+            </button>
           </div>
         )}
       </Modal>

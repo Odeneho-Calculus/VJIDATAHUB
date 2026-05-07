@@ -1,10 +1,202 @@
 import React, { useState, useEffect } from 'react';
-import { AlertCircle, Search, CheckCircle, Clock, XCircle, Filter, Layout, CreditCard, RefreshCw, ArrowRight, Eye, ShoppingBag } from 'lucide-react';
+import { AlertCircle, Search, CheckCircle, Clock, XCircle, Filter, Layout, CreditCard, RefreshCw, ArrowRight, Eye, ShoppingBag, Loader2, Phone, Wifi } from 'lucide-react';
 import { store as storeAPI } from '../services/api';
 import AgentLayout from '../components/AgentLayout';
 import Pagination from '../components/Pagination';
 import Modal from '../components/Modal';
 import { useSettings } from '../context/SettingsContext';
+
+const styles = `
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
+  
+  .vtu-page-container {
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    background-color: #f5f5f0;
+    padding: 24px 16px;
+  }
+
+  .vtu-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .vtu-heading-section {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+
+  .vtu-icon-box {
+    width: 46px;
+    height: 46px;
+    background: #111;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #f0a500;
+    flex-shrink: 0;
+  }
+
+  .vtu-h2 {
+    font-size: 26px;
+    font-weight: 800;
+    color: #111;
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+
+  .vtu-p {
+    font-size: 14px;
+    color: #666;
+    margin: 4px 0 0 0;
+  }
+
+  .vtu-main-card {
+    background: #fff;
+    border: 1.5px solid #e4e4de;
+    border-radius: 14px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.06);
+    padding: 24px;
+  }
+
+  .vtu-filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .vtu-input {
+    background: #fafaf7;
+    border: 1.5px solid #e0e0d8;
+    border-radius: 7px;
+    padding: 10px 14px;
+    font-size: 14px;
+    color: #111;
+    transition: all 0.2s;
+  }
+
+  .vtu-input:focus {
+    border-color: #111;
+    box-shadow: 0 0 0 3px rgba(17,17,17,0.07);
+    background: #fff;
+    outline: none;
+  }
+
+  .vtu-select {
+    background: #fafaf7;
+    border: 1.5px solid #e0e0d8;
+    border-radius: 7px;
+    padding: 10px 14px;
+    font-size: 14px;
+    color: #111;
+    cursor: pointer;
+    min-width: 140px;
+  }
+
+  .vtu-btn-primary {
+    background: #111;
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .vtu-btn-primary:hover:not(:disabled) {
+    background: #333;
+    transform: translateY(-1px);
+  }
+
+  .vtu-btn-outline {
+    background: #fff;
+    color: #111;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
+    border: 1.5px solid #e4e4de;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .vtu-table-container {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1.5px solid #e4e4de;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+
+  .vtu-table-container::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
+
+  .vtu-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .vtu-th {
+    background: #fafaf7;
+    text-align: left;
+    padding: 12px 16px;
+    font-weight: 700;
+    color: #333;
+    border-bottom: 1.5px solid #e4e4de;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  .vtu-td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    color: #444;
+    white-space: nowrap;
+  }
+
+  .vtu-badge {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  @media (max-width: 640px) {
+    .vtu-h2 {
+      font-size: 22px;
+    }
+    .vtu-btn-primary, .vtu-btn-outline {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+  }
+`;
 
 export default function AgentOrders() {
   const { settings } = useSettings();
@@ -109,28 +301,28 @@ export default function AgentOrders() {
   const getPaymentStatusColor = (status) => {
     switch (status) {
       case 'completed':
-        return 'bg-green-100 text-green-700';
+        return { background: '#ecfdf5', color: '#059669', border: '1px solid #d1fae5' };
       case 'pending':
-        return 'bg-amber-100 text-amber-700';
+        return { background: '#fffbeb', color: '#d97706', border: '1px solid #fef3c7' };
       case 'failed':
-        return 'bg-red-100 text-red-700';
+        return { background: '#fff5f5', color: '#b91c1c', border: '1px solid #fecaca' };
       default:
-        return 'bg-slate-100 text-slate-700';
+        return { background: '#f3f4f6', color: '#4b5563' };
     }
   };
 
   const getOrderStatusColor = (status) => {
     switch (status) {
       case 'completed':
-        return 'bg-green-100 text-green-700';
+        return { background: '#ecfdf5', color: '#059669', border: '1px solid #d1fae5' };
       case 'processing':
-        return 'bg-blue-100 text-blue-700';
+        return { background: '#eff6ff', color: '#2563eb', border: '1px solid #dbeafe' };
       case 'pending':
-        return 'bg-amber-100 text-amber-700';
+        return { background: '#fffbeb', color: '#d97706', border: '1px solid #fef3c7' };
       case 'failed':
-        return 'bg-red-100 text-red-700';
+        return { background: '#fff5f5', color: '#b91c1c', border: '1px solid #fecaca' };
       default:
-        return 'bg-slate-100 text-slate-700';
+        return { background: '#f3f4f6', color: '#4b5563' };
     }
   };
 
@@ -149,193 +341,160 @@ export default function AgentOrders() {
 
   return (
     <AgentLayout>
-      <div className="min-h-screen bg-[#F8FAFC]">
-        {/* Top Header - Glassmorphism */}
-        <div className="sticky top-0 z-20 app-pro-header px-6 py-4">
-          <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2 text-primary-600 mb-1">
-                <Layout size={16} />
-                <span className="text-xs font-bold uppercase tracking-wider">Order Summary</span>
-              </div>
-              <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-                Customer Orders
-                <span className="text-xs font-medium px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full border border-slate-200">
-                  {totalOrders} Total
-                </span>
-              </h1>
+      <div className="vtu-page-container">
+        <style>{styles}</style>
+        <div className="vtu-content">
+          {/* Heading Section */}
+          <div className="vtu-heading-section">
+            <div className="vtu-icon-box">
+              <ShoppingBag size={24} />
             </div>
-
-            <div className="flex items-center gap-3">
+            <div style={{ flex: 1 }}>
+              <h2 className="vtu-h2">Customer Orders</h2>
+              <p className="vtu-p">Monitor and manage all sales from your store</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="vtu-badge" style={{ background: '#111', color: '#f0a500' }}>{totalOrders} Total</span>
               <button
                 onClick={fetchOrders}
-                className="p-2 text-slate-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                className="vtu-btn-outline p-2"
                 title="Refresh Orders"
               >
-                <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
+                <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
               </button>
             </div>
           </div>
-        </div>
 
-        <div className="max-w-7xl mx-auto p-6 space-y-6">
-          {/* Error Message */}
           {error && (
-            <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl flex items-center gap-3 text-rose-700 animate-in fade-in zoom-in-95 duration-300">
+            <div className="vtu-main-card" style={{ borderColor: '#fecaca', background: '#fff5f5', color: '#b91c1c', display: 'flex', alignItems: 'center', gap: '12px', padding: '16px' }}>
               <AlertCircle size={20} />
-              <p className="font-semibold">{error}</p>
+              <span style={{ flex: 1 }}>{error}</span>
+              <XCircle size={16} style={{ cursor: 'pointer' }} onClick={() => setError('')} />
             </div>
           )}
 
-          {/* Filters and Search - Polished */}
-          <div className="bg-white rounded-3xl border border-slate-200/60 shadow-sm p-6 overflow-hidden">
-            <div className="flex flex-col lg:flex-row gap-4">
-              {/* Search */}
-              <form onSubmit={handleSearch} className="flex-1 relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" size={18} />
+          {/* Filters Card */}
+          <div className="vtu-main-card">
+            <div className="vtu-filter-bar">
+              <form onSubmit={handleSearch} style={{ flex: 1, position: 'relative' }}>
+                <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#999' }} />
                 <input
                   type="text"
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
-                  placeholder="Search by customer, network..."
-                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:border-primary-500 focus:bg-white transition-all text-sm font-medium"
+                  placeholder="Search by customer phone or network..."
+                  className="vtu-input"
+                  style={{ width: '100%', paddingLeft: '40px' }}
                 />
               </form>
 
-              {/* Status Filter */}
-              <div className="flex items-center gap-3 bg-slate-50 px-4 py-3 border border-slate-100 rounded-xl group focus-within:border-primary-500 focus-within:bg-white transition-all">
-                <Filter size={18} className="text-slate-600" />
-                <select
-                  value={statusFilter}
-                  onChange={(e) => handleFilterChange(e.target.value)}
-                  className="bg-transparent border-none outline-none text-sm font-semibold text-slate-700 min-w-[140px] appearance-none cursor-pointer"
-                >
-                  <option value="">All Status</option>
-                  <option value="pending">Pending</option>
-                  <option value="processing">Processing</option>
-                  <option value="completed">Completed</option>
-                  <option value="failed">Failed</option>
-                </select>
-              </div>
+              <select
+                value={statusFilter}
+                onChange={(e) => handleFilterChange(e.target.value)}
+                className="vtu-select"
+              >
+                <option value="">All Statuses</option>
+                <option value="pending">Pending</option>
+                <option value="processing">Processing</option>
+                <option value="completed">Completed</option>
+                <option value="failed">Failed</option>
+              </select>
 
-              <div className="flex items-center gap-3 bg-slate-50 px-4 py-3 border border-slate-100 rounded-xl group focus-within:border-primary-500 focus-within:bg-white transition-all">
-                <Layout size={18} className="text-slate-600" />
-                <select
-                  value={networkFilter}
-                  onChange={(e) => setNetworkFilter(e.target.value)}
-                  className="bg-transparent border-none outline-none text-sm font-semibold text-slate-700 min-w-[160px] appearance-none cursor-pointer"
-                >
-                  <option value="">All Networks</option>
-                  {networkOptions.map((network) => (
-                    <option key={network} value={network}>{network}</option>
-                  ))}
-                </select>
-              </div>
+              <select
+                value={networkFilter}
+                onChange={(e) => setNetworkFilter(e.target.value)}
+                className="vtu-select"
+              >
+                <option value="">All Networks</option>
+                {networkOptions.map((network) => (
+                  <option key={network} value={network}>{network}</option>
+                ))}
+              </select>
             </div>
           </div>
 
-          {/* Table Area */}
-          <div className="bg-white rounded-3xl border border-slate-200/60 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="px-8 py-6 bg-slate-50/50 border-b border-slate-100 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-primary-50 text-primary-600 rounded-xl">
-                  <CreditCard size={20} />
-                </div>
-                <div>
-                  <h3 className="font-black text-slate-900 tracking-tight leading-none uppercase text-[11px] tracking-widest text-slate-600">Order List</h3>
-                  <h3 className="text-lg font-black text-slate-900 tracking-tight">All Orders</h3>
-                </div>
-              </div>
-            </div>
-
+          {/* Orders Table Card */}
+          <div className="vtu-main-card" style={{ padding: 0, overflow: 'hidden' }}>
             {loading ? (
-              <div className="py-24 flex flex-col items-center justify-center gap-4">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
-                <p className="text-slate-600 font-medium animate-pulse">Loading orders...</p>
+              <div style={{ textAlign: 'center', padding: '100px' }}>
+                <Loader2 size={40} className="animate-spin" style={{ margin: '0 auto 16px', color: '#f0a500' }} />
+                <p className="vtu-p">Loading your orders...</p>
               </div>
             ) : displayedOrders.length === 0 ? (
-              <div className="text-center py-24 space-y-4">
-                <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto text-slate-200">
-                  <CreditCard size={40} />
-                </div>
-                <p className="text-slate-600 font-bold text-lg">No orders found for this search.</p>
+              <div style={{ textAlign: 'center', padding: '100px', background: '#fafaf7' }}>
+                <ShoppingBag size={48} style={{ margin: '0 auto 16px', color: '#e4e4de' }} />
+                <p style={{ fontSize: '16px', fontWeight: '800', color: '#111' }}>No orders found</p>
+                <p style={{ fontSize: '13px', color: '#666', marginTop: '4px' }}>Try adjusting your filters or search query.</p>
               </div>
             ) : (
-              <div className="overflow-x-auto scrollbar-hide">
-                <table className="w-full text-left">
+              <div className="vtu-table-container" style={{ border: 'none' }}>
+                <table className="vtu-table">
                   <thead>
-                    <tr className="border-b border-slate-100">
-                      <th className="py-4 px-8 font-bold text-[11px] uppercase text-slate-600 tracking-wider whitespace-nowrap">ID</th>
-                      <th className="py-4 px-4 font-bold text-[11px] uppercase text-slate-600 tracking-wider whitespace-nowrap">Customer</th>
-                      <th className="py-4 px-4 font-bold text-[11px] uppercase text-slate-600 tracking-wider whitespace-nowrap">Plan</th>
-                      <th className="py-4 px-4 font-bold text-[11px] uppercase text-slate-600 tracking-wider whitespace-nowrap">Amount</th>
-                      <th className="py-4 px-4 font-bold text-[11px] uppercase text-slate-600 tracking-wider whitespace-nowrap">Commission</th>
-                      <th className="py-4 px-4 font-bold text-[11px] uppercase text-slate-600 tracking-wider whitespace-nowrap">Payment</th>
-                      <th className="py-4 px-4 font-bold text-[11px] uppercase text-slate-600 tracking-wider whitespace-nowrap">Delivery</th>
-                      <th className="py-4 px-4 text-right font-bold text-[11px] uppercase text-slate-600 tracking-wider whitespace-nowrap">Date</th>
-                      <th className="py-4 px-8 text-right font-bold text-[11px] uppercase text-slate-600 tracking-wider whitespace-nowrap">Actions</th>
+                    <tr>
+                      <th className="vtu-th">Order ID</th>
+                      <th className="vtu-th">Customer</th>
+                      <th className="vtu-th">Package</th>
+                      <th className="vtu-th">Amount</th>
+                      <th className="vtu-th">Profit</th>
+                      <th className="vtu-th">Payment</th>
+                      <th className="vtu-th">Delivery</th>
+                      <th className="vtu-th text-right">Action</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-50">
-                    {displayedOrders.map((order) => (
-                      <tr key={order._id} className="group hover:bg-slate-50/50 transition-colors">
-                        <td className="py-4 px-8 text-xs font-mono font-bold text-slate-600 whitespace-nowrap">
-                          #{order._id?.slice(-8).toUpperCase()}
-                        </td>
-                        <td className="py-4 px-4 whitespace-nowrap">
-                          <p className="font-bold text-slate-900">{order.phoneNumber || 'N/A'}</p>
-                          <p className="text-[10px] font-black text-slate-600 uppercase">{order.network}</p>
-                        </td>
-                        <td className="py-4 px-4 whitespace-nowrap">
-                          <p className="text-sm font-semibold text-slate-700">{getOrderPlanDisplay(order)}</p>
-                        </td>
-                        <td className="py-4 px-4 whitespace-nowrap">
-                          <p className="font-black text-slate-900">{formatCurrency(order.amount)}</p>
-                        </td>
-                        <td className="py-4 px-4 whitespace-nowrap">
-                          <p className="font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md inline-block text-[11px]">
-                            +{formatCurrency(order.agentCommission || 0)}
-                          </p>
-                        </td>
-                        <td className="py-4 px-4 whitespace-nowrap">
-                          <span
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${getPaymentStatusColor(order.paymentStatus || 'pending')}`}
-                          >
-                            {order.paymentStatus || 'pending'}
-                          </span>
-                        </td>
-                        <td className="py-4 px-4 whitespace-nowrap">
-                          <span
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${getOrderStatusColor(order.status)}`}
-                          >
-                            {order.status}
-                          </span>
-                        </td>
-                        <td className="py-4 px-4 text-right whitespace-nowrap">
-                          <p className="text-xs font-bold text-slate-600">{formatDate(order.createdAt)}</p>
-                        </td>
-                        <td className="py-4 px-8 text-right whitespace-nowrap">
-                          <button
-                            onClick={() => {
-                              setSelectedOrder(order);
-                              setShowDetails(true);
-                            }}
-                            className="p-2 text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all"
-                            title="View Details"
-                          >
-                            <Eye size={16} />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                  <tbody>
+                    {displayedOrders.map((order) => {
+                      const deliveryStyle = getOrderStatusColor(order.status);
+                      const paymentStyle = getPaymentStatusColor(order.paymentStatus || 'pending');
+
+                      return (
+                        <tr key={order._id} className="hover:bg-slate-50 transition-colors">
+                          <td className="vtu-td font-mono" style={{ fontSize: '11px', color: '#999' }}>
+                            #{order._id?.slice(-8).toUpperCase()}
+                          </td>
+                          <td className="vtu-td">
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <Phone size={12} style={{ color: '#999' }} />
+                              <span style={{ fontWeight: '700', color: '#111' }}>{order.phoneNumber || 'N/A'}</span>
+                            </div>
+                            <div style={{ fontSize: '10px', fontWeight: '800', color: '#666', marginTop: '2px' }}>{order.network}</div>
+                          </td>
+                          <td className="vtu-td">
+                            <div style={{ fontWeight: '600' }}>{getOrderPlanDisplay(order)}</div>
+                            <div style={{ fontSize: '11px', color: '#999' }}>{formatDate(order.createdAt)}</div>
+                          </td>
+                          <td className="vtu-td font-bold" style={{ color: '#111' }}>{formatCurrency(order.amount)}</td>
+                          <td className="vtu-td">
+                            <span style={{ color: '#059669', background: '#ecfdf5', padding: '2px 6px', borderRadius: '4px', fontSize: '11px', fontWeight: '800' }}>
+                              +{formatCurrency(order.agentCommission || 0)}
+                            </span>
+                          </td>
+                          <td className="vtu-td">
+                            <span className="vtu-badge" style={paymentStyle}>{order.paymentStatus || 'pending'}</span>
+                          </td>
+                          <td className="vtu-td">
+                            <span className="vtu-badge" style={deliveryStyle}>{order.status}</span>
+                          </td>
+                          <td className="vtu-td text-right">
+                            <button
+                              onClick={() => {
+                                setSelectedOrder(order);
+                                setShowDetails(true);
+                              }}
+                              style={{ padding: '8px', borderRadius: '8px', border: '1.5px solid #e4e4de', background: '#fff', cursor: 'pointer' }}
+                            >
+                              <Eye size={16} style={{ color: '#666' }} />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
             )}
-
-            {/* Pagination Container */}
+            
             {!loading && totalPages > 1 && (
-              <div className="p-8 bg-slate-50/30 border-t border-slate-100">
+              <div style={{ padding: '16px', borderTop: '1.5px solid #f0f0f0', background: '#fafaf7' }}>
                 <Pagination
                   currentPage={currentPage}
                   totalPages={totalPages}
@@ -350,68 +509,66 @@ export default function AgentOrders() {
         <Modal
           isOpen={showDetails}
           onClose={() => setShowDetails(false)}
-          title="Order Details"
-          icon={<ShoppingBag size={20} className="text-primary-600" />}
+          title="Detailed Order Summary"
+          icon={<ShoppingBag size={20} style={{ color: '#111' }} />}
           maxWidth="max-w-lg"
         >
           {selectedOrder && (
-            <div className="space-y-6">
-              <div className="flex justify-between items-start">
+            <div style={{ fontFamily: 'DM Sans, sans-serif' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
                 <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Order ID</p>
-                  <p className="font-mono text-sm font-bold text-slate-900 uppercase">#{selectedOrder._id}</p>
+                  <p style={{ fontSize: '10px', fontWeight: '800', color: '#999', textTransform: 'uppercase', marginBottom: '4px' }}>Reference</p>
+                  <p style={{ fontSize: '14px', fontWeight: '800', color: '#111', fontFamily: 'monospace' }}>#{selectedOrder._id?.toUpperCase()}</p>
                 </div>
-                <div className="text-right">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Status</p>
-                  <div className="flex flex-col gap-2">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${getPaymentStatusColor(selectedOrder.paymentStatus || 'pending')}`}>
-                      Payment: {selectedOrder.paymentStatus || 'pending'}
-                    </span>
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${getOrderStatusColor(selectedOrder.status)}`}>
-                      Delivery: {selectedOrder.status}
-                    </span>
-                  </div>
+                <div style={{ textAlign: 'right' }}>
+                  <p style={{ fontSize: '10px', fontWeight: '800', color: '#999', textTransform: 'uppercase', marginBottom: '4px' }}>Fulfillment</p>
+                  <span className="vtu-badge" style={getOrderStatusColor(selectedOrder.status)}>
+                    {selectedOrder.status}
+                  </span>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Customer Details</p>
-                  <p className="font-bold text-slate-900">{selectedOrder.phoneNumber}</p>
-                  <p className="text-xs font-bold text-slate-600 uppercase mt-1">{selectedOrder.network}</p>
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div style={{ background: '#fafaf7', padding: '16px', borderRadius: '12px', border: '1.5px solid #e4e4de' }}>
+                  <p style={{ fontSize: '10px', fontWeight: '800', color: '#999', textTransform: 'uppercase', marginBottom: '4px' }}>Customer</p>
+                  <p style={{ fontSize: '14px', fontWeight: '800', color: '#111' }}>{selectedOrder.phoneNumber}</p>
+                  <p style={{ fontSize: '11px', color: '#666', marginTop: '2px', fontWeight: '700' }}>{selectedOrder.network}</p>
                 </div>
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{isCheckerOrder(selectedOrder) ? 'Checker Plan' : 'Data Package'}</p>
-                  <p className="font-bold text-slate-900">{getOrderPlanDisplay(selectedOrder)}</p>
-                  <p className="text-xs font-bold text-slate-600 mt-1">{formatCurrency(selectedOrder.amount)}</p>
+                <div style={{ background: '#fafaf7', padding: '16px', borderRadius: '12px', border: '1.5px solid #e4e4de' }}>
+                  <p style={{ fontSize: '10px', fontWeight: '800', color: '#999', textTransform: 'uppercase', marginBottom: '4px' }}>Plan Details</p>
+                  <p style={{ fontSize: '14px', fontWeight: '800', color: '#111' }}>{getOrderPlanDisplay(selectedOrder)}</p>
+                  <p style={{ fontSize: '11px', color: '#666', marginTop: '2px' }}>{formatCurrency(selectedOrder.amount)}</p>
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <div className="flex justify-between items-center py-2 border-b border-slate-50">
-                  <span className="text-xs font-bold text-slate-500 uppercase">Purchase Date</span>
-                  <span className="text-sm font-bold text-slate-900">{formatDate(selectedOrder.createdAt)}</span>
+              <div style={{ borderTop: '1.5px solid #f0f0f0', paddingTop: '16px' }}>
+                <div className="flex justify-between items-center py-2">
+                  <span style={{ fontSize: '12px', fontWeight: '700', color: '#666' }}>Payment Status</span>
+                  <span className="vtu-badge" style={getPaymentStatusColor(selectedOrder.paymentStatus || 'pending')}>{selectedOrder.paymentStatus || 'pending'}</span>
                 </div>
-                <div className="flex justify-between items-center py-2 border-b border-slate-50">
-                  <span className="text-xs font-bold text-slate-500 uppercase">Commission Earned</span>
-                  <span className="text-sm font-black text-emerald-600">+{formatCurrency(selectedOrder.agentCommission || 0)}</span>
+                <div className="flex justify-between items-center py-2">
+                  <span style={{ fontSize: '12px', fontWeight: '700', color: '#666' }}>Store Commission</span>
+                  <span style={{ fontSize: '14px', fontWeight: '800', color: '#059669' }}>+{formatCurrency(selectedOrder.agentCommission || 0)}</span>
+                </div>
+                <div className="flex justify-between items-center py-2">
+                  <span style={{ fontSize: '12px', fontWeight: '700', color: '#666' }}>Order Date</span>
+                  <span style={{ fontSize: '12px', fontWeight: '800', color: '#111' }}>{formatDate(selectedOrder.createdAt)}</span>
                 </div>
                 {selectedOrder.transactionId && (
-                  <div className="flex justify-between items-center py-2 border-b border-slate-50">
-                    <span className="text-xs font-bold text-slate-500 uppercase">Transaction ID</span>
-                    <span className="text-sm font-mono font-bold text-slate-900 uppercase">{selectedOrder.transactionId}</span>
+                  <div className="flex justify-between items-center py-2">
+                    <span style={{ fontSize: '12px', fontWeight: '700', color: '#666' }}>Transaction ID</span>
+                    <span style={{ fontSize: '11px', fontWeight: '800', color: '#111', fontFamily: 'monospace' }}>{selectedOrder.transactionId}</span>
                   </div>
                 )}
               </div>
 
-              <div className="pt-4 flex gap-3">
-                <button
-                  onClick={() => setShowDetails(false)}
-                  className="flex-1 py-3 text-sm font-black text-slate-600 uppercase tracking-widest bg-slate-100 rounded-2xl hover:bg-slate-200 transition-all active:scale-[0.98]"
-                >
-                  Close
-                </button>
-              </div>
+              <button
+                onClick={() => setShowDetails(false)}
+                className="vtu-btn-primary"
+                style={{ width: '100%', padding: '12px', marginTop: '24px' }}
+              >
+                Close Summary
+              </button>
             </div>
           )}
         </Modal>

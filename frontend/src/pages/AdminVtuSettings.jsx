@@ -8,6 +8,257 @@ import { useSidebar } from '../hooks/useSidebar';
 import { admin as adminAPI, digimall as digimallAPI, topza as topzaAPI } from '../services/api';
 import { useSettings } from '../context/SettingsContext';
 
+const styles = `
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
+  
+  .vtu-page-container {
+    font-family: 'DM Sans', sans-serif;
+    display: flex;
+    min-height: 100vh;
+    background-color: #f5f5f0;
+  }
+
+  .vtu-content {
+    flex: 1;
+    padding: 24px 16px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .vtu-main-card {
+    background: #fff;
+    border: 1.5px solid #e4e4de;
+    border-radius: 14px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.10);
+    width: 100%;
+    max-width: 1000px;
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+
+  .vtu-heading-section {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
+    width: 100%;
+    max-width: 1000px;
+  }
+
+  .vtu-icon-box {
+    width: 46px;
+    height: 46px;
+    background: #111;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #f0a500;
+    flex-shrink: 0;
+  }
+
+  .vtu-h2 {
+    font-size: 26px;
+    font-weight: 800;
+    color: #111;
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+
+  .vtu-p {
+    font-size: 14px;
+    color: #666;
+    margin: 4px 0 0 0;
+  }
+
+  .vtu-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    width: 100%;
+    margin-bottom: 24px;
+  }
+
+  @media (min-width: 768px) {
+    .vtu-stats-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+  }
+
+  .vtu-stat-card {
+    background: #fff;
+    border: 1.5px solid #e4e4de;
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .vtu-stat-label {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .vtu-stat-value {
+    font-size: 20px;
+    font-weight: 800;
+    color: #111;
+  }
+
+  .vtu-input {
+    background: #fafaf7;
+    border: 1.5px solid #e0e0d8;
+    border-radius: 7px;
+    padding: 10px 14px;
+    font-size: 14px;
+    width: 100%;
+    color: #111;
+    transition: all 0.2s;
+  }
+
+  .vtu-input:focus {
+    border-color: #111;
+    box-shadow: 0 0 0 3px rgba(17,17,17,0.07);
+    background: #fff;
+    outline: none;
+  }
+
+  .vtu-btn-primary {
+    background: #111;
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .vtu-btn-primary:hover:not(:disabled) {
+    background: #333;
+    transform: translateY(-1px);
+  }
+
+  .vtu-btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  @media (max-width: 640px) {
+    .vtu-btn-primary {
+      padding: 6px 12px;
+      font-size: 12px;
+      gap: 6px;
+    }
+    .vtu-btn-primary svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  .vtu-banner-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  @media (max-width: 640px) {
+    .vtu-banner-flex {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .vtu-h2 {
+      font-size: 20px;
+    }
+    .vtu-p {
+      font-size: 12px;
+    }
+  }
+
+  .vtu-table-container {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1.5px solid #e4e4de;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .vtu-table-container::-webkit-scrollbar {
+    display: none;
+  }
+
+  .vtu-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  .vtu-th {
+    background: #fafaf7;
+    text-align: left;
+    padding: 12px 16px;
+    font-weight: 700;
+    color: #333;
+    border-bottom: 1.5px solid #e4e4de;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  .vtu-td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    color: #444;
+  }
+
+  .vtu-badge {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .vtu-provider-pill {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1.5px solid #e4e4de;
+    background: #fff;
+    color: #666;
+  }
+
+  .vtu-provider-pill.active {
+    background: #111;
+    color: #fff;
+    border-color: #111;
+  }
+`;
+
 export default function AdminVtuSettings() {
   const TOPZA_WALLET_URL = 'https://www.topzagh.com/wallet';
   const { sidebarOpen, closeSidebar } = useSidebar();
@@ -22,7 +273,6 @@ export default function AdminVtuSettings() {
   const [networkCatalog, setNetworkCatalog] = useState([]);
   const [newNetwork, setNewNetwork] = useState({ name: '', slug: '', logoUrl: '', isActive: true });
 
-  // DigiMall-specific network state (fetched from API/DB � name+id are readonly, admin sets logo)
   const [DigiMallNetworks, setDigiMallNetworks] = useState([]);
   const [DigiMallNetworksLoading, setDigiMallNetworksLoading] = useState(false);
   const [topzaNetworks, setTopzaNetworks] = useState([]);
@@ -45,6 +295,7 @@ export default function AdminVtuSettings() {
       toast.success(msg, { duration: 3000 });
     }
   };
+
   const activeProviderDisplayName = activeProvider === 'digimall'
     ? 'DigiMall'
     : (activeProvider === 'topza' ? 'Topza' : 'XpresData');
@@ -52,17 +303,14 @@ export default function AdminVtuSettings() {
   const formatPrice2dpNoRound = (value) => {
     const numeric = Number(value);
     if (!Number.isFinite(numeric)) return '0.00';
-
     const sign = numeric < 0 ? '-' : '';
     let absString = Math.abs(numeric).toString();
-
     if (absString.includes('e')) {
       absString = Math.abs(numeric).toLocaleString('en-US', {
         useGrouping: false,
         maximumFractionDigits: 20,
       });
     }
-
     const [whole, fraction = ''] = absString.split('.');
     return `${sign}${whole}.${(fraction + '00').slice(0, 2)}`;
   };
@@ -74,7 +322,6 @@ export default function AdminVtuSettings() {
         setSystemSettings(response.settings);
         const catalog = response.settings?.networkCatalog || [];
         setNetworkCatalog(catalog);
-        // If DigiMall is active, pass the fresh catalog so logo URLs merge correctly
         if ((response.settings?.vtuProvider || 'xpresdata') === 'digimall') {
           fetchDigiMallNetworks(catalog);
         }
@@ -113,9 +360,8 @@ export default function AdminVtuSettings() {
     }
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchSystemSettings(); }, []);
-  useEffect(() => { fetchWalletSettings(activeProvider); }, [activeProvider]); // eslint-disable-line
+  useEffect(() => { fetchWalletSettings(activeProvider); }, [activeProvider]);
   useEffect(() => {
     if (globalSettings) {
       setSystemSettings(globalSettings);
@@ -123,7 +369,6 @@ export default function AdminVtuSettings() {
     }
   }, [globalSettings]);
 
-  // Fetch DigiMall networks whenever DigiMall becomes active
   useEffect(() => {
     if (activeProvider === 'digimall') {
       fetchDigiMallNetworks();
@@ -132,13 +377,12 @@ export default function AdminVtuSettings() {
       fetchTopzaNetworks();
       fetchTopzaTransactions();
     }
-  }, [activeProvider]); // eslint-disable-line
+  }, [activeProvider]);
 
   const fetchDigiMallTransactions = async () => {
     try {
       setTransactionsLoading(true);
       setTransactionsError('');
-      // DigiMall currently has no admin transactions endpoint in this app.
       setTransactions([]);
     } catch (err) {
       setTransactionsError(err?.message || 'Failed to fetch transactions');
@@ -170,10 +414,8 @@ export default function AdminVtuSettings() {
       setPollingTopza(false);
       return undefined;
     }
-
     let cancelled = false;
     setPollingTopza(true);
-
     const pollTopza = async () => {
       try {
         await Promise.all([
@@ -181,21 +423,19 @@ export default function AdminVtuSettings() {
           fetchTopzaTransactions({ silent: true }),
         ]);
       } catch {
-        // Ignore background polling errors; existing UI error handling remains in fetch helpers.
+        // Ignore background polling errors
       }
     };
-
     const intervalId = setInterval(async () => {
       if (cancelled) return;
       await pollTopza();
     }, 20000);
-
     return () => {
       cancelled = true;
       clearInterval(intervalId);
       setPollingTopza(false);
     };
-  }, [activeProvider]); // eslint-disable-line
+  }, [activeProvider]);
 
   const handleTopzaRefresh = async () => {
     try {
@@ -223,7 +463,6 @@ export default function AdminVtuSettings() {
       amount: Number(txn.amount || 0),
       createdAt: txn.createdAt || txn.created_at || txn.lastUpdated || txn.date || txn.timestamp || null,
     };
-
     setSelectedTransaction(normalized);
     setShowOrderDetailsModal(true);
   };
@@ -236,19 +475,15 @@ export default function AdminVtuSettings() {
 
   const confirmRefund = async () => {
     if (!selectedTransaction) return;
-
     try {
       setRefundLoading(true);
       const response = await adminAPI.refundOrder(
         selectedTransaction.id || selectedTransaction._id,
         'Refund processed by admin from VTU settings'
       );
-
       if (response.success) {
         setShowRefundConfirm(false);
         showMessage('Order refunded successfully', false);
-        
-        // Update the transaction with the new order data to reflect isRefunded status
         if (response.order) {
           const updatedTransaction = {
             ...selectedTransaction,
@@ -258,8 +493,6 @@ export default function AdminVtuSettings() {
           setSelectedTransaction(updatedTransaction);
           setShowOrderDetailsModal(true);
         }
-        
-        // Refresh transactions to update the list
         if (activeProvider === 'topza') {
           await fetchTopzaTransactions();
         }
@@ -278,7 +511,6 @@ export default function AdminVtuSettings() {
       setDigiMallNetworksLoading(true);
       const response = await digimallAPI.getNetworks();
       if (response.success && Array.isArray(response.networks)) {
-        // Merge with saved logo URLs from networkCatalog (match by slug = String(networkId))
         const existing = catalog || networkCatalog;
         const merged = response.networks
           .filter((n) => n && n.networkId !== undefined && n.name !== undefined)
@@ -385,7 +617,6 @@ export default function AdminVtuSettings() {
     }
   };
 
-  // DigiMall-specific: admin only sets logo URL; name/id come from the provider
   const handleDigiMallLogoChange = (networkId, logoUrl) => {
     setDigiMallNetworks((prev) => prev.map((n) => n.networkId === networkId ? { ...n, logoUrl } : n));
   };
@@ -407,7 +638,6 @@ export default function AdminVtuSettings() {
         return;
       }
       await adminAPI.updateSystemSettings({ networkCatalog: payload });
-      // Reflect saved logos back in the global networkCatalog so XpresData restoring works later
       setNetworkCatalog(payload);
     } catch (err) {
       setError(err?.message || 'Failed to save network logos');
@@ -446,441 +676,333 @@ export default function AdminVtuSettings() {
   };
 
   return (
-    <div className="flex h-screen">
+    <div className="vtu-page-container">
+      <style>{styles}</style>
       <AdminSidebar isOpen={sidebarOpen} onClose={closeSidebar} />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex-1 overflow-auto bg-gradient-to-br from-slate-50 via-white to-blue-50 p-4 sm:p-6">
-          <div className="max-w-7xl mx-auto">
-            {/* Header */}
-            <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <h1 className="text-3xl font-bold text-slate-900 mb-2">VTU Service Settings</h1>
-                <p className="text-slate-600">Manage your VTU providers and view wallet activity</p>
+      <div className="vtu-content">
+        <div className="vtu-heading-section">
+          <div className="vtu-icon-box">
+            <Settings size={24} />
+          </div>
+          <div style={{ flex: 1 }}>
+            <h2 className="vtu-h2">VTU Service Settings</h2>
+            <p className="vtu-p">Manage your VTU providers and view wallet activity</p>
+          </div>
+          <div className="flex gap-2">
+            {['topza'].map((p) => (
+              <button
+                key={p}
+                disabled={switchingProvider}
+                onClick={() => handleProviderSwitch(p)}
+                className={`vtu-provider-pill ${activeProvider === p ? 'active' : ''}`}
+              >
+                {p === 'digimall' ? 'DigiMall' : (p === 'topza' ? 'Topza' : 'XpresData')}
+                {activeProvider === p && <span style={{ marginLeft: '4px', fontSize: '10px', opacity: 0.8 }}>(ACTIVE)</span>}
+              </button>
+            ))}
+            {switchingProvider && <RefreshCw size={16} className="animate-spin" style={{ margin: 'auto 0' }} />}
+          </div>
+        </div>
+
+        {error && (
+          <div className="vtu-main-card" style={{ borderColor: '#fecaca', background: '#fff5f5', color: '#b91c1c', display: 'flex', alignItems: 'center', gap: '12px', padding: '16px' }}>
+            <AlertCircle size={20} />
+            <span style={{ flex: 1 }}>{error}</span>
+            <X size={16} style={{ cursor: 'pointer' }} onClick={() => setError('')} />
+          </div>
+        )}
+
+        {loading ? (
+          <div className="vtu-main-card" style={{ textAlign: 'center', padding: '60px' }}>
+            <RefreshCw size={40} className="animate-spin" style={{ margin: '0 auto 16px', color: '#f0a500' }} />
+            <p className="vtu-p">Loading wallet settings...</p>
+          </div>
+        ) : (
+          <>
+            {/* Stats Overview */}
+            <div className="vtu-stats-grid">
+              <div className="vtu-stat-card">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div>
+                    <p className="vtu-stat-label">Wallet Balance</p>
+                    <p className="vtu-stat-value">
+                      {walletData?.balance ? `GHS ${formatCurrencyAbbreviated(walletData.balance)}` : 'GHS 0.00'}
+                    </p>
+                  </div>
+                  <DollarSign size={20} style={{ color: '#f0a500' }} />
+                </div>
               </div>
-              {/* Provider Toggle */}
-              <div className="bg-white p-2 rounded-2xl border-2 border-slate-200 flex items-center gap-1">
-                <Settings className="text-slate-400 mx-2" size={18} />
-                {/* XpresData and DigiMall disabled — Topza is the sole active provider */}
-                {['topza'].map((p) => (
-                  <button
-                    key={p}
-                    disabled={switchingProvider}
-                    onClick={() => handleProviderSwitch(p)}
-                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeProvider === p ? 'bg-blue-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100'}`}
-                  >
-                    {p === 'digimall' ? 'DigiMall' : (p === 'topza' ? 'Topza' : 'XpresData')}
-                    {activeProvider === p && <span className="ml-1 text-[10px] font-black uppercase opacity-80">(Active)</span>}
-                  </button>
-                ))}
-                {switchingProvider && <RefreshCw size={16} className="animate-spin text-blue-600 ml-1" />}
+
+              {walletData?.lastSync && (
+                <div className="vtu-stat-card">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <p className="vtu-stat-label">Last Sync Date</p>
+                      <p className="vtu-stat-value">{formatDate(walletData.lastSync)}</p>
+                      <p style={{ fontSize: '10px', color: '#999' }}>{formatTime(walletData.lastSync)}</p>
+                    </div>
+                    <Clock size={20} style={{ color: '#f0a500' }} />
+                  </div>
+                </div>
+              )}
+
+              <div className="vtu-stat-card">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div>
+                    <p className="vtu-stat-label">Active Provider</p>
+                    <p className="vtu-stat-value" style={{ textTransform: 'capitalize' }}>{activeProvider}</p>
+                  </div>
+                  <Activity size={20} style={{ color: '#f0a500' }} />
+                </div>
+              </div>
+
+              <div className="vtu-stat-card">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div>
+                    <p className="vtu-stat-label">Sync Status</p>
+                    <p className="vtu-stat-value" style={{ color: '#059669', fontSize: '16px' }}>Operational</p>
+                  </div>
+                  <CheckCircle size={20} style={{ color: '#059669' }} />
+                </div>
               </div>
             </div>
 
-            {/* Error */}
-            {error && (
-              <div className="mb-6 p-4 bg-white border-2 border-red-300 rounded-2xl text-red-700 flex items-start gap-3">
-                <AlertCircle size={20} className="flex-shrink-0 mt-0.5" />
-                <span>{error}</span>
-                <button onClick={() => setError('')} className="ml-auto"><X size={16} /></button>
-              </div>
-            )}
-
-            {loading ? (
-              <div className="flex justify-center py-16">
-                <div className="text-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                  <p className="text-slate-600">Loading wallet settings...</p>
+            {/* Provider Specific Banner Actions */}
+            <div className="vtu-main-card" style={{ 
+              background: 'linear-gradient(135deg, #111111 0%, #1a1a1a 100%)', 
+              color: '#fff', 
+              border: 'none',
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              <div style={{ 
+                position: 'absolute', 
+                top: '-20px', 
+                right: '-20px', 
+                width: '100px', 
+                height: '100px', 
+                background: 'rgba(240, 165, 0, 0.05)', 
+                borderRadius: '50%', 
+                blur: '40px' 
+              }}></div>
+              
+              <div className="vtu-banner-flex">
+                <div>
+                  <h3 style={{ fontSize: '20px', fontWeight: '800', margin: 0, color: '#fff', letterSpacing: '-0.01em' }}>
+                    {activeProviderDisplayName} Integration
+                  </h3>
+                  <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', marginTop: '6px', fontWeight: '500' }}>
+                    Real-time connection with <span style={{ color: '#f0a500' }}>{activeProviderDisplayName}</span> is active and healthy.
+                  </p>
+                </div>
+                <div className="flex gap-3">
+                  {activeProvider === 'topza' && (
+                    <a
+                      href={TOPZA_WALLET_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="vtu-btn-primary"
+                      style={{ 
+                        background: '#f0a500', 
+                        color: '#111', 
+                        boxShadow: '0 4px 15px rgba(240, 165, 0, 0.2)'
+                      }}
+                    >
+                      <Wallet size={18} />
+                      Top Up Wallet
+                    </a>
+                  )}
+                  <button
+                    onClick={handleTopzaRefresh}
+                    disabled={syncing || transactionsLoading}
+                    className="vtu-btn-primary"
+                    style={{ 
+                      background: 'rgba(255,255,255,0.08)', 
+                      border: '1.5px solid rgba(255,255,255,0.15)'
+                    }}
+                  >
+                    <RefreshCw size={18} className={(syncing || transactionsLoading) ? 'animate-spin' : ''} />
+                    Refresh Stats
+                  </button>
                 </div>
               </div>
-            ) : (
-              <>
-                {/* Provider Banner */}
-                {activeProvider === 'xpresdata' ? (
-                  <div className="mb-8 bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
-                    <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-white/10 rounded-full blur-3xl"></div>
-                    <div className="relative flex flex-col sm:flex-row items-center gap-6">
-                      <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/30">
-                        <Activity className="w-8 h-8 text-white" />
-                      </div>
-                      <div className="text-center sm:text-left">
-                        <h2 className="text-2xl font-bold mb-2">XpresData Integration Active</h2>
-                        <p className="text-blue-100 max-w-2xl">
-                          Your system is currently using <strong>XpresData</strong> for VTU services.
-                          XpresData does not expose a real-time wallet balance endpoint.
-                          Use the toggle above to switch to <strong>DigiMall</strong>.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ) : activeProvider === 'digimall' ? (
-                  <div className="mb-8 bg-gradient-to-r from-emerald-600 to-teal-700 rounded-2xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
-                    <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-white/10 rounded-full blur-3xl"></div>
-                    <div className="relative flex flex-col sm:flex-row items-center gap-6">
-                      <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/30">
-                        <Activity className="w-8 h-8 text-white" />
-                      </div>
-                      <div className="text-center sm:text-left flex-1">
-                        <h2 className="text-2xl font-bold mb-2">DigiMall Integration Active</h2>
-                        {walletData ? (
-                          <div className="grid grid-cols-2 gap-4 mt-3">
-                            <div className="bg-white/10 rounded-xl p-3 backdrop-blur-sm">
-                              <p className="text-emerald-100 text-xs font-bold uppercase tracking-wider">Console Balance</p>
-                              <p className="text-2xl font-black mt-1">
-                                {formatCurrencyAbbreviated(typeof walletData.balance === 'number' ? walletData.balance : 0)}
-                              </p>
-                            </div>
-                            <div className="bg-white/10 rounded-xl p-3 backdrop-blur-sm">
-                              <p className="text-emerald-100 text-xs font-bold uppercase tracking-wider">Normal Balance</p>
-                              <p className="text-2xl font-black mt-1">
-                                {formatCurrencyAbbreviated(typeof walletData.normalBalance === 'number' ? walletData.normalBalance : 0)}
-                              </p>
-                            </div>
-                            {walletData.lastSync && (
-                              <div className="col-span-2 flex items-center gap-2">
-                                <CheckCircle size={14} className="text-emerald-200" />
-                                <span className="text-emerald-100 text-xs">Last synced: {formatDate(walletData.lastSync)} {formatTime(walletData.lastSync)}</span>
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <p className="text-emerald-100">Your system is using <strong>DigiMall</strong> for VTU services.</p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="mb-8 bg-gradient-to-r from-orange-600 to-amber-700 rounded-2xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
-                    <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-white/10 rounded-full blur-3xl"></div>
-                    <div className="relative flex flex-col sm:flex-row items-center gap-6">
-                      <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/30">
-                        <Activity className="w-8 h-8 text-white" />
-                      </div>
-                      <div className="text-center sm:text-left flex-1">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2">
-                          <h2 className="text-2xl font-bold">Topza Integration Active</h2>
-                          <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2">
-                            <a
-                              href={TOPZA_WALLET_URL}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-white/15 hover:bg-white/25 border border-white/30 text-white text-sm font-semibold transition-all"
-                            >
-                              <Wallet size={14} />
-                              Top Up Wallet
-                            </a>
-                            <button
-                              onClick={handleTopzaRefresh}
-                              disabled={syncing || transactionsLoading}
-                              className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-white/20 hover:bg-white/30 border border-white/30 text-white text-sm font-semibold transition-all disabled:opacity-60"
-                            >
-                              <RefreshCw size={14} className={(syncing || transactionsLoading) ? 'animate-spin' : ''} />
-                              {(syncing || transactionsLoading) ? 'Refreshing...' : 'Refresh now'}
-                            </button>
-                          </div>
-                        </div>
-                        {walletData ? (
-                          <div className="grid grid-cols-1 gap-4 mt-3">
-                            <div className="bg-white/10 rounded-xl p-3 backdrop-blur-sm">
-                              <p className="text-amber-100 text-xs font-bold uppercase tracking-wider">Wallet Balance</p>
-                              <p className="text-2xl font-black mt-1">
-                                {formatCurrencyAbbreviated(typeof walletData.balance === 'number' ? walletData.balance : 0)}
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-2 text-xs text-amber-100">
-                              <RefreshCw size={13} className={pollingTopza ? 'animate-spin' : ''} />
-                              Live updates every 20s (balance + transactions)
-                            </div>
-                            {walletData.lastSync && (
-                              <div className="flex items-center gap-2">
-                                <CheckCircle size={14} className="text-amber-200" />
-                                <span className="text-amber-100 text-xs">Last synced: {formatDate(walletData.lastSync)} {formatTime(walletData.lastSync)}</span>
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <p className="text-amber-100">Your system is using <strong>Topza</strong> for VTU services.</p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
+            </div>
 
-                {/* Balance stats (only providers with a supported balance endpoint) */}
-                {(activeProvider === 'digimall' || activeProvider === 'topza') && walletData && typeof walletData.balance === 'number' && (
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                    <div className="bg-white rounded-2xl p-4 sm:p-6 border-2 border-slate-200 hover:shadow-lg transition-all">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-slate-600 text-sm font-medium">Balance</p>
-                            <p className="text-3xl font-bold text-blue-600 mt-2">{formatCurrencyAbbreviated(walletData.balance)}</p>
-                        </div>
-                        <DollarSign className="w-12 h-12 text-blue-100" />
-                      </div>
-                    </div>
-                    {walletData.lastSync && (
-                      <div className="bg-white rounded-2xl p-4 sm:p-6 border-2 border-slate-200 hover:shadow-lg transition-all">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-slate-600 text-sm font-medium">Last Sync</p>
-                            <p className="text-2xl font-bold text-slate-900 mt-2">{formatDate(walletData.lastSync)}</p>
-                            <p className="text-xs text-slate-500 mt-1">{formatTime(walletData.lastSync)}</p>
-                          </div>
-                          <CheckCircle className="w-12 h-12 text-green-100" />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
+            {/* Network Catalog Section */}
+            <div className="vtu-main-card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                <div>
+                  <h3 style={{ fontSize: '18px', fontWeight: '800', margin: 0 }}>Network Catalog</h3>
+                  <p className="vtu-p">Manage display logos for available networks</p>
+                </div>
+                <button
+                  onClick={activeProvider === 'digimall' ? handleSaveDigiMallNetworks : (activeProvider === 'topza' ? handleSaveTopzaNetworks : handleSaveNetworks)}
+                  disabled={updatingSettings}
+                  className="vtu-btn-primary"
+                >
+                  {updatingSettings ? <RefreshCw size={16} className="animate-spin" /> : <CheckCircle size={16} />}
+                  {updatingSettings ? 'Saving...' : 'Save Catalog'}
+                </button>
+              </div>
 
-                {/* Network Catalog */}
-                <div className="bg-white rounded-2xl p-4 sm:p-6 border-2 border-slate-200 hover:shadow-lg transition-all mb-6 sm:mb-8">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-                    <div>
-                      <h2 className="text-lg font-semibold text-slate-900">Network Catalog</h2>
-                      <p className="text-sm text-slate-500">
-                        {(activeProvider === 'digimall' || activeProvider === 'topza')
-                          ? `Networks are fetched from ${activeProvider === 'topza' ? 'Topza' : 'DigiMall'}. Set a logo URL for each network.`
-                          : 'Set network name, slug/id, and logo URL for public display.'}
-                      </p>
-                    </div>
-                    <button
-                      onClick={activeProvider === 'digimall'
-                        ? handleSaveDigiMallNetworks
-                        : (activeProvider === 'topza' ? handleSaveTopzaNetworks : handleSaveNetworks)}
-                      disabled={updatingSettings}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-all disabled:opacity-60 flex items-center gap-2"
-                    >
-                      {updatingSettings && <RefreshCw size={16} className="animate-spin" />}
-                      {updatingSettings ? 'Saving...' : 'Save Catalog'}
-                    </button>
-                  </div>
-
-                  {(activeProvider === 'digimall' || activeProvider === 'topza') ? (
-                    // -- Provider-fetched networks: only logo URL is editable --
-                    (activeProvider === 'digimall' ? DigiMallNetworksLoading : topzaNetworksLoading) ? (
-                      <div className="flex items-center gap-2 py-6 text-slate-500 text-sm">
-                        <RefreshCw size={16} className="animate-spin" /> Fetching {activeProvider === 'topza' ? 'Topza' : 'DigiMall'} networks...
-                      </div>
-                    ) : (activeProvider === 'digimall' ? DigiMallNetworks.length : topzaNetworks.length) === 0 ? (
-                      <div className="text-center py-10 text-slate-500 text-sm flex flex-col items-center gap-3">
-                        <Globe size={32} className="text-slate-300" />
-                        <p>No {activeProvider === 'topza' ? 'Topza' : 'DigiMall'} networks found. Sync plans first.</p>
-                        <a
-                          href={activeProvider === 'topza' ? '/admin/topza-plans' : '/admin/digimall-plans'}
-                          className="px-4 py-2 bg-slate-900 text-white rounded-xl text-sm font-semibold hover:bg-slate-700 transition-all"
-                        >
-                          Go to {activeProvider === 'topza' ? 'Topza' : 'DigiMall'} Plans
-                        </a>
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        {(activeProvider === 'digimall' ? DigiMallNetworks : topzaNetworks).map((net) => (
-                          <div key={net.networkId} className="grid grid-cols-1 md:grid-cols-4 gap-3 items-center p-3 border border-slate-200 rounded-xl bg-slate-50">
-                            {/* networkId � readonly */}
-                            <div className="px-3 py-2 rounded-lg border border-slate-100 bg-white text-xs font-bold text-slate-400 select-none">
-                              ID: {net.networkId}
-                            </div>
-                            {/* name � readonly */}
-                            <div className="px-3 py-2 rounded-lg border border-slate-100 bg-white text-sm font-semibold text-slate-800 select-none">
-                              {net.name}
-                            </div>
-                            {/* logo URL input */}
+              {(activeProvider === 'digimall' ? DigiMallNetworksLoading : topzaNetworksLoading) ? (
+                <div style={{ textAlign: 'center', padding: '40px' }}>
+                  <RefreshCw size={24} className="animate-spin" style={{ margin: '0 auto 12px', color: '#999' }} />
+                  <p style={{ fontSize: '13px', color: '#999' }}>Fetching networks...</p>
+                </div>
+              ) : (
+                <div className="vtu-table-container">
+                  <table className="vtu-table">
+                    <thead>
+                      <tr>
+                        <th className="vtu-th">Network Name</th>
+                        <th className="vtu-th">Slug/Code</th>
+                        <th className="vtu-th">Logo URL</th>
+                        <th className="vtu-th">Preview</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(activeProvider === 'digimall' ? DigiMallNetworks : (activeProvider === 'topza' ? topzaNetworks : networkCatalog)).map((n, idx) => (
+                        <tr key={n.networkId || n.code || idx}>
+                          <td className="vtu-td" style={{ fontWeight: '700' }}>{n.name}</td>
+                          <td className="vtu-td font-mono" style={{ fontSize: '12px' }}>{n.slug || n.code || n.networkId}</td>
+                          <td className="vtu-td">
                             <input
-                              className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm"
-                              placeholder="Logo URL"
-                              value={net.logoUrl || ''}
-                              onChange={(e) => (activeProvider === 'digimall'
-                                ? handleDigiMallLogoChange(net.networkId, e.target.value)
-                                : handleTopzaLogoChange(net.networkId, e.target.value))}
+                              type="text"
+                              value={n.logoUrl || ''}
+                              onChange={(e) => {
+                                if (activeProvider === 'digimall') handleDigiMallLogoChange(n.networkId, e.target.value);
+                                else if (activeProvider === 'topza') handleTopzaLogoChange(n.networkId, e.target.value);
+                                else handleNetworkChange(idx, 'logoUrl', e.target.value);
+                              }}
+                              placeholder="https://example.com/logo.png"
+                              className="vtu-input"
+                              style={{ height: '36px' }}
                             />
-                            {/* logo preview */}
-                            <div className="flex items-center gap-2">
-                              {net.logoUrl ? (
-                                <img src={net.logoUrl} alt={net.name} className="w-10 h-10 object-contain rounded border border-slate-200 bg-white" />
-                              ) : (
-                                <div className="w-10 h-10 rounded border border-dashed border-slate-300 bg-white flex items-center justify-center">
-                                  <Globe size={16} className="text-slate-300" />
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )
-                  ) : (
-                    // -- XpresData: manual catalog --
-                    <div className="space-y-3">
-                      {networkCatalog.map((net, idx) => (
-                        <div key={`${net.slug || net.name || idx}-${idx}`} className="grid grid-cols-1 md:grid-cols-6 gap-3 items-center p-3 border border-slate-200 rounded-xl bg-slate-50">
-                          <input className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm" placeholder="Network name" value={net.name || ''} onChange={(e) => handleNetworkChange(idx, 'name', e.target.value)} />
-                          <input className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm" placeholder="Slug / ID" value={(net.slug && net.slug !== 'undefined') ? net.slug : ''} onChange={(e) => handleNetworkChange(idx, 'slug', e.target.value)} />
-                          <input className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm md:col-span-2" placeholder="Logo URL" value={net.logoUrl || ''} onChange={(e) => handleNetworkChange(idx, 'logoUrl', e.target.value)} />
-                          <div className="flex items-center justify-center md:justify-start">
-                            {net.logoUrl ? (
-                              <img src={net.logoUrl} alt={net.name || 'network'} className="w-10 h-10 object-contain rounded border border-slate-200 bg-white" />
+                          </td>
+                          <td className="vtu-td">
+                            {n.logoUrl ? (
+                              <img src={n.logoUrl} alt={n.name} style={{ width: '32px', height: '32px', borderRadius: '4px', objectFit: 'contain', background: '#f9f9f9', padding: '2px' }} />
                             ) : (
-                              <div className="w-10 h-10 rounded border border-dashed border-slate-300 bg-white flex items-center justify-center text-[10px] text-slate-400">N/A</div>
+                              <div style={{ width: '32px', height: '32px', borderRadius: '4px', background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyCenter: 'center', color: '#ccc' }}>
+                                <Globe size={16} />
+                              </div>
                             )}
-                          </div>
-                          <div className="flex items-center gap-2 justify-end">
-                            <label className="flex items-center gap-2 text-sm text-slate-600">
-                              <input type="checkbox" checked={net.isActive !== false} onChange={(e) => handleNetworkChange(idx, 'isActive', e.target.checked)} />
-                              Active
-                            </label>
-                            <button onClick={() => handleRemoveNetwork(idx)} className="text-rose-600 hover:text-rose-700 text-sm font-semibold">Remove</button>
-                          </div>
-                        </div>
+                          </td>
+                        </tr>
                       ))}
-                      <div className="grid grid-cols-1 md:grid-cols-5 gap-3 items-center p-3 border border-dashed border-slate-300 rounded-xl bg-white">
-                        <input className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm" placeholder="Network name" value={newNetwork.name} onChange={(e) => setNewNetwork({ ...newNetwork, name: e.target.value })} />
-                        <input className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm" placeholder="Slug / ID" value={newNetwork.slug} onChange={(e) => setNewNetwork({ ...newNetwork, slug: e.target.value })} />
-                        <input className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm md:col-span-2" placeholder="Logo URL" value={newNetwork.logoUrl} onChange={(e) => setNewNetwork({ ...newNetwork, logoUrl: e.target.value })} />
-                        <div className="flex items-center justify-end">
-                          <button onClick={handleAddNetwork} className="px-3 py-2 bg-slate-900 text-white rounded-lg text-sm font-semibold hover:bg-slate-800">Add Network</button>
-                        </div>
-                      </div>
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* Transactions Section */}
+            {(activeProvider === 'topza' || activeProvider === 'digimall') && (
+              <div className="vtu-main-card">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                  <div>
+                    <h3 style={{ fontSize: '18px', fontWeight: '800', margin: 0 }}>Recent API Transactions</h3>
+                    <p className="vtu-p">Monitor real-time purchase activity from your provider</p>
+                  </div>
+                  {pollingTopza && (
+                    <div className="vtu-badge" style={{ background: '#ecfdf5', color: '#059669', border: '1px solid #d1fae5' }}>
+                      <RefreshCw size={10} className="animate-spin" />
+                      Live Polling
                     </div>
                   )}
                 </div>
 
-                {/* Sync */}
-                <div className="bg-white rounded-2xl p-4 sm:p-6 border-2 border-slate-200 hover:shadow-lg transition-all">
-                  <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-                    <div>
-                      <h2 className="text-lg font-semibold text-slate-900">Provider Synchronization</h2>
-                      <p className="text-sm text-slate-500">Refresh wallet data from the active provider</p>
-                    </div>
-                    <button
-                      onClick={handleSyncAll}
-                      disabled={syncing}
-                      className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2 text-sm whitespace-nowrap"
-                    >
-                      <RefreshCw size={18} className={syncing ? 'animate-spin' : ''} />
-                      {syncing ? 'Syncing...' : `Refresh ${activeProviderDisplayName} Data`}
-                    </button>
+                {transactionsLoading && transactions.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '40px' }}>
+                    <RefreshCw size={24} className="animate-spin" style={{ margin: '0 auto 12px', color: '#999' }} />
+                    <p style={{ fontSize: '13px', color: '#999' }}>Loading transactions...</p>
                   </div>
-                </div>
+                ) : transactionsError ? (
+                  <div style={{ padding: '20px', textAlign: 'center', color: '#b91c1c', background: '#fff5f5', borderRadius: '8px' }}>
+                    {transactionsError}
+                  </div>
+                ) : transactions.length === 0 ? (
+                  <div style={{ padding: '40px', textAlign: 'center', color: '#999', border: '1.5px dashed #e4e4de', borderRadius: '14px' }}>
+                    No recent transactions found
+                  </div>
+                ) : (
+                  <div className="vtu-table-container">
+                    <table className="vtu-table">
+                      <thead>
+                        <tr>
+                          <th className="vtu-th">ID</th>
+                          <th className="vtu-th">Recipient</th>
+                          <th className="vtu-th">Details</th>
+                          <th className="vtu-th">Amount</th>
+                          <th className="vtu-th">Status</th>
+                          <th className="vtu-th">Date</th>
+                          <th className="vtu-th">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {transactions.map((txn, i) => {
+                          const item = txn.order_items?.[0] || {};
+                          const providerOrder = txn.order || txn.data?.order || {};
+                          const txnId = txn.orderNumber || txn.orderId || txn.transaction_code || txn.transaction_id || txn.trx_ref || txn.id || txn.reference || providerOrder.orderNumber || providerOrder.orderId || '-';
+                          const recipient = item.beneficiary_number || txn.phoneNumber || txn.recipient_msisdn || txn.phone || txn.recipient || providerOrder.phoneNumber || '-';
+                          const network = item.network || txn.network || txn.network_name || providerOrder.network || (txn.network_id ? `Network ${txn.network_id}` : '-');
+                          const bundle = item.volume || txn.planName || providerOrder.planName || providerOrder.dataAmount || txn.dataAmount || (txn.shared_bundle ? `${(txn.shared_bundle / 1000).toFixed(1)}GB` : '-');
+                          const amount = Number.isFinite(Number(txn.amount)) ? `GHS ${formatPrice2dpNoRound(txn.amount)}` : '-';
+                          const status = item.status || txn.status || txn.transaction_status || '-';
+                          const date = txn.createdAt || txn.created_at || txn.lastUpdated || txn.date || txn.timestamp;
+                          
+                          const statusLower = String(status).toLowerCase();
+                          let badgeStyles = { background: '#f3f4f6', color: '#6b7280' };
+                          if (statusLower.includes('success') || statusLower.includes('complete')) {
+                            badgeStyles = { background: '#ecfdf5', color: '#059669', border: '1px solid #d1fae5' };
+                          } else if (statusLower.includes('fail') || statusLower.includes('error')) {
+                            badgeStyles = { background: '#fff5f5', color: '#b91c1c', border: '1px solid #fecaca' };
+                          } else if (statusLower.includes('pending') || statusLower.includes('processing')) {
+                            badgeStyles = { background: '#fffbeb', color: '#d97706', border: '1px solid #fef3c7' };
+                          }
 
-                {/* Provider Transactions */}
-                {(activeProvider === 'digimall' || activeProvider === 'topza') && (
-                  <div className="bg-white rounded-2xl border-2 border-slate-200 hover:shadow-lg transition-all mt-6 sm:mt-8 overflow-hidden">
-                    <div className="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100">
-                      <div>
-                        <h2 className="text-lg font-semibold text-slate-900">{activeProvider === 'topza' ? 'Topza Transactions' : 'DigiMall Transactions'}</h2>
-                        <p className="text-sm text-slate-500">
-                          Recent transactions fetched from the {activeProvider === 'topza' ? 'Topza' : 'DigiMall'} provider
-                        </p>
-                      </div>
-                      <button
-                        onClick={activeProvider === 'topza' ? () => fetchTopzaTransactions() : fetchDigiMallTransactions}
-                        disabled={transactionsLoading}
-                        className="px-4 py-2 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-all disabled:opacity-50 flex items-center gap-2 text-sm whitespace-nowrap"
-                      >
-                        <RefreshCw size={16} className={transactionsLoading ? 'animate-spin' : ''} />
-                        {transactionsLoading ? 'Loading...' : 'Refresh'}
-                      </button>
-                    </div>
-
-                    {transactionsError && (
-                      <div className="mx-4 sm:mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-center gap-2">
-                        <AlertCircle size={16} className="flex-shrink-0" />
-                        {transactionsError}
-                      </div>
-                    )}
-
-                    {transactionsLoading ? (
-                      <div className="flex justify-center items-center py-16 gap-3 text-slate-500">
-                        <RefreshCw size={20} className="animate-spin" />
-                        <span className="text-sm">Fetching transactions�</span>
-                      </div>
-                    ) : transactions.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center py-16 gap-3 text-slate-400">
-                        <Clock size={40} className="opacity-30" />
-                        <p className="text-sm font-medium">No transactions found</p>
-                      </div>
-                    ) : (
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                          <thead>
-                            <tr className="bg-slate-50 border-b border-slate-100">
-                              <th className="text-left px-4 sm:px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">Transaction ID</th>
-                              <th className="text-left px-4 sm:px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">Recipient</th>
-                              <th className="text-left px-4 sm:px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">Network</th>
-                              <th className="text-left px-4 sm:px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">Bundle</th>
-                              <th className="text-left px-4 sm:px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">Amount</th>
-                              <th className="text-left px-4 sm:px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">Status</th>
-                              <th className="text-left px-4 sm:px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">Date</th>
-                              <th className="text-left px-4 sm:px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">Actions</th>
+                          return (
+                            <tr key={txnId + i}>
+                              <td className="vtu-td font-mono" style={{ fontSize: '11px', color: '#999' }}>{String(txnId).slice(-8)}</td>
+                              <td className="vtu-td">
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  <Phone size={12} style={{ color: '#999' }} />
+                                  <span style={{ fontWeight: '700' }}>{recipient}</span>
+                                </div>
+                              </td>
+                              <td className="vtu-td">
+                                <div style={{ fontSize: '12px' }}>
+                                  <div style={{ fontWeight: '600' }}>{network}</div>
+                                  <div style={{ color: '#666' }}>{bundle}</div>
+                                </div>
+                              </td>
+                              <td className="vtu-td font-bold" style={{ color: '#059669' }}>{amount}</td>
+                              <td className="vtu-td">
+                                <span className="vtu-badge" style={badgeStyles}>{status}</span>
+                              </td>
+                              <td className="vtu-td" style={{ fontSize: '11px', color: '#999' }}>
+                                {date ? (isNaN(Date.parse(date)) ? date : new Date(date).toLocaleString()) : '-'}
+                              </td>
+                              <td className="vtu-td">
+                                <button
+                                  onClick={() => openTransactionDetails(txn)}
+                                  style={{ padding: '6px', borderRadius: '6px', border: '1px solid #e4e4de', background: '#fff', cursor: 'pointer' }}
+                                >
+                                  <Eye size={14} style={{ color: '#666' }} />
+                                </button>
+                              </td>
                             </tr>
-                          </thead>
-                          <tbody className="divide-y divide-slate-100">
-                            {transactions.map((txn, i) => {
-                              const item = txn.order_items?.[0] || {};
-                              const providerOrder = txn.order || txn.data?.order || {};
-                              const txnId = txn.orderNumber || txn.orderId || txn.transaction_code || txn.transaction_id || txn.trx_ref || txn.id || txn.reference || providerOrder.orderNumber || providerOrder.orderId || '-';
-                              const recipient = item.beneficiary_number || txn.phoneNumber || txn.recipient_msisdn || txn.phone || txn.recipient || providerOrder.phoneNumber || '-';
-                              const network = item.network || txn.network || txn.network_name || providerOrder.network || (txn.network_id ? `Network ${txn.network_id}` : '-');
-                              const bundle = item.volume || txn.planName || providerOrder.planName || providerOrder.dataAmount || txn.dataAmount || (txn.shared_bundle ? `${(txn.shared_bundle / 1000).toFixed(1)}GB` : '-');
-                              const amount = Number.isFinite(Number(txn.amount)) ? `GHS ${formatPrice2dpNoRound(txn.amount)}` : '-';
-                              const status = item.status || txn.status || txn.transaction_status || '-';
-                              const date = txn.createdAt || txn.created_at || txn.lastUpdated || txn.date || txn.timestamp;
-                              const statusLower = String(status).toLowerCase();
-                              const statusColor = statusLower.includes('success') || statusLower.includes('complete')
-                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                : statusLower.includes('fail') || statusLower.includes('error')
-                                ? 'bg-red-50 text-red-700 border border-red-200'
-                                : statusLower.includes('pending') || statusLower.includes('processing')
-                                ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                                : 'bg-slate-100 text-slate-600';
-                              return (
-                                <tr key={txnId + i} className="hover:bg-slate-50 transition-colors">
-                                  <td className="px-4 sm:px-6 py-3 font-mono text-xs text-slate-700 max-w-[160px] truncate">{txnId}</td>
-                                  <td className="px-4 sm:px-6 py-3">
-                                    <div className="flex items-center gap-1.5">
-                                      <Phone size={12} className="text-slate-400 flex-shrink-0" />
-                                      <span className="text-slate-700 font-medium">{recipient}</span>
-                                    </div>
-                                  </td>
-                                  <td className="px-4 sm:px-6 py-3">
-                                    <div className="flex items-center gap-1.5">
-                                      <Wifi size={12} className="text-slate-400 flex-shrink-0" />
-                                      <span className="text-slate-700">{network}</span>
-                                    </div>
-                                  </td>
-                                  <td className="px-4 sm:px-6 py-3 font-semibold text-slate-900">{bundle}</td>
-                                  <td className="px-4 sm:px-6 py-3 font-semibold text-emerald-700">{amount}</td>
-                                  <td className="px-4 sm:px-6 py-3">
-                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide ${statusColor}`}>
-                                      {status}
-                                    </span>
-                                  </td>
-                                  <td className="px-4 sm:px-6 py-3 text-slate-500 text-xs whitespace-nowrap">
-                                    {date ? (isNaN(Date.parse(date)) ? date : new Date(date).toLocaleString()) : '-'}
-                                  </td>
-                                  <td className="px-4 sm:px-6 py-3">
-                                    <button
-                                      type="button"
-                                      onClick={() => openTransactionDetails(txn)}
-                                      className="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
-                                      title="View order details"
-                                      aria-label="View order details"
-                                    >
-                                      <Eye size={14} />
-                                    </button>
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
+                          );
+                        })}
+                      </tbody>
+                    </table>
                   </div>
                 )}
-              </>
+              </div>
             )}
-          </div>
-        </div>
+          </>
+        )}
       </div>
 
       <OrderDetailsModal
@@ -893,46 +1015,39 @@ export default function AdminVtuSettings() {
         onRefund={handleRefund}
       />
 
-      {/* Refund Confirmation Modal */}
       {showRefundConfirm && selectedTransaction && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-md w-full shadow-xl">
-            <div className="p-6 border-b border-slate-200">
-              <h3 className="text-lg font-bold text-slate-900">Confirm Refund</h3>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" style={{ fontFamily: 'DM Sans, sans-serif' }}>
+          <div className="bg-white rounded-xl max-w-md w-full shadow-2xl overflow-hidden border border-slate-200">
+            <div className="p-6 border-b border-slate-100">
+              <h3 className="text-xl font-bold text-slate-900">Confirm Refund</h3>
             </div>
-            <div className="p-6 space-y-4">
-              <p className="text-slate-700">
-                Are you sure you want to refund order <span className="font-bold">{selectedTransaction.orderNumber}</span>?
+            <div className="p-6">
+              <p className="text-slate-600 mb-4">
+                Are you sure you want to refund order <span className="font-bold text-slate-900">{selectedTransaction.orderNumber}</span>?
               </p>
-              <div className="bg-slate-50 p-3 rounded-lg">
-                <p className="text-sm text-slate-600">
-                  <span className="font-semibold">Amount:</span> GHS {formatPrice2dpNoRound(selectedTransaction.amount)}
-                </p>
+              <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-slate-500">Refund Amount</span>
+                  <span className="font-bold text-emerald-700">GHS {formatPrice2dpNoRound(selectedTransaction.amount)}</span>
+                </div>
               </div>
             </div>
-            <div className="p-6 border-t border-slate-200 flex gap-3">
+            <div className="p-6 border-t border-slate-100 flex gap-3">
               <button
                 type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setShowRefundConfirm(false);
-                  setSelectedTransaction(null);
-                }}
+                onClick={() => { setShowRefundConfirm(false); setSelectedTransaction(null); }}
                 disabled={refundLoading}
-                className="flex-1 px-4 py-2 bg-slate-200 text-slate-900 rounded-lg font-semibold hover:bg-slate-300 disabled:opacity-50 transition"
+                className="flex-1 px-4 py-2.5 bg-slate-100 text-slate-700 rounded-lg font-bold hover:bg-slate-200 transition disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  confirmRefund();
-                }}
+                onClick={confirmRefund}
                 disabled={refundLoading}
-                className="flex-1 px-4 py-2 bg-amber-600 text-white rounded-lg font-semibold hover:bg-amber-700 disabled:opacity-50 transition"
+                className="flex-1 px-4 py-2.5 bg-orange-600 text-white rounded-lg font-bold hover:bg-orange-700 transition shadow-lg shadow-orange-200 disabled:opacity-50"
               >
-                {refundLoading ? 'Processing...' : 'Refund'}
+                {refundLoading ? 'Processing...' : 'Confirm Refund'}
               </button>
             </div>
           </div>
@@ -941,4 +1056,3 @@ export default function AdminVtuSettings() {
     </div>
   );
 }
-
