@@ -335,25 +335,6 @@ export default function Profile() {
                 </div>
               </div>
 
-              <div className="dash-card !bg-[#111] !border-[#111] !p-6 relative overflow-hidden group">
-                <div className="relative z-10">
-                  <div className="flex items-center gap-3 mb-4 text-[#f0a500]">
-                    <Gift size={20} />
-                    <h2 className="text-[10px] font-black uppercase tracking-widest">Earn Rewards</h2>
-                  </div>
-                  <p className="text-white text-base font-bold tracking-tight mb-4">Invite friends & get bonuses!</p>
-
-                  <button
-                    onClick={copyReferralCode}
-                    className="w-full p-3 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between hover:bg-white/10 transition-all active:scale-95"
-                  >
-                    <span className="font-mono text-[#f0a500] text-sm font-bold">{user?.referralCode}</span>
-                    {copied ? <Check size={16} className="text-emerald-500" /> : <Copy size={16} className="text-white/40" />}
-                  </button>
-                  {copied && <p className="text-center text-[9px] font-black text-emerald-500 uppercase tracking-widest mt-2">Copied to clipboard!</p>}
-                </div>
-              </div>
-
               <button
                 onClick={handleLogout}
                 className="w-full py-4 bg-rose-50 text-rose-600 border border-rose-100 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-rose-600 hover:text-white transition-all active:scale-95 flex items-center justify-center gap-2"
@@ -365,6 +346,7 @@ export default function Profile() {
 
             {/* Right Column */}
             <div className="lg:col-span-8 flex flex-col gap-6">
+              {/* ... existing personal info card ... */}
               <div className="dash-card !p-8">
                 <div className="flex items-center justify-between gap-6 mb-8 pb-6 border-b border-[#f0f0f0]">
                   <div className="flex items-center gap-4">
@@ -464,6 +446,37 @@ export default function Profile() {
                     desc="Update your security credentials"
                     onClick={() => setShowPasswordModal(true)}
                   />
+                </div>
+              </div>
+            </div>
+
+            {/* Full Width Referral Card */}
+            <div className="lg:col-span-full">
+              <div className="dash-card !bg-[#111] !border-[#111] !p-8 relative overflow-hidden group">
+                <div className="absolute right-0 top-0 w-64 h-64 bg-[#f0a500]/10 rounded-full blur-3xl -mr-32 -mt-32"></div>
+                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-4 text-[#f0a500]">
+                      <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
+                        <Gift size={22} />
+                      </div>
+                      <h2 className="text-xs font-black uppercase tracking-widest text-white/70">Referral Rewards</h2>
+                    </div>
+                    <h3 className="text-white text-2xl font-black tracking-tight mb-2">Invite friends & get bonuses!</h3>
+                    <p className="text-slate-300 text-sm max-w-lg">Share your unique referral code with friends and family. Earn exclusive commissions on every successful registration or transaction they complete.</p>
+                  </div>
+
+                  <div className="w-full md:w-80">
+                    <p className="text-[10px] font-bold text-white/50 uppercase tracking-widest mb-3 ml-1">Your Referral Code</p>
+                    <button
+                      onClick={copyReferralCode}
+                      className="w-full p-5 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-between hover:bg-white/10 transition-all active:scale-95 group/ref"
+                    >
+                      <span className="font-mono text-[#f0a500] text-xl font-black">{user?.referralCode}</span>
+                      {copied ? <CheckCircle2 size={24} className="text-emerald-500" /> : <Copy size={24} className="text-white/40 group-hover/ref:text-white transition-colors" />}
+                    </button>
+                    {copied && <p className="text-center text-[10px] font-black text-emerald-500 uppercase tracking-widest mt-3 animate-bounce">Copied to clipboard!</p>}
+                  </div>
                 </div>
               </div>
             </div>
