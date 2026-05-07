@@ -187,208 +187,280 @@ export default function AdminNotifications() {
     return date.toLocaleDateString();
   };
 
+  const styles = `
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
+    .notif-wrapper { font-family: 'DM Sans', sans-serif; background-color: #f5f5f0; min-height: 100vh; color: #333; }
+    .notif-content { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
+    .notif-heading-section { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; }
+    .notif-icon-box { width: 46px; height: 46px; background-color: #111; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #f0a500; flex-shrink: 0; }
+    .notif-title { font-size: 26px; font-weight: 800; color: #111; margin: 0; }
+    .notif-subtitle { font-size: 14px; color: #666; margin-top: 4px; }
+    
+    .notif-stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px; }
+    @media (min-width: 1024px) { .notif-stat-grid { grid-template-columns: repeat(4, 1fr); } }
+    
+    .notif-stat-card { background: #fff; border: 1.5px solid #e4e4de; border-radius: 14px; padding: 20px; box-shadow: 0 8px 40px rgba(0,0,0,0.10); }
+    .notif-stat-icon-small { width: 36px; height: 36px; background-color: rgba(240,165,0,0.15); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #f0a500; margin-bottom: 12px; }
+    .notif-stat-label { font-size: 12.5px; font-weight: 700; color: #333; letter-spacing: 0.02em; margin-bottom: 4px; }
+    .notif-stat-value { font-size: 24px; font-weight: 800; color: #111; }
+
+    .notif-card { background: #fff; border: 1.5px solid #e4e4de; border-radius: 14px; box-shadow: 0 8px 40px rgba(0,0,0,0.10); overflow: hidden; margin-bottom: 24px; }
+    .notif-controls { padding: 20px; border-bottom: 1.5px solid #e4e4de; display: flex; flex-direction: column; gap: 20px; }
+    .notif-controls-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .notif-controls-title { font-size: 18px; font-weight: 700; color: #111; margin: 0; }
+    
+    .notif-input-wrapper { position: relative; flex: 1; min-width: 200px; }
+    .notif-input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #bbb; pointer-events: none; }
+    .notif-input { background: #fafaf7; border: 1.5px solid #e0e0d8; border-radius: 7px; padding: 11px 14px 11px 42px; font-size: 14px; color: #111; width: 100%; box-sizing: border-box; transition: all 0.2s; }
+    .notif-input:focus { border-color: #111; box-shadow: 0 0 0 3px rgba(17,17,17,0.07); background: #fff; outline: none; }
+    
+    .notif-select { background: #fafaf7; border: 1.5px solid #e0e0d8; border-radius: 7px; padding: 11px 14px; font-size: 14px; color: #111; cursor: pointer; outline: none; }
+    .notif-select:focus { border-color: #111; }
+
+    .notif-btn-primary { background: #111; color: #fff; border-radius: 7px; padding: 12px 20px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; gap: 8px; }
+    .notif-btn-primary:hover { background: #222; }
+    .notif-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    .notif-btn-secondary { background: #fafaf7; border: 1.5px solid #e4e4de; border-radius: 7px; padding: 10px 16px; font-size: 13px; font-weight: 700; color: #111; cursor: pointer; transition: all 0.2s; }
+    .notif-btn-secondary:hover { background: #f0f0ed; }
+    
+    .notif-btn-danger { background: #fff5f5; border: 1.5px solid #fecaca; border-radius: 7px; padding: 10px 16px; font-size: 13px; font-weight: 700; color: #b91c1c; cursor: pointer; transition: all 0.2s; }
+    .notif-btn-danger:hover { background: #fee2e2; }
+    .notif-btn-danger:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .notif-item { padding: 20px; display: flex; gap: 16px; transition: background 0.2s; border-bottom: 1px solid #e4e4de; }
+    .notif-item:last-child { border-bottom: none; }
+    .notif-item.is-unread { background-color: #fafaf7; }
+    .notif-item:hover { background-color: #fcfcf9; }
+    
+    .notif-item-icon { flex-shrink: 0; width: 40px; height: 40px; border-radius: 8px; background: #fafaf7; display: flex; align-items: center; justify-content: center; }
+    .notif-item-content { flex: 1; min-width: 0; }
+    .notif-item-title-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
+    .notif-item-title { font-size: 14px; font-weight: 700; color: #111; margin: 0; }
+    .notif-item-msg { font-size: 13px; color: #555; line-height: 1.5; margin: 0 0 8px 0; }
+    .notif-item-desc { font-size: 12px; color: #888; margin: 0 0 10px 0; }
+    .notif-item-meta { display: flex; align-items: center; gap: 12px; font-size: 11px; font-weight: 600; color: #aaa; }
+    
+    .notif-tag { font-size: 9px; font-weight: 800; text-transform: uppercase; padding: 3px 7px; border-radius: 4px; letter-spacing: 0.03em; }
+    
+    .notif-actions { display: flex; gap: 4px; }
+    .notif-icon-btn { pading: 8px; border-radius: 6px; border: none; background: transparent; cursor: pointer; color: #666; transition: all 0.2s; }
+    .notif-icon-btn:hover { background: #eee; color: #111; }
+    .notif-icon-btn.danger:hover { background: #fff5f5; color: #b91c1c; }
+
+    .notif-pagination { padding: 20px; display: flex; align-items: center; justify-content: space-between; border-top: 1.5px solid #e4e4de; background: #fafaf7; }
+    .notif-page-info { font-size: 13px; font-weight: 700; color: #666; }
+    .notif-page-btns { display: flex; gap: 8px; }
+
+    .notif-empty { padding: 60px 20px; text-align: center; color: #aaa; }
+    .notif-empty-title { font-size: 16px; font-weight: 700; color: #666; margin: 12px 0 4px 0; }
+    .notif-empty-text { font-size: 14px; }
+
+    .notif-error-box { background: #fff5f5; border: 1.5px solid #fecaca; color: #b91c1c; border-radius: 7px; padding: 12px 16px; margin-bottom: 24px; display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; }
+    .notif-success-box { background: #f0fdf4; border: 1.5px solid #bbf7d0; color: #15803d; border-radius: 7px; padding: 12px 16px; margin-bottom: 24px; display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; }
+    
+    .notif-loading { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; }
+    .notif-spinner { width: 32px; height: 32px; border: 3px solid rgba(17,17,17,0.1); border-top-color: #111; border-radius: 50%; animation: notif-spin 0.8s linear infinite; margin-bottom: 12px; }
+    @keyframes notif-spin { to { transform: rotate(360deg); } }
+  `;
+
   return (
-    <div className="flex h-screen">
+    <div className="notif-wrapper" style={{ display: 'flex' }}>
+      <style>{styles}</style>
       <AdminSidebar isOpen={sidebarOpen} onClose={closeSidebar} />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex-1 overflow-auto bg-slate-100">
-          <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8 space-y-6 sm:space-y-8">
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+        <main className="notif-content">
+          <div className="notif-heading-section">
+            <div className="notif-icon-box">
+              <Bell size={24} />
+            </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 mb-2">Notifications</h1>
-              <p className="text-sm sm:text-base text-slate-600">Manage platform notifications and alerts</p>
-            </div>
-
-            {error && (
-              <div className="p-3 sm:p-4 bg-red-50 border border-red-200 rounded-2xl text-red-700 flex items-start gap-3">
-                <AlertCircle size={20} className="flex-shrink-0 mt-0.5" />
-                <span>{error}</span>
-              </div>
-            )}
-
-            {success && (
-              <div className="p-3 sm:p-4 bg-green-50 border border-green-200 rounded-2xl text-green-700 flex items-start gap-3">
-                <CheckCircle size={20} className="flex-shrink-0 mt-0.5" />
-                <span>{success}</span>
-              </div>
-            )}
-
-            <div className="grid grid-cols-2 xl:grid-cols-4 gap-2 sm:gap-4">
-              <StatCard title="Total Notifications" value={stats.totalCount} icon={Bell} iconBg="bg-blue-50" iconColor="text-blue-700" />
-              <StatCard title="Unread" value={stats.unreadCount} icon={AlertCircle} iconBg="bg-amber-50" iconColor="text-amber-700" />
-              <StatCard title="Read" value={stats.totalCount - stats.unreadCount} icon={CheckCircle} iconBg="bg-emerald-50" iconColor="text-emerald-700" />
-              <StatCard title="Total Items" value={notifications.length} icon={Activity} iconBg="bg-indigo-50" iconColor="text-indigo-700" />
-            </div>
-
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-              <div className="p-4 sm:p-6 border-b border-slate-200">
-                <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-slate-900">Notifications</h2>
-                  <div className="flex gap-2">
-                    {stats.unreadCount > 0 && (
-                      <button
-                        onClick={handleMarkAllAsRead}
-                        className="px-4 py-2 bg-slate-100 text-slate-700 border border-slate-200 rounded-xl hover:bg-slate-200 transition-colors text-sm font-semibold"
-                      >
-                        Mark All as Read
-                      </button>
-                    )}
-                    <button
-                      onClick={handleOpenDeleteAll}
-                      disabled={notifications.length === 0}
-                      className="px-4 py-2 bg-red-50 text-red-700 border border-red-200 rounded-xl hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-semibold"
-                    >
-                      Delete All
-                    </button>
-                  </div>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
-                    <input
-                      type="text"
-                      placeholder="Search notifications..."
-                      value={searchQuery}
-                      onChange={(e) => {
-                        setSearchQuery(e.target.value);
-                        setPage(1);
-                      }}
-                      className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-slate-900 text-sm hover:border-slate-300"
-                    />
-                  </div>
-                  <select
-                    value={typeFilter}
-                    onChange={(e) => {
-                      setTypeFilter(e.target.value);
-                      setPage(1);
-                    }}
-                    className="px-4 py-2.5 border border-slate-200 rounded-xl bg-white text-slate-900 focus:outline-none focus:border-slate-900 text-sm"
-                  >
-                    <option value="">All Types</option>
-                    <option value="user_created">User Created</option>
-                    <option value="data_purchase">Data Purchase</option>
-                    <option value="low_balance">Low Balance</option>
-                    <option value="system">System</option>
-                  </select>
-                  <select
-                    value={isReadFilter}
-                    onChange={(e) => {
-                      setIsReadFilter(e.target.value);
-                      setPage(1);
-                    }}
-                    className="px-4 py-2.5 border border-slate-200 rounded-xl bg-white text-slate-900 focus:outline-none focus:border-slate-900 text-sm"
-                  >
-                    <option value="">All Status</option>
-                    <option value="false">Unread</option>
-                    <option value="true">Read</option>
-                  </select>
-                </div>
-              </div>
-
-              {loading && notifications.length === 0 ? (
-                <div className="flex justify-center py-16">
-                  <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-2 border-slate-300 border-t-slate-900 mx-auto mb-4"></div>
-                    <p className="text-slate-600">Loading notifications...</p>
-                  </div>
-                </div>
-              ) : notifications.length === 0 ? (
-                <div className="text-center py-16">
-                  <Database size={48} className="mx-auto text-slate-300 mb-4" />
-                  <p className="text-slate-600 text-lg">No notifications found</p>
-                </div>
-              ) : (
-                <div className="divide-y divide-slate-100">
-                  {notifications.map((notification) => (
-                    <div
-                      key={notification._id}
-                      className={`p-3 sm:p-4 hover:bg-slate-50 transition-colors ${!notification.isRead ? 'bg-slate-50' : ''}`}
-                    >
-                      <div className="flex gap-3">
-                        <div className="flex-shrink-0 mt-0.5">
-                          {getNotificationIcon(notification.type, notification.severity)}
-                        </div>
-
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                                <h3 className={`text-sm font-bold ${!notification.isRead ? 'text-slate-900' : 'text-slate-700'}`}>
-                                  {notification.title}
-                                </h3>
-                                <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-tight ${typeColors[notification.type] || ''}`}>
-                                  {getTypeLabel(notification.type)}
-                                </span>
-                              </div>
-                              <p className="text-slate-600 text-[13px] leading-relaxed mb-1">{notification.message}</p>
-                              {notification.description && (
-                                <p className="text-slate-500 text-[12px] mb-1.5">{notification.description}</p>
-                              )}
-                              <div className="flex items-center gap-3 text-[11px] font-medium text-slate-500">
-                                <span className="flex items-center gap-1">
-                                  <Clock size={12} />
-                                  {formatDate(notification.createdAt)}
-                                </span>
-                                {!notification.isRead && (
-                                  <span className="flex items-center gap-1 text-slate-700">
-                                    <Activity size={12} />
-                                    Unread
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex gap-1 flex-shrink-0 self-start">
-                          {!notification.isRead && (
-                            <button
-                              onClick={() => handleMarkAsRead(notification._id)}
-                              className="p-1.5 text-slate-600 hover:bg-slate-100 rounded-lg transition"
-                              title="Mark as read"
-                            >
-                              <CheckCircle size={16} />
-                            </button>
-                          )}
-                          <button
-                            onClick={() => handleOpenDelete(notification)}
-                            className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition"
-                            title="Delete notification"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {totalPages > 1 && (
-                <div className="p-4 sm:p-6 border-t border-slate-200 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                  <p className="text-sm text-slate-600">
-                    Page {page} of {totalPages}
-                  </p>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setPage(Math.max(1, page - 1))}
-                      disabled={page === 1}
-                      className="px-4 py-2 bg-white border border-slate-200 hover:border-slate-300 text-slate-700 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-semibold"
-                    >
-                      ← Previous
-                    </button>
-                    <button
-                      onClick={() => setPage(Math.min(totalPages, page + 1))}
-                      disabled={page === totalPages}
-                      className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-semibold"
-                    >
-                      Next →
-                    </button>
-                  </div>
-                </div>
-              )}
+              <h1 className="notif-title">Notifications</h1>
+              <p className="notif-subtitle">Manage platform notifications and alerts</p>
             </div>
           </div>
-        </div>
+
+          {error && (
+            <div className="notif-error-box">
+              <AlertCircle size={18} />
+              <span>{error}</span>
+            </div>
+          )}
+
+          {success && (
+            <div className="notif-success-box">
+              <CheckCircle size={18} />
+              <span>{success}</span>
+            </div>
+          )}
+
+          <div className="notif-stat-grid">
+            <StatCard title="Total Notifications" value={stats.totalCount} icon={Bell} />
+            <StatCard title="Unread" value={stats.unreadCount} icon={AlertCircle} />
+            <StatCard title="Read" value={stats.totalCount - stats.unreadCount} icon={CheckCircle} />
+            <StatCard title="Total Items" value={notifications.length} icon={Activity} />
+          </div>
+
+          <div className="notif-card">
+            <div className="notif-controls">
+              <div className="notif-controls-header">
+                <h2 className="notif-controls-title">Notifications</h2>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  {stats.unreadCount > 0 && (
+                    <button onClick={handleMarkAllAsRead} className="notif-btn-secondary">
+                      Mark All as Read
+                    </button>
+                  )}
+                  <button
+                    onClick={handleOpenDeleteAll}
+                    disabled={notifications.length === 0}
+                    className="notif-btn-danger"
+                  >
+                    Delete All
+                  </button>
+                </div>
+              </div>
+              
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                <div className="notif-input-wrapper">
+                  <Search size={18} className="notif-input-icon" />
+                  <input
+                    type="text"
+                    placeholder="Search notifications..."
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setPage(1);
+                    }}
+                    className="notif-input"
+                  />
+                </div>
+                <select
+                  value={typeFilter}
+                  onChange={(e) => {
+                    setTypeFilter(e.target.value);
+                    setPage(1);
+                  }}
+                  className="notif-select"
+                >
+                  <option value="">All Types</option>
+                  <option value="user_created">User Created</option>
+                  <option value="data_purchase">Data Purchase</option>
+                  <option value="low_balance">Low Balance</option>
+                  <option value="system">System</option>
+                </select>
+                <select
+                  value={isReadFilter}
+                  onChange={(e) => {
+                    setIsReadFilter(e.target.value);
+                    setPage(1);
+                  }}
+                  className="notif-select"
+                >
+                  <option value="">All Status</option>
+                  <option value="false">Unread</option>
+                  <option value="true">Read</option>
+                </select>
+              </div>
+            </div>
+
+            {loading && notifications.length === 0 ? (
+              <div className="notif-loading">
+                <div className="notif-spinner"></div>
+                <p style={{ fontSize: '14px', color: '#666', fontWeight: 600 }}>Loading notifications...</p>
+              </div>
+            ) : notifications.length === 0 ? (
+              <div className="notif-empty">
+                <Database size={48} />
+                <p className="notif-empty-title">No notifications found</p>
+                <p className="notif-empty-text">Try adjusting your filters or search query.</p>
+              </div>
+            ) : (
+              <div className="notif-list">
+                {notifications.map((notification) => (
+                  <div
+                    key={notification._id}
+                    className={`notif-item ${!notification.isRead ? 'is-unread' : ''}`}
+                  >
+                    <div className="notif-item-icon">
+                      {getNotificationIcon(notification.type, notification.severity)}
+                    </div>
+
+                    <div className="notif-item-content">
+                      <div className="notif-item-title-row">
+                        <h3 className="notif-item-title">{notification.title}</h3>
+                        <span className={`notif-tag ${typeColors[notification.type] || ''}`} style={{ backgroundColor: 'rgba(0,0,0,0.05)' }}>
+                          {getTypeLabel(notification.type)}
+                        </span>
+                      </div>
+                      <p className="notif-item-msg">{notification.message}</p>
+                      {notification.description && (
+                        <p className="notif-item-desc">{notification.description}</p>
+                      )}
+                      <div className="notif-item-meta">
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <Clock size={12} />
+                          {formatDate(notification.createdAt)}
+                        </span>
+                        {!notification.isRead && (
+                          <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#111' }}>
+                            <Activity size={12} />
+                            Unread
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="notif-actions">
+                      {!notification.isRead && (
+                        <button
+                          onClick={() => handleMarkAsRead(notification._id)}
+                          className="notif-icon-btn"
+                          title="Mark as read"
+                        >
+                          <CheckCircle size={18} />
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleOpenDelete(notification)}
+                        className="notif-icon-btn danger"
+                        title="Delete notification"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {totalPages > 1 && (
+              <div className="notif-pagination">
+                <div className="notif-page-info">
+                  Page {page} of {totalPages}
+                </div>
+                <div className="notif-page-btns">
+                  <button
+                    onClick={() => setPage(Math.max(1, page - 1))}
+                    disabled={page === 1}
+                    className="notif-btn-secondary"
+                    style={{ padding: '8px 16px' }}
+                  >
+                    Previous
+                  </button>
+                  <button
+                    onClick={() => setPage(Math.min(totalPages, page + 1))}
+                    disabled={page === totalPages}
+                    className="notif-btn-primary"
+                    style={{ padding: '8px 16px' }}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </main>
       </div>
 
       <ConfirmDialog
@@ -420,16 +492,16 @@ export default function AdminNotifications() {
 }
 
 // eslint-disable-next-line no-unused-vars
-function StatCard({ title, value, icon: Icon, iconBg, iconColor }) {
+function StatCard({ title, value, icon: Icon }) {
   return (
-    <div className="bg-white rounded-2xl p-3 sm:p-5 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all">
-      <div className="mb-2 sm:mb-3">
-        <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl ${iconBg} flex items-center justify-center`}>
-          <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${iconColor}`} />
-        </div>
+    <div className="notif-stat-card">
+      <div className="notif-stat-icon-small">
+        <Icon size={18} />
       </div>
-      <p className="text-[11px] sm:text-sm text-slate-500 mb-0.5">{title}</p>
-      <p className="text-lg sm:text-2xl font-bold text-slate-900">{value}</p>
+      <p className="notif-stat-label">{title}</p>
+      <p className="notif-stat-value">
+        {typeof value === 'number' ? value.toLocaleString() : value}
+      </p>
     </div>
   );
 }

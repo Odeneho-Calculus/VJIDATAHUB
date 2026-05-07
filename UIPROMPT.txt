@@ -1,36 +1,30 @@
-Redesign this page to match the established design system used across the Homepage, Login and Register pages. Do not use Tailwind CSS — use only inline styles and a single <style> block with custom class names prefixed to this page (e.g. dash-, wallet-, etc.) to avoid conflicts.
-Design tokens to follow exactly:
+Redesign this page to match the established design system used across the Homepage, Login and Register pages. Do not use Tailwind CSS — use only inline styles and a single `<style>` block with custom class names prefixed to this page (e.g. `dash-`, `wallet-`, etc.) to avoid conflicts.
 
-Font: 'DM Sans' — import from Google Fonts, apply via fontFamily on the root wrapper
-Page background: #f5f5f0
-Card background: #fff, border: 1.5px solid #e4e4de, border-radius: 14px, box-shadow: 0 8px 40px rgba(0,0,0,0.10)
-Primary color: #111 (buttons, active states, headings)
-Accent color: #f0a500 (amber — tags, highlights, icons on dark backgrounds)
-Input background: #fafaf7, border: 1.5px solid #e0e0d8, border-radius: 7px, padding: 11px 14px, font-size: 14px
-Input focus: border-color #111, box-shadow: 0 0 0 3px rgba(17,17,17,0.07), background #fff
-Labels: 12.5px, font-weight: 700, color: #333, letter-spacing: 0.02em
-Primary button: background #111, color #fff, border-radius 7px, padding 13px 20px, font-size 14px, font-weight 700 — hover: #222
-Error box: background #fff5f5, border: 1.5px solid #fecaca, color #b91c1c, border-radius 7px
-Info/footer box: background #fafaf7, border: 1.5px solid #e4e4de, border-radius 7px
-Secure note: font-size 11.5px, font-weight 600, color #bbb, centered
+**Design tokens to follow exactly:**
+- Font: `'DM Sans'` — import from Google Fonts, apply via `fontFamily` on the root wrapper
+- Page background: `#f5f5f0`
+- Card background: `#fff`, border: `1.5px solid #e4e4de`, border-radius: `14px`, box-shadow: `0 8px 40px rgba(0,0,0,0.10)`
+- Primary color: `#111` (buttons, active states, headings)
+- Accent color: `#f0a500` (amber — tags, highlights, icons on dark backgrounds)
+- Input background: `#fafaf7`, border: `1.5px solid #e0e0d8`, border-radius: `7px`, padding: `11px 14px`, font-size: `14px`
+- Input focus: border-color `#111`, box-shadow: `0 0 0 3px rgba(17,17,17,0.07)`, background `#fff`
+- Labels: `12.5px`, font-weight: `700`, color: `#333`, letter-spacing: `0.02em`
+- Primary button: background `#111`, color `#fff`, border-radius `7px`, padding `13px 20px`, font-size `14px`, font-weight `700` — hover: `#222`
+- Error box: background `#fff5f5`, border: `1.5px solid #fecaca`, color `#b91c1c`, border-radius `7px`
+- Info/footer box: background `#fafaf7`, border: `1.5px solid #e4e4de`, border-radius `7px`
+- Secure note: font-size `11.5px`, font-weight `600`, color `#bbb`, centered
 
-Layout rules:
+**Layout rules:**
+- Wrap the page in a flex center container with `min-height: 100vh`, background: `#f5f5f0`, padding: `24px 16px`
+- Use a single white card for the main content, centered, max-width: 380–420px
+- On mobile, show a top bar with a back link and the brand name (VJI DATA HUB)
 
-Wrap the page in a flex center container with min-height: 100vh, background: #f5f5f0, padding: 24px 16px
-Use a two-column card: left dark panel (background: #111, padding: 40px) hidden on mobile, right white panel for the main content
-Left panel must include: a back-to-homepage link, an amber tag pill, a heading, a subtitle, a feature list (icon box + title + description cards), and a footer note box
-Left panel feature icon boxes: background: rgba(240,165,0,0.15), color: #f0a500, border-radius: 6px, width/height: 36px
-Add a noise texture overlay to the left panel using an SVG feTurbulence filter as an absolutely positioned div
-Right panel: centered, max-width: 380–420px form, white background
-Mobile: hide left panel, show a top bar with a back link and the brand name (VJI DATA HUB)
+**Component patterns:**
+- Page heading: icon box (46×46px, background `#111`, border-radius `8px`, amber icon) + h2 at 26px / 800 weight
+- Spinner: 18px circle, border: `2.5px solid rgba(255,255,255,0.3)`, border-top-color `#fff`, CSS animation `spin`
+- All links inside footer boxes: font-weight `700`, color `#111`, hover color `#f0a500`
+- Prefix all CSS class names with a short page-specific identifier to avoid conflicts
 
-Component patterns:
+**Keep all existing React logic, hooks, state, and API calls untouched. Only update the JSX structure and styling.**
 
-Page heading: icon box (46×46px, background #111, border-radius 8px, amber icon) + h2 at 26px / 800 weight
-Spinner: 18px circle, border: 2.5px solid rgba(255,255,255,0.3), border-top-color #fff, CSS animation spin
-All links inside footer boxes: font-weight 700, color #111, hover color #f0a500
-Prefix all CSS class names with a short page-specific identifier to avoid conflicts
-
-Keep all existing React logic, hooks, state, and API calls untouched. Only update the JSX structure and styling.
-
-NOTE: ensure no single column even on small device screens should have at least up to grid of 2 for the stat cards if available
+**NOTE:** ensure no single column even on small device screens — stat cards should use at minimum a 2-column grid on small device screens if possible.

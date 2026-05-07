@@ -187,466 +187,431 @@ export default function AdminPlatformSettings() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f5f5f0', fontFamily: "'DM Sans', sans-serif" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
+        
+        .settings-main {
+          flex: 1;
+          min-width: 0;
+          padding: 24px 16px;
+        }
+        
+        .settings-max-width {
+          max-width: 800px;
+          margin: 0 auto;
+          display: flex;
+          flex-direction: column;
+          gap: 24px;
+        }
+        
+        .settings-card {
+          background: #fff;
+          border: 1.5px solid #e4e4de;
+          border-radius: 14px;
+          box-shadow: 0 8px 40px rgba(0,0,0,0.10);
+          padding: 24px;
+        }
+        
+        .settings-header {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          margin-bottom: 8px;
+        }
+        
+        .settings-icon-box {
+          width: 46px;
+          height: 46px;
+          background: #111;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #f0a500;
+        }
+        
+        .settings-title {
+          font-size: 26px;
+          font-weight: 800;
+          color: #111;
+          margin: 0;
+        }
+        
+        .settings-subtitle {
+          font-size: 14px;
+          color: #666;
+          margin: 4px 0 0 0;
+        }
+        
+        .settings-tabs {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 8px;
+          background: #fafaf7;
+          padding: 8px;
+          border-radius: 14px;
+          border: 1.5px solid #e4e4de;
+        }
+        
+        .settings-tab-btn {
+          padding: 12px;
+          border-radius: 7px;
+          font-size: 13px;
+          font-weight: 700;
+          cursor: pointer;
+          border: none;
+          background: transparent;
+          color: #666;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          transition: all 0.2s;
+        }
+        
+        .settings-tab-btn.active {
+          background: #111;
+          color: #fff;
+        }
+        
+        .settings-label {
+          display: block;
+          font-size: 12.5px;
+          font-weight: 700;
+          color: #333;
+          letter-spacing: 0.02em;
+          margin-bottom: 8px;
+        }
+        
+        .settings-input {
+          width: 100%;
+          background: #fafaf7;
+          border: 1.5px solid #e0e0d8;
+          border-radius: 7px;
+          padding: 11px 14px;
+          font-size: 14px;
+          color: #111;
+          transition: all 0.2s;
+          box-sizing: border-box;
+        }
+        
+        .settings-input:focus {
+          outline: none;
+          border-color: #111;
+          box-shadow: 0 0 0 3px rgba(17,17,17,0.07);
+          background: #fff;
+        }
+        
+        .settings-hint {
+          font-size: 11.5px;
+          font-weight: 600;
+          color: #bbb;
+          margin-top: 6px;
+        }
+        
+        .settings-btn-primary {
+          background: #111;
+          color: #fff;
+          border: none;
+          border-radius: 7px;
+          padding: 13px 20px;
+          font-size: 14px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.2s;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          justify-content: center;
+        }
+        
+        .settings-btn-primary:hover {
+          background: #222;
+        }
+        
+        .settings-error-box {
+          background: #fff5f5;
+          border: 1.5px solid #fecaca;
+          color: #b91c1c;
+          border-radius: 7px;
+          padding: 12px;
+          font-size: 13px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 16px;
+        }
+        
+        .settings-success-box {
+          background: #f0fdf4;
+          border: 1.5px solid #bbf7d0;
+          color: #166534;
+          border-radius: 7px;
+          padding: 12px;
+          font-size: 13px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 16px;
+        }
+        
+        .settings-table-wrapper {
+          overflow-x: auto;
+          margin-top: 16px;
+          border: 1.5px solid #e4e4de;
+          border-radius: 7px;
+        }
+        
+        .settings-table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 12px;
+        }
+        
+        .settings-table th {
+          padding: 12px;
+          background: #fafaf7;
+          border-bottom: 1.5px solid #e4e4de;
+          font-weight: 700;
+          text-align: left;
+        }
+        
+        .settings-table td {
+          padding: 12px;
+          border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .settings-spinner {
+          width: 18px;
+          height: 18px;
+          border: 2.5px solid rgba(255,255,255,0.3);
+          border-top-color: #fff;
+          border-radius: 50%;
+          animation: settings-spin 0.8s linear infinite;
+        }
+        
+        @keyframes settings-spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
+
       <AdminSidebar isOpen={sidebarOpen} onClose={closeSidebar} />
 
-      <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8">
-        {/* Page Header */}
-        <div className="mb-6">
-          <div className="flex items-center gap-3 mb-1">
-            <div className="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center flex-shrink-0">
-              <Globe size={17} />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-slate-900 leading-tight">Platform Settings</h1>
-              <p className="text-sm text-slate-500 leading-tight">Manage public contact details shown on the site</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Feedback */}
-        {error && (
-          <div className="mb-4 flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl">
-            <AlertCircle size={16} className="flex-shrink-0" />
-            <span>{error}</span>
-          </div>
-        )}
-        {success && (
-          <div className="mb-4 flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-xl">
-            <CheckCircle size={16} className="flex-shrink-0" />
-            <span>{success}</span>
-          </div>
-        )}
-
-        {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-700 rounded-full animate-spin" />
-          </div>
-        ) : (
-          <div className="max-w-3xl space-y-4">
-            <div className="bg-white border border-slate-200 rounded-2xl p-2">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                <button
-                  onClick={() => setActiveTab('contact')}
-                  className={`px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition ${activeTab === 'contact'
-                    ? 'bg-slate-900 text-white'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                    }`}
-                >
-                  <Phone size={15} />
-                  Contact Details
-                </button>
-                <button
-                  onClick={() => setActiveTab('orders')}
-                  className={`px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition ${activeTab === 'orders'
-                    ? 'bg-slate-900 text-white'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                    }`}
-                >
-                  <Settings2 size={15} />
-                  Order Settings
-                </button>
-                <button
-                  onClick={() => setActiveTab('charges')}
-                  className={`px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition ${activeTab === 'charges'
-                    ? 'bg-slate-900 text-white'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                    }`}
-                >
-                  <Clock3 size={15} />
-                  Transaction Charges
-                </button>
+      <main className="settings-main">
+        <div className="settings-max-width">
+          
+          <div className="settings-card">
+            <div className="settings-header">
+              <div className="settings-icon-box">
+                <Globe size={22} />
+              </div>
+              <div>
+                <h1 className="settings-title">Platform Settings</h1>
+                <p className="settings-subtitle">Manage public contact details and order configurations</p>
               </div>
             </div>
+          </div>
 
-            {activeTab === 'contact' && (
-              <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
-                <div className="px-5 py-4 border-b border-slate-100">
-                  <h2 className="text-sm font-semibold text-slate-800">Contact Details</h2>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    These values populate the floating contact button visible to all users.
-                  </p>
-                </div>
+          {error && (
+            <div className="settings-error-box">
+              <AlertCircle size={16} />
+              <span>{error}</span>
+            </div>
+          )}
+          {success && (
+            <div className="settings-success-box">
+              <CheckCircle size={16} />
+              <span>{success}</span>
+            </div>
+          )}
 
-                <div className="p-5 space-y-4">
-                  <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                      <span className="flex items-center gap-1.5">
-                        <Phone size={13} />
-                        Phone Number
-                      </span>
-                    </label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={(e) => {
-                        const value = e.target.value.replace(/[^\d+]/g, '');
-                        if (value.length <= 15) {
-                          setFormData((prev) => ({ ...prev, phone: value }));
-                        }
-                      }}
-                      placeholder="+233534359912"
-                      className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition"
-                    />
-                    <p className="text-[11px] text-slate-400 mt-1">Used for the &ldquo;Call&rdquo; button (tel: link). Include country code.</p>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                      <span className="flex items-center gap-1.5">
-                        <MessageCircle size={13} />
-                        WhatsApp Number
-                      </span>
-                    </label>
-                    <input
-                      type="tel"
-                      name="whatsapp"
-                      value={formData.whatsapp}
-                      onChange={(e) => {
-                        const value = e.target.value.replace(/\D/g, '');
-                        if (value.length <= 15) {
-                          setFormData((prev) => ({ ...prev, whatsapp: value }));
-                        }
-                      }}
-                      placeholder="233534359912"
-                      className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition"
-                    />
-                    <p className="text-[11px] text-slate-400 mt-1">Used for the &ldquo;WhatsApp&rdquo; button (wa.me link). No + or spaces.</p>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                      <span className="flex items-center gap-1.5">
-                        <Users size={13} />
-                        WhatsApp Community Link
-                      </span>
-                    </label>
-                    <input
-                      type="url"
-                      name="whatsappGroup"
-                      value={formData.whatsappGroup}
-                      onChange={handleChange}
-                      placeholder="https://chat.whatsapp.com/xxxxxx"
-                      className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition"
-                    />
-                    <p className="text-[11px] text-slate-400 mt-1">Used for the &ldquo;Community&rdquo; button.</p>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                      <span className="flex items-center gap-1.5">
-                        <Mail size={13} />
-                        Support Email
-                      </span>
-                    </label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      placeholder="support@example.com"
-                      className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition"
-                    />
-                    <p className="text-[11px] text-slate-400 mt-1">Used for the &ldquo;Email&rdquo; button (mailto: link).</p>
-                  </div>
-                </div>
+          {loading ? (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '64px' }}>
+              <div className="settings-spinner" style={{ borderTopColor: '#111', width: '32px', height: '32px' }}></div>
+            </div>
+          ) : (
+            <>
+              <div className="settings-tabs">
+                <button className={`settings-tab-btn ${activeTab === 'contact' ? 'active' : ''}`} onClick={() => setActiveTab('contact')}>
+                  <Phone size={15} /> Contact
+                </button>
+                <button className={`settings-tab-btn ${activeTab === 'orders' ? 'active' : ''}`} onClick={() => setActiveTab('orders')}>
+                  <Settings2 size={15} /> Orders
+                </button>
+                <button className={`settings-tab-btn ${activeTab === 'charges' ? 'active' : ''}`} onClick={() => setActiveTab('charges')}>
+                  <Clock3 size={15} /> Charges
+                </button>
               </div>
-            )}
 
-            {activeTab === 'orders' && (
-              <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
-                <div className="px-5 py-4 border-b border-slate-100">
-                  <h2 className="text-sm font-semibold text-slate-800">Order Settings</h2>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Configure how long a number is temporarily blocked from placing another order.
-                  </p>
-                </div>
-
-                <div className="p-5 space-y-4">
-                  <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                      <span className="flex items-center gap-1.5">
-                        <Settings2 size={13} />
-                        Order Status Update Method
-                      </span>
-                    </label>
-                    <select
-                      name="statusUpdateMethod"
-                      value={formData.statusUpdateMethod}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition"
-                    >
-                      <option value="cron">Cron (Every 5 Minutes)</option>
-                      <option value="webhook">Webhook (Real-time Push)</option>
-                    </select>
-                    <p className="text-[11px] text-slate-400 mt-1">
-                      Cron mode polls Topza every 5 minutes. Webhook mode updates only from incoming Topza webhook events.
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                      <span className="flex items-center gap-1.5">
-                        <Clock3 size={13} />
-                        Duplicate Order Cooldown (Minutes)
-                      </span>
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      max="1440"
-                      step="1"
-                      name="duplicateOrderCooldownMinutes"
-                      value={formData.duplicateOrderCooldownMinutes}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition"
-                    />
-                    <p className="text-[11px] text-slate-400 mt-1">Range: 1 to 1440 minutes. Example: set 10 to allow repeat purchase after 10 minutes.</p>
-                  </div>
-
-                  <div className="border border-slate-200 rounded-xl overflow-hidden">
-                    <div className="px-4 py-3 border-b border-slate-100 bg-slate-50 flex items-center justify-between gap-3">
-                      <div>
-                        <h3 className="text-sm font-semibold text-slate-800">Topza Webhook Monitor</h3>
-                        <p className="text-[11px] text-slate-500 mt-0.5">Recent webhook deliveries and status updates applied to orders.</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={handleClearWebhookLogs}
-                          disabled={clearingLogs || logsLoading}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-red-200 bg-white text-red-700 hover:bg-red-50 disabled:opacity-50 transition"
-                        >
-                          <Trash2 size={13} />
-                          {clearingLogs ? 'Clearing...' : 'Clear Logs'}
-                        </button>
-                        <button
-                          onClick={fetchWebhookLogs}
-                          disabled={logsLoading}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 disabled:opacity-50 transition"
-                        >
-                          <RefreshCw size={13} className={logsLoading ? 'animate-spin' : ''} />
-                          Refresh
-                        </button>
-                      </div>
+              <div className="settings-card">
+                {activeTab === 'contact' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    <div>
+                      <label className="settings-label">Phone Number</label>
+                      <input
+                        type="tel"
+                        className="settings-input"
+                        value={formData.phone}
+                        onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value.replace(/[^\d+]/g, '') }))}
+                        placeholder="+233..."
+                      />
+                      <p className="settings-hint">Used for "Call" button. Include country code.</p>
                     </div>
 
-                    <div className="p-4 space-y-3">
-                      <div className="flex flex-wrap gap-2">
-                        {[
-                          { id: 'all', label: 'All' },
-                          { id: 'updated', label: 'Updated' },
-                          { id: 'ignored', label: 'Ignored' },
-                          { id: 'invalid', label: 'Invalid Signature' },
-                        ].map((filter) => (
-                          <button
-                            key={filter.id}
-                            onClick={() => setLogFilter(filter.id)}
-                            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition ${logFilter === filter.id
-                              ? 'bg-slate-900 text-white border-slate-900'
-                              : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                              }`}
-                          >
-                            {filter.label}
-                          </button>
-                        ))}
+                    <div>
+                      <label className="settings-label">WhatsApp Number</label>
+                      <input
+                        type="tel"
+                        className="settings-input"
+                        value={formData.whatsapp}
+                        onChange={(e) => setFormData(prev => ({ ...prev, whatsapp: e.target.value.replace(/\D/g, '') }))}
+                        placeholder="233..."
+                      />
+                      <p className="settings-hint">Used for "WhatsApp" button. No + or spaces.</p>
+                    </div>
+
+                    <div>
+                      <label className="settings-label">WhatsApp Community Link</label>
+                      <input
+                        type="url"
+                        className="settings-input"
+                        name="whatsappGroup"
+                        value={formData.whatsappGroup}
+                        onChange={handleChange}
+                        placeholder="https://chat.whatsapp.com/..."
+                      />
+                    </div>
+
+                    <div>
+                      <label className="settings-label">Support Email</label>
+                      <input
+                        type="email"
+                        className="settings-input"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        placeholder="support@example.com"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 'orders' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    <div>
+                      <label className="settings-label">Status Update Method</label>
+                      <select name="statusUpdateMethod" value={formData.statusUpdateMethod} onChange={handleChange} className="settings-input">
+                        <option value="cron">Cron (Every 5 Minutes)</option>
+                        <option value="webhook">Webhook (Real-time Push)</option>
+                      </select>
+                      <p className="settings-hint">Cron polls every 5 mins. Webhook updates in real-time.</p>
+                    </div>
+
+                    <div>
+                      <label className="settings-label">Duplicate Order Cooldown (Minutes)</label>
+                      <input type="number" name="duplicateOrderCooldownMinutes" value={formData.duplicateOrderCooldownMinutes} onChange={handleChange} className="settings-input" min="1" max="1440" />
+                    </div>
+
+                    <div style={{ border: '1.5px solid #e4e4de', borderRadius: '14px', overflow: 'hidden', marginTop: '12px' }}>
+                      <div style={{ padding: '12px 16px', background: '#fafaf7', borderBottom: '1.5px solid #e4e4de', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <h3 style={{ margin: 0, fontSize: '13px', fontWeight: 800 }}>Webhook Monitor</h3>
+                        <button className="settings-tab-btn" style={{ padding: '6px 12px' }} onClick={fetchWebhookLogs}>
+                          <RefreshCw size={13} className={logsLoading ? 'animate-spin' : ''} /> Refresh
+                        </button>
                       </div>
-
-                      {!webhookSecretConfigured && (
-                        <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-                          TOPZA_WEBHOOK_SECRET is not configured on the backend. Signature validation will fail until it is set.
-                        </div>
-                      )}
-
-                      {logsError && (
-                        <div className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-                          {logsError}
-                        </div>
-                      )}
-
-                      {logsLoading ? (
-                        <div className="text-xs text-slate-500">Loading webhook logs...</div>
-                      ) : filteredWebhookLogs.length === 0 ? (
-                        <div className="text-xs text-slate-500">No webhook logs yet.</div>
-                      ) : (
-                        <div className="overflow-x-auto">
-                          <table className="w-full text-left text-xs">
-                            <thead>
-                              <tr className="text-slate-500 border-b border-slate-100">
-                                <th className="py-2 pr-3 font-semibold">Time</th>
-                                <th className="py-2 pr-3 font-semibold">Event</th>
-                                <th className="py-2 pr-3 font-semibold">Signature</th>
-                                <th className="py-2 pr-3 font-semibold">Result</th>
-                                <th className="py-2 pr-3 font-semibold">Order</th>
-                                <th className="py-2 pr-3 font-semibold text-right">Details</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {filteredWebhookLogs.map((log) => (
-                                <tr key={log._id} className="border-b border-slate-100 align-top">
-                                  <td className="py-2 pr-3 text-slate-700 whitespace-nowrap">{formatDateTime(log.createdAt || log.receivedAt)}</td>
-                                  <td className="py-2 pr-3 text-slate-700 whitespace-nowrap">{log.event || 'N/A'}</td>
-                                  <td className="py-2 pr-3 whitespace-nowrap">
-                                    <span className={`px-2 py-0.5 rounded-full font-semibold ${log.signatureValid ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                                      {log.signatureValid ? 'valid' : 'invalid'}
-                                    </span>
-                                  </td>
-                                  <td className="py-2 pr-3">
-                                    <span className={`px-2 py-0.5 rounded-full font-semibold ${log.handled ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'}`}>
-                                      {log.handled ? 'updated' : (log.reason || 'ignored')}
-                                    </span>
-                                  </td>
-                                  <td className="py-2 pr-3 text-slate-700">
-                                    <div className="font-semibold">{log.matchedOrderNumber || log.identifiers?.orderNumber || 'N/A'}</div>
-                                    <div className="text-slate-500">{log.orderStatusBefore || '-'} {'->'} {log.orderStatusAfter || '-'}</div>
-                                  </td>
-                                  <td className="py-2 pr-3 text-right">
-                                    <button
-                                      onClick={() => handleOpenLogDetails(log)}
-                                      className="inline-flex items-center gap-1 px-2 py-1 text-[11px] font-semibold rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50"
-                                    >
-                                      <Eye size={12} />
-                                      View
-                                    </button>
-                                  </td>
+                      <div style={{ padding: '16px' }}>
+                        {logsLoading ? <p className="settings-hint">Loading logs...</p> : (
+                          <div className="settings-table-wrapper" style={{ border: 'none', marginTop: 0 }}>
+                            <table className="settings-table">
+                              <thead>
+                                <tr>
+                                  <th>Time</th>
+                                  <th>Event</th>
+                                  <th>Result</th>
+                                  <th>Order</th>
+                                  <th></th>
                                 </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      )}
+                              </thead>
+                              <tbody>
+                                {webhookLogs.slice(0, 5).map(log => (
+                                  <tr key={log._id}>
+                                    <td>{new Date(log.createdAt || log.receivedAt).toLocaleTimeString()}</td>
+                                    <td style={{ fontWeight: 700 }}>{log.event}</td>
+                                    <td>
+                                      <span style={{ padding: '2px 6px', borderRadius: '4px', background: log.handled ? '#f0fdf4' : '#f8fafc', color: log.handled ? '#166534' : '#666', fontWeight: 700, fontSize: '10px' }}>
+                                        {log.handled ? 'OK' : 'SKIP'}
+                                      </span>
+                                    </td>
+                                    <td>{log.matchedOrderNumber || 'N/A'}</td>
+                                    <td><button style={{ border: 'none', background: 'transparent', cursor: 'pointer' }} onClick={() => handleOpenLogDetails(log)}><Eye size={12} /></button></td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
+                )}
+
+                {activeTab === 'charges' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    <div>
+                      <label className="settings-label">Data Purchase Charge</label>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '8px' }}>
+                        <select name="dataPurchaseChargeType" value={formData.dataPurchaseChargeType} onChange={handleChange} className="settings-input">
+                          <option value="fixed">Fixed (GHS)</option>
+                          <option value="percentage">Percentage (%)</option>
+                        </select>
+                        <input type="number" name="dataPurchaseCharge" value={formData.dataPurchaseCharge} onChange={handleChange} className="settings-input" step="0.01" />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="settings-label">Wallet Funding Charge</label>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '8px' }}>
+                        <select name="walletFundingChargeType" value={formData.walletFundingChargeType} onChange={handleChange} className="settings-input">
+                          <option value="fixed">Fixed (GHS)</option>
+                          <option value="percentage">Percentage (%)</option>
+                        </select>
+                        <input type="number" name="walletFundingCharge" value={formData.walletFundingCharge} onChange={handleChange} className="settings-input" step="0.01" />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div style={{ marginTop: '24px' }}>
+                  <button className="settings-btn-primary" style={{ width: '100%' }} onClick={handleSave} disabled={saving}>
+                    {saving ? <div className="settings-spinner" /> : <Save size={16} />}
+                    {saving ? 'Saving Changes...' : 'Save Configuration'}
+                  </button>
                 </div>
               </div>
-            )}
+            </>
+          )}
 
-            {activeTab === 'charges' && (
-              <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
-                <div className="px-5 py-4 border-b border-slate-100">
-                  <h2 className="text-sm font-semibold text-slate-800">Transaction Charges</h2>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Configure transaction charges as either fixed GHS fees or percentages. Set value to 0 to disable.
-                  </p>
-                </div>
-                <div className="p-5 space-y-4">
-                  <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                      <span className="flex items-center gap-1.5">
-                        <Settings2 size={13} />
-                        Data Purchase Charge
-                      </span>
-                    </label>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-2">
-                      <select
-                        name="dataPurchaseChargeType"
-                        value={formData.dataPurchaseChargeType}
-                        onChange={handleChange}
-                        className="sm:col-span-1 px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition"
-                      >
-                        <option value="fixed">Fixed (GHS)</option>
-                        <option value="percentage">Percentage (%)</option>
-                      </select>
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        name="dataPurchaseCharge"
-                        value={formData.dataPurchaseCharge}
-                        onChange={handleChange}
-                        className="sm:col-span-2 w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition"
-                      />
-                    </div>
-                    <p className="text-[11px] text-slate-400 mt-1">
-                      Applied on all Paystack data/checker purchases (guests, store buyers, and registered users paying via card/Momo). {formData.dataPurchaseChargeType === 'percentage' ? 'Example: 2.5 means 2.5% of order amount.' : 'Example: 0.20 means GHc 0.20 per transaction.'} Not charged on wallet data/checker payments.
-                    </p>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1.5">
-                      <span className="flex items-center gap-1.5">
-                        <Settings2 size={13} />
-                        Wallet Funding Charge
-                      </span>
-                    </label>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-2">
-                      <select
-                        name="walletFundingChargeType"
-                        value={formData.walletFundingChargeType}
-                        onChange={handleChange}
-                        className="sm:col-span-1 px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition"
-                      >
-                        <option value="fixed">Fixed (GHS)</option>
-                        <option value="percentage">Percentage (%)</option>
-                      </select>
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        name="walletFundingCharge"
-                        value={formData.walletFundingCharge}
-                        onChange={handleChange}
-                        className="sm:col-span-2 w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition"
-                      />
-                    </div>
-                    <p className="text-[11px] text-slate-400 mt-1">Applied every time a user funds their wallet via Paystack. {formData.walletFundingChargeType === 'percentage' ? 'Example: 1.5 means 1.5% of funding amount.' : 'Only fixed GHS value is added.'} Only the base amount is credited to the wallet.</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white text-sm font-semibold rounded-xl hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition"
-            >
-              {saving ? (
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <Save size={15} />
-              )}
-              {saving ? 'Saving…' : 'Save Changes'}
-            </button>
-          </div>
-        )}
+        </div>
       </main>
 
-      <Modal
-        isOpen={showLogModal}
-        onClose={() => setShowLogModal(false)}
-        title="Webhook Log Details"
-        maxWidth="max-w-2xl"
-      >
+      <Modal isOpen={showLogModal} onClose={() => setShowLogModal(false)} title="Webhook Log Details">
         {selectedLog && (
-          <div className="space-y-4 text-xs">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="p-3 rounded-lg border border-slate-200 bg-slate-50">
-                <p className="text-slate-500">Event</p>
-                <p className="font-semibold text-slate-900 mt-1">{selectedLog.event || 'N/A'}</p>
+          <div style={{ fontSize: '12px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="settings-card" style={{ padding: '12px', boxShadow: 'none' }}>
+                <p className="settings-label" style={{ marginBottom: '4px' }}>Event</p>
+                <p style={{ margin: 0, fontWeight: 700 }}>{selectedLog.event}</p>
               </div>
-              <div className="p-3 rounded-lg border border-slate-200 bg-slate-50">
-                <p className="text-slate-500">Received</p>
-                <p className="font-semibold text-slate-900 mt-1">{formatDateTime(selectedLog.createdAt || selectedLog.receivedAt)}</p>
-              </div>
-              <div className="p-3 rounded-lg border border-slate-200 bg-slate-50">
-                <p className="text-slate-500">Signature</p>
-                <p className="font-semibold text-slate-900 mt-1">{selectedLog.signatureValid ? 'Valid' : 'Invalid'}</p>
-              </div>
-              <div className="p-3 rounded-lg border border-slate-200 bg-slate-50">
-                <p className="text-slate-500">Result</p>
-                <p className="font-semibold text-slate-900 mt-1">{selectedLog.handled ? 'Updated' : (selectedLog.reason || 'Ignored')}</p>
+              <div className="settings-card" style={{ padding: '12px', boxShadow: 'none' }}>
+                <p className="settings-label" style={{ marginBottom: '4px' }}>Status</p>
+                <p style={{ margin: 0, fontWeight: 700 }}>{selectedLog.handled ? 'Processed' : 'Ignored'}</p>
               </div>
             </div>
-
-            <div className="p-3 rounded-lg border border-slate-200">
-              <p className="text-slate-500 mb-1">Matched Order</p>
-              <p className="font-semibold text-slate-900">{selectedLog.matchedOrderNumber || selectedLog.identifiers?.orderNumber || 'N/A'}</p>
-              <p className="text-slate-600 mt-1">{selectedLog.orderStatusBefore || '-'} {'->'} {selectedLog.orderStatusAfter || '-'}</p>
-            </div>
-
-            <div className="p-3 rounded-lg border border-slate-200">
-              <p className="text-slate-500 mb-2">Payload</p>
-              <pre className="text-[11px] bg-slate-900 text-slate-100 rounded-lg p-3 overflow-auto max-h-64">
-                {JSON.stringify(selectedLog.payload || {}, null, 2)}
+            <div className="settings-card" style={{ padding: '12px', boxShadow: 'none' }}>
+              <p className="settings-label" style={{ marginBottom: '4px' }}>Payload</p>
+              <pre style={{ margin: 0, background: '#111', color: '#fff', padding: '12px', borderRadius: '7px', overflowX: 'auto' }}>
+                {JSON.stringify(selectedLog.payload, null, 2)}
               </pre>
             </div>
           </div>

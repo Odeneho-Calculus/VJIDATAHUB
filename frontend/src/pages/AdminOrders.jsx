@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Eye, Edit2, Trash2, AlertCircle, Search, ShoppingCart, CheckCircle, Clock, TrendingUp, Database, CheckCircle2, RotateCcw } from 'lucide-react';
+import { Eye, Edit2, Trash2, Search, ShoppingCart, CheckCircle, Clock, TrendingUp, Database, CheckCircle2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { formatNumberAbbreviated } from '../utils/formatCurrency';
 import AdminSidebar from '../components/AdminSidebar';
@@ -140,31 +140,22 @@ export default function AdminOrders() {
   const allSelected = filteredOrders.length > 0 && filteredOrders.every(order => selectedIds.has(order.id || order._id));
   const someSelected = selectedIds.size > 0;
 
-  const getPaymentStatusColor = (status) => {
+  const getPaymentStatusStyle = (status) => {
     switch (status) {
-      case 'completed':
-        return 'bg-green-100 text-green-700';
-      case 'pending':
-        return 'bg-amber-100 text-amber-700';
-      case 'failed':
-        return 'bg-red-100 text-red-700';
-      default:
-        return 'bg-slate-100 text-slate-700';
+      case 'completed': return { backgroundColor: '#f0fdf4', color: '#166534' };
+      case 'pending': return { backgroundColor: '#fffbeb', color: '#92400e' };
+      case 'failed': return { backgroundColor: '#fef2f2', color: '#991b1b' };
+      default: return { backgroundColor: '#f8fafc', color: '#334155' };
     }
   };
 
-  const getOrderStatusColor = (status) => {
+  const getOrderStatusStyle = (status) => {
     switch (status) {
-      case 'completed':
-        return 'bg-green-100 text-green-700';
-      case 'processing':
-        return 'bg-blue-100 text-blue-700';
-      case 'pending':
-        return 'bg-amber-100 text-amber-700';
-      case 'failed':
-        return 'bg-red-100 text-red-700';
-      default:
-        return 'bg-slate-100 text-slate-700';
+      case 'completed': return { backgroundColor: '#f0fdf4', color: '#166534' };
+      case 'processing': return { backgroundColor: '#eff6ff', color: '#1e40af' };
+      case 'pending': return { backgroundColor: '#fffbeb', color: '#92400e' };
+      case 'failed': return { backgroundColor: '#fef2f2', color: '#991b1b' };
+      default: return { backgroundColor: '#f8fafc', color: '#334155' };
     }
   };
 
@@ -345,352 +336,478 @@ export default function AdminOrders() {
     }
   };
 
-
   return (
-    <div className="flex h-screen bg-slate-100">
+    <div style={{ display: 'flex', height: '100vh', backgroundColor: '#f5f5f0', fontFamily: "'DM Sans', sans-serif" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
+        
+        .orders-container {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+        }
+        
+        .orders-scrollable {
+          flex: 1;
+          overflow-y: auto;
+          padding: 24px 16px;
+        }
+        
+        .orders-max-width {
+          max-width: 1280px;
+          margin: 0 auto;
+          display: flex;
+          flex-direction: column;
+          gap: 24px;
+        }
+        
+        .orders-card {
+          background: #fff;
+          border: 1.5px solid #e4e4de;
+          border-radius: 14px;
+          box-shadow: 0 8px 40px rgba(0,0,0,0.10);
+          padding: 24px;
+        }
+        
+        .orders-header {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          margin-bottom: 8px;
+        }
+        
+        .orders-icon-box {
+          width: 46px;
+          height: 46px;
+          background: #111;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #f0a500;
+        }
+        
+        .orders-title {
+          font-size: 26px;
+          font-weight: 800;
+          color: #111;
+          margin: 0;
+        }
+        
+        .orders-subtitle {
+          font-size: 14px;
+          color: #666;
+          margin: 4px 0 0 0;
+        }
+        
+        .orders-stats-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 12px;
+        }
+        
+        @media (min-width: 1024px) {
+          .orders-stats-grid {
+            grid-template-columns: repeat(4, 1fr);
+          }
+        }
+        
+        .orders-stat-card {
+          background: #fff;
+          border: 1.5px solid #e4e4de;
+          border-radius: 14px;
+          padding: 16px;
+          transition: all 0.2s;
+        }
+        
+        .orders-stat-card:hover {
+          border-color: #111;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        
+        .orders-stat-label {
+          font-size: 12.5px;
+          font-weight: 700;
+          color: #333;
+          letter-spacing: 0.02em;
+          margin-bottom: 4px;
+        }
+        
+        .orders-stat-value {
+          font-size: 24px;
+          font-weight: 800;
+          color: #111;
+          margin: 0;
+        }
+        
+        .orders-input-group {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+        
+        .orders-search-wrapper {
+          position: relative;
+        }
+        
+        .orders-search-icon {
+          position: absolute;
+          left: 14px;
+          top: 50%;
+          transform: translateY(-50%);
+          color: #999;
+        }
+        
+        .orders-input {
+          width: 100%;
+          background: #fafaf7;
+          border: 1.5px solid #e0e0d8;
+          border-radius: 7px;
+          padding: 11px 14px 11px 40px;
+          font-size: 14px;
+          color: #111;
+          transition: all 0.2s;
+          box-sizing: border-box;
+        }
+        
+        .orders-input:focus {
+          outline: none;
+          border-color: #111;
+          box-shadow: 0 0 0 3px rgba(17,17,17,0.07);
+          background: #fff;
+        }
+        
+        .orders-filter-label {
+          font-size: 12.5px;
+          font-weight: 700;
+          color: #333;
+          letter-spacing: 0.02em;
+          margin-bottom: 8px;
+          text-transform: uppercase;
+        }
+        
+        .orders-filter-chips {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+        
+        .orders-chip {
+          padding: 8px 16px;
+          border-radius: 7px;
+          font-size: 13px;
+          font-weight: 700;
+          cursor: pointer;
+          border: 1.5px solid #e0e0d8;
+          background: #fafaf7;
+          color: #111;
+          transition: all 0.2s;
+        }
+        
+        .orders-chip.active {
+          background: #111;
+          color: #fff;
+          border-color: #111;
+        }
+        
+        .orders-table-container {
+          overflow-x: auto;
+          margin-top: 8px;
+        }
+        
+        .orders-table {
+          width: 100%;
+          border-collapse: collapse;
+          text-align: left;
+        }
+        
+        .orders-table th {
+          padding: 16px;
+          background: #fafaf7;
+          border-bottom: 1.5px solid #e4e4de;
+          font-size: 12.5px;
+          font-weight: 700;
+          color: #333;
+          letter-spacing: 0.02em;
+        }
+        
+        .orders-table td {
+          padding: 16px;
+          border-bottom: 1.5px solid #f0f0f0;
+          font-size: 14px;
+          color: #111;
+        }
+        
+        .orders-badge {
+          padding: 4px 10px;
+          border-radius: 20px;
+          font-size: 10px;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          display: inline-block;
+        }
+        
+        .orders-btn-primary {
+          background: #111;
+          color: #fff;
+          border: none;
+          border-radius: 7px;
+          padding: 10px 16px;
+          font-size: 14px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.2s;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        
+        .orders-btn-primary:hover {
+          background: #222;
+        }
+        
+        .orders-btn-icon {
+          width: 32px;
+          height: 32px;
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 1.5px solid #e4e4de;
+          background: #fff;
+          color: #111;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        
+        .orders-btn-icon:hover {
+          background: #fafaf7;
+          border-color: #111;
+        }
+        
+        .orders-spinner {
+          width: 18px;
+          height: 18px;
+          border: 2.5px solid rgba(0,0,0,0.1);
+          border-top-color: #111;
+          border-radius: 50%;
+          animation: orders-spin 0.8s linear infinite;
+        }
+        
+        @keyframes orders-spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
+
       <AdminSidebar isOpen={sidebarOpen} onClose={closeSidebar} />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex-1 overflow-auto">
-          <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8 space-y-6 sm:space-y-8">
-            {/* Page Header */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm px-4 py-5 sm:px-6 sm:py-6">
-              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 mb-1">{isAgentScope ? 'Agent Orders' : 'Order Management'}</h1>
-              <p className="text-sm text-slate-500">{isAgentScope ? 'Track all orders placed by buyers through agent stores' : 'Manage all customer orders and track their status'}</p>
+      
+      <div className="orders-container">
+        <div className="orders-scrollable">
+          <div className="orders-max-width">
+            
+            {/* Header */}
+            <div className="orders-card">
+              <div className="orders-header">
+                <div className="orders-icon-box">
+                  <ShoppingCart size={22} />
+                </div>
+                <div>
+                  <h1 className="orders-title">{isAgentScope ? 'Agent Orders' : 'Order Management'}</h1>
+                  <p className="orders-subtitle">{isAgentScope ? 'Track all orders placed by buyers through agent stores' : 'Manage all customer orders and track their status'}</p>
+                </div>
+              </div>
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-2 xl:grid-cols-4 gap-2 sm:gap-4">
-              <div className="bg-white rounded-2xl p-3 sm:p-5 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all">
-                <div className="flex items-start justify-between mb-2 sm:mb-3">
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                    <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 text-blue-700" />
+            <div className="orders-stats-grid">
+              {[
+                { label: 'Total Orders', value: statsData.total, icon: <ShoppingCart size={16} />, color: '#eff6ff' },
+                { label: 'Completed', value: statsData.completed, icon: <CheckCircle size={16} />, color: '#f0fdf4' },
+                { label: 'Pending', value: statsData.pending, icon: <Clock size={16} />, color: '#fffbeb' },
+                { label: 'Processing', value: statsData.processing, icon: <TrendingUp size={16} />, color: '#eff6ff' }
+              ].map((stat, i) => (
+                <div key={i} className="orders-stat-card">
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: stat.color, display: 'flex', alignItems: 'center', justifyCenter: 'center', padding: '0 8px' }}>
+                      {stat.icon}
+                    </div>
                   </div>
+                  <p className="orders-stat-label">{stat.label}</p>
+                  <p className="orders-stat-value">{stat.value}</p>
                 </div>
-                <p className="text-[11px] sm:text-sm text-slate-500 mb-0.5">Total Orders</p>
-                <p className="text-xl sm:text-3xl font-bold text-slate-900">{statsData.total}</p>
-              </div>
-
-              <div className="bg-white rounded-2xl p-3 sm:p-5 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all">
-                <div className="flex items-start justify-between mb-2 sm:mb-3">
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-                    <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-700" />
-                  </div>
-                </div>
-                <p className="text-[11px] sm:text-sm text-slate-500 mb-0.5">Completed</p>
-                <p className="text-xl sm:text-3xl font-bold text-slate-900">{statsData.completed}</p>
-              </div>
-
-              <div className="bg-white rounded-2xl p-3 sm:p-5 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all">
-                <div className="flex items-start justify-between mb-2 sm:mb-3">
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-50 flex items-center justify-center">
-                    <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-amber-700" />
-                  </div>
-                </div>
-                <p className="text-[11px] sm:text-sm text-slate-500 mb-0.5">Pending</p>
-                <p className="text-xl sm:text-3xl font-bold text-slate-900">{statsData.pending}</p>
-              </div>
-
-              <div className="bg-white rounded-2xl p-3 sm:p-5 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all">
-                <div className="flex items-start justify-between mb-2 sm:mb-3">
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
-                    <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-700" />
-                  </div>
-                </div>
-                <p className="text-[11px] sm:text-sm text-slate-500 mb-0.5">Processing</p>
-                <p className="text-xl sm:text-3xl font-bold text-slate-900">{statsData.processing}</p>
-              </div>
+              ))}
             </div>
 
             {/* Controls */}
-            <div className="bg-white rounded-2xl p-4 sm:p-6 border border-slate-200 shadow-sm">
-              <div className="flex flex-col sm:flex-row gap-3 mb-4">
-                <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <div className="orders-card">
+              <div className="orders-input-group">
+                <div className="orders-search-wrapper">
+                  <Search className="orders-search-icon" size={16} />
                   <input
                     type="text"
-                    placeholder="Search by order #, user name, email, phone, store name, store owner..."
+                    className="orders-input"
+                    placeholder="Search by order #, user, phone, store..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-slate-400 focus:ring-0 text-sm hover:border-slate-300"
                   />
                 </div>
 
-              </div>
-
-              <div className="space-y-3">
                 <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Status</p>
-                  <div className="flex flex-wrap gap-2">
-                    <button
+                  <p className="orders-filter-label">Status Filter</p>
+                  <div className="orders-filter-chips">
+                    <div 
+                      className={`orders-chip ${statusFilter === '' ? 'active' : ''}`}
                       onClick={() => setStatusFilter('')}
-                      className={`px-3 py-1.5 rounded-lg font-medium transition text-xs whitespace-nowrap border ${statusFilter === ''
-                        ? 'bg-slate-900 text-white border-slate-900'
-                        : 'bg-slate-100 text-slate-900 hover:bg-slate-200 border-slate-200'
-                        }`}
-                    >
-                      All Status
-                    </button>
-                    {['pending', 'processing', 'completed', 'failed'].map(status => (
-                      <button
-                        key={status}
-                        onClick={() => setStatusFilter(status)}
-                        className={`px-3 py-1.5 rounded-lg font-medium transition text-xs whitespace-nowrap border ${statusFilter === status
-                          ? 'bg-slate-900 text-white border-slate-900'
-                          : 'bg-slate-100 text-slate-900 hover:bg-slate-200 border-slate-200'
-                          }`}
-                      >
-                        {status.charAt(0).toUpperCase() + status.slice(1)}
-                      </button>
+                    >All Status</div>
+                    {['pending', 'processing', 'completed', 'failed'].map(s => (
+                      <div 
+                        key={s}
+                        className={`orders-chip ${statusFilter === s ? 'active' : ''}`}
+                        onClick={() => setStatusFilter(s)}
+                      >{s.charAt(0).toUpperCase() + s.slice(1)}</div>
                     ))}
                   </div>
                 </div>
 
                 <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Network</p>
-                  <div className="flex flex-wrap gap-2">
-                    <button
+                  <p className="orders-filter-label">Network Filter</p>
+                  <div className="orders-filter-chips">
+                    <div 
+                      className={`orders-chip ${networkFilter === '' ? 'active' : ''}`}
                       onClick={() => setNetworkFilter('')}
-                      className={`px-3 py-1.5 rounded-lg font-medium transition text-xs whitespace-nowrap border ${networkFilter === ''
-                        ? 'bg-slate-900 text-white border-slate-900'
-                        : 'bg-slate-100 text-slate-900 hover:bg-slate-200 border-slate-200'
-                        }`}
-                    >
-                      All Networks
-                    </button>
-                    {networkOptions.map(network => (
-                      <button
-                        key={network}
-                        onClick={() => setNetworkFilter(network)}
-                        className={`px-3 py-1.5 rounded-lg font-medium transition text-xs whitespace-nowrap border ${networkFilter === network
-                          ? 'bg-slate-900 text-white border-slate-900'
-                          : 'bg-slate-100 text-slate-900 hover:bg-slate-200 border-slate-200'
-                          }`}
-                      >
-                        {network}
-                      </button>
+                    >All Networks</div>
+                    {networkOptions.map(n => (
+                      <div 
+                        key={n}
+                        className={`orders-chip ${networkFilter === n ? 'active' : ''}`}
+                        onClick={() => setNetworkFilter(n)}
+                      >{n}</div>
                     ))}
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Orders Table */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-              {/* Section Header */}
-              <div className="px-4 sm:px-6 py-4 border-b border-slate-200 bg-slate-50">
-                <h2 className="text-sm font-semibold text-slate-900">Order Records</h2>
-                <p className="text-xs text-slate-500 mt-0.5">{filteredOrders.length} result{filteredOrders.length !== 1 ? 's' : ''}</p>
+            {/* Table */}
+            <div className="orders-card" style={{ padding: 0 }}>
+              <div style={{ padding: '16px 24px', borderBottom: '1.5px solid #e4e4de', background: '#fafaf7', borderTopLeftRadius: '14px', borderTopRightRadius: '14px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <h2 style={{ margin: 0, fontSize: '14px', fontWeight: 800 }}>Order Records</h2>
+                    <p style={{ margin: '2px 0 0 0', fontSize: '11.5px', color: '#666', fontWeight: 600 }}>{filteredOrders.length} results</p>
+                  </div>
+                  {someSelected && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <span style={{ fontSize: '12px', fontWeight: 700, color: '#111' }}>{selectedIds.size} selected</span>
+                      <button className="orders-btn-primary" style={{ padding: '6px 12px', fontSize: '12px', background: '#991b1b' }} onClick={() => setShowBulkDeleteConfirm(true)}>
+                        <Trash2 size={13} /> Delete
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
-              {someSelected && (
-                <div className="px-4 sm:px-6 py-3 border-b border-slate-200 bg-blue-50 flex items-center justify-between gap-2">
-                  <span className="text-sm text-blue-700 font-medium">{selectedIds.size} selected</span>
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => setSelectedIds(new Set())}
-                      className="text-xs text-slate-600 hover:text-slate-900 underline"
-                    >
-                      Clear
-                    </button>
-                    <button
-                      onClick={() => setShowBulkDeleteConfirm(true)}
-                      className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition"
-                    >
-                      <Trash2 size={13} />
-                      Delete Selected
-                    </button>
+
+              <div className="orders-table-container">
+                {loading ? (
+                  <div style={{ padding: '64px', display: 'flex', justifyContent: 'center' }}>
+                    <div className="orders-spinner" style={{ width: '32px', height: '32px' }}></div>
                   </div>
-                </div>
-              )}
-              {loading ? (
-                <div className="flex justify-center py-16">
-                  <div className="text-center">
-                    <div className="animate-spin rounded-full h-10 w-10 border-2 border-slate-300 border-t-blue-700 mx-auto mb-4"></div>
-                    <p className="text-slate-500 text-sm">Loading orders...</p>
+                ) : filteredOrders.length === 0 ? (
+                  <div style={{ padding: '64px', textAlign: 'center' }}>
+                    <Database size={48} style={{ color: '#e4e4de', marginBottom: '16px' }} />
+                    <p style={{ color: '#666', margin: 0 }}>No orders found matching your criteria</p>
                   </div>
-                </div>
-              ) : filteredOrders.length === 0 ? (
-                <div className="text-center py-16">
-                  <Database size={48} className="mx-auto text-slate-300 mb-4" />
-                  <p className="text-slate-600 text-lg">No orders found</p>
-                  <p className="text-slate-500 text-sm">Try adjusting your search or filters</p>
-                </div>
-              ) : (
-                <>
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="bg-slate-50 border-b border-slate-200">
-                          <th className="pl-4 sm:pl-6 pr-2 py-4 w-10">
-                            <input
-                              type="checkbox"
-                              checked={allSelected}
-                              onChange={toggleSelectAll}
-                              className="rounded border-slate-300 accent-slate-900"
-                            />
-                          </th>
-                          <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-slate-900 whitespace-nowrap">Order</th>
-                          <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-slate-900 whitespace-nowrap">Store</th>
-                          <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-slate-900 whitespace-nowrap">Customer</th>
-                          <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-slate-900 whitespace-nowrap">Plan</th>
-                          <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-slate-900 whitespace-nowrap">Amount</th>
-                          <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-slate-900 whitespace-nowrap">Payment</th>
-                          <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-slate-900 whitespace-nowrap">Delivery</th>
-                          <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-slate-900 whitespace-nowrap">Date</th>
-                          <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-slate-900 whitespace-nowrap">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-200">
-                        {filteredOrders.map(order => {
-                          const orderId = order.id || order._id;
-                          return (
-                          <tr
-                            key={orderId}
-                            className={`hover:bg-slate-50 transition ${selectedIds.has(orderId) ? 'bg-blue-50 hover:bg-blue-100' : ''}`}
-                          >
-                            <td className="pl-4 sm:pl-6 pr-2 py-4 whitespace-nowrap w-10">
-                              <input
-                                type="checkbox"
-                                checked={selectedIds.has(orderId)}
-                                onChange={() => toggleSelectOne(orderId)}
-                                className="rounded border-slate-300 accent-slate-900"
-                              />
+                ) : (
+                  <table className="orders-table">
+                    <thead>
+                      <tr>
+                        <th style={{ width: '40px' }}>
+                          <input type="checkbox" checked={allSelected} onChange={toggleSelectAll} />
+                        </th>
+                        <th>Order</th>
+                        <th>Store / Customer</th>
+                        <th>Plan / Phone</th>
+                        <th>Amount</th>
+                        <th>Payment Status</th>
+                        <th>Order Status</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredOrders.map(order => {
+                        const orderId = order.id || order._id;
+                        return (
+                          <tr key={orderId} style={{ background: selectedIds.has(orderId) ? '#fafaf7' : 'transparent' }}>
+                            <td>
+                              <input type="checkbox" checked={selectedIds.has(orderId)} onChange={() => toggleSelectOne(orderId)} />
                             </td>
-                            <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                              <div className="flex flex-col gap-1">
-                                <p className="text-sm font-semibold text-slate-900">{order.orderNumber?.slice(-8) || order._id?.slice(-8) || 'N/A'}</p>
-                                <p className="text-[11px] text-slate-600 font-medium uppercase tracking-tight">{order.network || 'N/A'}</p>
-                              </div>
+                            <td>
+                              <div style={{ fontWeight: 700 }}>#{order.orderNumber?.slice(-8) || order._id?.slice(-8)}</div>
+                              <div style={{ fontSize: '11px', color: '#666', fontWeight: 700 }}>{order.network}</div>
                             </td>
-                            <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                              {order.store ? (
-                                <div className="flex flex-col gap-1">
-                                  <p className="text-sm font-semibold text-slate-900">{order.store.name || 'N/A'}</p>
-                                  <p className="text-[11px] text-slate-500 font-medium">{order.store.owner?.name || 'N/A'}</p>
-                                  <p className="text-[10px] text-slate-400 truncate">{order.store.owner?.email || 'N/A'}</p>
-                                </div>
-                              ) : (
-                                <p className="text-sm text-slate-400 italic">No store</p>
-                              )}
+                            <td>
+                              <div style={{ fontSize: '13px', fontWeight: 700 }}>{order.store?.name || (order.isGuest ? (order.guestInfo?.name || 'Guest') : (order.user?.name || 'User'))}</div>
+                              <div style={{ fontSize: '11px', color: '#999' }}>{order.store ? order.store.owner?.name : (order.isGuest ? order.guestInfo?.email : order.user?.email)}</div>
                             </td>
-                            <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                              <div className="flex flex-col gap-1">
-                                <div className="flex items-center gap-2">
-                                  <p className="text-sm font-semibold text-slate-900">
-                                    {order.isGuest
-                                      ? order.guestInfo?.name  || order.guestInfo?.email || 'Guest User'
-                                      : order.user?.name || order.userId?.name || 'Unknown'}
-                                  </p>
-                                  {order.isGuest && (
-                                    <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-[10px] font-bold rounded-full border border-purple-300">
-                                      GUEST
-                                    </span>
-                                  )}
-                                </div>
-                                <p className="text-[11px] text-slate-500 font-medium">
-                                  {order.isGuest
-                                    ? order.guestInfo?.email || order.guestInfo?.phone || 'N/A'
-                                    : order.user?.email || order.userId?.email || 'N/A'}
-                                </p>
-                              </div>
+                            <td>
+                              <div style={{ fontSize: '13px', fontWeight: 700 }}>{getPlanDisplayValue(order)}</div>
+                              <div style={{ fontSize: '11px', color: '#666' }}>{order.phoneNumber}</div>
                             </td>
-                            <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                              <div className="flex flex-col gap-1">
-                                <p className="text-sm font-bold text-slate-900">{getPlanDisplayValue(order)}</p>
-                                <p className="text-[11px] text-slate-500 font-medium">{order.phoneNumber || 'N/A'}</p>
-                              </div>
-                            </td>
-                            <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                              <p className="text-sm font-black text-slate-900">GHS {formatNumberAbbreviated(order.amount) || '0'}</p>
-                            </td>
-                            <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                              <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-tight inline-block ${getPaymentStatusColor(order.paymentStatus)}`}>
+                            <td style={{ fontWeight: 800 }}>GHS {formatNumberAbbreviated(order.amount)}</td>
+                            <td>
+                              <span className="orders-badge" style={getPaymentStatusStyle(order.paymentStatus)}>
                                 {order.paymentStatus || 'pending'}
                               </span>
                             </td>
-                            <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                              <div className="flex flex-col gap-1">
-                                <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-tight self-start ${getOrderStatusColor(order.status)}`}>
-                                  {order.providerStatus || order.status || 'N/A'}
-                                </span>
-                                {order.providerStatus && (
-                                  <span className="text-[9px] text-slate-400 font-medium uppercase tracking-tight">
-                                    local: {order.status}
-                                  </span>
-                                )}
-                              </div>
+                            <td>
+                              <span className="orders-badge" style={getOrderStatusStyle(order.status)}>
+                                {order.providerStatus || order.status}
+                              </span>
                             </td>
-                            <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                              <div className="flex flex-col">
-                                <p className="text-xs font-bold text-slate-900">{new Date(order.date || order.createdAt).toLocaleDateString()}</p>
-                                <p className="text-[10px] text-slate-500 font-medium">{new Date(order.date || order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                              </div>
+                            <td>
+                              <div style={{ fontSize: '12px', fontWeight: 700 }}>{new Date(order.date || order.createdAt).toLocaleDateString()}</div>
+                              <div style={{ fontSize: '10px', color: '#999' }}>{new Date(order.date || order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                             </td>
-                            <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                              <div className="flex gap-1 items-center">
-                                <button
-                                  onClick={() => handleViewDetails(order)}
-                                  className="p-2 hover:bg-slate-100 rounded-lg transition border border-transparent hover:border-slate-200"
-                                  title="View Details"
-                                >
-                                  <Eye className="w-4 h-4 text-cyan-600" />
-                                </button>
-                                {canVerifyPendingPayment(order) && (
-                                  <button
-                                    onClick={() => handleVerifyPendingPayment(order)}
-                                    disabled={verifyingId === (order._id || order.id)}
-                                    className="p-2 hover:bg-slate-100 rounded-lg transition border border-transparent hover:border-slate-200 disabled:opacity-50"
-                                    title="Verify Pending Payment"
-                                  >
-                                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                                  </button>
-                                )}
-                                <button
-                                  onClick={() => handleEditStatus(order)}
-                                  className="p-2 hover:bg-slate-100 rounded-lg transition border border-transparent hover:border-slate-200"
-                                  title="Edit Status"
-                                >
-                                  <Edit2 className="w-4 h-4 text-slate-600" />
-                                </button>
-                                <button
-                                  onClick={() => handleOpenDelete(order)}
-                                  className="p-2 hover:bg-slate-100 rounded-lg transition border border-transparent hover:border-slate-200"
-                                  title="Delete"
-                                >
-                                  <Trash2 className="w-4 h-4 text-red-600" />
-                                </button>
+                            <td>
+                              <div style={{ display: 'flex', gap: '4px' }}>
+                                <button className="orders-btn-icon" onClick={() => handleViewDetails(order)}><Eye size={14} /></button>
+                                <button className="orders-btn-icon" onClick={() => handleEditStatus(order)}><Edit2 size={14} /></button>
+                                <button className="orders-btn-icon" onClick={() => handleOpenDelete(order)} style={{ color: '#b91c1c' }}><Trash2 size={14} /></button>
                               </div>
                             </td>
                           </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                )}
+              </div>
 
-                  <div className="p-4 sm:p-6 border-t border-slate-200 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                    <p className="text-sm text-slate-600">
-                      Page {page} of {totalPages} • {filteredOrders.length} orders total
-                    </p>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => setPage(Math.max(1, page - 1))}
-                        disabled={page === 1}
-                        className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-900 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
-                      >
-                        ← Previous
-                      </button>
-                      <button
-                        onClick={() => setPage(Math.min(totalPages, page + 1))}
-                        disabled={page === totalPages}
-                        className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
-                      >
-                        Next →
-                      </button>
-                    </div>
+              {/* Pagination */}
+              {!loading && totalPages > 1 && (
+                <div style={{ padding: '16px 24px', borderTop: '1.5px solid #e4e4de', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <p style={{ fontSize: '12px', color: '#666', fontWeight: 600 }}>Page {page} of {totalPages}</p>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button 
+                      className="orders-chip" 
+                      style={{ padding: '6px 12px' }} 
+                      disabled={page === 1}
+                      onClick={() => setPage(p => Math.max(1, p - 1))}
+                    >Prev</button>
+                    <button 
+                      className="orders-chip" 
+                      style={{ padding: '6px 12px' }} 
+                      disabled={page === totalPages}
+                      onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                    >Next</button>
                   </div>
-                </>
+                </div>
               )}
             </div>
+
           </div>
         </div>
       </div>
@@ -716,53 +833,42 @@ export default function AdminOrders() {
         setNewStatus={setNewStatus}
         adminNotes={adminNotes}
         setAdminNotes={setAdminNotes}
-        updateLoading={updateLoading}
         onUpdate={handleUpdateStatus}
+        loading={updateLoading}
       />
 
       <ConfirmDialog
         isOpen={showRefundConfirm}
-        onClose={() => setShowRefundConfirm(false)}
-        onCancel={() => setShowRefundConfirm(false)}
-        onConfirm={confirmRefund}
         title="Refund Order"
-        message={`Are you sure you want to refund GHS ${(selectedOrder?.amount + (selectedOrder?.transactionCharge || 0))?.toFixed(2)} for order #${selectedOrder?.orderNumber}? This will credit the user's wallet and reverse any commissions.`}
-        confirmText={updateLoading ? 'Refunding...' : 'Confirm Refund'}
-        cancelText="Cancel"
-        variant="warning"
+        message="Are you sure you want to refund this order? The user's wallet will be credited."
+        onConfirm={confirmRefund}
+        onCancel={() => setShowRefundConfirm(false)}
         loading={updateLoading}
       />
 
       <ConfirmDialog
         isOpen={showDeleteConfirm}
         title="Delete Order"
-        message={selectedOrder ? `Are you sure you want to delete order "${selectedOrder.orderNumber}"? This action cannot be undone.` : ''}
-        confirmText="Delete"
-        cancelText="Cancel"
-        isDangerous={true}
+        message="Are you sure you want to delete this order? This action cannot be undone."
         onConfirm={confirmDelete}
-        onCancel={() => {
-          setShowDeleteConfirm(false);
-          setSelectedOrder(null);
-        }}
+        onCancel={() => setShowDeleteConfirm(false)}
+        loading={updateLoading}
       />
 
       <ConfirmDialog
         isOpen={showBulkDeleteConfirm}
-        title="Delete Selected"
-        message={`Delete ${selectedIds.size} selected order(s)? This action cannot be undone.`}
-        confirmText="Delete"
-        cancelText="Cancel"
-        isDangerous={true}
+        title="Delete Selected Orders"
+        message={`Are you sure you want to delete ${selectedIds.size} selected order(s)? This action cannot be undone.`}
         onConfirm={confirmBulkDelete}
         onCancel={() => setShowBulkDeleteConfirm(false)}
+        loading={updateLoading}
       />
 
       <VerifyingPaymentModal isOpen={showVerifyingModal} />
       <VerifiedPaymentModal
         isOpen={showVerifiedModal}
-        onClose={() => setShowVerifiedModal(false)}
         message={verifiedMessage}
+        onClose={() => setShowVerifiedModal(false)}
       />
     </div>
   );

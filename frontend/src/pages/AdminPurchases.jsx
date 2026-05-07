@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Eye, Trash2, X, AlertCircle, Search, ShoppingCart, CheckCircle, Clock, DollarSign, Database } from 'lucide-react';
+import { Eye, Trash2, Search, ShoppingCart, CheckCircle, Clock, DollarSign, Database } from 'lucide-react';
 import { formatNumberAbbreviated } from '../utils/formatCurrency';
 import AdminSidebar from '../components/AdminSidebar';
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -23,7 +23,6 @@ export default function AdminPurchases() {
   const [selectedPurchase, setSelectedPurchase] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  // eslint-disable-next-line no-unused-vars
   const [updateLoading, setUpdateLoading] = useState(false);
 
   useEffect(() => {
@@ -130,257 +129,432 @@ export default function AdminPurchases() {
     }
   };
 
+  const getStatusStyle = (status) => {
+    switch (status) {
+      case 'completed': return { backgroundColor: '#f0fdf4', color: '#166534' };
+      case 'pending': return { backgroundColor: '#fffbeb', color: '#92400e' };
+      case 'failed': return { backgroundColor: '#fef2f2', color: '#991b1b' };
+      default: return { backgroundColor: '#f8fafc', color: '#334155' };
+    }
+  };
+
   return (
-    <div className="flex h-screen">
+    <div style={{ display: 'flex', height: '100vh', backgroundColor: '#f5f5f0', fontFamily: "'DM Sans', sans-serif" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
+        
+        .purchases-container {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+        }
+        
+        .purchases-scrollable {
+          flex: 1;
+          overflow-y: auto;
+          padding: 24px 16px;
+        }
+        
+        .purchases-max-width {
+          max-width: 1280px;
+          margin: 0 auto;
+          display: flex;
+          flex-direction: column;
+          gap: 24px;
+        }
+        
+        .purchases-card {
+          background: #fff;
+          border: 1.5px solid #e4e4de;
+          border-radius: 14px;
+          box-shadow: 0 8px 40px rgba(0,0,0,0.10);
+          padding: 24px;
+        }
+        
+        .purchases-header {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          margin-bottom: 8px;
+        }
+        
+        .purchases-icon-box {
+          width: 46px;
+          height: 46px;
+          background: #111;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #f0a500;
+        }
+        
+        .purchases-title {
+          font-size: 26px;
+          font-weight: 800;
+          color: #111;
+          margin: 0;
+        }
+        
+        .purchases-subtitle {
+          font-size: 14px;
+          color: #666;
+          margin: 4px 0 0 0;
+        }
+        
+        .purchases-stats-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 12px;
+        }
+        
+        @media (min-width: 1024px) {
+          .purchases-stats-grid {
+            grid-template-columns: repeat(4, 1fr);
+          }
+        }
+        
+        .purchases-stat-card {
+          background: #fff;
+          border: 1.5px solid #e4e4de;
+          border-radius: 14px;
+          padding: 16px;
+          transition: all 0.2s;
+        }
+        
+        .purchases-stat-card:hover {
+          border-color: #111;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        
+        .purchases-stat-label {
+          font-size: 12.5px;
+          font-weight: 700;
+          color: #333;
+          letter-spacing: 0.02em;
+          margin-bottom: 4px;
+        }
+        
+        .purchases-stat-value {
+          font-size: 20px;
+          font-weight: 800;
+          color: #111;
+          margin: 0;
+        }
+        
+        .purchases-input-group {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+        
+        .purchases-search-wrapper {
+          position: relative;
+        }
+        
+        .purchases-search-icon {
+          position: absolute;
+          left: 14px;
+          top: 50%;
+          transform: translateY(-50%);
+          color: #999;
+        }
+        
+        .purchases-input {
+          width: 100%;
+          background: #fafaf7;
+          border: 1.5px solid #e0e0d8;
+          border-radius: 7px;
+          padding: 11px 14px 11px 40px;
+          font-size: 14px;
+          color: #111;
+          transition: all 0.2s;
+          box-sizing: border-box;
+        }
+        
+        .purchases-input:focus {
+          outline: none;
+          border-color: #111;
+          box-shadow: 0 0 0 3px rgba(17,17,17,0.07);
+          background: #fff;
+        }
+        
+        .purchases-filter-chips {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+        
+        .purchases-chip {
+          padding: 8px 16px;
+          border-radius: 7px;
+          font-size: 13px;
+          font-weight: 700;
+          cursor: pointer;
+          border: 1.5px solid #e0e0d8;
+          background: #fafaf7;
+          color: #111;
+          transition: all 0.2s;
+        }
+        
+        .purchases-chip.active {
+          background: #111;
+          color: #fff;
+          border-color: #111;
+        }
+        
+        .purchases-table-container {
+          overflow-x: auto;
+          margin-top: 8px;
+        }
+        
+        .purchases-table {
+          width: 100%;
+          border-collapse: collapse;
+          text-align: left;
+        }
+        
+        .purchases-table th {
+          padding: 16px;
+          background: #fafaf7;
+          border-bottom: 1.5px solid #e4e4de;
+          font-size: 12.5px;
+          font-weight: 700;
+          color: #333;
+          letter-spacing: 0.02em;
+        }
+        
+        .purchases-table td {
+          padding: 16px;
+          border-bottom: 1.5px solid #f0f0f0;
+          font-size: 14px;
+          color: #111;
+        }
+        
+        .purchases-badge {
+          padding: 4px 10px;
+          border-radius: 20px;
+          font-size: 10px;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          display: inline-block;
+        }
+        
+        .purchases-btn-icon {
+          width: 32px;
+          height: 32px;
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 1.5px solid #e4e4de;
+          background: #fff;
+          color: #111;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        
+        .purchases-btn-icon:hover {
+          background: #fafaf7;
+          border-color: #111;
+        }
+        
+        .purchases-error-box {
+          background: #fff5f5;
+          border: 1.5px solid #fecaca;
+          color: #b91c1c;
+          border-radius: 7px;
+          padding: 12px;
+          font-size: 13px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 16px;
+        }
+        
+        .purchases-success-box {
+          background: #f0fdf4;
+          border: 1.5px solid #bbf7d0;
+          color: #166534;
+          border-radius: 7px;
+          padding: 12px;
+          font-size: 13px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 16px;
+        }
+
+        .purchases-spinner {
+          width: 18px;
+          height: 18px;
+          border: 2.5px solid rgba(0,0,0,0.1);
+          border-top-color: #111;
+          border-radius: 50%;
+          animation: purchases-spin 0.8s linear infinite;
+        }
+        
+        @keyframes purchases-spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
+
       <AdminSidebar isOpen={sidebarOpen} onClose={closeSidebar} />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex-1 overflow-auto bg-gradient-to-br from-slate-50 via-white to-blue-50 p-4 sm:p-6">
-          <div className="max-w-7xl mx-auto">
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-slate-900 mb-2">Purchase Management</h1>
-              <p className="text-slate-600">Track all user purchases and manage transactions</p>
+
+      <div className="purchases-container">
+        <div className="purchases-scrollable">
+          <div className="purchases-max-width">
+
+            <div className="purchases-card">
+              <div className="purchases-header">
+                <div className="purchases-icon-box">
+                  <ShoppingCart size={22} />
+                </div>
+                <div>
+                  <h1 className="purchases-title">Purchase Management</h1>
+                  <p className="purchases-subtitle">Track all user purchases and manage transactions</p>
+                </div>
+              </div>
             </div>
 
             {error && (
-              <div className="mb-6 p-4 bg-white border-2 border-red-300 rounded-2xl text-red-700 flex items-start gap-3">
-                <AlertCircle size={20} className="flex-shrink-0 mt-0.5" />
+              <div className="purchases-error-box">
+                <AlertCircle size={16} />
                 <span>{error}</span>
               </div>
             )}
-
             {success && (
-              <div className="mb-6 p-4 bg-white border-2 border-green-300 rounded-2xl text-green-700 flex items-start gap-3">
-                <CheckCircle size={20} className="flex-shrink-0 mt-0.5" />
+              <div className="purchases-success-box">
+                <CheckCircle size={16} />
                 <span>{success}</span>
               </div>
             )}
 
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              <div className="bg-white rounded-2xl p-4 sm:p-6 border-2 border-slate-200 hover:border-slate-300 hover:shadow-lg transition-all">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-slate-600 text-sm font-medium">Total Purchases</p>
-                    <p className="text-3xl font-bold text-slate-900 mt-2">{stats.total}</p>
-                  </div>
-                  <ShoppingCart className="w-12 h-12 text-blue-100" />
-                </div>
-              </div>
-
-              <div className="bg-white rounded-2xl p-4 sm:p-6 border-2 border-slate-200 hover:border-slate-300 hover:shadow-lg transition-all">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-slate-600 text-sm font-medium">Completed</p>
-                    <p className="text-3xl font-bold text-green-600 mt-2">{stats.completed}</p>
-                  </div>
-                  <CheckCircle className="w-12 h-12 text-green-100" />
-                </div>
-              </div>
-
-              <div className="bg-white rounded-2xl p-4 sm:p-6 border-2 border-slate-200 hover:border-slate-300 hover:shadow-lg transition-all">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-slate-600 text-sm font-medium">Pending</p>
-                    <p className="text-3xl font-bold text-yellow-600 mt-2">{stats.pending}</p>
-                  </div>
-                  <Clock className="w-12 h-12 text-yellow-100" />
-                </div>
-              </div>
-
-              <div className="bg-white rounded-2xl p-4 sm:p-6 border-2 border-slate-200 hover:border-slate-300 hover:shadow-lg transition-all">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-slate-600 text-sm font-medium">Total Revenue</p>
-                    <p className="text-3xl font-bold text-purple-600 mt-2">GHS {formatNumberAbbreviated(stats.totalRevenue)}</p>
-                  </div>
-                  <DollarSign className="w-12 h-12 text-purple-100" />
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-2xl p-4 sm:p-6 border-2 border-slate-200 hover:border-slate-300 hover:shadow-lg transition-all mb-6 sm:mb-8">
-              <div className="flex flex-col sm:flex-row gap-3 mb-4">
-                <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
-                  <input
-                    type="text"
-                    placeholder="Search by user name, email, phone, plan..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border-2 border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-blue-400 focus:ring-0 text-sm hover:border-slate-300"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <div>
-                  <p className="text-xs font-semibold text-slate-600 mb-2 block">Status</p>
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      onClick={() => setStatusFilter('')}
-                      className={`px-4 py-2 rounded-lg font-medium transition text-sm whitespace-nowrap ${statusFilter === ''
-                        ? 'bg-blue-100 text-blue-900 border-2 border-blue-300'
-                        : 'bg-slate-100 text-slate-900 hover:bg-slate-200 border-2 border-slate-200'
-                        }`}
-                    >
-                      All Status
-                    </button>
-                    {['pending', 'completed', 'failed'].map(status => (
-                      <button
-                        key={status}
-                        onClick={() => setStatusFilter(status)}
-                        className={`px-4 py-2 rounded-lg font-medium transition text-sm whitespace-nowrap ${statusFilter === status
-                          ? 'bg-blue-100 text-blue-900 border-2 border-blue-300'
-                          : 'bg-slate-100 text-slate-900 hover:bg-slate-200 border-2 border-slate-200'
-                          }`}
-                      >
-                        {status.charAt(0).toUpperCase() + status.slice(1)}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <p className="text-xs font-semibold text-slate-600 mb-2 block">Network</p>
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      onClick={() => setNetworkFilter('')}
-                      className={`px-4 py-2 rounded-lg font-medium transition text-sm whitespace-nowrap ${networkFilter === ''
-                        ? 'bg-blue-100 text-blue-900 border-2 border-blue-300'
-                        : 'bg-slate-100 text-slate-900 hover:bg-slate-200 border-2 border-slate-200'
-                        }`}
-                    >
-                      All Networks
-                    </button>
-                    {['MTN', 'TELECEL', 'AIRTELTIGO'].map(network => (
-                      <button
-                        key={network}
-                        onClick={() => setNetworkFilter(network)}
-                        className={`px-4 py-2 rounded-lg font-medium transition text-sm whitespace-nowrap ${networkFilter === network
-                          ? 'bg-blue-100 text-blue-900 border-2 border-blue-300'
-                          : 'bg-slate-100 text-slate-900 hover:bg-slate-200 border-2 border-slate-200'
-                          }`}
-                      >
-                        {network}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-2xl border-2 border-slate-200 hover:border-slate-300 transition-all overflow-hidden">
-              {loading ? (
-                <div className="flex justify-center py-16">
-                  <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <p className="text-slate-600">Loading purchases...</p>
-                  </div>
-                </div>
-              ) : filteredPurchases.length === 0 ? (
-                <div className="text-center py-16">
-                  <Database size={48} className="mx-auto text-slate-300 mb-4" />
-                  <p className="text-slate-600 text-lg">No purchases found</p>
-                  <p className="text-slate-500 text-sm">Try adjusting your search or filters</p>
-                </div>
-              ) : (
-                <>
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="bg-gradient-to-r from-slate-100 to-blue-50 border-b-2 border-slate-200">
-                          <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-slate-900 whitespace-nowrap">User</th>
-                          <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-slate-900 whitespace-nowrap">Purchase</th>
-                          <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-slate-900 whitespace-nowrap">Amount</th>
-                          <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-slate-900 whitespace-nowrap">Status</th>
-                          <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-slate-900 whitespace-nowrap">Date</th>
-                          <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-slate-900 whitespace-nowrap">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-200">
-                        {filteredPurchases.map(purchase => (
-                          <tr
-                            key={purchase.id || purchase._id}
-                            className="hover:bg-blue-50 transition"
-                          >
-                            <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                              <div className="flex flex-col gap-1">
-                                <p className="text-sm font-semibold text-slate-900">{purchase.user?.name || purchase.userId?.name || 'Unknown'}</p>
-                                <p className="text-[11px] text-slate-500 font-medium">{purchase.user?.email || purchase.userId?.email || 'N/A'}</p>
-                              </div>
-                            </td>
-                            <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                              <div className="flex flex-col gap-1">
-                                <p className="text-sm font-bold text-slate-900">{purchase.planName || 'N/A'}</p>
-                                <p className="text-[10px] text-slate-600 font-medium uppercase tracking-tight">{purchase.network || 'N/A'} • #{purchase._id?.slice(-8)}</p>
-                              </div>
-                            </td>
-                            <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                              <p className="text-sm font-black text-blue-600">GHS {formatNumberAbbreviated(purchase.amount) || '0'}</p>
-                            </td>
-                            <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                              <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-tight ${purchase.status === 'completed'
-                                ? 'bg-green-100 text-green-700'
-                                : purchase.status === 'pending'
-                                  ? 'bg-amber-100 text-amber-700'
-                                  : 'bg-red-100 text-red-700'
-                                }`}>
-                                {purchase.status || 'N/A'}
-                              </span>
-                            </td>
-                            <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                              <div className="flex flex-col">
-                                <p className="text-xs font-bold text-slate-900">{new Date(purchase.date || purchase.createdAt).toLocaleDateString()}</p>
-                                <p className="text-[10px] text-slate-500 font-medium">{new Date(purchase.date || purchase.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                              </div>
-                            </td>
-                            <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                              <div className="flex gap-1 items-center">
-                                <button
-                                  onClick={() => handleViewDetails(purchase)}
-                                  className="p-2 hover:bg-slate-100 rounded-lg transition"
-                                  title="View Details"
-                                >
-                                  <Eye className="w-4 h-4 text-cyan-600" />
-                                </button>
-                                <button
-                                  onClick={() => handleOpenDelete(purchase)}
-                                  className="p-2 hover:bg-slate-100 rounded-lg transition"
-                                  title="Delete"
-                                >
-                                  <Trash2 className="w-4 h-4 text-red-600" />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  <div className="p-4 sm:p-6 border-t border-slate-200 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                    <p className="text-sm text-slate-600">
-                      Page {page} of {totalPages} • {filteredPurchases.length} purchases total
-                    </p>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => setPage(Math.max(1, page - 1))}
-                        disabled={page === 1}
-                        className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-900 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
-                      >
-                        ← Previous
-                      </button>
-                      <button
-                        onClick={() => setPage(Math.min(totalPages, page + 1))}
-                        disabled={page === totalPages}
-                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
-                      >
-                        Next →
-                      </button>
+            <div className="purchases-stats-grid">
+              {[
+                { label: 'Total Purchases', value: stats.total, icon: <ShoppingCart size={16} />, color: '#eff6ff' },
+                { label: 'Completed', value: stats.completed, icon: <CheckCircle size={16} />, color: '#f0fdf4' },
+                { label: 'Pending', value: stats.pending, icon: <Clock size={16} />, color: '#fffbeb' },
+                { label: 'Total Revenue', value: `GHS ${formatNumberAbbreviated(stats.totalRevenue)}`, icon: <DollarSign size={16} />, color: '#f5f3ff' }
+              ].map((stat, i) => (
+                <div key={i} className="purchases-stat-card">
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: stat.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {stat.icon}
                     </div>
                   </div>
-                </>
+                  <p className="purchases-stat-label">{stat.label}</p>
+                  <p className="purchases-stat-value">{stat.value}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="purchases-card">
+              <div className="purchases-input-group">
+                <div className="purchases-search-wrapper">
+                  <Search className="purchases-search-icon" size={16} />
+                  <input
+                    type="text"
+                    className="purchases-input"
+                    placeholder="Search by user, phone, plan..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                  <div>
+                    <p className="purchases-stat-label" style={{ textTransform: 'uppercase' }}>Status</p>
+                    <div className="purchases-filter-chips">
+                      <div className={`purchases-chip ${statusFilter === '' ? 'active' : ''}`} onClick={() => setStatusFilter('')}>All</div>
+                      {['pending', 'completed', 'failed'].map(s => (
+                        <div key={s} className={`purchases-chip ${statusFilter === s ? 'active' : ''}`} onClick={() => setStatusFilter(s)}>{s}</div>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="purchases-stat-label" style={{ textTransform: 'uppercase' }}>Network</p>
+                    <div className="purchases-filter-chips">
+                      <div className={`purchases-chip ${networkFilter === '' ? 'active' : ''}`} onClick={() => setNetworkFilter('')}>All</div>
+                      {['MTN', 'TELECEL', 'AIRTELTIGO'].map(n => (
+                        <div key={n} className={`purchases-chip ${networkFilter === n ? 'active' : ''}`} onClick={() => setNetworkFilter(n)}>{n}</div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="purchases-card" style={{ padding: 0 }}>
+              <div className="purchases-table-container">
+                {loading ? (
+                  <div style={{ padding: '64px', display: 'flex', justifyContent: 'center' }}>
+                    <div className="purchases-spinner" style={{ width: '32px', height: '32px' }}></div>
+                  </div>
+                ) : filteredPurchases.length === 0 ? (
+                  <div style={{ padding: '64px', textAlign: 'center' }}>
+                    <Database size={48} style={{ color: '#e4e4de', marginBottom: '16px' }} />
+                    <p style={{ color: '#666', margin: 0 }}>No purchases found</p>
+                  </div>
+                ) : (
+                  <table className="purchases-table">
+                    <thead>
+                      <tr>
+                        <th>User</th>
+                        <th>Purchase</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredPurchases.map(purchase => (
+                        <tr key={purchase.id || purchase._id}>
+                          <td>
+                            <div style={{ fontWeight: 700 }}>{purchase.user?.name || purchase.userId?.name || 'Unknown'}</div>
+                            <div style={{ fontSize: '11px', color: '#999' }}>{purchase.user?.email || purchase.userId?.email || 'N/A'}</div>
+                          </td>
+                          <td>
+                            <div style={{ fontWeight: 700 }}>{purchase.planName || 'N/A'}</div>
+                            <div style={{ fontSize: '11px', color: '#666', fontWeight: 700 }}>{purchase.network} • #{purchase._id?.slice(-8)}</div>
+                          </td>
+                          <td style={{ fontWeight: 800 }}>GHS {formatNumberAbbreviated(purchase.amount)}</td>
+                          <td>
+                            <span className="purchases-badge" style={getStatusStyle(purchase.status)}>
+                              {purchase.status || 'N/A'}
+                            </span>
+                          </td>
+                          <td>
+                            <div style={{ fontSize: '12px', fontWeight: 700 }}>{new Date(purchase.date || purchase.createdAt).toLocaleDateString()}</div>
+                            <div style={{ fontSize: '10px', color: '#999' }}>{new Date(purchase.date || purchase.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                          </td>
+                          <td>
+                            <div style={{ display: 'flex', gap: '4px' }}>
+                              <button className="purchases-btn-icon" onClick={() => handleViewDetails(purchase)}><Eye size={14} /></button>
+                              <button className="purchases-btn-icon" onClick={() => handleOpenDelete(purchase)} style={{ color: '#b91c1c' }}><Trash2 size={14} /></button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+
+              {!loading && totalPages > 1 && (
+                <div style={{ padding: '16px 24px', borderTop: '1.5px solid #e4e4de', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <p style={{ fontSize: '12px', color: '#666', fontWeight: 600 }}>Page {page} of {totalPages}</p>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button className="purchases-chip" style={{ padding: '6px 12px' }} disabled={page === 1} onClick={() => setPage(p => Math.max(1, p - 1))}>Prev</button>
+                    <button className="purchases-chip" style={{ padding: '6px 12px' }} disabled={page === totalPages} onClick={() => setPage(p => Math.min(totalPages, p + 1))}>Next</button>
+                  </div>
+                </div>
               )}
             </div>
+
           </div>
         </div>
       </div>
@@ -398,14 +572,13 @@ export default function AdminPurchases() {
         isOpen={showDeleteConfirm}
         title="Delete Purchase"
         message={`Are you sure you want to delete this purchase? This action cannot be undone.`}
-        confirmText="Delete"
-        cancelText="Cancel"
         onConfirm={confirmDelete}
         onCancel={() => {
           setShowDeleteConfirm(false);
           setSelectedPurchase(null);
         }}
         isDangerous={true}
+        loading={updateLoading}
       />
     </div>
   );
