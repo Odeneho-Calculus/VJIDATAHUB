@@ -209,6 +209,13 @@ export default function AdminUsers() {
     return '#ecfdf5';
   };
 
+  const getStatusText = (user) => {
+    if (user.status === 'banned') return 'Banned';
+    if (user.status === 'suspended') return 'Suspended';
+    if (user.deletedAt) return 'Deleted';
+    return 'Active';
+  };
+
   return (
     <div className="usr-page-container" style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f5f5f0' }}>
       <style>{`
@@ -590,7 +597,13 @@ export default function AdminUsers() {
         </div>
       </div>
 
-      <UserViewModal isOpen={showViewModal} onClose={() => setShowViewModal(false)} user={selectedUser} />
+      <UserViewModal 
+        isOpen={showViewModal} 
+        onClose={() => setShowViewModal(false)} 
+        user={selectedUser} 
+        getStatusColor={getStatusColor}
+        getStatusText={getStatusText}
+      />
       <UserEditModal isOpen={showEditModal} onClose={() => setShowEditModal(false)} user={selectedUser} onUpdate={handleUpdateUser} loading={updatingUser} />
       <UserBanModal isOpen={showBanModal} onClose={() => setShowBanModal(false)} user={selectedUser} reason={banReason} setReason={setBanReason} onConfirm={handleBanUser} loading={banningUser} />
       <UserSuspendModal isOpen={showSuspendModal} onClose={() => setShowSuspendModal(false)} user={selectedUser} days={suspendDays} setDays={setSuspendDays} onConfirm={handleSuspendUser} loading={suspendingUser} />

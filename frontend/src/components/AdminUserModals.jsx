@@ -43,8 +43,14 @@ export const UserViewModal = ({ isOpen, onClose, user, getStatusColor, getStatus
             </div>
             <div className="flex justify-between items-center sm:border-b border-slate-200 pb-1">
               <span className="text-xs font-bold text-slate-500">Status:</span>
-              <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase ${getStatusColor(user)}`}>
-                {getStatusText(user)}
+              <span 
+                className="px-2 py-0.5 rounded text-[9px] font-black uppercase"
+                style={{ 
+                  backgroundColor: '#f3f4f6', 
+                  color: typeof getStatusColor === 'function' ? getStatusColor(user) : '#059669' 
+                }}
+              >
+                {typeof getStatusText === 'function' ? getStatusText(user) : (user.status || 'Active')}
               </span>
             </div>
             <div className="flex justify-between items-center sm:border-b border-slate-200 pb-1">

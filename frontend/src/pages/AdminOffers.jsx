@@ -134,6 +134,11 @@ export default function AdminOffers() {
     }
   };
 
+  const handleOpenDelete = (plan) => {
+    setSelectedPlan(plan);
+    setShowDeleteConfirm(true);
+  };
+
   const confirmDelete = async () => {
     if (!selectedPlan) return;
     try {
