@@ -45,18 +45,6 @@ export default function PublicCatalog() {
         return '';
     };
 
-    const setupSocket = useCallback(() => {
-        const socketUrl = getSocketBaseUrl();
-
-        socketRef.current = io(socketUrl, { withCredentials: true });
-        socketRef.current.on('connect', () => {
-            socketRef.current.emit('join_store', slug);
-        });
-        socketRef.current.on('store_updated', () => {
-            fetchStoreData(false);
-        });
-    }, [slug, fetchStoreData]);
-
     const fetchStoreData = useCallback(async (showLoading = true) => {
         try {
             if (showLoading) setLoading(true);
@@ -94,6 +82,18 @@ export default function PublicCatalog() {
             if (showLoading) setLoading(false);
         }
     }, [slug]);
+
+    const setupSocket = useCallback(() => {
+        const socketUrl = getSocketBaseUrl();
+
+        socketRef.current = io(socketUrl, { withCredentials: true });
+        socketRef.current.on('connect', () => {
+            socketRef.current.emit('join_store', slug);
+        });
+        socketRef.current.on('store_updated', () => {
+            fetchStoreData(false);
+        });
+    }, [slug, fetchStoreData]);
 
     useEffect(() => {
         fetchStoreData();
