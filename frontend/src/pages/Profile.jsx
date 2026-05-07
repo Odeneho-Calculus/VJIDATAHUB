@@ -3,8 +3,9 @@ import { toast } from 'react-hot-toast';
 import { useAuth } from '../hooks/useAuth';
 import { formatCurrencyAbbreviated } from '../utils/formatCurrency';
 import { validatePhoneNumber } from '../utils/phoneValidation';
-import { User, Mail, Phone, Copy, Shield, LogOut, Check, ChevronRight, Bell, Settings, Lock, Smartphone, Wallet, Gift, ExternalLink, ReceiptText, Loader2, CheckCircle2, ShieldCheck, Zap } from 'lucide-react';
+import { User, Mail, Phone, Copy, Shield, LogOut, Check, ChevronRight, Bell, Settings, Lock, Smartphone, Wallet, Gift, ExternalLink, ReceiptText, Loader2, CheckCircle2, ShieldCheck, Zap, X, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { auth as authAPI } from '../services/api';
 import UserLayout from '../components/UserLayout';
 
 const styles = `
@@ -166,6 +167,16 @@ export default function Profile() {
     phone: user?.phone || '',
   });
 
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+
   const accountIdSource = user?.id || user?._id || '';
   const accountIdSuffix = accountIdSource ? accountIdSource.slice(-8) : 'N/A';
 
@@ -200,6 +211,39 @@ export default function Profile() {
     setFormData(prev => ({ ...prev, phone: phoneValidation.formatted }));
     toast.success('Profile updated successfully!', { duration: 3000 });
     setEditMode(false);
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error('New passwords do not match');
+      return;
+    }
+    if (passwordData.newPassword.length < 6) {
+      toast.error('New password must be at least 6 characters');
+      return;
+    }
+
+    try {
+      setPasswordLoading(true);
+      await authAPI.changePassword({
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+      });
+      toast.success('Password updated successfully! Please login again.', { duration: 5000 });
+      setShowPasswordModal(false);
+      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      
+      // Logout and redirect
+      setTimeout(() => {
+        logout();
+        navigate('/login');
+      }, 2000);
+    } catch (err) {
+      toast.error(err.message || 'Failed to change password');
+    } finally {
+      setPasswordLoading(false);
+    }
   };
 
   return (
@@ -417,14 +461,110 @@ export default function Profile() {
                   <SecurityAction 
                     icon={Lock} 
                     title="Change Password" 
-                    desc="Last changed 3 months ago"
-                    onClick={() => toast.info('Password change initiated')}
+                    desc="Update your security credentials"
+                    onClick={() => setShowPasswordModal(true)}
                   />
                 </div>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Change Password Modal */}
+        {showPasswordModal && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-[#111]/40 backdrop-blur-[2px] animate-in fade-in duration-300" onClick={() => setShowPasswordModal(false)} />
+            <div className="relative w-full max-w-md bg-white border-1.5 border-[#e4e4de] rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
+              <div className="p-8 flex flex-col gap-6">
+                <div className="text-center">
+                  <div className="w-14 h-14 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-xl flex items-center justify-center mx-auto text-[#111] mb-4">
+                    <ShieldCheck size={28} />
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-900 uppercase tracking-tight">Change Password</h3>
+                  <p className="text-[10px] text-slate-500 mt-1 uppercase font-bold tracking-widest">Secure your account access</p>
+                </div>
+
+                <form onSubmit={handleChangePassword} className="flex flex-col gap-5">
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Current Password</label>
+                    <div className="relative">
+                      <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
+                      <input
+                        required
+                        type={showCurrentPassword ? 'text' : 'password'}
+                        value={passwordData.currentPassword}
+                        onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                        className="w-full pl-11 pr-12 py-3 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:border-[#111] transition-all"
+                        placeholder="••••••••"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#111]"
+                      >
+                        {showCurrentPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">New Password</label>
+                    <div className="relative">
+                      <Zap size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
+                      <input
+                        required
+                        type={showNewPassword ? 'text' : 'password'}
+                        value={passwordData.newPassword}
+                        onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                        className="w-full pl-11 pr-12 py-3 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:border-[#111] transition-all"
+                        placeholder="••••••••"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#111]"
+                      >
+                        {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Confirm New Password</label>
+                    <div className="relative">
+                      <CheckCircle2 size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
+                      <input
+                        required
+                        type="password"
+                        value={passwordData.confirmPassword}
+                        onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                        className="w-full pl-11 pr-4 py-3 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:border-[#111] transition-all"
+                        placeholder="••••••••"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 mt-2">
+                    <button 
+                      type="button" 
+                      onClick={() => setShowPasswordModal(false)} 
+                      className="dash-btn-outline !py-3"
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      type="submit" 
+                      disabled={passwordLoading} 
+                      className="dash-btn-primary !py-3"
+                    >
+                      {passwordLoading ? <Loader2 className="animate-spin" size={18} /> : 'Update Password'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </UserLayout>
   );
