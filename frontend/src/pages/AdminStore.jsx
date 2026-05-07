@@ -7,13 +7,271 @@ import {
   MessageSquare, Phone, Mail, Facebook, Instagram, Twitter, ExternalLink,
   Zap, ShieldCheck, Sparkles, Activity, Minus,
   RefreshCw, Save, X, Palette, Smartphone, CreditCard, Search, Filter,
-  TrendingUp, Wallet, Send
+  TrendingUp, Wallet, Send, ChevronRight, Loader2, ShoppingBag, CheckCircle, CheckCircle2, Clock
 } from 'lucide-react';
 import { store as storeAPI, wallet as walletAPI } from '../services/api';
 import { checkers as checkersAPI } from '../services/api';
 import AgentLayout from '../components/AgentLayout';
 import AlertModal from '../components/AlertModal';
 import { useSettings } from '../context/SettingsContext';
+
+const styles = `
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
+  
+  .dash-wrapper {
+    font-family: 'DM Sans', sans-serif;
+    background-color: #f5f5f0;
+    min-height: 100vh;
+  }
+
+  .dash-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .dash-header {
+    background: #fff;
+    border: 1.5px solid #e4e4de;
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  @media (min-width: 768px) {
+    .dash-header {
+      padding: 24px;
+    }
+  }
+
+  .dash-heading-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .dash-icon-box {
+    width: 40px;
+    height: 40px;
+    background: #111;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #f0a500;
+    flex-shrink: 0;
+  }
+
+  .dash-h2 {
+    font-size: 18px;
+    font-weight: 800;
+    color: #111;
+    margin: 0;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  @media (min-width: 768px) {
+    .dash-h2 {
+      font-size: 26px;
+    }
+    .dash-icon-box {
+      width: 46px;
+      height: 46px;
+    }
+  }
+
+  .dash-p {
+    font-size: 14px;
+    color: #666;
+    margin: 4px 0 0 0;
+  }
+
+  .dash-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  @media (min-width: 768px) {
+    .dash-stat-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+  }
+
+  .dash-stat-card {
+    background: #fff;
+    border: 1.5px solid #e4e4de;
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    transition: all 0.2s;
+  }
+
+  .dash-stat-card:hover {
+    border-color: #d4d4ce;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.06);
+  }
+
+  .dash-stat-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .dash-stat-value {
+    font-size: 20px;
+    font-weight: 800;
+    color: #111;
+  }
+
+  .dash-card {
+    background: #fff;
+    border: 1.5px solid #e4e4de;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.06);
+  }
+
+  .dash-card-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: #111;
+    margin: 0 0 20px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dash-btn-primary {
+    background: #111;
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .dash-btn-primary:hover:not(:disabled) {
+    background: #333;
+    transform: translateY(-1px);
+  }
+
+  .dash-btn-outline {
+    background: #fff;
+    color: #111;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
+    border: 1.5px solid #e4e4de;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .dash-btn-outline:hover {
+    background: #fafaf7;
+    border-color: #d4d4ce;
+  }
+
+  .dash-table-container {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1.5px solid #e4e4de;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .dash-table-container::-webkit-scrollbar {
+    display: none;
+  }
+
+  .dash-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .dash-th {
+    background: #fafaf7;
+    text-align: left;
+    padding: 12px 16px;
+    font-weight: 700;
+    color: #333;
+    border-bottom: 1.5px solid #e4e4de;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .dash-td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    color: #444;
+  }
+
+  .dash-badge {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .tab-button {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    border-radius: 12px;
+    transition: all 0.2s;
+    border: 1.5px solid #e4e4de;
+    background: #fff;
+    min-width: 100px;
+  }
+
+  .tab-button.active {
+    background: #111;
+    border-color: #111;
+    color: #fff;
+  }
+
+  .tab-button:not(.active):hover {
+    background: #fafaf7;
+    border-color: #d4d4ce;
+  }
+`;
 
 export default function AdminStore() {
   const { settings } = useSettings();
@@ -53,11 +311,8 @@ export default function AdminStore() {
   if (loading) {
     return (
       <AgentLayout>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="flex flex-col items-center gap-4">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
-            <p className="text-slate-600 font-medium">Loading your store...</p>
-          </div>
+        <div className="flex h-[80vh] items-center justify-center bg-[#f5f5f0]">
+          <Loader2 className="w-10 h-10 text-[#f0a500] animate-spin" />
         </div>
       </AgentLayout>
     );
@@ -69,77 +324,66 @@ export default function AdminStore() {
 
   return (
     <AgentLayout>
-      <div className="min-h-screen bg-[#F8FAFC] overflow-x-hidden">
-        {/* Top Header - Glassmorphism */}
-        <div className="sticky top-0 z-20 app-pro-header px-6 py-4">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2 text-primary-600 min-w-0">
-                <Layout size={16} className="flex-shrink-0" />
-                <span className="text-xs font-bold uppercase tracking-wider whitespace-nowrap">My Store</span>
+      <div className="dash-wrapper overflow-x-hidden">
+        <style>{styles}</style>
+        
+        <div className="dash-content">
+          <div className="dash-header !p-4">
+            <div className="flex items-center justify-between gap-4">
+              <div className="dash-heading-row">
+                <div className="dash-icon-box !w-10 !h-10">
+                  <Layout size={20} />
+                </div>
+                <div className="min-w-0">
+                  <h2 className="dash-h2 !text-base sm:!text-xl">{storeData?.name || 'My Store'}</h2>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold text-slate-400 font-mono uppercase truncate">/{storeData?.slug}</span>
+                  </div>
+                </div>
               </div>
-
-              <div className="flex items-center gap-2 flex-shrink-0">
+              <div className="flex items-center gap-1 sm:gap-2 shrink-0">
                 <a
                   href={`/store/${storeData?.slug}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-2 px-3 py-2 bg-white text-slate-700 rounded-xl border border-slate-200 hover:border-primary-400 hover:text-primary-600 transition-all font-medium text-sm shadow-sm whitespace-nowrap"
+                  className="dash-btn-outline !py-1.5 !px-2.5 !text-[11px] sm:!text-sm"
                 >
-                  <ExternalLink size={16} />
-                  View Store
+                  <ExternalLink size={14} />
+                  <span className="hidden xs:inline">View Store</span>
                 </a>
                 <button
                   onClick={fetchStore}
-                  className="p-2 text-slate-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                  className="p-1.5 text-slate-400 hover:text-[#f0a500] transition-colors"
                   title="Refresh Data"
                 >
-                  <RefreshCw size={18} />
+                  <RefreshCw size={16} />
                 </button>
               </div>
             </div>
-
-            <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2 mt-2 flex-wrap">
-              {storeData?.name || 'My Store'}
-              <span className="text-xs font-normal px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full border border-slate-200">
-                {storeData?.slug}
-              </span>
-            </h1>
           </div>
-        </div>
 
-        <div className="max-w-7xl mx-auto p-6">
           {/* Access Status Banner */}
           {!isAccessible && (
-            <div className="mb-8 overflow-hidden rounded-2xl bg-gradient-to-r from-red-500 to-rose-600 p-[1px] shadow-lg shadow-red-200">
-              <div className="bg-white rounded-[15px] p-5 flex flex-col md:flex-row items-center gap-5">
-                <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center text-red-600 flex-shrink-0 animate-pulse">
-                  <Lock size={28} />
+            <div className="dash-card border-red-200 bg-red-50/30">
+              <div className="flex flex-col md:flex-row items-center gap-5">
+                <div className="w-12 h-12 rounded-lg bg-red-100 flex items-center justify-center text-red-600 flex-shrink-0">
+                  <Lock size={24} />
                 </div>
                 <div className="flex-1 text-center md:text-left">
-                  <h3 className="text-lg font-bold text-slate-900">Action Required</h3>
-                  <p className="text-slate-600 mt-1">
+                  <h3 className="text-base font-bold text-slate-900">Action Required</h3>
+                  <p className="text-sm text-slate-600 mt-1">
                     {accessStatus.code === 'AGENT_FEE_UNPAID' && 'Your agent registration fee is pending. Complete payment to start selling and earning commissions.'}
                     {accessStatus.code === 'STORE_TEMP_BANNED' && `Store suspended: ${storeData?.temporaryBanReason || 'Access suspended.'}`}
                   </p>
                   <div className="mt-3 flex flex-wrap items-center justify-center md:justify-start gap-2">
-                    {/* Always show admin contact if available */}
                     {storeData?.adminContact?.email && (
-                      <a
-                        href={`mailto:${storeData.adminContact.email}`}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold hover:bg-slate-200 transition-colors"
-                      >
-                        <Mail size={12} />
-                        {storeData.adminContact.email}
+                      <a href={`mailto:${storeData.adminContact.email}`} className="text-xs font-bold text-slate-500 hover:text-slate-700 underline flex items-center gap-1">
+                        <Mail size={12} /> {storeData.adminContact.email}
                       </a>
                     )}
                     {storeData?.adminContact?.phone && (
-                      <a
-                        href={`tel:${storeData.adminContact.phone}`}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold hover:bg-slate-200 transition-colors"
-                      >
-                        <Phone size={12} />
-                        {storeData.adminContact.phone}
+                      <a href={`tel:${storeData.adminContact.phone}`} className="text-xs font-bold text-slate-500 hover:text-slate-700 underline flex items-center gap-1 ml-2">
+                        <Phone size={12} /> {storeData.adminContact.phone}
                       </a>
                     )}
                   </div>
@@ -147,7 +391,7 @@ export default function AdminStore() {
                 {accessStatus.code === 'AGENT_FEE_UNPAID' && (
                   <button
                     onClick={() => setActiveTab('billing')}
-                    className="px-6 py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 shadow-lg shadow-red-200 transition-all transform hover:scale-105"
+                    className="dash-btn-primary !bg-red-600 hover:!bg-red-700"
                   >
                     Pay Activation Fee
                   </button>
@@ -157,46 +401,37 @@ export default function AdminStore() {
           )}
 
           {error && (
-            <div className="mb-8 p-4 bg-rose-50 border border-rose-200 rounded-2xl flex items-center gap-3 text-rose-700">
+            <div className="dash-card border-rose-200 bg-rose-50 flex items-center gap-3 text-rose-700 py-4">
               <AlertCircle size={20} />
-              <p className="font-semibold">{error}</p>
+              <p className="font-bold text-sm">{error}</p>
             </div>
           )}
 
-          {/* Navigation Grid */}
-          <style>{`
-            .store-tabs-scroll::-webkit-scrollbar { display: none; }
-            .store-tabs-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-          `}</style>
-          <div className="mb-8 w-full max-w-full overflow-hidden">
-            <div className="w-full overflow-x-auto overflow-y-hidden store-tabs-scroll overscroll-x-contain">
-              <div className="inline-flex items-stretch gap-2 whitespace-nowrap pb-1 pr-1">
-                {[
-                  { id: 'general', label: 'Store Details', icon: Palette },
-                  { id: 'plans', label: 'Data Plans', icon: Smartphone },
-                  { id: 'checkers', label: 'Result Checkers', icon: CreditCard },
-                  { id: 'orders', label: 'Sales', icon: CreditCard },
-                  { id: 'commissions', label: 'Earnings', icon: Share2 },
-                  { id: 'billing', label: 'Setup Fee', icon: Settings },
-                ].map(tab => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`flex-shrink-0 min-w-[124px] sm:min-w-[132px] flex flex-col items-center justify-center px-3 py-2.5 rounded-xl transition-all border ${activeTab === tab.id
-                      ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-200'
-                      : 'bg-white border-slate-200 text-slate-600 hover:border-blue-200 hover:text-blue-600'
-                      }`}
-                  >
-                    <tab.icon size={20} className="mb-1.5" />
-                    <span className="text-[11px] font-bold uppercase tracking-tight whitespace-nowrap">{tab.label}</span>
-                  </button>
-                ))}
-              </div>
+          {/* Navigation Tabs */}
+          <div className="w-full overflow-x-auto pb-2 scrollbar-hide">
+            <div className="flex items-center gap-3 min-w-max">
+              {[
+                { id: 'general', label: 'Details', icon: Palette },
+                { id: 'plans', label: 'Data Plans', icon: Smartphone },
+                { id: 'checkers', label: 'Checkers', icon: CreditCard },
+                { id: 'orders', label: 'Sales', icon: ShoppingBag },
+                { id: 'commissions', label: 'Earnings', icon: Share2 },
+                { id: 'billing', label: 'Billing', icon: Settings },
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
+                >
+                  <tab.icon size={20} className="mb-1" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider">{tab.label}</span>
+                </button>
+              ))}
             </div>
           </div>
 
           {/* Dynamic Content Area */}
-          <div className="relative animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="relative">
             {activeTab === 'general' && (
               <OverviewTab
                 data={storeData}
@@ -235,13 +470,13 @@ export default function AdminStore() {
             )}
 
             {shouldLockSettings && (
-              <div className="absolute inset-0 z-20 rounded-2xl bg-white/60 backdrop-blur-[2px] border border-slate-200 flex items-center justify-center p-4 sm:p-6">
-                <div className="max-w-lg w-full bg-white/90 border border-slate-200 rounded-2xl shadow-lg p-5 sm:p-6 text-center">
-                  <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
-                    <Lock size={22} />
+              <div className="absolute inset-0 z-20 rounded-2xl bg-[#f5f5f0]/60 backdrop-blur-[2px] border-2 border-dashed border-[#e4e4de] flex items-center justify-center p-4">
+                <div className="max-w-md w-full dash-card text-center">
+                  <div className="w-12 h-12 mx-auto mb-4 rounded-lg bg-red-50 text-red-600 flex items-center justify-center">
+                    <Lock size={24} />
                   </div>
-                  <h3 className="text-lg font-bold text-slate-900 mb-1">Store Locked</h3>
-                  <p className="text-sm text-slate-600 mb-4">
+                  <h3 className="text-lg font-bold text-slate-900 mb-2">Store Locked</h3>
+                  <p className="text-sm text-slate-600 mb-6">
                     {accessStatus.code === 'AGENT_FEE_UNPAID' && 'Complete activation to unlock store settings and make your public store accessible.'}
                     {accessStatus.code === 'STORE_TEMP_BANNED' && `Store suspended: ${storeData?.temporaryBanReason || 'Access suspended by admin.'}`}
                     {accessStatus.code !== 'AGENT_FEE_UNPAID' && accessStatus.code !== 'STORE_TEMP_BANNED' && 'Store settings are currently locked.'}
@@ -249,7 +484,7 @@ export default function AdminStore() {
                   {accessStatus.code === 'AGENT_FEE_UNPAID' && (
                     <button
                       onClick={() => setActiveTab('billing')}
-                      className="px-5 py-2.5 bg-primary-600 text-white rounded-xl font-semibold hover:bg-primary-700 transition-all"
+                      className="dash-btn-primary mx-auto"
                     >
                       Go to Activation
                     </button>
@@ -457,188 +692,146 @@ function OverviewTab({ data, onRefresh, showAlert }) {
     } finally {
       setIsSaving(false);
     }
-
-    if (currentFeatures.length <= 1) {
-      return;
-    }
   };
 
   return (
-    <div className="space-y-8 pb-20">
-      {/* Sections Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-        {/* Basic Info & Colors */}
-        <div className="lg:col-span-2 space-y-6">
+    <div className="flex flex-col gap-6 pb-20">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 flex flex-col gap-6">
           <SectionCard title="Store Info" icon={Globe}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <InputGroup label="Store Display Name" value={formData.name} onChange={(v) => setFormData({ ...formData, name: v })} />
               <InputGroup label="Store Slug (URL)" value={formData.slug} onChange={(v) => setFormData({ ...formData, slug: v.toLowerCase() })} placeholder="my-custom-store" />
               <div className="md:col-span-2">
-                <InputGroup label="Slogan / Brief Description" value={formData.description} onChange={(v) => setFormData({ ...formData, description: v })} />
+                <InputGroup label="Slogan / Brief Description" value={formData.description} onChange={(v) => setFormData({ ...formData, description: v })} isTextArea />
               </div>
             </div>
-            <div className="mt-8 pt-8 border-t border-slate-100">
-              <h4 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
-                <Palette size={16} /> Colors & Branding
+            <div className="mt-8 pt-8 border-t border-[#e4e4de]">
+              <h4 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2 uppercase tracking-wider">
+                <Palette size={16} /> Branding Colors
               </h4>
-              <div className="grid grid-cols-2 gap-4">
-                <ColorInput label="Main Color" value={formData.theme.primaryColor} onChange={(v) => setFormData({ ...formData, theme: { ...formData.theme, primaryColor: v } })} />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <ColorInput label="Primary Color" value={formData.theme.primaryColor} onChange={(v) => setFormData({ ...formData, theme: { ...formData.theme, primaryColor: v } })} />
                 <ColorInput label="Secondary Color" value={formData.theme.secondaryColor} onChange={(v) => setFormData({ ...formData, theme: { ...formData.theme, secondaryColor: v } })} />
               </div>
             </div>
           </SectionCard>
 
           <SectionCard title="Homepage Text" icon={Layout}>
-            <div className="space-y-4">
-              <InputGroup label="Featured Badge (e.g. 🔥 LIMITED OFFER)" value={formData.content.heroBadge} onChange={(v) => setFormData({ ...formData, content: { ...formData.content, heroBadge: v } })} />
+            <div className="flex flex-col gap-5">
+              <InputGroup label="Featured Badge" value={formData.content.heroBadge} onChange={(v) => setFormData({ ...formData, content: { ...formData.content, heroBadge: v } })} placeholder="e.g. 🔥 LIMITED OFFER" />
               <InputGroup label="Headline" value={formData.content.heroTitle} onChange={(v) => setFormData({ ...formData, content: { ...formData.content, heroTitle: v } })} />
               <InputGroup label="Sub-headline" value={formData.content.heroSubtitle} onChange={(v) => setFormData({ ...formData, content: { ...formData.content, heroSubtitle: v } })} isTextArea />
-              <InputGroup label="Hero Background Image URL" value={formData.content.heroImage} onChange={(v) => setFormData({ ...formData, content: { ...formData.content, heroImage: v } })} placeholder="https://example.com/hero-image.jpg" />
+              <InputGroup label="Hero Image URL" value={formData.content.heroImage} onChange={(v) => setFormData({ ...formData, content: { ...formData.content, heroImage: v } })} placeholder="https://example.com/hero.jpg" />
+              
               <div className="space-y-2">
-                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider ml-1">Hero Image Preview</label>
-                <div className="w-full h-40 rounded-2xl border border-slate-200 bg-slate-50 overflow-hidden flex items-center justify-center">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Preview</label>
+                <div className="w-full h-40 rounded-xl border-1.5 border-[#e4e4de] bg-[#fafaf7] overflow-hidden flex items-center justify-center">
                   {formData.content.heroImage?.trim() ? (
-                    <img
-                      src={formData.content.heroImage}
-                      alt="Hero preview"
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                        const fallback = e.currentTarget.nextElementSibling;
-                        if (fallback) fallback.classList.remove('hidden');
-                      }}
-                      onLoad={(e) => {
-                        e.currentTarget.style.display = 'block';
-                        const fallback = e.currentTarget.nextElementSibling;
-                        if (fallback) fallback.classList.add('hidden');
-                      }}
-                    />
-                  ) : null}
-                  <div className={`${formData.content.heroImage?.trim() ? 'hidden' : ''} text-xs text-slate-400 font-medium`}>
-                    Paste an image URL to preview hero background
-                  </div>
+                    <img src={formData.content.heroImage} alt="Hero" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="text-xs text-slate-400 font-medium">Hero Image Preview</div>
+                  )}
                 </div>
               </div>
             </div>
           </SectionCard>
 
-          <SectionCard title="Store Features" icon={Smartphone}>
-            <div className="flex items-center justify-end mb-4">
+          <SectionCard title="Value Props" icon={Sparkles}>
+            <div className="flex items-center justify-between mb-6">
+              <p className="text-xs text-slate-500 font-medium">Add up to {maxFeatures} key features to display.</p>
               <button
                 type="button"
                 onClick={handleAddFeature}
                 disabled={(formData.content?.features || []).length >= maxFeatures}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-50 text-primary-700 text-xs font-bold border border-primary-100 hover:bg-primary-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="dash-btn-outline !py-1.5 !px-3 !text-xs"
               >
-                <Plus size={14} /> Add Feature
+                <Plus size={14} /> Add
               </button>
             </div>
-            <div className="space-y-3">
+            
+            <div className="flex flex-col gap-4">
               {formData.content.features.map((feat, idx) => (
-                <div key={idx} className="p-4 rounded-2xl border border-slate-200 bg-white shadow-sm">
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-3 md:items-start">
-                    <div className="md:col-span-4">
-                      <InputGroup label="Title" value={feat.title} onChange={(v) => {
-                        const next = [...formData.content.features];
-                        next[idx].title = v;
-                        setFormData({ ...formData, content: { ...formData.content, features: next } });
-                      }} />
+                <div key={idx} className="p-4 rounded-xl border-1.5 border-[#e4e4de] bg-[#fff] relative">
+                  <button
+                    onClick={() => handleRemoveFeature(idx)}
+                    className="absolute top-3 right-3 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                  >
+                    <X size={14} />
+                  </button>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <InputGroup label="Title" value={feat.title} onChange={(v) => {
+                      const next = [...formData.content.features];
+                      next[idx].title = v;
+                      setFormData({ ...formData, content: { ...formData.content, features: next } });
+                    }} />
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Icon</label>
+                      <select
+                        value={feat.icon || ''}
+                        onChange={(e) => {
+                          const next = [...formData.content.features];
+                          next[idx].icon = e.target.value;
+                          setFormData({ ...formData, content: { ...formData.content, features: next } });
+                        }}
+                        className="w-full px-4 py-2.5 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-lg focus:outline-none focus:border-[#111] transition-all text-sm"
+                      >
+                        <option value="">Default</option>
+                        {featureIconOptions.map((option) => (
+                          <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                      </select>
                     </div>
-
-                    <div className="md:col-span-3 space-y-2">
-                      <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider ml-1">Icon</label>
-                      <div className="relative">
-                        <select
-                          value={feat.icon || ''}
-                          onChange={(e) => {
-                            const next = [...formData.content.features];
-                            next[idx].icon = e.target.value;
-                            setFormData({ ...formData, content: { ...formData.content, features: next } });
-                          }}
-                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all text-slate-900"
-                        >
-                          <option value="">Default Icon</option>
-                          {featureIconOptions.map((option) => (
-                            <option key={option.value} value={option.value}>{option.label}</option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className="md:col-span-5">
-                      <InputGroup label="Desc" value={feat.description} onChange={(v) => {
+                    <div className="md:col-span-2">
+                      <InputGroup label="Description" value={feat.description} onChange={(v) => {
                         const next = [...formData.content.features];
                         next[idx].description = v;
                         setFormData({ ...formData, content: { ...formData.content, features: next } });
-                      }} placeholder="Short feature description" />
-                    </div>
-
-                    <div className="md:col-span-12 md:flex md:justify-end">
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveFeature(idx)}
-                        disabled={isSaving}
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold text-rose-600 bg-rose-50 border border-rose-100 hover:bg-rose-100 transition-all"
-                      >
-                        <Minus size={12} /> Remove
-                      </button>
+                      }} placeholder="Short description..." />
                     </div>
                   </div>
                 </div>
               ))}
+              {formData.content.features.length === 0 && (
+                <div className="py-10 text-center border-2 border-dashed border-[#e4e4de] rounded-xl text-slate-400 text-sm font-medium">
+                  No features added yet.
+                </div>
+              )}
             </div>
           </SectionCard>
         </div>
 
-        {/* Assets & Sidebar */}
-        <div className="space-y-6">
-          <SectionCard title="Branding Assets" icon={ImageIcon}>
-            <div className="space-y-4 text-center">
-              <div className="w-32 h-32 mx-auto rounded-full bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden shadow-inner">
+        <div className="flex flex-col gap-6">
+          <SectionCard title="Assets" icon={ImageIcon}>
+            <div className="flex flex-col items-center gap-6 py-4">
+              <div className="w-28 h-28 rounded-2xl bg-[#fafaf7] border-2 border-dashed border-[#e4e4de] flex items-center justify-center overflow-hidden">
                 {formData.logo ? (
-                  <img src={formData.logo} alt="Logo Preview" className="w-full h-full object-cover" />
+                  <img src={formData.logo} alt="Logo" className="w-full h-full object-contain p-2" />
                 ) : (
-                  <div className="text-slate-400"><ImageIcon size={40} /></div>
+                  <ImageIcon size={32} className="text-slate-300" />
                 )}
               </div>
-              <div className="space-y-2">
-                <input
-                  type="text"
-                  value={formData.logo}
-                  onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-center text-sm font-medium focus:ring-2 focus:ring-primary-500/10 focus:border-primary-500 transition-all"
-                  placeholder="Paste Logo URL"
-                />
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Recommended: Square Transparent PNG</p>
+              <div className="w-full">
+                <InputGroup label="Logo URL" value={formData.logo} onChange={(v) => setFormData({ ...formData, logo: v })} placeholder="https://..." />
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest text-center mt-3">Square PNG Recommended</p>
               </div>
             </div>
           </SectionCard>
 
-          <SectionCard title="Social Links" icon={Share2}>
-            <div className="space-y-3">
+          <SectionCard title="Socials" icon={Share2}>
+            <div className="flex flex-col gap-4">
               <IconInput 
                 icon={MessageSquare} 
-                label="Whatsapp" 
+                label="WhatsApp" 
                 value={formData.socialLinks.whatsapp} 
-                onChange={(v) => {
-                  const cleaned = v.replace(/\D/g, '');
-                  if (cleaned.length <= 15) {
-                    setFormData({ ...formData, socialLinks: { ...formData.socialLinks, whatsapp: cleaned } });
-                  }
-                }} 
-                prefix="https://wa.me/" 
+                onChange={(v) => setFormData({ ...formData, socialLinks: { ...formData.socialLinks, whatsapp: v.replace(/\D/g, '') } })} 
+                prefix="wa.me/" 
               />
               <IconInput 
                 icon={Phone} 
                 label="Phone" 
                 value={formData.socialLinks.phone} 
-                onChange={(v) => {
-                  const cleaned = v.replace(/\D/g, '');
-                  if (cleaned.length <= 15) {
-                    setFormData({ ...formData, socialLinks: { ...formData.socialLinks, phone: cleaned } });
-                  }
-                }} 
+                onChange={(v) => setFormData({ ...formData, socialLinks: { ...formData.socialLinks, phone: v.replace(/\D/g, '') } })} 
               />
               <IconInput icon={Mail} label="Email" value={formData.socialLinks.email} onChange={(v) => setFormData({ ...formData, socialLinks: { ...formData.socialLinks, email: v } })} />
               <IconInput icon={Facebook} label="Facebook" value={formData.socialLinks.facebook} onChange={(v) => setFormData({ ...formData, socialLinks: { ...formData.socialLinks, facebook: v } })} />
@@ -646,15 +839,15 @@ function OverviewTab({ data, onRefresh, showAlert }) {
             </div>
           </SectionCard>
 
-          {/* Quick Actions Sticky Bottom Mobile */}
-          <div className="bg-white p-6 rounded-2xl border border-primary-100 shadow-xl shadow-primary-50 sticky top-28">
-            <p className="text-sm font-medium text-slate-600 mb-4">You have unsaved changes in your branding settings.</p>
+          <div className="dash-card sticky top-6">
+            <h4 className="text-sm font-bold text-slate-900 mb-2">Unsaved Changes</h4>
+            <p className="text-xs text-slate-500 mb-6">Review your changes before applying them to your storefront.</p>
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-700 shadow-lg shadow-primary-100 transition-all disabled:opacity-50"
+              className="dash-btn-primary w-full py-3"
             >
-              {isSaving ? <div className="animate-spin rounded-full h-5 w-5 border-2 border-white/30 border-t-white" /> : <Save size={20} />}
+              {isSaving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
               Save Changes
             </button>
           </div>
@@ -676,12 +869,6 @@ function InventoryTab({ plans, activeProvider = 'xpresdata', onRefresh, showAler
   const activePlanType = normalizedProvider === 'digimall'
     ? 'DigimallOffer'
     : (normalizedProvider === 'topza' ? 'TopzaOffer' : 'XpresDataOffer');
-
-  const normalizePlanType = (type) => {
-    const value = String(type || '').toLowerCase();
-    if (!value || value === 'dataplan') return 'xpresdataoffer';
-    return value;
-  };
 
   useEffect(() => {
     if (showAdd) fetchGlobalPlans();
@@ -725,146 +912,118 @@ function InventoryTab({ plans, activeProvider = 'xpresdata', onRefresh, showAler
   });
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="text-lg sm:text-xl font-bold text-slate-900 min-w-0">Manage Data Plans</h2>
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-xl font-bold text-slate-900">Store Inventory</h2>
+          <p className="text-sm text-slate-600 mt-1">Manage data bundles available on your storefront.</p>
+        </div>
         <button
           onClick={() => setShowAdd(true)}
-          className="inline-flex items-center gap-2 ml-auto shrink-0 px-3.5 sm:px-4 py-2 sm:py-2.5 bg-primary-600 text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold hover:bg-primary-700 shadow-md shadow-primary-100 transition-all"
+          className="dash-btn-primary"
         >
-          <Plus size={16} className="sm:w-[18px] sm:h-[18px]" />
-          <span className="sm:hidden">Add Plan</span>
-          <span className="hidden sm:inline">Append New Plan</span>
+          <Plus size={18} />
+          Append Plan
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {plans.map(plan => (
-          <PlanCard
-            key={plan._id}
-            plan={plan}
-            isActiveForCurrentVtu={
-              normalizePlanType(plan?.planType) === String(activePlanType).toLowerCase()
-            }
-            onRemove={() => handleRemove(plan._id)}
-            onEdit={() => setSelectedPlanForEdit(plan)}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {plans.map((p) => (
+          <InventoryCard
+            key={p._id}
+            plan={p}
+            onEdit={() => setSelectedPlanForEdit(p)}
+            onRemove={() => handleRemove(p._id)}
           />
         ))}
         {plans.length === 0 && (
-          <div className="col-span-full py-12 flex flex-col items-center justify-center text-slate-400 gap-4">
-            <Smartphone size={64} className="opacity-20" />
-            <p className="font-medium">No plans in your catalogue. Click the button above to add some!</p>
+          <div className="col-span-full py-20 text-center border-2 border-dashed border-[#e4e4de] rounded-2xl bg-white/50">
+            <div className="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400">
+              <Smartphone size={28} />
+            </div>
+            <h3 className="text-base font-bold text-slate-900">Empty Inventory</h3>
+            <p className="text-sm text-slate-500 mt-1 mb-6">You haven't added any data plans to your store yet.</p>
+            <button onClick={() => setShowAdd(true)} className="dash-btn-outline mx-auto">
+              Browse Available Plans
+            </button>
           </div>
         )}
       </div>
 
       {showAdd && (
-        <Modal title="Select Plan to Add" onClose={() => setShowAdd(false)}>
-          <div className="space-y-6">
-            {/* Filters */}
-            <div className="flex flex-col md:flex-row gap-4">
+        <Modal
+          isOpen={showAdd}
+          onClose={() => setShowAdd(false)}
+          title="Add New Plan"
+        >
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col sm:flex-row gap-3">
               <div className="flex-1 relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                 <input
                   type="text"
-                  placeholder="Search plan name..."
+                  placeholder="Search plans..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:border-primary-500 focus:bg-white transition-all text-sm font-medium"
+                  className="w-full pl-10 pr-4 py-2.5 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-lg focus:outline-none focus:border-[#111] transition-all text-sm"
                 />
               </div>
-              <div className="w-full md:w-48 relative">
-                <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <select
-                  value={networkFilter}
-                  onChange={(e) => setNetworkFilter(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:border-primary-500 focus:bg-white transition-all text-sm font-medium appearance-none"
-                >
-                  <option value="all">All Networks</option>
-                  {networks.map(n => (
-                    <option key={n} value={n}>{n}</option>
-                  ))}
-                </select>
-              </div>
+              <select
+                value={networkFilter}
+                onChange={(e) => setNetworkFilter(e.target.value)}
+                className="px-4 py-2.5 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-lg focus:outline-none focus:border-[#111] transition-all text-sm font-bold uppercase"
+              >
+                <option value="all">Networks</option>
+                {networks.map(n => <option key={n} value={n}>{n}</option>)}
+              </select>
             </div>
 
             {loadingGlobal ? (
-              <div className="py-12 text-center">
-                <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-slate-200 border-t-primary-600 mb-4"></div>
-                <p className="text-slate-500 font-medium">Loading plans...</p>
-              </div>
+              <div className="py-20 text-center"><Loader2 className="animate-spin mx-auto text-[#f0a500]" size={32} /></div>
             ) : (
-              <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
-                {filteredPlans.map(p => (
-                  (() => {
-                    const planType = p.planType || 'XpresDataOffer';
-                    const planKey = `${planType}:${p._id}`;
-                    const isAlreadyAdded = existingPlanKeys.has(planKey);
-
-                    return (
-                      <div
-                        key={p._id}
-                        className={`group flex items-center justify-between p-4 border rounded-2xl transition-all shadow-sm ${isAlreadyAdded
-                          ? 'bg-slate-50 border-slate-200'
-                          : 'bg-white border-slate-100 hover:border-primary-100 hover:bg-primary-50/10'
-                          }`}
-                      >
-                        <div className="space-y-1">
-                          <h4 className={`font-bold uppercase tracking-tight ${isAlreadyAdded ? 'text-slate-400' : 'text-slate-900 group-hover:text-primary-700 transition-colors'}`}>
-                            {p.name || p.planName}
-                          </h4>
-                          <div className="flex items-center gap-2">
-                            <span className={`text-[10px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider ${isAlreadyAdded ? 'bg-slate-100 text-slate-400' : 'bg-slate-100 text-slate-500'}`}>
-                              {p.network}
-                            </span>
-                            <span className="text-xs text-slate-400 font-medium">•</span>
-                            <span className={`text-xs font-bold tracking-tight ${isAlreadyAdded ? 'text-slate-400' : 'text-slate-500'}`}>
-                              BASE: {formatCurrencyAbbreviated(p.agentPrice || p.sellingPrice)}
-                            </span>
-                          </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
+                {filteredPlans.map((p) => {
+                  const isAlreadyAdded = existingPlanKeys.has(`${p.planType || 'DataPlan'}:${p._id}`);
+                  return (
+                    <div
+                      key={p._id}
+                      className={`flex items-center justify-between p-4 border-1.5 rounded-xl transition-all ${
+                        isAlreadyAdded ? 'bg-slate-50 border-slate-200 opacity-60' : 'bg-white border-[#e4e4de] hover:border-[#111]'
+                      }`}
+                    >
+                      <div className="min-w-0">
+                        <h4 className="text-sm font-bold text-slate-900 truncate uppercase">{p.name || p.planName}</h4>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded uppercase">{p.network}</span>
+                          <span className="text-xs font-bold text-[#111]">{formatCurrencyAbbreviated(p.agentPrice || p.sellingPrice)}</span>
                         </div>
-                        <button
-                          onClick={() => !isAlreadyAdded && setSelectedPlanForPrice(p)}
-                          disabled={isAlreadyAdded}
-                          className={`p-3 rounded-xl transition-all shadow-sm ${isAlreadyAdded
-                            ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
-                            : 'bg-slate-50 text-primary-600 hover:bg-primary-600 hover:text-white group-hover:shadow-md'
-                            }`}
-                          title={isAlreadyAdded ? 'Already added to storefront' : 'Add this plan'}
-                        >
-                          {isAlreadyAdded ? <span className="text-[10px] font-bold uppercase tracking-wider">Added</span> : <Plus size={20} />}
-                        </button>
                       </div>
-                    );
-                  })()
-                ))}
-
-                {filteredPlans.length === 0 && (
-                  <div className="py-20 text-center space-y-4">
-                    <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto">
-                      <Search className="text-slate-300" size={32} />
+                      <button
+                        onClick={() => !isAlreadyAdded && setSelectedPlanForPrice(p)}
+                        disabled={isAlreadyAdded}
+                        className={`p-2 rounded-lg transition-colors ${
+                          isAlreadyAdded ? 'text-slate-300' : 'text-[#111] hover:bg-[#111] hover:text-white'
+                        }`}
+                      >
+                        {isAlreadyAdded ? <CheckCircle2 size={20} /> : <Plus size={20} />}
+                      </button>
                     </div>
-                    <p className="text-slate-400 font-medium">No matching plans found.</p>
-                  </div>
-                )}
+                  );
+                })}
               </div>
             )}
           </div>
         </Modal>
       )}
+
       {selectedPlanForPrice && (
         <PriceModal
           plan={selectedPlanForPrice}
           submitLabel="Add Plan"
-          loadingLabel="Adding..."
           onClose={() => setSelectedPlanForPrice(null)}
           onConfirm={async (price) => {
             const planType = selectedPlanForPrice.planType || 'XpresDataOffer';
-            await storeAPI.addPlan({
-              planId: selectedPlanForPrice._id,
-              customPrice: price,
-              planType
-            });
+            await storeAPI.addPlan({ planId: selectedPlanForPrice._id, customPrice: price, planType });
             onRefresh();
             setSelectedPlanForPrice(null);
             setShowAdd(false);
@@ -878,18 +1037,11 @@ function InventoryTab({ plans, activeProvider = 'xpresdata', onRefresh, showAler
           plan={{
             ...selectedPlanForEdit,
             name: selectedPlanForEdit.planId?.planName || selectedPlanForEdit.planId?.name,
-            sellingPrice: selectedPlanForEdit.planType === 'XpresDataOffer'
-              ? (selectedPlanForEdit.planId?.agentPrice || selectedPlanForEdit.planId?.sellingPrice || 0)
-              : selectedPlanForEdit.planType === 'DigimallOffer'
-              ? (selectedPlanForEdit.planId?.agentPrice || selectedPlanForEdit.planId?.sellingPrice || 0)
-              : selectedPlanForEdit.planType === 'TopzaOffer'
-              ? (selectedPlanForEdit.planId?.agentPrice || selectedPlanForEdit.planId?.sellingPrice || 0)
-              : (selectedPlanForEdit.planId?.sellingPrice || 0),
+            sellingPrice: (selectedPlanForEdit.planId?.agentPrice || selectedPlanForEdit.planId?.sellingPrice || 0),
             network: selectedPlanForEdit.network || selectedPlanForEdit.planId?.network || selectedPlanForEdit.planId?.isp,
           }}
           initialPrice={selectedPlanForEdit.customPrice}
           submitLabel="Update Price"
-          loadingLabel="Updating..."
           onClose={() => setSelectedPlanForEdit(null)}
           onConfirm={async (price) => {
             const targetPlanId = selectedPlanForEdit.planId?._id || selectedPlanForEdit.planId || selectedPlanForEdit._id;
@@ -936,10 +1088,7 @@ function CheckerInventoryTab({ onRefresh, showAlert }) {
   }, [refresh]);
 
   const addChecker = async () => {
-    if (!selectedCheckerId) {
-      showAlert('warning', 'Select a checker first');
-      return;
-    }
+    if (!selectedCheckerId) return;
     try {
       setSaving(true);
       await checkersAPI.addStoreChecker({ checkerId: selectedCheckerId, customPrice: Number(customPrice || 0) });
@@ -967,6 +1116,7 @@ function CheckerInventoryTab({ onRefresh, showAlert }) {
   };
 
   const removeChecker = async (checkerRow) => {
+    if (!window.confirm('Remove this checker from your store?')) return;
     try {
       await checkersAPI.removeStoreChecker(checkerRow._id);
       showAlert('success', 'Checker removed from store');
@@ -979,173 +1129,148 @@ function CheckerInventoryTab({ onRefresh, showAlert }) {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center text-slate-500">
-        Loading store checker settings...
+      <div className="dash-card py-20 text-center">
+        <Loader2 className="animate-spin mx-auto text-[#f0a500]" size={32} />
+        <p className="mt-4 text-slate-500 font-medium">Loading checkers...</p>
       </div>
     );
   }
 
-  const selectedChecker = availableCheckers.find((row) => row._id === selectedCheckerId);
-
   return (
-    <div className="space-y-6">
-      <div className="bg-white rounded-2xl border border-slate-200 p-5">
-        <h3 className="text-lg font-bold text-slate-900 mb-3">Add Result Checker To Store</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <select
-            value={selectedCheckerId}
-            onChange={(e) => {
-              const nextId = e.target.value;
-              setSelectedCheckerId(nextId);
-              const checker = availableCheckers.find((row) => row._id === nextId);
-              setCustomPrice(checker ? String(checker.basePrice || 0) : '');
-            }}
-            className="px-3 py-2.5 rounded-xl border border-slate-200"
-          >
-            <option value="">Select checker</option>
-            {availableCheckers.map((checker) => (
-              <option key={checker._id} value={checker._id}>
-                {checker.displayName} (Base GHc {Number(checker.basePrice || 0).toFixed(2)})
-              </option>
-            ))}
-          </select>
-
-          <input
-            type="number"
-            min="0"
-            step="0.01"
-            value={customPrice}
-            onChange={(e) => setCustomPrice(e.target.value)}
-            placeholder="Custom selling price"
-            className="px-3 py-2.5 rounded-xl border border-slate-200"
-          />
-
+    <div className="flex flex-col gap-6">
+      <SectionCard title="Config Checker" icon={CreditCard}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Type</label>
+            <select
+              value={selectedCheckerId}
+              onChange={(e) => {
+                const id = e.target.value;
+                setSelectedCheckerId(id);
+                const ch = availableCheckers.find(r => r._id === id);
+                setCustomPrice(ch ? String(ch.basePrice || 0) : '');
+              }}
+              className="w-full px-4 py-2.5 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-lg focus:outline-none focus:border-[#111] transition-all text-sm"
+            >
+              <option value="">Select a checker</option>
+              {availableCheckers.map(ch => (
+                <option key={ch._id} value={ch._id}>{ch.displayName}</option>
+              ))}
+            </select>
+          </div>
+          <InputGroup label="Price (GHS)" value={customPrice} onChange={setCustomPrice} placeholder="0.00" />
           <button
             onClick={addChecker}
             disabled={saving || !selectedCheckerId}
-            className="px-4 py-2.5 rounded-xl bg-slate-900 text-white font-semibold disabled:opacity-50"
+            className="dash-btn-primary h-[45px]"
           >
-            {saving ? 'Saving...' : 'Add Checker'}
+            {saving ? <Loader2 className="animate-spin" size={18} /> : <Plus size={18} />}
+            Append to Store
           </button>
         </div>
-        {selectedChecker && (
-          <p className="mt-2 text-xs text-slate-500">
-            Base price: GHc {Number(selectedChecker.basePrice || 0).toFixed(2)}. Your store price must not be below base.
-          </p>
-        )}
-      </div>
+      </SectionCard>
 
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        <div className="p-4 border-b border-slate-100">
-          <h3 className="font-bold text-slate-900">Store Result Checkers</h3>
-        </div>
-        {storeCheckers.length === 0 ? (
-          <div className="p-6 text-sm text-slate-500">No checker configured in your store yet.</div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-slate-50 text-xs text-slate-600 uppercase tracking-wider">
-                  <th className="text-left p-3">Checker</th>
-                  <th className="text-left p-3">Store Price</th>
-                  <th className="text-left p-3">Stock</th>
-                  <th className="text-left p-3">Visibility</th>
-                  <th className="text-left p-3">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {storeCheckers.map((row) => (
-                  <tr key={row._id} className="border-t border-slate-100 text-sm">
-                    <td className="p-3">
-                      <p className="font-semibold text-slate-900">{row.checkerId?.displayName || row.checkerId?.checkerType || 'Checker'}</p>
-                      <p className="text-xs text-slate-500">{row.checkerId?.checkerType || ''}</p>
-                    </td>
-                    <td className="p-3">GHc {Number(row.customPrice || 0).toFixed(2)}</td>
-                    <td className="p-3 text-xs text-slate-600">{Number(row.checkerId?.stockCount || 0)}</td>
-                    <td className="p-3">
-                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${row.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
-                        {row.isActive ? 'Visible' : 'Hidden'}
-                      </span>
-                    </td>
-                    <td className="p-3">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => {
-                            const next = window.prompt('Enter new store price', String(Number(row.customPrice || 0)));
-                            if (next === null) return;
-                            updateChecker(row, { customPrice: Number(next) });
-                          }}
-                          className="px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold hover:bg-slate-50"
-                        >
-                          Edit Price
-                        </button>
-                        <button
-                          onClick={() => updateChecker(row, { isActive: !row.isActive })}
-                          className="px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold hover:bg-slate-50"
-                        >
-                          {row.isActive ? 'Hide' : 'Show'}
-                        </button>
-                        <button
-                          onClick={() => removeChecker(row)}
-                          className="px-2.5 py-1.5 rounded-lg border border-rose-200 text-rose-700 text-xs font-semibold hover:bg-rose-50"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+      <div className="dash-table-container">
+        <table className="dash-table">
+          <thead>
+            <tr>
+              <th className="dash-th">Checker Name</th>
+              <th className="dash-th">Store Price</th>
+              <th className="dash-th">Status</th>
+              <th className="dash-th text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {storeCheckers.map((row) => (
+              <tr key={row._id}>
+                <td className="dash-td">
+                  <p className="font-bold text-slate-900">{row.checkerId?.displayName || 'Checker'}</p>
+                  <p className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">{row.checkerId?.checkerType}</p>
+                </td>
+                <td className="dash-td font-bold text-slate-900">GHc {Number(row.customPrice || 0).toFixed(2)}</td>
+                <td className="dash-td">
+                  <span className={`dash-badge ${row.isActive ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'}`}>
+                    {row.isActive ? 'Visible' : 'Hidden'}
+                  </span>
+                </td>
+                <td className="dash-td text-right">
+                  <div className="flex items-center justify-end gap-2">
+                    <button
+                      onClick={() => {
+                        const p = window.prompt('New price:', String(row.customPrice));
+                        if (p) updateChecker(row, { customPrice: Number(p) });
+                      }}
+                      className="p-2 text-slate-400 hover:text-[#f0a500] hover:bg-slate-50 rounded-lg transition-all"
+                    >
+                      <Edit2 size={16} />
+                    </button>
+                    <button
+                      onClick={() => updateChecker(row, { isActive: !row.isActive })}
+                      className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                    >
+                      {row.isActive ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                    <button
+                      onClick={() => removeChecker(row)}
+                      className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+            {storeCheckers.length === 0 && (
+              <tr>
+                <td colSpan="4" className="dash-td py-20 text-center text-slate-400 font-medium">
+                  No checkers configured yet.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );
 }
 
-// --- UTILITY COMPONENTS ---
-
 function SectionCard({ title, icon: Icon, children }) {
   return (
-    <div className="bg-white rounded-3xl border border-slate-200/60 shadow-sm overflow-hidden transition-all hover:shadow-md">
-      <div className="px-6 py-4 bg-slate-50/50 border-b border-slate-100 flex items-center justify-between">
-        <h3 className="font-bold text-slate-700 flex items-center gap-2">
-          {Icon && <Icon size={18} className="text-primary-500" />}
+    <div className="dash-card flex flex-col gap-5">
+      <div className="flex items-center justify-between border-b border-[#e4e4de] pb-4 -mx-6 px-6">
+        <h3 className="dash-card-title !mb-0">
+          {Icon && <Icon size={18} className="text-[#f0a500]" />}
           {title}
         </h3>
         <div className="flex gap-1">
-          <div className="w-2 h-2 rounded-full bg-slate-200"></div>
-          <div className="w-2 h-2 rounded-full bg-slate-200"></div>
+          <div className="w-1.5 h-1.5 rounded-full bg-slate-200"></div>
+          <div className="w-1.5 h-1.5 rounded-full bg-slate-200"></div>
         </div>
       </div>
-      <div className="p-6">
-        {children}
-      </div>
+      <div>{children}</div>
     </div>
   );
 }
 
 function InputGroup({ label, value = '', onChange, placeholder = '', isTextArea = false }) {
-  const safeValue = value || '';
   return (
-    <div className="space-y-2">
-      <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider ml-1">{label}</label>
+    <div className="flex flex-col gap-2">
+      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">{label}</label>
       {isTextArea ? (
         <textarea
-          value={safeValue}
+          value={value || ''}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           rows={3}
-          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all resize-none text-slate-900"
+          className="w-full px-4 py-2.5 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-lg focus:outline-none focus:border-[#111] transition-all resize-none text-sm"
         />
       ) : (
         <input
           type="text"
-          value={safeValue}
+          value={value || ''}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all text-slate-900"
+          className="w-full px-4 py-2.5 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-lg focus:outline-none focus:border-[#111] transition-all text-sm"
         />
       )}
     </div>
@@ -1153,40 +1278,41 @@ function InputGroup({ label, value = '', onChange, placeholder = '', isTextArea 
 }
 
 function ColorInput({ label, value = '', onChange }) {
-  const safeValue = value || '';
   return (
-    <div className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl">
-      <input
-        type="color"
-        value={safeValue}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-8 h-8 rounded-lg cursor-pointer bg-transparent"
-      />
-      <div>
-        <p className="text-[10px] font-bold text-slate-500 uppercase">{label}</p>
-        <p className="text-xs font-mono text-slate-900">{safeValue}</p>
+    <div className="flex items-center gap-4 p-3 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-xl group transition-all hover:border-slate-300">
+      <div className="relative w-10 h-10 shrink-0">
+        <input
+          type="color"
+          value={value || ''}
+          onChange={(e) => onChange(e.target.value)}
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+        />
+        <div 
+          className="w-full h-full rounded-lg border border-white shadow-sm transition-transform group-hover:scale-105" 
+          style={{ backgroundColor: value }}
+        />
+      </div>
+      <div className="min-w-0">
+        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{label}</p>
+        <p className="text-xs font-mono font-bold text-slate-900 truncate uppercase">{value}</p>
       </div>
     </div>
   );
 }
 
-// eslint-disable-next-line no-unused-vars
 function IconInput({ icon: Icon, label, value = '', onChange, prefix = '' }) {
-  const displayValue = (typeof value === 'string' ? value : '').replace(prefix, '');
-
   return (
-    <div className="flex items-center gap-3 p-1 pl-3 bg-slate-50 border border-slate-200 rounded-xl focus-within:ring-2 focus-within:ring-primary-500/20 focus-within:border-primary-500 transition-all">
-      <Icon size={16} className="text-slate-400" />
-      <div className="flex-1">
-        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter -mb-1">{label}</p>
-        <div className="flex items-center">
-          <span className="text-xs text-slate-400 font-mono">{prefix}</span>
+    <div className="flex flex-col gap-2">
+      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">{label}</label>
+      <div className="flex items-center gap-3 px-4 py-2.5 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-lg focus-within:border-[#111] transition-all">
+        <Icon size={16} className="text-slate-400" />
+        <div className="flex items-center gap-1 w-full text-sm">
+          {prefix && <span className="text-slate-400 font-bold">{prefix}</span>}
           <input
             type="text"
-            value={displayValue}
+            value={value || ''}
             onChange={(e) => onChange(e.target.value)}
-            className="w-full py-1 text-sm bg-transparent focus:outline-none text-slate-900"
-            placeholder="..."
+            className="w-full bg-transparent focus:outline-none font-medium text-slate-900"
           />
         </div>
       </div>
@@ -1194,69 +1320,33 @@ function IconInput({ icon: Icon, label, value = '', onChange, prefix = '' }) {
   );
 }
 
-function PlanCard({ plan, onRemove, onEdit, isActiveForCurrentVtu = true }) {
+function InventoryCard({ plan, onEdit, onRemove }) {
   return (
-    <div className={`group p-5 lg:p-6 rounded-3xl border shadow-sm transition-all overflow-hidden h-full ${isActiveForCurrentVtu
-      ? 'bg-white border-slate-200/80 hover:shadow-xl hover:shadow-primary-100/50'
-      : 'bg-slate-50 border-slate-200 opacity-70'
-      }`}>
-      <div className="flex items-start gap-4 mb-4 min-w-0">
-        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-bold transition-all ${isActiveForCurrentVtu
-          ? 'bg-slate-50 text-primary-600 group-hover:bg-primary-50 group-hover:scale-110'
-          : 'bg-slate-100 text-slate-400'
-          }`}>
+    <div className="dash-card flex flex-col gap-6 !p-5 group transition-all hover:translate-y-[-2px]">
+      <div className="flex items-center gap-4">
+        <div className="w-12 h-12 rounded-xl bg-[#fafaf7] border-1.5 border-[#e4e4de] flex items-center justify-center text-[#111] group-hover:bg-[#111] group-hover:text-white group-hover:border-[#111] transition-all">
           <Smartphone size={24} />
         </div>
         <div className="min-w-0">
-          <h4 className={`font-bold leading-tight break-words ${isActiveForCurrentVtu ? 'text-slate-900' : 'text-slate-500'}`}>
-            {plan.planId?.name}
-          </h4>
-          <div className="flex items-center gap-2 mt-0.5">
-            <p className={`text-[10px] font-bold uppercase tracking-widest ${isActiveForCurrentVtu ? 'text-primary-500' : 'text-slate-400'}`}>
-              {plan.network}
-            </p>
-          </div>
+          <h4 className="font-bold text-slate-900 truncate uppercase tracking-tight">{plan.planId?.name || plan.planName}</h4>
+          <p className="text-[10px] font-bold text-[#f0a500] uppercase tracking-widest">{plan.network}</p>
         </div>
       </div>
 
-      <div className={`flex items-end justify-between pt-4 mt-auto ${isActiveForCurrentVtu ? 'border-t border-slate-50' : 'border-t border-slate-200'}`}>
+      <div className="flex items-end justify-between pt-6 border-t border-[#f0f0f0]">
         <div>
-          <p className="text-[10px] text-slate-400 font-medium">Selling Price</p>
-          <p className={`text-2xl font-black tracking-tight ${isActiveForCurrentVtu ? 'text-slate-900' : 'text-slate-500'}`}>
+          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Selling Price</p>
+          <p className="text-2xl font-black text-slate-900 tracking-tight">
             {formatCurrencyAbbreviated(plan.customPrice)}
           </p>
         </div>
-        <div className="flex flex-col items-end">
-          <p className="text-[10px] text-slate-400 font-medium">Network Base</p>
-          <p className="text-xs font-bold text-slate-500 line-through">
-            {formatCurrencyAbbreviated((plan.planType === 'XpresDataOffer' || plan.planType === 'DigimallOffer' || plan.planType === 'TopzaOffer') ? (plan.planId?.agentPrice || plan.planId?.sellingPrice) : plan.planId?.sellingPrice || 0)}
-          </p>
-          <div className="mt-2.5 flex items-center gap-2">
-            <button
-              onClick={onEdit}
-              disabled={!isActiveForCurrentVtu}
-              className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold transition-all ${isActiveForCurrentVtu
-                ? 'text-blue-700 bg-blue-50 border border-blue-100 hover:bg-blue-100'
-                : 'text-slate-400 bg-slate-100 border border-slate-200 cursor-not-allowed'
-                }`}
-              title={isActiveForCurrentVtu ? 'Edit plan price' : 'Provider is currently inactive'}
-            >
-              <Edit2 size={12} />
-              Edit
-            </button>
-            <button
-              onClick={onRemove}
-              disabled={!isActiveForCurrentVtu}
-              className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold transition-all ${isActiveForCurrentVtu
-                ? 'text-rose-700 bg-rose-50 border border-rose-100 hover:bg-rose-100'
-                : 'text-slate-400 bg-slate-100 border border-slate-200 cursor-not-allowed'
-                }`}
-              title={isActiveForCurrentVtu ? 'Remove from storefront' : 'Provider is currently inactive'}
-            >
-              <X size={12} />
-              Remove
-            </button>
-          </div>
+        <div className="flex items-center gap-2">
+          <button onClick={onEdit} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Edit">
+            <Edit2 size={16} />
+          </button>
+          <button onClick={onRemove} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Remove">
+            <Trash2 size={16} />
+          </button>
         </div>
       </div>
     </div>
@@ -1285,134 +1375,135 @@ function OrdersTab() {
     }
   };
 
+  const getStatusStyle = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'completed': return 'bg-green-100 text-green-700';
+      case 'pending': return 'bg-amber-100 text-amber-700';
+      case 'processing': return 'bg-blue-100 text-blue-700';
+      default: return 'bg-slate-100 text-slate-700';
+    }
+  };
+
   return (
-    <div className="bg-white rounded-3xl border border-slate-200/60 shadow-sm overflow-hidden">
-      <div className="p-8">
-        <div className="flex items-center justify-between mb-8">
+    <div className="flex flex-col gap-6">
+      <div className="dash-header">
+        <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-xl font-bold text-slate-900">Order History</h3>
-            <p className="text-sm text-slate-500">Live feed of orders through your storefront</p>
+            <h3 className="text-lg font-bold text-slate-900">Sales History</h3>
+            <p className="text-sm text-slate-500 mt-1">Track all orders coming through your storefront.</p>
           </div>
-          <div className="p-3 bg-primary-50 text-primary-600 rounded-2xl">
-            <CreditCard size={24} />
+          <div className="dash-icon-box !w-10 !h-10">
+            <ShoppingBag size={20} />
           </div>
         </div>
-
-        {loading ? (
-          <div className="py-20 text-center animate-pulse text-slate-400 font-medium">Loading orders...</div>
-        ) : (
-          <div className="overflow-x-auto scrollbar-hide">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="border-b border-slate-100">
-                  <th className="pb-4 font-bold text-[11px] uppercase text-slate-600 tracking-wider whitespace-nowrap">Order ID</th>
-                  <th className="pb-4 font-bold text-[11px] uppercase text-slate-600 tracking-wider whitespace-nowrap">Plan</th>
-                  <th className="pb-4 font-bold text-[11px] uppercase text-slate-600 tracking-wider whitespace-nowrap">Amount</th>
-                  <th className="pb-4 font-bold text-[11px] uppercase text-slate-600 tracking-wider whitespace-nowrap">Status</th>
-                  <th className="pb-4 text-right font-bold text-[11px] uppercase text-slate-600 tracking-wider whitespace-nowrap">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {orders.map(order => (
-                  <tr key={order._id} className="group hover:bg-slate-50/50 transition-colors">
-                    <td className="py-4 whitespace-nowrap">
-                      <p className="font-bold text-slate-900 group-hover:text-primary-600 transition-colors">#{order.orderNumber}</p>
-                      <p className="text-[10px] text-slate-600 font-medium">{new Date(order.createdAt).toLocaleDateString()}</p>
-                    </td>
-                    <td className="py-4 whitespace-nowrap">
-                      <p className="text-sm font-semibold text-slate-700">{order.planName}</p>
-                      <p className="text-[10px] font-bold text-primary-500 uppercase tracking-tighter">{order.network}</p>
-                    </td>
-                    <td className="py-4 whitespace-nowrap">
-                      <p className="font-black text-slate-900">{formatCurrencyAbbreviated(order.amount)}</p>
-                    </td>
-                    <td className="py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${order.status === 'completed' ? 'bg-green-100 text-green-700' :
-                        order.status === 'pending' ? 'bg-amber-100 text-amber-700' :
-                          'bg-rose-100 text-rose-700'
-                        }`}>
-                        {order.status}
-                      </span>
-                    </td>
-                    <td className="py-4 text-right whitespace-nowrap">
-                      <button
-                        onClick={() => {
-                          setSelectedOrder(order);
-                          setShowOrderDetails(true);
-                        }}
-                        className="p-2 text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all"
-                        title="View Order"
-                      >
-                        <Eye size={16} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {orders.length === 0 && (
-              <div className="py-12 text-center text-slate-400">No orders recorded yet.</div>
-            )}
-          </div>
-        )}
-
-        {/* Order Details Modal */}
-        {showOrderDetails && selectedOrder && (
-          <Modal
-            isOpen={showOrderDetails}
-            onClose={() => setShowOrderDetails(false)}
-            title="Order Information"
-          >
-            <div className="space-y-6">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Order Ref</p>
-                  <p className="font-mono text-sm font-bold text-slate-900">#{selectedOrder.orderNumber}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Status</p>
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${selectedOrder.status === 'completed' ? 'bg-green-100 text-green-700' :
-                    selectedOrder.status === 'pending' ? 'bg-amber-100 text-amber-700' :
-                      'bg-rose-100 text-rose-700'
-                    }`}>
-                    {selectedOrder.status}
-                  </span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Plan</p>
-                  <p className="font-bold text-slate-900">{selectedOrder.planName}</p>
-                  <p className="text-[10px] font-bold text-primary-500 uppercase">{selectedOrder.network}</p>
-                </div>
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Amount</p>
-                  <p className="font-bold text-slate-900">{formatCurrencyAbbreviated(selectedOrder.amount)}</p>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <div className="flex justify-between items-center py-2 border-b border-slate-50 text-[11px]">
-                  <span className="font-bold text-slate-500 uppercase">Customer Number</span>
-                  <span className="font-bold text-slate-900">{selectedOrder.phoneNumber || 'N/A'}</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-slate-50 text-[11px]">
-                  <span className="font-bold text-slate-500 uppercase">Order Date</span>
-                  <span className="font-bold text-slate-900">{new Date(selectedOrder.createdAt).toLocaleString()}</span>
-                </div>
-              </div>
-
-              <button
-                onClick={() => setShowOrderDetails(false)}
-                className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black uppercase text-[11px] tracking-widest hover:bg-slate-800 transition-all active:scale-[0.98]"
-              >
-                Close
-              </button>
-            </div>
-          </Modal>
-        )}
       </div>
+
+      {loading ? (
+        <div className="dash-card py-20 text-center"><Loader2 className="animate-spin mx-auto text-[#f0a500]" size={32} /></div>
+      ) : (
+        <div className="dash-table-container">
+          <table className="dash-table">
+            <thead>
+              <tr>
+                <th className="dash-th">Order ID</th>
+                <th className="dash-th">Product</th>
+                <th className="dash-th">Amount</th>
+                <th className="dash-th">Status</th>
+                <th className="dash-th text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders.map(order => (
+                <tr key={order._id}>
+                  <td className="dash-td">
+                    <p className="font-bold text-slate-900">#{order.orderNumber}</p>
+                    <p className="text-[10px] text-slate-400 font-medium">{new Date(order.createdAt).toLocaleDateString()}</p>
+                  </td>
+                  <td className="dash-td">
+                    <p className="font-bold text-slate-700 text-sm truncate max-w-[150px]">{order.planName}</p>
+                    <p className="text-[10px] font-black text-[#f0a500] uppercase">{order.network}</p>
+                  </td>
+                  <td className="dash-td font-black text-slate-900">{formatCurrencyAbbreviated(order.amount)}</td>
+                  <td className="dash-td">
+                    <span className={`dash-badge ${getStatusStyle(order.status)}`}>
+                      {order.status}
+                    </span>
+                  </td>
+                  <td className="dash-td text-right">
+                    <button
+                      onClick={() => {
+                        setSelectedOrder(order);
+                        setShowOrderDetails(true);
+                      }}
+                      className="p-2 text-slate-400 hover:text-[#111] hover:bg-slate-50 rounded-lg transition-all"
+                    >
+                      <Eye size={18} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {orders.length === 0 && (
+                <tr>
+                  <td colSpan="5" className="dash-td py-20 text-center text-slate-400 font-medium">No sales recorded yet.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {showOrderDetails && selectedOrder && (
+        <Modal
+          isOpen={showOrderDetails}
+          onClose={() => setShowOrderDetails(false)}
+          title="Order Details"
+        >
+          <div className="flex flex-col gap-6">
+            <div className="flex justify-between items-start border-b border-[#f0f0f0] pb-4">
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Order Ref</p>
+                <p className="font-bold text-lg text-slate-900">#{selectedOrder.orderNumber}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Status</p>
+                <span className={`dash-badge ${getStatusStyle(selectedOrder.status)} !px-3 !py-1`}>
+                  {selectedOrder.status}
+                </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 bg-[#fafaf7] rounded-xl border border-[#e4e4de]">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Product</p>
+                <p className="font-bold text-slate-900 text-sm truncate">{selectedOrder.planName}</p>
+                <p className="text-[10px] font-black text-[#f0a500] uppercase mt-1">{selectedOrder.network}</p>
+              </div>
+              <div className="p-4 bg-[#fafaf7] rounded-xl border border-[#e4e4de]">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Amount Paid</p>
+                <p className="font-black text-slate-900 text-lg">{formatCurrencyAbbreviated(selectedOrder.amount)}</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <div className="flex justify-between items-center py-2 border-b border-[#f0f0f0]">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Beneficiary</span>
+                <span className="text-sm font-bold text-slate-900">{selectedOrder.phoneNumber || 'N/A'}</span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-[#f0f0f0]">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Transaction Date</span>
+                <span className="text-sm font-bold text-slate-900">{new Date(selectedOrder.createdAt).toLocaleString()}</span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowOrderDetails(false)}
+              className="dash-btn-primary w-full py-4 mt-2"
+            >
+              Close Details
+            </button>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
@@ -1439,49 +1530,54 @@ function CommissionsTab() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+    <div className="flex flex-col gap-6">
+      <div className="dash-stat-grid">
         <StatsCard
-          title="Total Earnings"
+          title="Total Earned"
           value={data?.totalEarned || 0}
-          color="primary"
           icon={TrendingUp}
         />
         <StatsCard
           title="Withdrawable"
           value={data?.availableForWithdrawal || 0}
-          color="success"
           icon={Wallet}
         />
         <StatsCard
-          title="Pending Withdrawal"
+          title="Pending"
           value={data?.pendingWithdrawal || 0}
-          color="amber"
-          icon={Send}
+          icon={Clock}
+        />
+        <StatsCard
+          title="Total Paid Out"
+          value={data?.totalWithdrawn || 0}
+          icon={CheckCircle}
         />
       </div>
 
-      <SectionCard title="Payout Summary" icon={CreditCard}>
-        <div className="grid grid-cols-2 gap-3 sm:gap-4">
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
-            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Total Withdrawn</p>
-            <p className="text-2xl font-bold text-slate-900">{formatCurrencyAbbreviated(data?.totalWithdrawn || 0)}</p>
+      <SectionCard title="Payout Details" icon={CreditCard}>
+        <div className="flex flex-col gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-xl p-5">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Available Balance</p>
+              <p className="text-2xl font-black text-[#111]">{formatCurrencyAbbreviated(data?.availableForWithdrawal || 0)}</p>
+            </div>
+            <div className="bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-xl p-5">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Aggregate Payouts</p>
+              <p className="text-2xl font-black text-[#111]">{formatCurrencyAbbreviated(data?.totalWithdrawn || 0)}</p>
+            </div>
           </div>
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
-            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Current Balance</p>
-            <p className="text-2xl font-bold text-slate-900">{formatCurrencyAbbreviated(data?.availableForWithdrawal || 0)}</p>
-          </div>
+          
+          <p className="text-sm text-slate-600">Your earnings are automatically aggregated from every sale processed through your storefront link.</p>
+          
+          <button
+            onClick={() => navigate('/agent/commissions')}
+            disabled={loading}
+            className="dash-btn-primary !w-max !px-8"
+          >
+            Manage Settlements
+            <ChevronRight size={16} />
+          </button>
         </div>
-
-        <p className="mt-4 text-sm text-slate-500">Aggregate of all commissions processed to your bank or wallet.</p>
-
-        <button
-          onClick={() => navigate('/agent/commissions')}
-          disabled={loading}
-          className="mt-4 w-full sm:w-auto px-5 py-2.5 bg-primary-600 text-white rounded-xl font-semibold hover:bg-primary-700 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-        >
-          Request Settlement
-        </button>
       </SectionCard>
     </div>
   );
@@ -1563,94 +1659,82 @@ function BillingTab({ storeData, onRefresh, showAlert }) {
       } else {
         const refreshedStatus = res?.feePayment?.status === 'paid' ? 'paid' : feeStatus;
         setFeeStatus(refreshedStatus);
-        if (typeof res?.balance === 'number') {
-          setWalletBalance(res.balance);
+        if (refreshedStatus === 'paid') {
+          showAlert('success', 'Store activated successfully via wallet.');
+          onRefresh();
+        } else {
+          showAlert('info', res?.message || 'Payment initiated.');
         }
-        showAlert('success', res?.message || 'Activation completed successfully.');
-        onRefresh();
-        setIsInitializing(false);
       }
     } catch (err) {
       showAlert('error', err.message || 'Failed to initialize payment');
-      setIsInitializing(false);
+    } finally {
+      if (paymentMethod !== 'paystack') {
+        setIsInitializing(false);
+      }
     }
   };
 
+  const isActive = ['paid', 'protocol'].includes(feeStatus);
+
   return (
-    <SectionCard title="Account Activation" icon={Settings}>
-      <div className="max-w-2xl mx-auto py-10 text-center">
-        <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 ${feeStatus === 'paid' ? 'bg-green-100 text-green-600' : 'bg-rose-100 text-rose-600'
-          }`}>
-          {feeStatus === 'paid' ? <Layout size={40} /> : <Lock size={40} />}
+    <SectionCard title="Agent Activation" icon={ShieldCheck}>
+      <div className="flex flex-col items-center text-center gap-6 max-w-xl mx-auto py-4">
+        <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all ${
+          isActive ? 'bg-green-100 text-green-600' : 'bg-[#111] text-[#f0a500]'
+        }`}>
+          {isActive ? <CheckCircle size={32} /> : <Zap size={32} />}
+        </div>
+        
+        <div className="space-y-2">
+          <h3 className="text-xl font-bold text-slate-900">
+            {isActive ? 'Account Fully Activated' : 'Unlock Your Public Storefront'}
+          </h3>
+          <p className="text-sm text-slate-600 leading-relaxed">
+            {isActive 
+              ? 'Congratulations! Your agent account is active. You can now customize your store and start earning commissions from sales.' 
+              : `To start selling data bundles and earning commissions, you need to pay a one-time activation fee of ${formatCurrencyAbbreviated(registrationFee)}.`}
+          </p>
         </div>
 
-        <h3 className="text-2xl font-black text-slate-900 mb-2">
-          {['paid', 'protocol'].includes(feeStatus) ? 'Active Agency Account' : 'Account Activation Required'}
-        </h3>
-        <p className="text-slate-500 mb-8 leading-relaxed">
-          {['paid', 'protocol'].includes(feeStatus)
-            ? 'Your store is active. You can now sell and manage your data bundles.'
-            : 'To activate your store and start selling, a one-time activation fee is required.'}
-        </p>
-
-        {!['paid', 'protocol'].includes(feeStatus) && (
-          <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 mb-8 max-w-sm mx-auto">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Total Activation Cost</span>
-            <div className="text-4xl font-black text-slate-900">{formatCurrencyAbbreviated(registrationFee || 0)}</div>
-            <div className="mt-3 text-xs font-semibold text-slate-600">
-              Wallet Balance: {formatCurrencyAbbreviated(walletBalance || 0)}
+        {!isActive && (
+          <div className="w-full flex flex-col gap-6 mt-4">
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Select Payment Method</label>
+              <div className="grid grid-cols-2 gap-3 p-1.5 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-xl">
+                <button
+                  onClick={() => setPaymentMethod('wallet')}
+                  className={`py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
+                    paymentMethod === 'wallet' ? 'bg-[#111] text-white shadow-md' : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  Wallet {paymentMethod === 'wallet' && `(${formatCurrencyAbbreviated(walletBalance)})`}
+                </button>
+                <button
+                  onClick={() => setPaymentMethod('paystack')}
+                  className={`py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
+                    paymentMethod === 'paystack' ? 'bg-[#111] text-white shadow-md' : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  Online Card
+                </button>
+              </div>
             </div>
+
+            <button
+              onClick={handlePay}
+              disabled={isInitializing || (paymentMethod === 'wallet' && walletBalance < registrationFee)}
+              className="dash-btn-primary !py-4 !rounded-xl !text-sm"
+            >
+              {isInitializing ? <Loader2 className="animate-spin" size={20} /> : <CreditCard size={20} />}
+              {paymentMethod === 'wallet' ? 'Confirm Wallet Payment' : 'Pay with Paystack'}
+            </button>
+            
+            {paymentMethod === 'wallet' && walletBalance < registrationFee && (
+              <p className="text-[10px] font-bold text-red-500 uppercase tracking-tight">Insufficient balance. Please top up your wallet first.</p>
+            )}
           </div>
         )}
-
-        {!['paid', 'protocol'].includes(feeStatus) && (
-          <div className="max-w-sm mx-auto mb-6">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Payment Method</p>
-            <div className="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl border border-slate-200">
-              <button
-                onClick={() => setPaymentMethod('wallet')}
-                className={`px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wide transition ${paymentMethod === 'wallet'
-                  ? 'bg-white text-slate-900 shadow-sm border border-slate-200'
-                  : 'text-slate-500 hover:text-slate-700'
-                  }`}
-              >
-                Wallet
-              </button>
-              <button
-                onClick={() => setPaymentMethod('paystack')}
-                className={`px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wide transition ${paymentMethod === 'paystack'
-                  ? 'bg-white text-slate-900 shadow-sm border border-slate-200'
-                  : 'text-slate-500 hover:text-slate-700'
-                  }`}
-              >
-                Paystack
-              </button>
-            </div>
-          </div>
-        )}
-
-        <button
-          onClick={handlePay}
-          disabled={
-            isInitializing ||
-            ['paid', 'protocol'].includes(feeStatus) ||
-            (paymentMethod === 'wallet' && Number(walletBalance || 0) < Number(registrationFee || 0))
-          }
-          className={`px-10 py-4 rounded-2xl font-black transition-all shadow-lg ${['paid', 'protocol'].includes(feeStatus)
-            ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-            : 'bg-primary-600 text-white hover:bg-primary-700 shadow-primary-200'
-            }`}
-        >
-          {isInitializing
-            ? paymentMethod === 'wallet'
-              ? 'Processing Wallet Payment...'
-              : 'Connecting to Payment Gateway...'
-            : ['paid', 'protocol'].includes(feeStatus)
-              ? 'Account Active'
-              : paymentMethod === 'wallet'
-                ? 'Pay with Wallet'
-                : 'Pay with Paystack'}
-        </button>
       </div>
     </SectionCard>
   );
@@ -1658,46 +1742,28 @@ function BillingTab({ storeData, onRefresh, showAlert }) {
 
 // --- MICRO UTILS ---
 
-function StatsCard({ title, value, color, icon: Icon }) {
-  const colors = {
-    primary: {
-      card: 'border-blue-200/70',
-      iconWrap: 'bg-blue-100 text-blue-600',
-    },
-    success: {
-      card: 'border-emerald-200/70',
-      iconWrap: 'bg-emerald-100 text-emerald-600',
-    },
-    amber: {
-      card: 'border-amber-200/70',
-      iconWrap: 'bg-amber-100 text-amber-600',
-    },
-  };
-  const tone = colors[color] || colors.primary;
-
+function StatsCard({ title, value, icon: Icon }) {
   return (
-    <div className={`bg-white rounded-2xl p-4 sm:p-5 border ${tone.card} shadow-sm hover:shadow-md transition-all`}>
-      <div className="flex items-start justify-between mb-3">
-        <div className={`w-9 h-9 rounded-lg ${tone.iconWrap} flex items-center justify-center`}>
-          {Icon ? <Icon size={18} /> : <Activity size={18} />}
-        </div>
+    <div className="dash-stat-card">
+      <div className="flex items-center justify-between mb-1">
+        <span className="dash-stat-label">{title}</span>
+        {Icon && <Icon size={14} className="text-slate-300" />}
       </div>
-      <p className="text-xs sm:text-sm text-slate-600 mb-1">{title}</p>
-      <div className="text-xl sm:text-2xl font-bold text-slate-900">{formatCurrencyAbbreviated(Number(value || 0))}</div>
+      <div className="dash-stat-value">{formatCurrencyAbbreviated(Number(value || 0))}</div>
     </div>
   );
 }
 
 function Modal({ title, onClose, children }) {
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6">
-      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px] animate-in fade-in duration-300" onClick={onClose} />
-      <div className="relative w-full max-w-2xl bg-white rounded-[32px] sm:rounded-[40px] shadow-2xl overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 flex flex-col max-h-[calc(100vh-140px)]">
-        <div className="px-6 py-4 sm:px-10 sm:py-8 border-b border-slate-50 flex items-center justify-between bg-white flex-shrink-0">
-          <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight uppercase leading-none">{title}</h3>
-          <button onClick={onClose} className="p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all active:scale-95"><X size={24} /></button>
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-[#111]/40 backdrop-blur-[2px] animate-in fade-in duration-300" onClick={onClose} />
+      <div className="relative w-full max-w-2xl bg-[#fff] border-1.5 border-[#e4e4de] rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 flex flex-col max-h-[90vh]">
+        <div className="px-6 py-4 border-b border-[#e4e4de] flex items-center justify-between bg-white flex-shrink-0">
+          <h3 className="text-base font-bold text-slate-900 uppercase tracking-wider">{title}</h3>
+          <button onClick={onClose} className="p-2 text-slate-300 hover:text-[#111] transition-colors"><X size={20} /></button>
         </div>
-        <div className="p-6 sm:p-10 flex-1 overflow-y-auto custom-scrollbar">
+        <div className="p-6 flex-1 overflow-y-auto custom-scrollbar">
           {children}
         </div>
       </div>
@@ -1705,7 +1771,7 @@ function Modal({ title, onClose, children }) {
   );
 }
 
-function PriceModal({ plan, onClose, onConfirm, initialPrice, submitLabel = 'Add Plan', loadingLabel = 'Processing...' }) {
+function PriceModal({ plan, onClose, onConfirm, initialPrice, submitLabel = 'Add Plan' }) {
   const [price, setPrice] = useState(
     (initialPrice !== undefined && initialPrice !== null
       ? initialPrice
@@ -1735,73 +1801,48 @@ function PriceModal({ plan, onClose, onConfirm, initialPrice, submitLabel = 'Add
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6">
-      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px] animate-in fade-in duration-300" onClick={onClose}></div>
-      <div className="relative w-full max-w-md bg-white rounded-[32px] sm:rounded-[40px] shadow-2xl overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
-        <div className="p-6 sm:p-10 space-y-6 sm:space-y-8">
-          <div className="space-y-2 text-center">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-primary-50 rounded-2xl flex items-center justify-center mx-auto text-primary-600 mb-2 transition-transform hover:scale-110">
-              <CreditCard size={32} />
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-[#111]/40 backdrop-blur-[2px] animate-in fade-in duration-300" onClick={onClose}></div>
+      <div className="relative w-full max-w-md bg-white border-1.5 border-[#e4e4de] rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
+        <div className="p-8 flex flex-col gap-6">
+          <div className="text-center">
+            <div className="w-14 h-14 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-xl flex items-center justify-center mx-auto text-[#111] mb-4">
+              <CreditCard size={28} />
             </div>
-            <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight uppercase leading-tight">Set Selling Price</h3>
-            <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">{plan.name} • {plan.network}</p>
+            <h3 className="text-lg font-bold text-slate-900 uppercase tracking-tight">Configure Price</h3>
+            <p className="text-xs text-slate-500 mt-1 uppercase font-bold tracking-widest">{plan.name} • {plan.network}</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
-            <div className="space-y-2 sm:space-y-3">
-              <div className="flex justify-between items-center px-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Global Base Cost</label>
-                <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">{formatCurrencyAbbreviated(plan.sellingPrice)}</span>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+            <div className="flex flex-col gap-3">
+              <div className="flex justify-between items-center px-1">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Base Cost</label>
+                <span className="text-xs font-bold text-[#111]">{formatCurrencyAbbreviated(plan.sellingPrice)}</span>
               </div>
-              <div className="relative group">
-                <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 font-bold">GH₵</div>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-400 text-sm">GHS</span>
                 <input
                   autoFocus
                   type="number"
                   step="0.01"
                   value={price}
-                  onChange={(e) => {
-                    setPrice(e.target.value);
-                    setError('');
-                  }}
-                  className="w-full pl-16 pr-8 py-5 sm:py-6 bg-slate-50 border-2 border-slate-100 rounded-[24px] text-slate-900 font-black text-lg sm:text-xl focus:outline-none focus:border-primary-500 focus:bg-white transition-all shadow-inner"
+                  onChange={(e) => { setPrice(e.target.value); setError(''); }}
+                  className="w-full pl-14 pr-4 py-4 bg-[#fafaf7] border-2 border-[#e4e4de] rounded-xl text-[#111] font-black text-xl focus:outline-none focus:border-[#111] transition-all"
                   placeholder="0.00"
                 />
               </div>
-              {error && (
-                <div className="flex items-center gap-2 text-rose-500 px-2 animate-in slide-in-from-top-1">
-                  <AlertCircle size={14} />
-                  <p className="text-[10px] font-black uppercase tracking-tight">{error}</p>
-                </div>
-              )}
+              {error && <p className="text-[10px] font-bold text-red-500 uppercase px-1">{error}</p>}
             </div>
 
-            <div className="grid grid-cols-2 gap-3 sm:gap-4">
-              <button
-                type="button"
-                onClick={onClose}
-                disabled={isSubmitting}
-                className="py-4 sm:py-5 bg-slate-50 text-slate-500 rounded-[20px] font-black uppercase text-[10px] tracking-widest hover:bg-slate-100 transition-all active:scale-95"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="py-4 sm:py-5 bg-primary-600 text-white rounded-[20px] font-black uppercase text-[10px] tracking-widest hover:bg-primary-700 shadow-lg shadow-primary-100 transition-all active:scale-95"
-              >
-                {isSubmitting ? loadingLabel : submitLabel}
+            <div className="grid grid-cols-2 gap-3">
+              <button type="button" onClick={onClose} className="dash-btn-outline !py-3">Cancel</button>
+              <button type="submit" disabled={isSubmitting} className="dash-btn-primary !py-3">
+                {isSubmitting ? <Loader2 className="animate-spin" size={18} /> : submitLabel}
               </button>
             </div>
           </form>
-
-          <div className="flex items-center justify-center gap-2 opacity-20">
-            <Lock size={10} />
-            <p className="text-[8px] font-black uppercase tracking-[0.2em]">Secure Node Configuration</p>
-          </div>
         </div>
       </div>
     </div>
   );
 }
-
