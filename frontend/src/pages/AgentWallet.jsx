@@ -427,154 +427,177 @@ export default function AgentWallet() {
         
         <div className="dash-content">
           {/* Header Card */}
-          <div className="dash-header !p-4">
-            <div className="flex items-center justify-between gap-4">
+          <div className="dash-header">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="dash-heading-row">
-                <div className="dash-icon-box !w-10 !h-10">
-                  <LayoutIcon size={20} />
+                <div className="dash-icon-box">
+                  <Wallet size={24} />
                 </div>
-                <div className="min-w-0">
-                  <h2 className="dash-h2 !text-base sm:!text-xl">Wallet Center</h2>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-slate-400 font-mono uppercase truncate">Fund wallet & view history</span>
+                <div>
+                  <h2 className="dash-h2">Wallet Center</h2>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-xs font-bold text-slate-400 font-mono uppercase">Fund wallet & view history</span>
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center gap-2">
                 <button
                   onClick={() => fetchTransactions(txPage)}
-                  className="p-1.5 text-slate-400 hover:text-[#f0a500] transition-colors"
+                  className="dash-btn-outline p-2"
                   title="Refresh wallet"
                 >
-                  <RefreshCw size={16} className={txLoading ? 'animate-spin' : ''} />
+                  <RefreshCw size={18} className={txLoading ? 'animate-spin' : ''} />
                 </button>
               </div>
             </div>
           </div>
 
           <div className="dash-stat-grid">
-            <StatsCard title="Current Balance" value={user?.balance || 0} icon={Wallet} />
-            <StatsCard title="Recent Credits" value={getTotalCredits()} icon={ArrowDownCircle} />
-            <StatsCard title="Pending" value={getPendingTransactions()} icon={Clock} isRaw />
-            <StatsCard title="Transactions" value={txTotal} icon={TrendingUp} isRaw />
+            <StatsCard title="Current Balance" value={user?.balance || 0} icon={Wallet} color="#f0a500" />
+            <StatsCard title="Recent Credits" value={getTotalCredits()} icon={ArrowDownCircle} color="#10b981" />
+            <StatsCard title="Pending" value={getPendingTransactions()} icon={Clock} isRaw color="#3b82f6" />
+            <StatsCard title="Transactions" value={txTotal} icon={TrendingUp} isRaw color="#a855f7" />
           </div>
 
           {businessStatus && !businessStatus.isOpen && (
-            <div className="dash-card flex items-start gap-3 py-4 border-orange-200 bg-orange-50 text-orange-700">
-              <Clock size={20} className="flex-shrink-0" />
-              <div>
-                <p className="font-bold text-sm">Business Closed</p>
-                <p className="text-xs">{businessStatus.message}</p>
+            <div className="dash-premium-banner" style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' }}>
+              <div className="dash-banner-accent"></div>
+              <div className="flex flex-col md:flex-row items-center gap-6 relative z-10">
+                <div className="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center backdrop-blur-md">
+                  <Clock size={28} />
+                </div>
+                <div className="flex-1 text-center md:text-left">
+                  <h3 style={{ fontSize: '20px', fontWeight: '800' }}>Business Closed</h3>
+                  <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.7)', marginTop: '4px' }}>
+                    {businessStatus.message || 'We are currently closed. Please try again during business hours.'}
+                  </p>
+                </div>
               </div>
             </div>
           )}
 
           {error && (
-            <div className="dash-card flex items-start gap-3 py-4 border-rose-200 bg-rose-50 text-rose-700">
-              <AlertCircle size={20} className="flex-shrink-0" />
-              <div>
-                <p className="font-bold text-sm">Error</p>
-                <p className="text-xs">{error}</p>
+            <div className="dash-premium-banner" style={{ background: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)' }}>
+              <div className="dash-banner-accent"></div>
+              <div className="flex flex-col md:flex-row items-center gap-6 relative z-10">
+                <div className="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center backdrop-blur-md">
+                  <AlertCircle size={28} />
+                </div>
+                <div className="flex-1 text-center md:text-left">
+                  <h3 style={{ fontSize: '20px', fontWeight: '800' }}>Error</h3>
+                  <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.7)', marginTop: '4px' }}>{error}</p>
+                </div>
               </div>
             </div>
           )}
 
           {success && (
-            <div className="dash-card flex items-start gap-3 py-4 border-emerald-200 bg-emerald-50 text-emerald-700">
-              <CheckCircle size={20} className="flex-shrink-0" />
-              <div>
-                <p className="font-bold text-sm">Success</p>
-                <p className="text-xs">{success}</p>
+            <div className="dash-premium-banner" style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}>
+              <div className="dash-banner-accent"></div>
+              <div className="flex flex-col md:flex-row items-center gap-6 relative z-10">
+                <div className="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center backdrop-blur-md">
+                  <CheckCircle2 size={28} />
+                </div>
+                <div className="flex-1 text-center md:text-left">
+                  <h3 style={{ fontSize: '20px', fontWeight: '800' }}>Success</h3>
+                  <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.7)', marginTop: '4px' }}>{success}</p>
+                </div>
               </div>
             </div>
           )}
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-1">
-              <div className="dash-card !p-5">
-                <h3 className="dash-card-title !mb-4 !text-xs uppercase tracking-widest">Quick Amounts</h3>
-                <div className="grid grid-cols-2 gap-2">
-                  {quickAmounts.map((quickAmount) => (
-                    <button
-                      key={quickAmount}
-                      onClick={() => setAmount(quickAmount.toString())}
-                      disabled={loading || (businessStatus && !businessStatus.isOpen)}
-                      className={`py-2.5 rounded-xl transition text-[10px] font-bold uppercase tracking-wider disabled:opacity-50 ${
-                        amount === quickAmount.toString()
-                        ? 'bg-[#111] text-white shadow-md'
-                        : 'bg-[#fafaf7] text-slate-600 border border-[#e4e4de] hover:border-slate-400'
-                      }`}
-                    >
-                      GH₵ {quickAmount}
-                    </button>
-                  ))}
-                </div>
+            <div className="lg:col-span-1 dash-card">
+              <h3 className="dash-card-title">
+                <Zap size={18} style={{ color: '#f0a500' }} />
+                Quick Amounts
+              </h3>
+              <div className="grid grid-cols-2 gap-3">
+                {quickAmounts.map((quickAmount) => (
+                  <button
+                    key={quickAmount}
+                    onClick={() => setAmount(quickAmount.toString())}
+                    disabled={loading || (businessStatus && !businessStatus.isOpen)}
+                    className={`py-3 rounded-xl transition text-[11px] font-bold uppercase tracking-wider disabled:opacity-50 border-1.5 ${
+                      amount === quickAmount.toString()
+                      ? 'bg-[#111] text-white border-[#111] shadow-lg'
+                      : 'bg-[#fafaf7] text-slate-600 border-[#e4e4de] hover:border-slate-400'
+                    }`}
+                  >
+                    GH₵ {quickAmount}
+                  </button>
+                ))}
               </div>
             </div>
 
-            <div className="lg:col-span-2">
-              <div className="dash-card !p-5">
-                <h3 className="dash-card-title !mb-6">
-                  <Wallet size={18} className="text-[#f0a500]" />
-                  Fund Agent Wallet
-                </h3>
+            <div className="lg:col-span-2 dash-card">
+              <h3 className="dash-card-title">
+                <CreditCard size={18} style={{ color: '#3b82f6' }} />
+                Fund Agent Wallet
+              </h3>
 
-                <div className="mb-6 flex flex-col gap-2">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Amount (GHS)</label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-400 text-sm">GHS</span>
-                    <input
-                      type="number"
-                      value={amount}
-                      onChange={(e) => {
-                        setAmount(e.target.value);
-                        setError(null);
-                      }}
-                      placeholder="0.00"
-                      disabled={loading}
-                      className="w-full pl-14 pr-4 py-4 bg-[#fafaf7] border-2 border-[#e4e4de] rounded-xl text-[#111] font-black text-xl focus:outline-none focus:border-[#111] transition-all"
-                    />
+              <div className="mb-8 flex flex-col gap-3">
+                <label className="dash-stat-label ml-1">Amount (GHS)</label>
+                <div className="relative">
+                  <span className="absolute left-5 top-1/2 -translate-y-1/2 font-bold text-slate-400 text-lg">GHS</span>
+                  <input
+                    type="number"
+                    value={amount}
+                    onChange={(e) => {
+                      setAmount(e.target.value);
+                      setError(null);
+                    }}
+                    placeholder="0.00"
+                    disabled={loading}
+                    className="w-full pl-16 pr-5 py-5 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-xl text-[#111] font-black text-2xl focus:outline-none focus:border-[#111] transition-all"
+                  />
+                </div>
+              </div>
+
+              {walletFundingCharge > 0 && parsedAmount > 0 && (
+                <div className="mb-8 p-5 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-2xl space-y-3">
+                  <div className="flex justify-between items-center text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    <span>Deposit Amount</span>
+                    <span className="text-slate-900 font-black">GHS {parsedAmount.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs font-bold text-[#f0a500] uppercase tracking-wider">
+                    <span>Transaction Fee</span>
+                    <span className="font-black">+ GHS {walletFundingCharge.toFixed(2)}</span>
+                  </div>
+                  <div className="h-px bg-[#e4e4de] my-1" />
+                  <div className="flex justify-between items-center text-lg font-black text-[#111]">
+                    <span>Total Charged</span>
+                    <span>GHS {totalAmountCharged.toFixed(2)}</span>
                   </div>
                 </div>
+              )}
 
-                {walletFundingCharge > 0 && parsedAmount > 0 && (
-                  <div className="mb-6 p-4 bg-slate-50 border border-[#e4e4de] rounded-xl space-y-2">
-                    <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase">
-                      <span>Credit</span>
-                      <span>GHS {parsedAmount.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between text-[10px] font-bold text-[#f0a500] uppercase">
-                      <span>Fee</span>
-                      <span>+ GHS {walletFundingCharge.toFixed(2)}</span>
-                    </div>
-                    <div className="h-px bg-[#e4e4de]" />
-                    <div className="flex justify-between text-base font-black text-[#111]">
-                      <span>Total Charged</span>
-                      <span>GHS {totalAmountCharged.toFixed(2)}</span>
-                    </div>
-                  </div>
+              <button
+                onClick={handleTopUp}
+                disabled={loading || !amount || (businessStatus && !businessStatus.isOpen)}
+                className="dash-btn-primary w-full !py-5 !rounded-xl !text-sm !font-black uppercase tracking-widest shadow-xl shadow-slate-200"
+              >
+                {loading ? <Loader2 className="animate-spin" size={24} /> : (
+                  <>
+                    <CreditCard size={20} />
+                    Proceed to Payment
+                  </>
                 )}
+              </button>
 
-                <button
-                  onClick={handleTopUp}
-                  disabled={loading || !amount || (businessStatus && !businessStatus.isOpen)}
-                  className="dash-btn-primary w-full !py-4 !rounded-xl !text-sm"
-                >
-                  {loading ? <Loader2 className="animate-spin" size={20} /> : <CreditCard size={20} />}
-                  Proceed to Payment
-                </button>
-
-                <p className="text-[10px] text-center mt-4 text-slate-400 font-bold uppercase tracking-widest">
-                  Securely powered by Paystack
-                </p>
-              </div>
+              <p className="text-[10px] text-center mt-5 text-slate-400 font-bold uppercase tracking-[0.2em]">
+                Securely powered by Paystack
+              </p>
             </div>
           </div>
 
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-2">
-              <History size={16} className="text-[#f0a500]" />
-              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Transaction History</h3>
+          {/* Transaction History Section */}
+          <div className="dash-card">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="dash-card-title" style={{ margin: 0 }}>
+                <Activity size={18} style={{ color: '#3b82f6' }} />
+                Transaction History
+              </h3>
             </div>
             
             <div className="dash-table-container">
@@ -585,60 +608,72 @@ export default function AgentWallet() {
                     <th className="dash-th">Amount</th>
                     <th className="dash-th">Balance</th>
                     <th className="dash-th">Status</th>
-                    <th className="dash-th text-right">Details</th>
+                    <th className="dash-th text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {transactions.map((tx) => (
-                    <tr key={tx._id}>
-                      <td className="dash-td">
-                        <p className="font-bold text-slate-900">{typeLabelMap[tx.type] || 'Transaction'}</p>
-                        <p className="text-[10px] text-slate-400 font-medium">{new Date(tx.createdAt).toLocaleString()}</p>
-                      </td>
-                      <td className={`dash-td font-black ${isCreditTransaction(tx) ? 'text-emerald-600' : 'text-slate-900'}`}>
-                        {isCreditTransaction(tx) ? '+' : '-'}{formatCurrencyAbbreviated(Math.abs(tx.amount))}
-                      </td>
-                      <td className="dash-td font-bold text-slate-600">{formatCurrencyAbbreviated(tx.balanceAfter)}</td>
-                      <td className="dash-td">
-                        <span className={`dash-badge ${statusBadgeMap[getResolvedTransactionStatus(tx)] || 'bg-slate-100 text-slate-700'}`}>
-                          {getResolvedTransactionStatus(tx)}
-                        </span>
-                      </td>
-                      <td className="dash-td text-right">
-                        <button
-                          onClick={() => {
-                            setSelectedTx(tx);
-                            setShowTxDetails(true);
-                          }}
-                          className="p-2 text-slate-400 hover:text-[#111] hover:bg-slate-50 rounded-lg transition-all"
-                        >
-                          <Eye size={18} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  {transactions.map((tx) => {
+                    const status = getResolvedTransactionStatus(tx);
+                    const statusColor = status === 'completed' || status === 'successful'
+                      ? { background: '#ecfdf5', color: '#059669', border: '1px solid #d1fae5' }
+                      : status === 'pending' || status === 'processing'
+                      ? { background: '#fffbeb', color: '#d97706', border: '1px solid #fef3c7' }
+                      : { background: '#fff5f5', color: '#b91c1c', border: '1px solid #fecaca' };
+
+                    return (
+                      <tr key={tx._id}>
+                        <td className="dash-td">
+                          <div>
+                            <p style={{ fontWeight: '700', color: '#111' }}>{typeLabelMap[tx.type] || 'Transaction'}</p>
+                            <p style={{ fontSize: '10px', color: '#999' }}>{new Date(tx.createdAt).toLocaleString()}</p>
+                          </div>
+                        </td>
+                        <td className="dash-td font-black" style={{ color: isCreditTransaction(tx) ? '#059669' : '#111' }}>
+                          {isCreditTransaction(tx) ? '+' : '-'}{formatCurrencyAbbreviated(Math.abs(tx.amount))}
+                        </td>
+                        <td className="dash-td font-bold" style={{ color: '#666' }}>{formatCurrencyAbbreviated(tx.balanceAfter)}</td>
+                        <td className="dash-td">
+                          <span className="dash-badge" style={statusColor}>{status}</span>
+                        </td>
+                        <td className="dash-td text-right">
+                          <button
+                            onClick={() => {
+                              setSelectedTx(tx);
+                              setShowTxDetails(true);
+                            }}
+                            style={{ padding: '6px', borderRadius: '6px', border: '1px solid #e4e4de', background: '#fff', cursor: 'pointer' }}
+                          >
+                            <Eye size={14} style={{ color: '#666' }} />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                   {transactions.length === 0 && !txLoading && (
                     <tr>
-                      <td colSpan="5" className="dash-td py-12 text-center text-slate-400 font-bold uppercase text-xs">No transaction history found</td>
+                      <td colSpan="5" className="dash-td py-20 text-center">
+                        <History size={40} style={{ color: '#e4e4de', margin: '0 auto 16px' }} />
+                        <p style={{ fontSize: '14px', fontWeight: '700', color: '#999' }}>No transaction history found.</p>
+                      </td>
                     </tr>
                   )}
                 </tbody>
               </table>
             </div>
 
-            <div className="flex items-center justify-between gap-4 mt-2">
+            <div className="flex items-center justify-between gap-4 mt-6">
               <button
                 disabled={txPage <= 1 || txLoading}
                 onClick={() => setTxPage(p => p - 1)}
-                className="dash-btn-outline !py-2 !px-4 disabled:opacity-50"
+                className="dash-btn-outline !py-2.5 !px-5 disabled:opacity-50"
               >
                 Previous
               </button>
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Page {txPage}</span>
+              <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Page {txPage}</span>
               <button
                 disabled={!txHasMore || txLoading}
                 onClick={() => setTxPage(p => p + 1)}
-                className="dash-btn-outline !py-2 !px-4 disabled:opacity-50"
+                className="dash-btn-outline !py-2.5 !px-5 disabled:opacity-50"
               >
                 Next
               </button>
@@ -655,53 +690,77 @@ export default function AgentWallet() {
       />
 
       {showTxDetails && selectedTx && (
-        <Modal
-          isOpen={showTxDetails}
-          onClose={() => setShowTxDetails(false)}
-          title="Transaction Receipt"
-        >
-          <div className="flex flex-col gap-6">
-            <div className="flex justify-between items-start border-b border-[#f0f0f0] pb-4">
-              <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Reference</p>
-                <p className="font-bold text-sm text-slate-900 break-all">#{selectedTx.reference || selectedTx._id}</p>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+          <div
+            className="absolute inset-0 bg-[#111]/40 backdrop-blur-sm transition-opacity"
+            onClick={() => setShowTxDetails(false)}
+          />
+          <div className="relative bg-white rounded-[24px] shadow-2xl max-w-lg w-full overflow-hidden border border-[#e4e4de] animate-in fade-in zoom-in duration-300" style={{ fontFamily: 'DM Sans, sans-serif' }}>
+            <div className="px-8 py-6 border-b border-[#f0f0f0] flex items-center justify-between bg-[#fafaf7]">
+              <div className="flex items-center gap-3">
+                <div className="dash-icon-box" style={{ width: '40px', height: '40px' }}>
+                  <Clock size={20} />
+                </div>
+                <h3 className="text-lg font-black text-[#111] tracking-tight">Transaction Receipt</h3>
               </div>
-              <div className="text-right flex-shrink-0">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Status</p>
-                <span className={`dash-badge ${statusBadgeMap[getResolvedTransactionStatus(selectedTx)]} !px-3 !py-1`}>
-                  {getResolvedTransactionStatus(selectedTx)}
-                </span>
-              </div>
+              <button
+                onClick={() => setShowTxDetails(false)}
+                className="p-2 hover:bg-[#e4e4de] rounded-full transition-colors"
+              >
+                <Check size={20} className="text-slate-500" />
+              </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 bg-[#fafaf7] rounded-xl border border-[#e4e4de]">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Amount</p>
-                <p className={`font-black text-lg ${isCreditTransaction(selectedTx) ? 'text-emerald-600' : 'text-slate-900'}`}>
-                  {isCreditTransaction(selectedTx) ? '+' : '-'}{formatCurrencyAbbreviated(Math.abs(selectedTx.amount))}
-                </p>
+            <div className="p-8 space-y-6">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="dash-stat-label" style={{ marginBottom: '4px' }}>Status</p>
+                  <span className="dash-badge" style={
+                    getResolvedTransactionStatus(selectedTx) === 'completed' || getResolvedTransactionStatus(selectedTx) === 'successful'
+                      ? { background: '#ecfdf5', color: '#059669', border: '1px solid #d1fae5' }
+                      : getResolvedTransactionStatus(selectedTx) === 'pending' || getResolvedTransactionStatus(selectedTx) === 'processing'
+                      ? { background: '#fffbeb', color: '#d97706', border: '1px solid #fef3c7' }
+                      : { background: '#fff5f5', color: '#b91c1c', border: '1px solid #fecaca' }
+                  }>
+                    {getResolvedTransactionStatus(selectedTx)}
+                  </span>
+                </div>
+                <div className="text-right">
+                  <p className="dash-stat-label" style={{ marginBottom: '4px' }}>Amount</p>
+                  <p style={{ fontSize: '24px', fontWeight: '800', color: isCreditTransaction(selectedTx) ? '#059669' : '#111' }}>
+                    {isCreditTransaction(selectedTx) ? '+' : '-'}{formatCurrencyAbbreviated(Math.abs(selectedTx.amount))}
+                  </p>
+                </div>
               </div>
-              <div className="p-4 bg-[#fafaf7] rounded-xl border border-[#e4e4de]">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">New Balance</p>
-                <p className="font-black text-slate-900 text-lg">{formatCurrencyAbbreviated(selectedTx.balanceAfter)}</p>
+
+              <div className="p-5 bg-[#fafaf7] rounded-2xl border border-[#e4e4de] space-y-4">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="dash-stat-label">Transaction Type</span>
+                  <span style={{ fontWeight: '800', color: '#111' }}>{typeLabelMap[selectedTx.type] || selectedTx.type}</span>
+                </div>
+                <div className="flex justify-between items-start text-sm">
+                  <span className="dash-stat-label">Description</span>
+                  <span style={{ fontWeight: '700', color: '#111' }} className="text-right max-w-[60%]">{selectedTx.description || 'No description available'}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="dash-stat-label">Timestamp</span>
+                  <span style={{ fontWeight: '700', color: '#111' }}>{new Date(selectedTx.createdAt).toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                   <span className="dash-stat-label">Reference</span>
+                   <span style={{ fontWeight: '700', color: '#111', fontFamily: 'monospace' }}>#{String(selectedTx.reference || selectedTx._id).slice(-10).toUpperCase()}</span>
+                </div>
               </div>
-            </div>
 
-            <div className="flex flex-col gap-3">
-              <DetailRow label="Type" value={typeLabelMap[selectedTx.type] || selectedTx.type} />
-              <DetailRow label="Description" value={selectedTx.description || 'No description available'} />
-              <DetailRow label="Date" value={new Date(selectedTx.createdAt).toLocaleString()} />
-              {selectedTx.paymentReference && <DetailRow label="Paystack Ref" value={selectedTx.paymentReference} />}
+              <button
+                onClick={() => setShowTxDetails(false)}
+                className="dash-btn-primary w-full py-4 text-xs uppercase tracking-widest"
+              >
+                Close Receipt
+              </button>
             </div>
-
-            <button
-              onClick={() => setShowTxDetails(false)}
-              className="dash-btn-primary w-full py-4 mt-2 !rounded-xl"
-            >
-              Done
-            </button>
           </div>
-        </Modal>
+        </div>
       )}
     </AgentLayout>
   );
@@ -709,25 +768,18 @@ export default function AgentWallet() {
 
 // --- MICRO UTILS ---
 
-function StatsCard({ title, value, icon: Icon, isRaw = false }) {
+function StatsCard({ title, value, icon: Icon, isRaw = false, color = '#111' }) {
   return (
     <div className="dash-stat-card">
-      <div className="flex items-center justify-between mb-1">
-        <span className="dash-stat-label">{title}</span>
-        {Icon && <Icon size={14} className="text-slate-300" />}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div>
+          <p className="dash-stat-label">{title}</p>
+          <p className="dash-stat-value">
+            {isRaw ? value : formatCurrencyAbbreviated(Number(value || 0))}
+          </p>
+        </div>
+        {Icon && <Icon size={18} style={{ color }} />}
       </div>
-      <div className="dash-stat-value">
-        {isRaw ? value : formatCurrencyAbbreviated(Number(value || 0))}
-      </div>
-    </div>
-  );
-}
-
-function DetailRow({ label, value }) {
-  return (
-    <div className="flex justify-between items-center py-2 border-b border-[#f0f0f0]">
-      <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">{label}</span>
-      <span className="text-sm font-bold text-slate-900 text-right ml-4">{value}</span>
     </div>
   );
 }

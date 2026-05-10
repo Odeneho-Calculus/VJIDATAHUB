@@ -1,14 +1,285 @@
 import React, { useState, useEffect } from 'react';
-import { Eye, Download, Lock, RotateCcw, X, Copy, Check, RotateCw, Wallet, ArrowUpRight, ArrowDownLeft, Gift, Search, Filter, Calendar, Layout, CreditCard, ChevronRight, Hash, AlertCircle, ShoppingBag, ReceiptText, RefreshCw } from 'lucide-react';
+import { Eye, Download, Lock, RotateCcw, X, Copy, Check, RotateCw, Wallet, ArrowUpRight, ArrowDownLeft, Gift, Search, Filter, Calendar, Layout, CreditCard, ChevronRight, Hash, AlertCircle, ShoppingBag, ReceiptText, RefreshCw, Activity, ShieldCheck, CheckCircle2, Clock } from 'lucide-react';
 import { formatCurrencyAbbreviated, formatNumberAbbreviated } from '../utils/formatCurrency';
 import { wallet, purchases, checkers as checkersAPI } from '../services/api';
 import UserLayout from '../components/UserLayout';
 import Modal from '../components/Modal';
 import AlertModal from '../components/AlertModal';
 
+const styles = `
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
+
+  .dash-wrapper {
+    font-family: 'DM Sans', sans-serif;
+    background-color: #fafaf7;
+    min-height: 100vh;
+    padding: 20px;
+    color: #1a1a1a;
+  }
+
+  .dash-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .dash-header {
+    background: #fff;
+    border: 1.5px solid #e4e4de;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  }
+
+  .dash-h2 {
+    font-size: 24px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    margin: 0;
+    color: #111;
+  }
+
+  .dash-icon-box {
+    width: 48px;
+    height: 48px;
+    background: #111;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+  }
+
+  .dash-heading-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .dash-btn-outline {
+    background: #fff;
+    border: 1.5px solid #e4e4de;
+    border-radius: 12px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 800;
+    color: #111;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dash-btn-outline:hover {
+    border-color: #111;
+    background: #fafaf7;
+  }
+
+  .dash-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+  }
+
+  .dash-stat-card {
+    background: #fff;
+    border: 1.5px solid #e4e4de;
+    border-radius: 20px;
+    padding: 20px;
+  }
+
+  .dash-stat-label {
+    font-size: 11px;
+    font-weight: 800;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+
+  .dash-stat-value {
+    font-size: 22px;
+    font-weight: 900;
+    color: #111;
+    margin: 0;
+  }
+
+  .dash-card {
+    background: #fff;
+    border: 1.5px solid #e4e4de;
+    border-radius: 24px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .dash-card-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: #111;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .dash-premium-banner {
+    background: linear-gradient(135deg, #111 0%, #333 100%);
+    border-radius: 24px;
+    padding: 32px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .dash-banner-accent {
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    width: 120px;
+    height: 120px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .dash-table {
+    width: 100%;
+    border-spacing: 0 8px;
+    border-collapse: separate;
+  }
+
+  .dash-table th {
+    padding: 12px 16px;
+    font-size: 10px;
+    font-weight: 800;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-align: left;
+  }
+
+  .dash-table-row {
+    background: #fff;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+
+  .dash-table-row:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+
+  .dash-table td {
+    padding: 16px;
+    border-top: 1.5px solid #e4e4de;
+    border-bottom: 1.5px solid #e4e4de;
+    font-size: 13px;
+  }
+
+  .dash-table td:first-child {
+    border-left: 1.5px solid #e4e4de;
+    border-top-left-radius: 16px;
+    border-bottom-left-radius: 16px;
+  }
+
+  .dash-table td:last-child {
+    border-right: 1.5px solid #e4e4de;
+    border-top-right-radius: 16px;
+    border-bottom-right-radius: 16px;
+  }
+
+  .badge-premium {
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .badge-success { background: #ecfdf5; color: #059669; border: 1px solid #d1fae5; }
+  .badge-pending { background: #fffbeb; color: #d97706; border: 1px solid #fef3c7; }
+  .badge-failed { background: #fef2f2; color: #dc2626; border: 1px solid #fee2e2; }
+  .badge-info { background: #eff6ff; color: #2563eb; border: 1px solid #dbeafe; }
+
+  .dash-tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    transition: all 0.2s;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .dash-tab.active {
+    background: #111;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  .dash-tab:not(.active):hover {
+    background: #f1f5f9;
+    color: #1e293b;
+  }
+
+  .dash-input {
+    background: #fff;
+    border: 1.5px solid #e4e4de;
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #111;
+    transition: all 0.2s;
+    outline: none;
+  }
+
+  .dash-input:focus {
+    border-color: #111;
+    box-shadow: 0 0 0 4px rgba(0,0,0,0.02);
+  }
+
+  .dash-mobile-card {
+    background: #fff;
+    border: 1.5px solid #e4e4de;
+    border-radius: 20px;
+    padding: 20px;
+    transition: all 0.2s;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  }
+
+  .dash-mobile-card:hover {
+    border-color: #111;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  }
+
+  @media (max-width: 768px) {
+    .dash-wrapper { padding: 12px; }
+    .dash-header { padding: 16px; }
+    .dash-premium-banner { padding: 20px; }
+    .dash-stat-grid { grid-template-columns: 1fr 1fr; }
+  }
+`;
+
 export default function Transactions() {
   const [activeTab, setActiveTab] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [perPage, setPerPage] = useState(10);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -216,11 +487,24 @@ export default function Transactions() {
   };
 
   const filteredTransactions = transactions.filter(tx => {
-    if (activeTab === 'data-purchase' && tx.type !== 'Data Purchase') return false;
-    if (activeTab === 'checker-purchase' && tx.type !== 'Checker Purchase') return false;
-    if (activeTab === 'topup' && tx.type !== 'Wallet Top-up') return false;
+    // Tab filtering
+    if (activeTab === 'purchase' && !['Data Purchase', 'Checker Purchase'].includes(tx.type)) return false;
+    if (activeTab === 'top_up' && tx.type !== 'Wallet Top-up') return false;
     if (activeTab === 'bonus' && tx.type !== 'Referral Bonus') return false;
 
+    // Search filtering
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      const matchesSearch = 
+        tx.description?.toLowerCase().includes(query) ||
+        tx.type?.toLowerCase().includes(query) ||
+        tx.reference?.toLowerCase().includes(query) ||
+        tx.amount.toString().includes(query);
+      
+      if (!matchesSearch) return false;
+    }
+
+    // Status filtering
     if (statusFilter !== 'all') {
       const s = tx.statusRaw?.toLowerCase();
       if (statusFilter === 'completed' && !(s === 'completed' || s === 'success' || s === 'successful')) return false;
@@ -262,166 +546,138 @@ export default function Transactions() {
   };
 
   return (
-                    { id: 'checker-purchase', label: 'Checker Purchase', icon: ShoppingBag },
     <UserLayout>
-      <div className="min-h-screen bg-[#F8FAFC]">
-        <div className="flex flex-col">
-          {/* Sticky Header */}
-          <div className="sticky top-0 z-30 app-pro-header pb-1">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-700 flex items-center justify-center text-white shadow-lg shadow-indigo-100">
-                    <ReceiptText size={24} strokeWidth={2.5} />
-                  </div>
-                  <div>
-                    <h1 className="text-2xl font-black text-slate-900 tracking-tight">Transactions</h1>
-                    <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1.5 mt-0.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                      History • {transactions.length} Records
-                    </p>
+      <div className="dash-wrapper overflow-x-hidden">
+        <style>{styles}</style>
+        
+        <div className="dash-content">
+          {/* Header Card */}
+          <div className="dash-header">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="dash-heading-row">
+                <div className="dash-icon-box">
+                  <ReceiptText size={24} />
+                </div>
+                <div>
+                  <h2 className="dash-h2">Transaction History</h2>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-xs font-bold text-slate-400 font-mono uppercase">Full Financial Records</span>
                   </div>
                 </div>
-
-                <div className="flex items-center gap-3 self-end sm:self-auto">
-                  <button
-                    onClick={handleRefresh}
-                    disabled={isRefreshing}
-                    className="p-3 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-400 transition-all text-slate-600 hover:text-blue-600 group active:scale-95"
-                  >
-                    <RotateCw size={20} className={`${isRefreshing ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
-                  </button>
-                  <button className="flex items-center gap-2 px-5 py-3 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl shadow-slate-200 active:scale-95">
-                    <Download size={16} strokeWidth={3} />
-                    <span className="hidden sm:inline">Export CSV</span>
-                  </button>
-                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleRefresh}
+                  disabled={isRefreshing}
+                  className="dash-btn-outline p-2"
+                  title="Refresh History"
+                >
+                  <RefreshCw size={18} className={isRefreshing ? 'animate-spin' : ''} />
+                </button>
+                <button className="dash-btn-outline">
+                  <Download size={16} />
+                  <span>Export</span>
+                </button>
               </div>
             </div>
           </div>
 
-          <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
-            {/* Error Message */}
-            {error && (
-              <div className="mb-8 p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-center gap-3 text-rose-600 animate-in fade-in slide-in-from-top-4">
-                <AlertCircle size={20} />
-                <p className="text-sm font-bold">{error}</p>
-              </div>
-            )}
-
-            {/* Premium Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-              <div className="group bg-white p-6 rounded-[2rem] border border-slate-200/60 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-500 hover:-translate-y-1">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
-                    <Layout size={24} />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Volume</p>
-                    <p className="text-2xl font-black text-slate-900">{transactions.length}</p>
-                  </div>
+          <div className="dash-stat-grid">
+            <div className="dash-stat-card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <p className="dash-stat-label">Total Spent</p>
+                  <p className="dash-stat-value">{formatCurrencyAbbreviated(totalSpent)}</p>
                 </div>
-                <div className="w-full h-1 bg-slate-50 rounded-full overflow-hidden">
-                  <div className="h-full bg-indigo-500 rounded-full" style={{ width: '100%' }}></div>
-                </div>
-              </div>
-
-              <div className="group bg-white p-6 rounded-[2rem] border border-slate-200/60 shadow-sm hover:shadow-xl hover:shadow-rose-500/5 transition-all duration-500 hover:-translate-y-1">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-rose-50 group-hover:text-rose-600 transition-colors">
-                    <ArrowDownLeft size={24} />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Spending</p>
-                    <p className="text-2xl font-black text-slate-900 tracking-tight">GH₵ {formatCurrencyAbbreviated(totalSpent)}</p>
-                  </div>
-                </div>
-                <div className="w-full h-1 bg-slate-50 rounded-full overflow-hidden">
-                  <div className="h-full bg-rose-500 rounded-full" style={{ width: '65%' }}></div>
-                </div>
-              </div>
-
-              <div className="group bg-white p-6 rounded-[2rem] border border-slate-200/60 shadow-sm hover:shadow-xl hover:shadow-emerald-500/5 transition-all duration-500 hover:-translate-y-1">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
-                    <ArrowUpRight size={24} />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Top-up</p>
-                    <p className="text-2xl font-black text-slate-900 tracking-tight">GH₵ {formatCurrencyAbbreviated(totalTopUp)}</p>
-                  </div>
-                </div>
-                <div className="w-full h-1 bg-slate-50 rounded-full overflow-hidden">
-                  <div className="h-full bg-emerald-500 rounded-full" style={{ width: '45%' }}></div>
-                </div>
+                <ArrowDownLeft size={18} style={{ color: '#ef4444' }} />
               </div>
             </div>
-
-            {/* Filtering & Navigation */}
-            <div className="bg-white rounded-[2.5rem] border border-slate-200/60 shadow-sm overflow-hidden mb-8">
-              <div className="p-2 border-b border-slate-100 bg-slate-50/50">
-                <div className="flex overflow-x-auto scrollbar-hide p-1 gap-1">
-                  {[
-                    { id: 'all', label: 'All Activity', icon: Layout },
-                    { id: 'data-purchase', label: 'Data Purchase', icon: ShoppingBag },
-                    { id: 'topup', label: 'Wallet Top-ups', icon: CreditCard },
-                    { id: 'bonus', label: 'Commissions', icon: Gift }
-                  ].map(tab => (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === tab.id
-                        ? 'bg-white text-blue-600 shadow-sm shadow-blue-100 ring-1 ring-slate-200'
-                        : 'text-slate-400 hover:text-slate-600 hover:bg-white/50'
-                        }`}
-                    >
-                      <tab.icon size={14} strokeWidth={activeTab === tab.id ? 3 : 2} />
-                      {tab.label}
-                    </button>
-                  ))}
+            <div className="dash-stat-card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <p className="dash-stat-label">Total Funding</p>
+                  <p className="dash-stat-value">{formatCurrencyAbbreviated(totalTopUp)}</p>
                 </div>
+                <ArrowUpRight size={18} style={{ color: '#10b981' }} />
+              </div>
+            </div>
+            <div className="dash-stat-card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <p className="dash-stat-label">Record Count</p>
+                  <p className="dash-stat-value">{transactions.length}</p>
+                </div>
+                <Activity size={18} style={{ color: '#3b82f6' }} />
+              </div>
+            </div>
+            <div className="dash-stat-card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <p className="dash-stat-label">System Integrity</p>
+                  <p className="dash-stat-value">Verified</p>
+                </div>
+                <ShieldCheck size={18} style={{ color: '#a855f7' }} />
+              </div>
+            </div>
+          </div>
+
+          {/* Filters & Transaction List */}
+          <div className="dash-card">
+            <div className="p-4 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { id: 'all', label: 'All Activities', icon: ReceiptText },
+                  { id: 'top_up', label: 'Funding', icon: ArrowUpRight },
+                  { id: 'purchase', label: 'Spendings', icon: ShoppingBag },
+                  { id: 'bonus', label: 'Rewards', icon: Gift },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`dash-tab ${activeTab === tab.id ? 'active' : ''}`}
+                  >
+                    <tab.icon size={14} />
+                    <span>{tab.label}</span>
+                  </button>
+                ))}
               </div>
 
-              <div className="p-4 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-3 w-full sm:w-auto">
-                  <div className="flex h-11 items-center gap-2 px-4 bg-slate-100/50 rounded-2xl border border-slate-200/40 focus-within:bg-white focus-within:border-blue-400 transition-all w-full sm:w-64 group">
-                    <Search size={16} className="text-slate-400 group-focus-within:text-blue-500" />
-                    <input
-                      type="text"
-                      placeholder="Search history..."
-                      className="bg-transparent border-none focus:ring-0 text-sm font-bold text-slate-600 placeholder:text-slate-400 w-full"
-                    />
-                  </div>
-
-                  <div className="flex items-center gap-2 px-4 h-11 bg-slate-50 rounded-2xl border border-slate-200/60">
-                    <Filter size={14} className="text-slate-400" />
-                    <select
-                      value={statusFilter}
-                      onChange={(e) => setStatusFilter(e.target.value)}
-                      className="bg-transparent border-none focus:ring-0 text-[10px] font-black uppercase tracking-widest text-slate-600 cursor-pointer"
-                    >
-                      <option value="all">Status</option>
-                      <option value="completed">Success</option>
-                      <option value="pending">Pending</option>
-                      <option value="failed">Failed</option>
-                    </select>
-                  </div>
+              <div className="flex flex-col sm:flex-row items-center gap-3">
+                <div className="relative group w-full sm:w-64">
+                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                  <input
+                    type="text"
+                    placeholder="Search records..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="dash-input pl-10 w-full"
+                  />
                 </div>
-
-                <div className="flex items-center gap-2 h-11 px-4 bg-slate-50 rounded-2xl border border-slate-200/60">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mr-2 border-r border-slate-200 pr-3">View</span>
+                
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="dash-input text-[10px] font-black uppercase tracking-widest py-2 px-3 h-11"
+                  >
+                    <option value="all">All Status</option>
+                    <option value="completed">Success</option>
+                    <option value="pending">Pending</option>
+                    <option value="failed">Failed</option>
+                  </select>
+                  
                   <select
                     value={perPage}
                     onChange={(e) => setPerPage(Number(e.target.value))}
-                    className="bg-transparent border-none focus:ring-0 text-[10px] font-black uppercase tracking-widest text-slate-600 cursor-pointer"
+                    className="dash-input text-[10px] font-black uppercase tracking-widest py-2 px-3 h-11"
                   >
-                    <option value={5}>5 Rows</option>
                     <option value={10}>10 Rows</option>
                     <option value={20}>20 Rows</option>
                     <option value={50}>50 Rows</option>
                   </select>
                 </div>
               </div>
+            </div>
 
               {/* Transactions List */}
               {loading ? (
@@ -528,13 +784,12 @@ export default function Transactions() {
                     </table>
                   </div>
 
-                  {/* Mobile List View */}
                   <div className="md:hidden divide-y divide-slate-100">
                     {paginatedTransactions.map(tx => (
                       <div
                         key={tx.id}
                         onClick={() => { setSelectedTx(tx); setShowDetails(true); }}
-                        className="p-5 active:bg-slate-50 transition-colors"
+                        className="dash-mobile-card mb-3"
                       >
                         <div className="flex justify-between items-start mb-4">
                           <div className="flex gap-4">
@@ -726,7 +981,6 @@ export default function Transactions() {
             message={alertConfig.message}
           />
         </div>
-      </div>
     </UserLayout>
   );
 }

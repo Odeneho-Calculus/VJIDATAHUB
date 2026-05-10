@@ -21,10 +21,257 @@ import {
   Eye,
   Mail,
   Phone,
-  User
+  User,
+  Activity,
+  Loader2,
+  AlertCircle,
+  Lock,
+  Wallet,
+  Store
 } from 'lucide-react';
 import { wallet, purchases, publicAPI } from '../services/api';
 import UserLayout from '../components/UserLayout';
+
+const styles = `
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
+  
+  .dash-wrapper {
+    font-family: 'DM Sans', sans-serif;
+    background-color: #f5f5f0;
+    min-height: 100vh;
+  }
+
+  .dash-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .dash-header {
+    background: #fff;
+    border: 1.5px solid #e4e4de;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .dash-heading-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .dash-icon-box {
+    width: 46px;
+    height: 46px;
+    background: #111;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #f0a500;
+    flex-shrink: 0;
+  }
+
+  .dash-h2 {
+    font-size: 26px;
+    font-weight: 800;
+    color: #111;
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+
+  .dash-p {
+    font-size: 14px;
+    color: #666;
+    margin: 4px 0 0 0;
+  }
+
+  .dash-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  @media (min-width: 768px) {
+    .dash-stat-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+  }
+
+  .dash-stat-card {
+    background: #fff;
+    border: 1.5px solid #e4e4de;
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    transition: all 0.2s;
+  }
+
+  .dash-stat-card:hover {
+    border-color: #d4d4ce;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.06);
+  }
+
+  .dash-stat-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .dash-stat-value {
+    font-size: 20px;
+    font-weight: 800;
+    color: #111;
+  }
+
+  .dash-card {
+    background: #fff;
+    border: 1.5px solid #e4e4de;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.06);
+  }
+
+  .dash-card-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: #111;
+    margin: 0 0 20px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dash-btn-primary {
+    background: #111;
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .dash-btn-primary:hover:not(:disabled) {
+    background: #333;
+    transform: translateY(-1px);
+  }
+
+  .dash-btn-outline {
+    background: #fff;
+    color: #111;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
+    border: 1.5px solid #e4e4de;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .dash-btn-outline:hover {
+    background: #fafaf7;
+    border-color: #d4d4ce;
+  }
+
+  @media (max-width: 640px) {
+    .dash-btn-primary, .dash-btn-outline {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+  }
+
+  .dash-premium-banner {
+    background: linear-gradient(135deg, #111111 0%, #1a1a1a 100%);
+    color: #fff;
+    border-radius: 14px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  }
+
+  .dash-banner-accent {
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    width: 100px;
+    height: 100px;
+    background: rgba(240, 165, 0, 0.05);
+    border-radius: 50%;
+    filter: blur(40px);
+  }
+
+  .dash-table-container {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1.5px solid #e4e4de;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .dash-table-container::-webkit-scrollbar {
+    display: none;
+  }
+
+  .dash-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .dash-th {
+    background: #fafaf7;
+    text-align: left;
+    padding: 12px 16px;
+    font-weight: 700;
+    color: #333;
+    border-bottom: 1.5px solid #e4e4de;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .dash-td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    color: #444;
+  }
+
+  .dash-badge {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+`;
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -171,308 +418,233 @@ export default function Dashboard() {
     }
   };
 
-  const getStatusColor = (status) => {
-    switch (status?.toLowerCase()) {
-      case 'completed':
-        return 'bg-green-100 text-green-700';
-      case 'failed':
-        return 'bg-rose-100 text-rose-700';
-      case 'pending':
-      case 'processing':
-        return 'bg-amber-100 text-amber-700';
-      default:
-        return 'bg-slate-100 text-slate-700';
-    }
-  };
-
   const memberIdSource = user?.id || user?._id || '';
   const memberId = memberIdSource ? memberIdSource.slice(-6).toUpperCase() : 'N/A';
 
   return (
     <UserLayout>
-      <div className="relative min-h-screen bg-[#F8FAFC]">
-        {/* Top Header - Glassmorphism */}
-        <div className="sticky top-0 z-20 app-pro-header px-6 py-4">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2 text-blue-600 min-w-0">
-                <Layout size={16} className="flex-shrink-0" />
-                <span className="text-xs font-bold uppercase tracking-wider whitespace-nowrap">Account Overview</span>
-              </div>
-
-              <button
-                onClick={() => {
-                  setLoadingData(true);
-                  fetchTransactionsAndStats();
-                  fetchActiveBundles();
-                }}
-                className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                title="Refresh Data"
-              >
-                <RefreshCw size={20} className={loadingData ? 'animate-spin' : ''} />
-              </button>
-            </div>
-
-            <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2 mt-2 flex-wrap">
-              Welcome back, {user?.name}
-              <span className="text-xs font-medium px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full border border-slate-200">
-                Member ID: {memberId}
-              </span>
-            </h1>
-          </div>
-        </div>
-
-        <div className="max-w-7xl mx-auto p-6 space-y-8">
-          {/* Dashboard Quick Navigation */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <h2 className="text-lg font-bold text-slate-800">Quick Actions</h2>
-            <div className="grid grid-cols-2 sm:flex items-center gap-3">
-              <Link
-                to="/orders"
-                className="px-4 py-2.5 text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-100 transition-all font-bold text-xs shadow-sm flex items-center justify-center gap-2"
-              >
-                Order History
-                <ChevronRight size={14} className="text-slate-600" />
-              </Link>
-              <Link
-                to="/topup"
-                className="px-4 py-2.5 text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-100 transition-all font-bold text-xs shadow-sm flex items-center justify-center gap-2"
-              >
-                Fund Wallet
-                <CreditCard size={14} className="text-emerald-500" />
-              </Link>
-              <Link
-                to="/buy-data"
-                className="col-span-2 sm:col-auto px-4 py-2.5 bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-all font-bold text-xs shadow-xl shadow-slate-200 flex items-center justify-center gap-2"
-              >
-                Buy Data Bundle
-                <Zap size={14} className="text-blue-400" />
-              </Link>
-            </div>
-          </div>
-
-          {/* Analytics Grid */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {stats.map((stat, i) => (
-              <div key={i} className="bg-white p-6 rounded-3xl border border-slate-200/60 shadow-sm hover:shadow-md transition-all">
-                <div className={`w-10 h-10 rounded-xl bg-${stat.color}-50 text-${stat.color}-600 flex items-center justify-center mb-4`}>
-                  <stat.icon size={20} />
+      <div className="dash-wrapper">
+        <style>{styles}</style>
+        <div className="dash-content">
+          {/* Header Card */}
+          <div className="dash-header">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="dash-heading-row">
+                <div className="dash-icon-box">
+                  <Layout size={24} />
                 </div>
-                <p className="text-slate-600 text-[10px] font-bold uppercase tracking-widest mb-1">{stat.label}</p>
-                <div className="text-xl font-black text-slate-900 tracking-tight">{stat.value}</div>
+                <div>
+                  <h2 className="dash-h2">Welcome back, {user?.name}</h2>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-xs font-bold text-slate-400 font-mono uppercase">Member ID: {memberId}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    setLoadingData(true);
+                    fetchTransactionsAndStats();
+                    fetchActiveBundles();
+                  }}
+                  className="dash-btn-outline p-2"
+                  title="Refresh Data"
+                >
+                  <RefreshCw size={18} className={loadingData ? 'animate-spin' : ''} />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Action Navigation */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest">Quick Actions</h3>
+            <div className="grid grid-cols-2 sm:flex items-center gap-3">
+              <Link to="/orders" className="dash-btn-outline flex-1 sm:flex-none">
+                <ShoppingBag size={14} />
+                Order History
+              </Link>
+              <Link to="/topup" className="dash-btn-outline flex-1 sm:flex-none">
+                <CreditCard size={14} style={{ color: '#059669' }} />
+                Fund Wallet
+              </Link>
+              <Link to="/buy-data" className="dash-btn-primary w-full sm:w-auto">
+                <Zap size={14} style={{ color: '#f0a500' }} />
+                Buy Data
+              </Link>
+            </div>
+          </div>
+
+          {/* Stats Grid */}
+          <div className="dash-stat-grid">
+            {stats.map((stat, i) => (
+              <div key={i} className="dash-stat-card">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div>
+                    <p className="dash-stat-label">{stat.label}</p>
+                    <p className="dash-stat-value">{stat.value}</p>
+                  </div>
+                  <stat.icon size={18} style={{ color: stat.color === 'blue' ? '#3b82f6' : stat.color === 'emerald' ? '#10b981' : stat.color === 'indigo' ? '#6366f1' : '#a855f7' }} />
+                </div>
               </div>
             ))}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Account Details & Referrals */}
-            <div className="lg:col-span-2 space-y-6">
-              <div className="bg-white rounded-3xl border border-slate-200/60 shadow-sm overflow-hidden group">
-                <div className="px-6 py-4 bg-slate-50/50 border-b border-slate-100 flex items-center justify-between">
-                  <h3 className="font-bold text-slate-700 flex items-center gap-2">
-                    <User size={18} className="text-blue-500" />
-                    Account Details
-                  </h3>
-                  <div className="flex gap-1">
-                    <div className="w-2 h-2 rounded-full bg-slate-200"></div>
-                    <div className="w-2 h-2 rounded-full bg-slate-200"></div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Account Details */}
+            <div className="lg:col-span-2 dash-card">
+              <h3 className="dash-card-title">
+                <User size={18} style={{ color: '#3b82f6' }} />
+                Account Details
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div style={{ background: '#fafaf7', padding: '16px', borderRadius: '12px', border: '1.5px solid #e4e4de' }}>
+                  <p className="dash-stat-label" style={{ marginBottom: '4px' }}>Email Address</p>
+                  <p style={{ fontSize: '14px', fontWeight: '800', color: '#111' }} className="truncate">{user?.email}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Phone size={10} style={{ color: '#999' }} />
+                    <span style={{ fontSize: '12px', color: '#666' }}>{user?.phone || 'No phone set'}</span>
                   </div>
                 </div>
-                <div className="p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                      <div className="space-y-0.5">
-                        <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Email Address</p>
-                        <div className="flex items-center gap-2 text-slate-900">
-                          <Mail size={14} className="text-slate-400" />
-                          <p className="text-sm font-black truncate">{user?.email}</p>
-                        </div>
-                      </div>
-                      <div className="space-y-0.5">
-                        <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Phone Number</p>
-                        <div className="flex items-center gap-2 text-slate-900">
-                          <Phone size={14} className="text-slate-400" />
-                          <p className="text-sm font-black">{user?.phone || 'Not set'}</p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="space-y-4">
-                      <div className="space-y-0.5">
-                        <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Referral Code</p>
-                        <div className="flex items-center gap-2">
-                          <p className="text-base font-black font-mono text-blue-600 tracking-tighter">{user?.referralCode}</p>
-                          <button onClick={copyReferralCode} className="p-1 px-2 bg-blue-50 text-blue-600 rounded-lg text-[9px] font-bold hover:bg-blue-100 transition-colors">
-                            {copied ? 'Copied!' : 'Copy'}
-                          </button>
-                        </div>
-                      </div>
-                      <div className="p-4 rounded-2xl bg-blue-50 text-blue-900 border border-blue-100 shadow-sm">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-blue-600 text-white rounded-lg flex items-center justify-center flex-shrink-0">
-                            <Share2 size={16} />
-                          </div>
-                          <div>
-                            <p className="text-[9px] font-bold uppercase tracking-widest text-blue-600 opacity-80">Referral Reward</p>
-                            <p className="text-xs font-black leading-tight">GH₵ {referralSettings?.amountPerReferral || '0.00'} / invite</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                <div style={{ background: '#fafaf7', padding: '16px', borderRadius: '12px', border: '1.5px solid #e4e4de' }}>
+                  <p className="dash-stat-label" style={{ marginBottom: '4px' }}>Referral Program</p>
+                  <div className="flex items-center justify-between">
+                    <p style={{ fontSize: '15px', fontWeight: '800', color: '#111', fontFamily: 'monospace' }}>{user?.referralCode}</p>
+                    <button onClick={copyReferralCode} className="text-xs font-bold text-indigo-600">{copied ? 'Copied!' : 'Copy Code'}</button>
                   </div>
-                </div>
-              </div>
-
-              {/* Data Bundles Grid */}
-              <div className="bg-white rounded-3xl border border-slate-200/60 shadow-sm overflow-hidden">
-                <div className="px-6 py-4 bg-slate-50/50 border-b border-slate-100 flex items-center justify-between">
-                  <h3 className="font-bold text-slate-700 flex items-center gap-2">
-                    <Zap size={18} className="text-amber-500" />
-                    Featured Bundles
-                  </h3>
-                  <Link to="/buy-data" className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline">
-                    View All
-                  </Link>
-                </div>
-                <div className="p-6">
-                  {loadingBundles ? (
-                    <div className="flex items-center justify-center py-12">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-400"></div>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                      {dataBundles.map(bundle => (
-                        <Link
-                          key={bundle._id}
-                          to={`/buy-data?planId=${bundle._id}&planName=${encodeURIComponent(bundle.planName)}&dataSize=${encodeURIComponent(bundle.dataSize)}&price=${bundle.sellingPrice}&network=${bundle.network}`}
-                          className="group p-4 rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-md hover:border-blue-300 transition-all"
-                        >
-                          <div className="flex justify-between items-start mb-3">
-                            <span className="px-2 py-0.5 bg-white rounded-lg text-[9px] font-black uppercase tracking-wider text-slate-600 border border-slate-100">
-                              {bundle.network}
-                            </span>
-                          </div>
-                          <p className="text-lg font-black text-slate-900 mb-1">{bundle.dataSize}</p>
-                          <p className="text-[10px] font-bold text-slate-500 uppercase mb-3">{bundle.validity}</p>
-                          <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-                            <p className="text-sm font-black text-blue-600">{formatCurrencyAbbreviated(bundle.sellingPrice)}</p>
-                            <ChevronRight size={14} className="text-slate-300 group-hover:translate-x-1 transition-transform" />
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  )}
+                  <p style={{ fontSize: '11px', color: '#059669', fontWeight: '700', marginTop: '4px' }}>
+                    Earn GH₵ {referralSettings?.amountPerReferral || '0.00'} per invite
+                  </p>
                 </div>
               </div>
             </div>
 
-            {/* Network Status Card */}
-            <div className="bg-white rounded-3xl border border-slate-200/60 shadow-sm overflow-hidden flex flex-col group h-fit">
-              <div className="px-6 py-4 bg-slate-50/50 border-b border-slate-100 flex items-center justify-between">
-                <h3 className="font-bold text-slate-700 flex items-center gap-2">
-                  <CheckCircle size={18} className="text-emerald-500" />
-                  Service Health
-                </h3>
-              </div>
-              <div className="p-8 space-y-6">
-                <div className="space-y-6">
-                  {[
-                    { net: 'MTN Network', status: 'Optimal', load: '12%', color: 'emerald' },
-                    { net: 'Telecel Network', status: 'Stable', load: '24%', color: 'blue' },
-                    { net: 'AirtelTigo Network', status: 'Stable', load: '18%', color: 'blue' }
-                  ].map((n, i) => (
-                    <div key={i} className="space-y-2">
-                      <div className="flex justify-between items-end">
-                        <p className="text-xs font-bold text-slate-600">{n.net}</p>
-                        <p className={`text-[9px] font-black uppercase tracking-widest ${n.status === 'Optimal' ? 'text-emerald-600' : 'text-blue-600'}`}>{n.status}</p>
-                      </div>
-                      <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                        <div className={`h-full bg-${n.color}-500 rounded-full group-hover:opacity-80 transition-all`} style={{ width: n.load }}></div>
-                      </div>
-                    </div>
-                  ))}
+            {/* Wallet Status */}
+            <div className="dash-card">
+              <h3 className="dash-card-title">
+                <Wallet size={18} style={{ color: '#f0a500' }} />
+                Wallet Status
+              </h3>
+              <div className="space-y-4">
+                <div style={{ background: '#111', padding: '20px', borderRadius: '14px', color: '#fff', position: 'relative', overflow: 'hidden' }}>
+                  <div style={{ position: 'absolute', top: '-10px', right: '-10px', width: '60px', height: '60px', background: 'rgba(240, 165, 0, 0.1)', borderRadius: '50%', filter: 'blur(20px)' }}></div>
+                  <p className="dash-stat-label" style={{ color: 'rgba(255,255,255,0.5)', marginBottom: '4px' }}>Available Balance</p>
+                  <p style={{ fontSize: '24px', fontWeight: '800' }}>{formatCurrencyAbbreviated(user?.balance || 0)}</p>
+                  <Link to="/topup" className="flex items-center gap-1 text-[10px] font-bold text-[#f0a500] mt-3 uppercase tracking-widest">
+                    Quick Topup <ChevronRight size={12} />
+                  </Link>
                 </div>
-                <div className="pt-6 border-t border-slate-50 text-center">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Platform Uptime 99.9%</p>
+                <div className="flex items-center justify-between p-3 rounded-xl border border-[#e4e4de]">
+                   <span className="text-xs font-bold text-slate-500">Total Spent</span>
+                   <span className="text-sm font-black text-slate-900">{formatCurrencyAbbreviated(user?.totalSpent || 0)}</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Recent Transactions */}
-          <div className="bg-white rounded-3xl border border-slate-200/60 shadow-sm overflow-hidden">
-            <div className="px-8 py-6 bg-slate-50/50 border-b border-slate-100 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-50 text-blue-600 rounded-xl">
-                  <ShoppingBag size={20} />
-                </div>
-                <div>
-                  <h3 className="font-black text-slate-900 tracking-tight leading-none uppercase text-[11px] tracking-widest text-slate-600">Account Activity</h3>
-                  <h3 className="text-lg font-black text-slate-900 tracking-tight">Recent Transactions</h3>
-                </div>
-              </div>
-              <Link
-                to="/transactions"
-                className="group flex items-center gap-2 text-xs font-black text-blue-600 uppercase tracking-widest hover:gap-3 transition-all"
-              >
+          {/* Featured Bundles */}
+          <div className="dash-card">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="dash-card-title" style={{ margin: 0 }}>
+                <Zap size={18} style={{ color: '#f0a500' }} />
+                Featured Bundles
+              </h3>
+              <Link to="/buy-data" style={{ fontSize: '11px', fontWeight: '800', color: '#3b82f6', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 View All
-                <ChevronRight size={16} />
+              </Link>
+            </div>
+            
+            {loadingBundles ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 text-[#f0a500] animate-spin" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                {dataBundles.map(bundle => (
+                  <Link
+                    key={bundle._id}
+                    to={`/buy-data?planId=${bundle._id}&planName=${encodeURIComponent(bundle.planName)}&dataSize=${encodeURIComponent(bundle.dataSize)}&price=${bundle.sellingPrice}&network=${bundle.network}`}
+                    className="flex flex-col p-3 rounded-xl border border-[#e4e4de] hover:border-[#d4d4ce] hover:shadow-md transition-all bg-white"
+                  >
+                    <span className="text-[9px] font-black uppercase text-slate-400 mb-1">{bundle.network}</span>
+                    <span className="text-lg font-black text-[#111]">{bundle.dataSize}</span>
+                    <span className="text-[10px] font-bold text-slate-500 mb-3">{bundle.validity}</span>
+                    <div className="mt-auto pt-2 border-t border-[#f0f0f0] flex items-center justify-between">
+                      <span className="text-sm font-black text-[#059669]">{formatCurrencyAbbreviated(bundle.sellingPrice)}</span>
+                      <ChevronRight size={14} className="text-slate-300" />
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Recent Transactions Section */}
+          <div className="dash-card">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="dash-card-title" style={{ margin: 0 }}>
+                <Activity size={18} style={{ color: '#3b82f6' }} />
+                Recent Transactions
+              </h3>
+              <Link to="/transactions" style={{ fontSize: '11px', fontWeight: '800', color: '#3b82f6', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                View All History
               </Link>
             </div>
 
             {recentTransactions.length === 0 ? (
-              <div className="text-center py-20 space-y-6">
-                <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto text-slate-200">
-                  <ShoppingBag size={48} />
-                </div>
-                <p className="text-slate-600 font-bold text-lg">No activity yet.</p>
+              <div style={{ textAlign: 'center', padding: '60px', border: '1.5px dashed #e4e4de', borderRadius: '14px' }}>
+                <ShoppingBag size={40} style={{ color: '#e4e4de', margin: '0 auto 16px' }} />
+                <p style={{ fontSize: '14px', fontWeight: '700', color: '#999' }}>No transactions yet.</p>
               </div>
             ) : (
-              <div className="overflow-x-auto scrollbar-hide">
-                <table className="w-full text-left">
+              <div className="dash-table-container">
+                <table className="dash-table">
                   <thead>
-                    <tr className="border-b border-slate-100">
-                      <th className="py-4 px-8 font-bold text-[11px] uppercase text-slate-600 tracking-wider whitespace-nowrap">Type</th>
-                      <th className="py-4 px-4 font-bold text-[11px] uppercase text-slate-600 tracking-wider whitespace-nowrap">Amount</th>
-                      <th className="py-4 px-4 font-bold text-[11px] uppercase text-slate-600 tracking-wider whitespace-nowrap">Status</th>
-                      <th className="py-4 px-4 text-right font-bold text-[11px] uppercase text-slate-600 tracking-wider whitespace-nowrap">Date</th>
-                      <th className="py-4 px-8 text-right font-bold text-[11px] uppercase text-slate-600 tracking-wider whitespace-nowrap">Details</th>
+                    <tr>
+                      <th className="dash-th">Type</th>
+                      <th className="dash-th">Amount</th>
+                      <th className="dash-th">Status</th>
+                      <th className="dash-th">Date</th>
+                      <th className="dash-th text-right">Action</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-50">
-                    {recentTransactions.map((tx) => (
-                      <tr key={tx.id} className="group hover:bg-slate-50/50 transition-colors">
-                        <td className="py-4 px-8 whitespace-nowrap">
-                          <p className="font-bold text-slate-900">{tx.type}</p>
-                          <p className="text-[10px] text-slate-500 truncate max-w-[150px]">{tx.description}</p>
-                        </td>
-                        <td className="py-4 px-4 whitespace-nowrap">
-                          <p className={`font-black ${tx.rawAmount < 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
+                  <tbody>
+                    {recentTransactions.map((tx) => {
+                      const statusColor = tx.statusRaw === 'completed' || tx.statusRaw === 'success'
+                        ? { background: '#ecfdf5', color: '#059669', border: '1px solid #d1fae5' }
+                        : tx.statusRaw === 'pending' || tx.statusRaw === 'processing'
+                        ? { background: '#fffbeb', color: '#d97706', border: '1px solid #fef3c7' }
+                        : { background: '#fff5f5', color: '#b91c1c', border: '1px solid #fecaca' };
+
+                      return (
+                        <tr key={tx.id}>
+                          <td className="dash-td">
+                            <div>
+                              <p style={{ fontWeight: '700', color: '#111' }}>{tx.type}</p>
+                              <p style={{ fontSize: '10px', color: '#999' }} className="truncate max-w-[200px]">{tx.description}</p>
+                            </div>
+                          </td>
+                          <td className="dash-td font-bold" style={{ color: tx.rawAmount < 0 ? '#b91c1c' : '#059669' }}>
                             {tx.rawAmount < 0 ? '-' : '+'}{formatCurrencyAbbreviated(Math.abs(tx.rawAmount))}
-                          </p>
-                        </td>
-                        <td className="py-4 px-4 whitespace-nowrap">
-                          <span
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${getStatusColor(tx.statusRaw)}`}
-                          >
-                            {tx.status}
-                          </span>
-                        </td>
-                        <td className="py-4 px-4 text-right whitespace-nowrap">
-                          <p className="text-xs font-bold text-slate-600">{tx.date}</p>
-                        </td>
-                        <td className="py-4 px-8 text-right whitespace-nowrap">
-                          <button
-                            onClick={() => {
-                              setSelectedOrder(tx);
-                              setShowDetails(true);
-                            }}
-                            className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                          >
-                            <Eye size={16} />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                          </td>
+                          <td className="dash-td">
+                            <span className="dash-badge" style={statusColor}>{tx.status}</span>
+                          </td>
+                          <td className="dash-td" style={{ fontSize: '11px', color: '#999' }}>{tx.date}</td>
+                          <td className="dash-td text-right">
+                            <button
+                              onClick={() => {
+                                setSelectedOrder(tx);
+                                setShowDetails(true);
+                              }}
+                              style={{ padding: '6px', borderRadius: '6px', border: '1px solid #e4e4de', background: '#fff', cursor: 'pointer' }}
+                            >
+                              <Eye size={14} style={{ color: '#666' }} />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -485,20 +657,20 @@ export default function Dashboard() {
       {showDetails && selectedOrder && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
           <div
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
+            className="absolute inset-0 bg-[#111]/40 backdrop-blur-sm transition-opacity"
             onClick={() => setShowDetails(false)}
           />
-          <div className="relative bg-white rounded-[32px] shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100 animate-in fade-in zoom-in duration-300">
-            <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+          <div className="relative bg-white rounded-[24px] shadow-2xl max-w-lg w-full overflow-hidden border border-[#e4e4de] animate-in fade-in zoom-in duration-300" style={{ fontFamily: 'DM Sans, sans-serif' }}>
+            <div className="px-8 py-6 border-b border-[#f0f0f0] flex items-center justify-between bg-[#fafaf7]">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-600 text-white rounded-xl">
+                <div className="dash-icon-box" style={{ width: '40px', height: '40px' }}>
                   <Clock size={20} />
                 </div>
-                <h3 className="text-lg font-black text-slate-900 tracking-tight">Transaction Details</h3>
+                <h3 className="text-lg font-black text-[#111] tracking-tight">Transaction Details</h3>
               </div>
               <button
                 onClick={() => setShowDetails(false)}
-                className="p-2 hover:bg-slate-200 rounded-full transition-colors"
+                className="p-2 hover:bg-[#e4e4de] rounded-full transition-colors"
               >
                 <Check size={20} className="text-slate-500" />
               </button>
@@ -507,37 +679,43 @@ export default function Dashboard() {
             <div className="p-8 space-y-6">
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Status</p>
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${getStatusColor(selectedOrder.statusRaw)}`}>
+                  <p className="dash-stat-label" style={{ marginBottom: '4px' }}>Status</p>
+                  <span className="dash-badge" style={
+                    selectedOrder.statusRaw === 'completed' || selectedOrder.statusRaw === 'success'
+                      ? { background: '#ecfdf5', color: '#059669', border: '1px solid #d1fae5' }
+                      : selectedOrder.statusRaw === 'pending' || selectedOrder.statusRaw === 'processing'
+                      ? { background: '#fffbeb', color: '#d97706', border: '1px solid #fef3c7' }
+                      : { background: '#fff5f5', color: '#b91c1c', border: '1px solid #fecaca' }
+                  }>
                     {selectedOrder.status}
                   </span>
                 </div>
                 <div className="text-right">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Amount</p>
-                  <p className={`text-xl font-black ${selectedOrder.rawAmount < 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
+                  <p className="dash-stat-label" style={{ marginBottom: '4px' }}>Amount</p>
+                  <p style={{ fontSize: '24px', fontWeight: '800', color: selectedOrder.rawAmount < 0 ? '#b91c1c' : '#059669' }}>
                     {selectedOrder.rawAmount < 0 ? '-' : '+'}{formatCurrencyAbbreviated(Math.abs(selectedOrder.rawAmount))}
                   </p>
                 </div>
               </div>
 
-              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-4">
+              <div className="p-5 bg-[#fafaf7] rounded-2xl border border-[#e4e4de] space-y-4">
                 <div className="flex justify-between items-center text-sm">
-                  <span className="font-bold text-slate-500 uppercase text-[10px] tracking-widest">Type</span>
-                  <span className="font-black text-slate-900">{selectedOrder.type}</span>
+                  <span className="dash-stat-label">Transaction Type</span>
+                  <span style={{ fontWeight: '800', color: '#111' }}>{selectedOrder.type}</span>
                 </div>
                 <div className="flex justify-between items-start text-sm">
-                  <span className="font-bold text-slate-500 uppercase text-[10px] tracking-widest">Description</span>
-                  <span className="font-bold text-slate-900 text-right max-w-[60%]">{selectedOrder.description}</span>
+                  <span className="dash-stat-label">Description</span>
+                  <span style={{ fontWeight: '700', color: '#111' }} className="text-right max-w-[60%]">{selectedOrder.description}</span>
                 </div>
                 <div className="flex justify-between items-center text-sm">
-                  <span className="font-bold text-slate-500 uppercase text-[10px] tracking-widest">Date</span>
-                  <span className="font-bold text-slate-900">{selectedOrder.date}</span>
+                  <span className="dash-stat-label">Timestamp</span>
+                  <span style={{ fontWeight: '700', color: '#111' }}>{selectedOrder.date}</span>
                 </div>
               </div>
 
               <button
                 onClick={() => setShowDetails(false)}
-                className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-slate-800 transition-all shadow-xl shadow-slate-200 active:scale-[0.98]"
+                className="dash-btn-primary w-full py-4 text-xs uppercase tracking-widest"
               >
                 Close Details
               </button>

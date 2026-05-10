@@ -237,6 +237,25 @@ const styles = `
     align-items: center;
     gap: 4px;
   }
+
+  .dash-plan-card {
+    background: #fff;
+    border: 1.5px solid #e4e4de;
+    border-radius: 14px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  }
+
+  .dash-plan-card:hover {
+    transform: translateY(-4px);
+    border-color: #111;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+  }
 `;
 
 export default function ResultsChecker() {
@@ -460,22 +479,24 @@ export default function ResultsChecker() {
                   );
 
                   return (
-                    <div key={product._id} className="dash-card !p-5 group transition-all hover:translate-y-[-2px]">
+                    <div key={product._id} className="dash-plan-card group">
                       <div className="flex items-center gap-3 mb-4">
-                        <div className="w-10 h-10 rounded-lg bg-[#fafaf7] border-1.5 border-[#e4e4de] flex items-center justify-center text-[#111] group-hover:bg-[#111] group-hover:text-white transition-all">
+                        <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-[#111] group-hover:text-white transition-all">
                           <Smartphone size={20} />
                         </div>
                         <div className="min-w-0">
-                          <h4 className="font-bold text-slate-900 truncate uppercase text-sm">{product.displayName || product.checkerType}</h4>
-                          <p className="text-[10px] font-bold text-[#f0a500] uppercase tracking-widest">{product.checkerType}</p>
+                          <h4 className="font-black text-[#111] truncate uppercase text-sm tracking-tight">{product.displayName || product.checkerType}</h4>
+                          <p className="text-[10px] font-bold text-[#f0a500] uppercase tracking-[0.2em] mt-0.5">{product.checkerType}</p>
                         </div>
                       </div>
 
-                      <div className="pt-4 border-t border-[#f0f0f0]">
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Unit Price</p>
-                        <p className="text-2xl font-black text-slate-900 tracking-tight">
-                          {formatCurrencyAbbreviated(basePrice)}
-                        </p>
+                      <div className="pt-4 border-t border-[#f5f5f0]">
+                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Unit Price</p>
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-2xl font-black text-[#111] tracking-tight">
+                            {formatCurrencyAbbreviated(basePrice)}
+                          </span>
+                        </div>
                         
                         {paymentMethod === 'paystack' && dataPurchaseCharge > 0 && (
                           <div className="mt-3 p-2 bg-slate-50 rounded-lg space-y-1">
@@ -493,9 +514,9 @@ export default function ResultsChecker() {
                         <button
                           onClick={() => handleBuy(product)}
                           disabled={buyingId === product._id || (paymentMethod === 'wallet' && Number(user?.balance || 0) < Number(product.finalPrice || 0))}
-                          className="dash-btn-primary w-full !py-2.5 mt-4"
+                          className="w-full py-3 bg-[#111] text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-[#333] transition-all flex items-center justify-center gap-2 mt-4 disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-slate-100"
                         >
-                          {buyingId === product._id ? <Loader2 size={16} className="animate-spin" /> : <ShoppingBag size={16} />}
+                          {buyingId === product._id ? <Loader2 size={16} className="animate-spin" /> : <ShoppingBag size={14} strokeWidth={3} />}
                           Buy PIN
                         </button>
                       </div>

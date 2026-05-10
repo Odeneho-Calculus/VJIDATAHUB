@@ -1,11 +1,237 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Eye, RotateCw, Copy, Check, Filter, Search, Calendar, ChevronRight, Hash, Smartphone, CreditCard, Layout, Zap, ArrowLeft, RefreshCw, AlertCircle, ShoppingBag } from 'lucide-react';
+import { Eye, RotateCw, Copy, Check, Filter, Search, Calendar, ChevronRight, Hash, Smartphone, CreditCard, Layout, Zap, ArrowLeft, RefreshCw, AlertCircle, ShoppingBag, Activity, ShieldCheck, CheckCircle2, CheckCircle, Clock } from 'lucide-react';
 import { formatCurrencyAbbreviated } from '../utils/formatCurrency';
 import { purchases, dataplans } from '../services/api';
 import UserLayout from '../components/UserLayout';
 import Modal from '../components/Modal';
 import AlertModal from '../components/AlertModal';
 import { useAuth } from '../hooks/useAuth';
+
+const styles = `
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
+
+  .dash-wrapper {
+    font-family: 'DM Sans', sans-serif;
+    background-color: #fafaf7;
+    min-height: 100vh;
+    padding: 20px;
+    color: #1a1a1a;
+  }
+
+  .dash-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .dash-header {
+    background: #fff;
+    border: 1.5px solid #e4e4de;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  }
+
+  .dash-h2 {
+    font-size: 24px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    margin: 0;
+    color: #111;
+  }
+
+  .dash-icon-box {
+    width: 48px;
+    height: 48px;
+    background: #111;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+  }
+
+  .dash-heading-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .dash-btn-outline {
+    background: #fff;
+    border: 1.5px solid #e4e4de;
+    border-radius: 12px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 800;
+    color: #111;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dash-btn-outline:hover {
+    border-color: #111;
+    background: #fafaf7;
+  }
+
+  .dash-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+  }
+
+  .dash-stat-card {
+    background: #fff;
+    border: 1.5px solid #e4e4de;
+    border-radius: 20px;
+    padding: 20px;
+  }
+
+  .dash-stat-label {
+    font-size: 11px;
+    font-weight: 800;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+
+  .dash-stat-value {
+    font-size: 22px;
+    font-weight: 900;
+    color: #111;
+    margin: 0;
+  }
+
+  .dash-card {
+    background: #fff;
+    border: 1.5px solid #e4e4de;
+    border-radius: 24px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .dash-card-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: #111;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .dash-premium-banner {
+    background: linear-gradient(135deg, #111 0%, #333 100%);
+    border-radius: 24px;
+    padding: 32px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .dash-banner-accent {
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    width: 120px;
+    height: 120px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .dash-table {
+    width: 100%;
+    border-spacing: 0 8px;
+    border-collapse: separate;
+  }
+
+  .dash-table th {
+    padding: 12px 16px;
+    font-size: 10px;
+    font-weight: 800;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-align: left;
+  }
+
+  .dash-table-row {
+    background: #fff;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+
+  .dash-table-row:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+
+  .dash-table td {
+    padding: 16px;
+    border-top: 1.5px solid #e4e4de;
+    border-bottom: 1.5px solid #e4e4de;
+    font-size: 13px;
+  }
+
+  .dash-table td:first-child {
+    border-left: 1.5px solid #e4e4de;
+    border-top-left-radius: 16px;
+    border-bottom-left-radius: 16px;
+  }
+
+  .dash-table td:last-child {
+    border-right: 1.5px solid #e4e4de;
+    border-top-right-radius: 16px;
+    border-bottom-right-radius: 16px;
+  }
+
+  .badge-premium {
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .badge-success { background: #ecfdf5; color: #059669; border: 1px solid #d1fae5; }
+  .badge-pending { background: #fffbeb; color: #d97706; border: 1px solid #fef3c7; }
+  .badge-failed { background: #fef2f2; color: #dc2626; border: 1px solid #fee2e2; }
+  .badge-info { background: #eff6ff; color: #2563eb; border: 1px solid #dbeafe; }
+
+  .dash-mobile-card {
+    background: #fff;
+    border: 1.5px solid #e4e4de;
+    border-radius: 20px;
+    padding: 16px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  }
+
+  .dash-mobile-card:hover {
+    border-color: #111;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  }
+
+  @media (max-width: 768px) {
+    .dash-wrapper { padding: 12px; }
+    .dash-header { padding: 16px; }
+    .dash-premium-banner { padding: 20px; }
+    .dash-stat-grid { grid-template-columns: 1fr 1fr; }
+  }
+`;
 
 export default function Orders() {
   const { user } = useAuth();
@@ -193,266 +419,216 @@ export default function Orders() {
 
   return (
     <UserLayout>
-      <div className="min-h-screen bg-slate-50/50 pb-20">
-        {/* Sticky Header */}
-        <div className="sticky top-0 z-30 app-pro-header pb-1">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div className="dash-wrapper overflow-x-hidden">
+        <style>{styles}</style>
+        
+        <div className="dash-content">
+          {/* Header Card */}
+          <div className="dash-header">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white shadow-lg shadow-blue-100">
-                  <ShoppingBag size={24} strokeWidth={2.5} />
+              <div className="dash-heading-row">
+                <div className="dash-icon-box">
+                  <ShoppingBag size={24} />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-black text-slate-900 tracking-tight">My Orders</h1>
-                  <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1.5 mt-0.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    History • {orders.length} Records
-                  </p>
+                  <h2 className="dash-h2">Order History</h2>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-xs font-bold text-slate-400 font-mono uppercase">Manage Your Purchases</span>
+                  </div>
                 </div>
               </div>
-
-              <div className="flex items-center gap-3 self-end sm:self-auto">
-                <div className="hidden sm:flex flex-col items-end px-4 py-1.5 bg-slate-100/50 rounded-2xl border border-slate-200/40">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Your Balance</span>
-                  <span className="text-sm font-black text-slate-900">{formatCurrencyAbbreviated(user?.balance) || '0'}</span>
-                </div>
+              <div className="flex items-center gap-2">
                 <button
                   onClick={handleRefresh}
                   disabled={isRefreshing}
-                  className="p-3 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-400 transition-all text-slate-600 hover:text-blue-600 group active:scale-95"
+                  className="dash-btn-outline p-2"
+                  title="Refresh Orders"
                 >
-                  <RefreshCw size={20} className={`${isRefreshing ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
+                  <RefreshCw size={18} className={isRefreshing ? 'animate-spin' : ''} />
                 </button>
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-          {/* Filters Card */}
-          <div className="bg-white p-6 rounded-[2rem] border border-slate-200/60 shadow-sm">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div className="grid grid-cols-2 gap-4 flex-1">
-                <div className="space-y-2">
-                  <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2 px-1">
-                    <Filter size={12} className="text-blue-500" />
-                    Status
-                  </label>
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200/60 rounded-2xl px-4 py-3 text-sm font-bold text-slate-700 outline-none focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 transition-all appearance-none cursor-pointer"
-                  >
-                    <option value="all">Check All</option>
-                    <option value="completed">Success</option>
-                    <option value="pending">Waiting</option>
-                    <option value="failed">Rejected</option>
-                  </select>
+          <div className="dash-stat-grid">
+            <div className="dash-stat-card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <p className="dash-stat-label">Total Orders</p>
+                  <p className="dash-stat-value">{orders.length}</p>
                 </div>
-
-                <div className="space-y-2">
-                  <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2 px-1">
-                    <Layout size={12} className="text-indigo-500" />
-                    Network
-                  </label>
-                  <select
-                    value={networkFilter}
-                    onChange={(e) => setNetworkFilter(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200/60 rounded-2xl px-4 py-3 text-sm font-bold text-slate-700 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all appearance-none cursor-pointer"
-                  >
-                    <option value="all">All Carriers</option>
-                    {getUniqueNetworks().map(network => (
-                      <option key={network} value={network.toLowerCase()}>{network}</option>
-                    ))}
-                  </select>
-                </div>
+                <ShoppingBag size={18} style={{ color: '#10b981' }} />
               </div>
-
-              <div className="hidden lg:flex items-center gap-3 text-slate-400 bg-slate-50 px-4 py-3 rounded-2xl border border-slate-100">
-                <AlertCircle size={16} />
-                <p className="text-xs font-bold tracking-tight">Orders are synced in real-time with providers</p>
+            </div>
+            <div className="dash-stat-card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <p className="dash-stat-label">Active Orders</p>
+                  <p className="dash-stat-value">{orders.filter(o => o.status === 'pending').length}</p>
+                </div>
+                <Clock size={18} style={{ color: '#3b82f6' }} />
+              </div>
+            </div>
+            <div className="dash-stat-card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <p className="dash-stat-label">Network Sync</p>
+                  <p className="dash-stat-value">Live</p>
+                </div>
+                <Activity size={18} style={{ color: '#f0a500' }} />
+              </div>
+            </div>
+            <div className="dash-stat-card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <p className="dash-stat-label">Verified Data</p>
+                  <p className="dash-stat-value">Secure</p>
+                </div>
+                <ShieldCheck size={18} style={{ color: '#a855f7' }} />
               </div>
             </div>
           </div>
 
-          {/* Orders Container */}
-          <div className="bg-white rounded-[2.5rem] border border-slate-200/60 shadow-sm overflow-hidden">
+          {/* Filters Card */}
+          <div className="dash-card">
+            <h3 className="dash-card-title">
+              <Filter size={18} style={{ color: '#3b82f6' }} />
+              Filter Records
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</label>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="w-full bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-xl px-4 py-3 text-xs font-black text-slate-700 outline-none focus:border-slate-400 transition-all appearance-none cursor-pointer"
+                >
+                  <option value="all">All Status</option>
+                  <option value="completed">Completed</option>
+                  <option value="pending">Pending</option>
+                  <option value="failed">Failed</option>
+                </select>
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Network</label>
+                <select
+                  value={networkFilter}
+                  onChange={(e) => setNetworkFilter(e.target.value)}
+                  className="w-full bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-xl px-4 py-3 text-xs font-black text-slate-700 outline-none focus:border-slate-400 transition-all appearance-none cursor-pointer"
+                >
+                  <option value="all">All Networks</option>
+                  {getUniqueNetworks().map(network => (
+                    <option key={network} value={network.toLowerCase()}>{network}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Orders Table Container */}
+          <div className="dash-card">
+            <h3 className="dash-card-title">
+              <Zap size={18} style={{ color: '#f0a500' }} />
+              Purchase History
+            </h3>
+
             {loading ? (
-              <div className="flex flex-col items-center justify-center py-24 text-center space-y-4">
-                <div className="relative">
-                  <div className="w-16 h-16 border-4 border-slate-100 rounded-full"></div>
-                  <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
-                </div>
-                <p className="text-sm font-black text-slate-500 uppercase tracking-widest">Loading Records...</p>
+              <div style={{ textAlign: 'center', padding: '60px' }}>
+                <RefreshCw size={40} className="animate-spin" style={{ color: '#e4e4de', margin: '0 auto 16px' }} />
+                <p style={{ fontSize: '14px', fontWeight: '700', color: '#999' }}>Loading your records...</p>
               </div>
             ) : filteredOrders.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-24 text-center space-y-6">
-                <div className="w-24 h-24 bg-slate-50 rounded-[2.5rem] flex items-center justify-center text-slate-300">
-                  <ShoppingBag size={48} strokeWidth={1.5} />
-                </div>
-                <div className="space-y-1">
-                  <p className="text-xl font-black text-slate-900 tracking-tight">No orders found</p>
-                  <p className="text-sm font-bold text-slate-400">Try adjusting your filters or check back later.</p>
-                </div>
+              <div style={{ textAlign: 'center', padding: '60px', border: '1.5px dashed #e4e4de', borderRadius: '14px' }}>
+                <ShoppingBag size={40} style={{ color: '#e4e4de', margin: '0 auto 16px' }} />
+                <p style={{ fontSize: '14px', fontWeight: '700', color: '#999' }}>No orders matching your criteria.</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 {/* Desktop Table */}
-                <table className="hidden md:table w-full text-left border-collapse">
+                <table className="dash-table hidden md:table">
                   <thead>
-                    <tr className="bg-slate-50/50 border-b border-slate-100">
-                      <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Reference</th>
-                      <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Carrier & Plan</th>
-                      <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Amount</th>
-                      <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Payment</th>
-                      <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Delivery</th>
-                      <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                    <tr>
+                      <th>Order ID</th>
+                      <th>Service & Plan</th>
+                      <th>Amount</th>
+                      <th>Status</th>
+                      <th>Date</th>
+                      <th>Action</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-50">
+                  <tbody>
                     {filteredOrders.map(order => (
-                      <tr
-                        key={order.id || order._id}
-                        onClick={() => handleViewDetails(order)}
-                        className="group hover:bg-slate-50/80 transition-all cursor-pointer"
-                      >
-                        <td className="px-6 py-5">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-white group-hover:text-blue-600 shadow-sm transition-colors">
-                              <Hash size={14} />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="text-xs font-black text-slate-900 uppercase tracking-tighter truncate">
-                                {order.orderNumber?.slice(-12) || 'N/A'}
-                              </p>
-                              <p className="text-[10px] font-bold text-slate-400 mt-0.5 whitespace-nowrap">
-                                {formatDate(order.date || order.createdAt)}
-                              </p>
-                            </div>
+                      <tr key={order.id || order._id} className="dash-table-row" onClick={() => handleViewDetails(order)}>
+                        <td>
+                          <div className="flex flex-col">
+                            <span className="font-black text-[#111]">#{order.orderNumber?.slice(-8).toUpperCase()}</span>
+                            <span className="text-[10px] text-slate-400 font-bold uppercase">{order.orderKind || 'Purchase'}</span>
                           </div>
                         </td>
-                        <td className="px-6 py-5">
+                        <td>
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-[10px]">
+                            <div className="w-8 h-8 rounded-lg bg-[#fafaf7] border border-[#e4e4de] flex items-center justify-center font-black text-[10px]">
                               {getOrderNetworkDisplay(order)?.charAt(0).toUpperCase()}
                             </div>
-                            <div className="min-w-0">
-                              <p className="text-sm font-black text-slate-900 tracking-tight truncate">
-                                {getOrderPlanDisplay(order)}
-                              </p>
-                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
-                                {getOrderNetworkDisplay(order)}
-                              </p>
+                            <div className="flex flex-col">
+                              <span className="font-bold text-[#111]">{getOrderNetworkDisplay(order)}</span>
+                              <span className="text-[10px] text-slate-500">{getOrderPlanDisplay(order)}</span>
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-5 text-center">
-                          <p className="text-sm font-black text-slate-900 tracking-tight">
-                            GH₵ {formatCurrencyAbbreviated(order.amount) || '0'}
-                          </p>
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mt-0.5 italic">
-                            {order.paymentMethod}
-                          </p>
+                        <td>
+                          <span className="font-black text-[#111]">{formatCurrencyAbbreviated(order.amount)}</span>
                         </td>
-                        <td className="px-6 py-5">
-                          <div className="flex justify-center">
-                            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${getPaymentStatusStyles(order.paymentStatus || 'pending')}`}>
-                              {order.paymentStatus || 'pending'}
-                            </span>
+                        <td>
+                          <span className={`badge-premium ${order.status?.toLowerCase() === 'completed' || order.status?.toLowerCase() === 'success' ? 'badge-success' : order.status?.toLowerCase() === 'pending' ? 'badge-pending' : 'badge-failed'}`}>
+                            {order.status || 'Unknown'}
+                          </span>
+                        </td>
+                        <td>
+                          <div className="flex flex-col">
+                            <span className="font-bold text-[#111] text-[11px]">{formatDate(order.date || order.createdAt)}</span>
+                            <span className="text-[10px] text-slate-400">{formatTime(order.date || order.createdAt)}</span>
                           </div>
                         </td>
-                        <td className="px-6 py-5">
-                          <div className="flex justify-center">
-                            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${getDeliveryStatusStyles(order.status)}`}>
-                              {order.status || 'Unknown'}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-5 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            {order.paymentStatus === 'pending' && order.paymentMethod === 'paystack' && (
-                              <button
-                                onClick={(e) => openVerificationModal(order, e)}
-                                className="p-2 bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white rounded-xl transition-all shadow-sm active:scale-95 border border-amber-100"
-                                title="Verify Payment"
-                              >
-                                <RefreshCw size={14} strokeWidth={3} />
-                              </button>
-                            )}
-                            <button
-                              className="p-2 bg-slate-100 text-slate-400 hover:bg-slate-900 hover:text-white rounded-xl transition-all shadow-sm active:scale-95"
-                              title="Details"
-                            >
-                              <ChevronRight size={16} strokeWidth={3} />
-                            </button>
-                          </div>
+                        <td>
+                          <button className="p-2 rounded-lg hover:bg-[#fafaf7] text-slate-400 hover:text-[#111] transition-all">
+                            <ChevronRight size={18} />
+                          </button>
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
 
-                {/* Mobile Cards */}
-                <div className="md:hidden divide-y divide-slate-100">
+                <div className="md:hidden flex flex-col gap-3">
                   {filteredOrders.map(order => (
-                    <div
-                      key={order.id || order._id}
+                    <div 
+                      key={order.id || order._id} 
+                      className="dash-mobile-card"
                       onClick={() => handleViewDetails(order)}
-                      className="p-5 active:bg-slate-50 transition-colors"
                     >
-                      <div className="flex justify-between items-start mb-4">
-                        <div className="flex gap-3">
-                          <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-xs shadow-sm">
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-[#fafaf7] border border-[#e4e4de] flex items-center justify-center font-black">
                             {getOrderNetworkDisplay(order)?.charAt(0).toUpperCase()}
                           </div>
-                          <div>
-                            <p className="text-base font-black text-slate-900 tracking-tight">
-                              {getOrderPlanDisplay(order)}
-                            </p>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">
-                              {getOrderNetworkDisplay(order)}
-                            </p>
+                          <div className="flex flex-col">
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{getOrderNetworkDisplay(order)}</span>
+                            <span className="font-black text-[#111]">{getOrderPlanDisplay(order)}</span>
                           </div>
                         </div>
-                        <div className="flex flex-col gap-2">
-                          <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border text-center ${getPaymentStatusStyles(order.paymentStatus || 'pending')}`}>
-                            Pay: {order.paymentStatus || 'pending'}
-                          </span>
-                          <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border text-center ${getDeliveryStatusStyles(order.status)}`}>
-                            {order.status}
-                          </span>
-                        </div>
+                        <span className={`badge-premium ${order.status?.toLowerCase() === 'completed' || order.status?.toLowerCase() === 'success' ? 'badge-success' : order.status?.toLowerCase() === 'pending' ? 'badge-pending' : 'badge-failed'}`}>
+                          {order.status || 'Pending'}
+                        </span>
                       </div>
-
-                      <div className="flex items-center justify-between pt-4 border-t border-slate-50 mt-1">
-                        <div className="flex flex-col gap-1">
-                          <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
-                            <Calendar size={12} className="text-slate-300" />
-                            {formatDate(order.date || order.createdAt)} • {formatTime(order.date || order.createdAt)}
-                          </div>
-                          <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
-                            <Smartphone size={12} className="text-slate-300" />
-                            {order.phoneNumber || 'N/A'}
-                          </div>
+                      <div className="flex justify-between items-end pt-3 border-t border-[#f0f0f0]">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] font-bold text-slate-400">{formatDate(order.date || order.createdAt)}</span>
+                          <span className="font-black text-[#111]">{formatCurrencyAbbreviated(order.amount)}</span>
                         </div>
-                        <div className="text-right">
-                          <p className="text-lg font-black text-slate-900 tracking-tighter">
-                            GH₵ {formatCurrencyAbbreviated(order.amount)}
-                          </p>
-                          <div className="flex items-center justify-end gap-2 mt-2">
-                            {order.paymentStatus === 'pending' && order.paymentMethod === 'paystack' && (
-                              <button
-                                onClick={(e) => openVerificationModal(order, e)}
-                                className="p-2 bg-amber-50 text-amber-600 rounded-xl border border-amber-100"
-                              >
-                                <RefreshCw size={14} />
-                              </button>
-                            )}
-                            <div className="w-8 h-8 bg-slate-900 text-white rounded-xl flex items-center justify-center">
-                              <ChevronRight size={16} strokeWidth={3} />
-                            </div>
-                          </div>
-                        </div>
+                        <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-1">
+                          View Details <ChevronRight size={12} />
+                        </span>
                       </div>
                     </div>
                   ))}
@@ -462,72 +638,88 @@ export default function Orders() {
           </div>
         </div>
 
-        {/* Order Details Modal */}
+        {/* Details Modal */}
         <Modal
           isOpen={showDetails}
           onClose={() => setShowDetails(false)}
-          title="Order Details"
-          icon={ShoppingBag}
-          footer={
-            <button
-              onClick={() => setShowDetails(false)}
-              className="w-full py-4 bg-slate-900 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl hover:bg-blue-600 transition-all active:scale-[0.98] shadow-xl shadow-slate-200"
-            >
-              Close Record
-            </button>
-          }
+          title="Transaction Details"
         >
           {selectedOrder && (
-            <div className="space-y-6">
-              <div className="bg-slate-50 rounded-[2rem] p-6 border border-slate-100 flex flex-col items-center text-center">
-                <div className="w-16 h-16 rounded-2xl bg-white shadow-sm flex items-center justify-center text-blue-600 mb-4 border border-slate-100">
-                  <Smartphone size={32} strokeWidth={1.5} />
-                </div>
-                <p className="text-2xl font-black text-slate-900 tracking-tight">{getOrderPlanDisplay(selectedOrder)}</p>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mt-1">{getOrderNetworkDisplay(selectedOrder)}</p>
-
-                <div className="mt-6 space-y-2">
-                  <div className={`px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border inline-block ${getPaymentStatusStyles(selectedOrder.paymentStatus || 'pending')}`}>
-                    Payment: {selectedOrder.paymentStatus || 'pending'}
+            <div className="dash-card border-0 p-0 shadow-none">
+              <div className="dash-premium-banner mb-2" style={{ padding: '24px' }}>
+                <div className="dash-banner-accent"></div>
+                <div className="flex items-center gap-4 relative z-10">
+                  <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center backdrop-blur-md">
+                    <ShoppingBag size={24} />
                   </div>
-                  <div className={`px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border block ${getDeliveryStatusStyles(selectedOrder.status)}`}>
-                    Delivery: {selectedOrder.status}
+                  <div>
+                    <h3 className="text-lg font-black">{getOrderPlanDisplay(selectedOrder)}</h3>
+                    <p className="text-[11px] font-bold text-white/70 uppercase tracking-widest">{selectedOrder.orderNumber}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-1">
-                {[
-                  { label: 'Reference', value: selectedOrder.orderNumber, mono: true, icon: Hash },
-                  { label: 'Recipient', value: selectedOrder.phoneNumber, mono: true, icon: Smartphone },
-                  { label: 'Plan Name', value: selectedOrder.planName || getOrderPlanDisplay(selectedOrder) || '-' },
-                  { label: 'Total Paid', value: `GH₵ ${formatCurrencyAbbreviated(selectedOrder.amount)}`, bold: true, icon: CreditCard },
-                  { label: 'Method', value: selectedOrder.paymentMethod, icon: CreditCard },
-                  { label: 'Timestamp', value: new Date(selectedOrder.date || selectedOrder.createdAt).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }), icon: Calendar }
-                ].map((item, i) => (
-                  <div key={i} className="flex items-center justify-between py-3 border-b border-slate-50 last:border-0 group">
-                    <div className="flex items-center gap-2 text-slate-400">
-                      {item.icon && <item.icon size={12} className="group-hover:text-blue-500 transition-colors" />}
-                      <span className="text-[10px] font-black uppercase tracking-widest">{item.label}</span>
-                    </div>
-                    <span className={`text-[11px] font-bold ${item.mono ? 'font-mono' : ''} ${item.bold ? 'text-blue-600 text-sm font-black' : 'text-slate-700'}`}>
-                      {item.value}
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-3 bg-[#fafaf7] rounded-xl border border-[#e4e4de]">
+                    <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Status</p>
+                    <span className={`badge-premium ${selectedOrder.status?.toLowerCase() === 'completed' || selectedOrder.status?.toLowerCase() === 'success' ? 'badge-success' : selectedOrder.status?.toLowerCase() === 'pending' ? 'badge-pending' : 'badge-failed'}`}>
+                      {selectedOrder.status}
                     </span>
                   </div>
-                ))}
-              </div>
+                  <div className="p-3 bg-[#fafaf7] rounded-xl border border-[#e4e4de]">
+                    <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Amount</p>
+                    <p className="font-black text-[#111]">{formatCurrencyAbbreviated(selectedOrder.amount)}</p>
+                  </div>
+                </div>
 
-              {(selectedOrder.providerMessage || selectedOrder.errorMessage) && (
-                <div className="p-4 bg-rose-50/50 border border-rose-100 rounded-2xl">
-                  <p className="text-[9px] font-black text-rose-400 uppercase tracking-widest mb-1 flex items-center gap-2">
-                    <AlertCircle size={10} />
-                    System Response
-                  </p>
-                  <p className="text-[11px] font-bold text-rose-600 leading-relaxed italic">
-                    {selectedOrder.providerMessage || selectedOrder.errorMessage}
+                <div className="p-4 bg-[#fafaf7] rounded-2xl border border-[#e4e4de] space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs font-bold text-slate-500">Beneficiary</span>
+                    <span className="text-sm font-black text-[#111]">{selectedOrder.beneficiary || 'N/A'}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs font-bold text-slate-500">Network</span>
+                    <span className="text-sm font-black text-[#111]">{getOrderNetworkDisplay(selectedOrder)}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs font-bold text-slate-500">Date</span>
+                    <span className="text-sm font-black text-[#111]">{formatDate(selectedOrder.date || selectedOrder.createdAt)}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs font-bold text-slate-500">Time</span>
+                    <span className="text-sm font-black text-[#111]">{formatTime(selectedOrder.date || selectedOrder.createdAt)}</span>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-slate-900 rounded-2xl text-white space-y-3 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full -mr-12 -mt-12"></div>
+                  <p className="text-[10px] font-black text-white/50 uppercase tracking-widest">Provider Response</p>
+                  <p className="text-xs font-medium leading-relaxed italic">
+                    {selectedOrder.providerResponse || 'Transaction processed successfully through secure gateway.'}
                   </p>
                 </div>
-              )}
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowDetails(false)}
+                    className="flex-1 py-4 bg-[#111] text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-[#333] transition-all"
+                  >
+                    Close
+                  </button>
+                  {selectedOrder.status?.toLowerCase() === 'pending' && (
+                    <button
+                      onClick={(e) => {
+                        setShowDetails(false);
+                        openVerificationModal(selectedOrder, e);
+                      }}
+                      className="flex-1 py-4 bg-blue-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-blue-700 transition-all"
+                    >
+                      Verify Now
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           )}
         </Modal>
@@ -536,76 +728,68 @@ export default function Orders() {
         <Modal
           isOpen={verifyModalOpen}
           onClose={() => setVerifyModalOpen(false)}
-          title="Verify Payment"
-          icon={RefreshCw}
-          footer={
-            <div className="flex gap-3 w-full">
-              <button
-                onClick={() => setVerifyModalOpen(false)}
-                className="flex-1 py-4 bg-slate-50 text-slate-400 font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-slate-100 transition-all border border-slate-100"
-                disabled={verifying}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleConfirmVerify}
-                disabled={verifying}
-                className="flex-[2] py-4 bg-blue-600 text-white font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                {verifying ? (
-                  <RefreshCw size={14} className="animate-spin" />
-                ) : (
-                  <>
-                    <Check size={14} strokeWidth={3} />
-                    Finalize Verification
-                  </>
-                )}
-              </button>
-            </div>
-          }
+          title="Verify Transaction"
         >
           {verificationOrder && (
             <div className="space-y-6">
-              <div className="text-center space-y-2">
-                <p className="text-sm font-bold text-slate-500 leading-relaxed">
-                  Please confirm the Paystack transaction reference for manual verification.
-                </p>
-              </div>
-
-              <div className="bg-slate-50 rounded-[2rem] p-6 border border-slate-100">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 text-center">Transaction Reference</p>
-                <div className="flex flex-col items-center gap-4">
-                  <code className="px-4 py-3 bg-white border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-900 break-all w-full text-center shadow-sm">
-                    {verificationOrder.transactionReference || verificationOrder.paystackReference || 'N/A'}
-                  </code>
-                  <button
-                    onClick={handleCopyReference}
-                    className={`flex items-center gap-2 px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${copied ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-100' : 'bg-white text-slate-600 border border-slate-200 hover:border-blue-400'
-                      }`}
-                  >
-                    {copied ? <Check size={14} strokeWidth={3} /> : <Copy size={14} />}
-                    {copied ? 'Copied' : 'Copy Reference'}
-                  </button>
+              <div className="p-6 bg-blue-50 border border-blue-100 rounded-2xl flex items-center gap-4">
+                <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white">
+                  <ShieldCheck size={24} />
+                </div>
+                <div>
+                  <h4 className="font-black text-blue-900 tracking-tight">Payment Verification</h4>
+                  <p className="text-xs font-bold text-blue-700/70 uppercase">Reference Lookup</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 p-4 bg-amber-50 rounded-2xl border border-amber-100">
-                <AlertCircle size={18} className="text-amber-500 shrink-0" />
-                <p className="text-[11px] font-bold text-amber-700 leading-tight">
-                  Verification will sync your account balance if the payment was successful on Paystack.
+              <div className="space-y-4">
+                <div className="p-4 bg-[#fafaf7] border border-[#e4e4de] rounded-2xl space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Transaction Reference</label>
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="font-mono text-xs font-bold text-slate-700 break-all">
+                      {verificationOrder.transactionReference || verificationOrder.paystackReference || 'N/A'}
+                    </p>
+                    <button
+                      onClick={handleCopyReference}
+                      className="p-2 bg-white border border-[#e4e4de] rounded-lg text-slate-500 hover:text-[#111] transition-all"
+                    >
+                      {copied ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
+                    </button>
+                  </div>
+                </div>
+
+                <p className="text-[11px] font-medium text-slate-500 text-center px-4 leading-relaxed">
+                  Click the button below to synchronize this payment with the network providers. This process usually takes less than 5 seconds.
                 </p>
+
+                <button
+                  disabled={verifying}
+                  onClick={handleConfirmVerify}
+                  className="w-full py-4 bg-[#111] text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-[#333] transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {verifying ? (
+                    <>
+                      <RefreshCw size={16} className="animate-spin" />
+                      Verifying...
+                    </>
+                  ) : (
+                    <>
+                      <ShieldCheck size={16} />
+                      Verify Transaction
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           )}
         </Modal>
 
-        {/* Alert Modal */}
         <AlertModal
           isOpen={alertConfig.isOpen}
-          onClose={() => setAlertConfig(prev => ({ ...prev, isOpen: false }))}
           type={alertConfig.type}
           title={alertConfig.title}
           message={alertConfig.message}
+          onClose={() => setAlertConfig({ ...alertConfig, isOpen: false })}
         />
       </div>
     </UserLayout>

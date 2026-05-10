@@ -251,6 +251,10 @@
   .contact-fab-heartbeat {
     animation: heartbeat 3s infinite ease-in-out;
   }
+
+  .border-1.5 {
+    border-width: 1.5px;
+  }
 }
 
 :root {
