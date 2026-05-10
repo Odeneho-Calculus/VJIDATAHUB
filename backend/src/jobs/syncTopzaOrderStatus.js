@@ -122,7 +122,7 @@ const syncTopzaOrderStatus = async () => {
       order.providerStatus = normalizedProviderStatus;
       order.externalOrderId = nextExternalOrderId || order.externalOrderId;
       order.externalOrderNumber = nextExternalOrderNumber || order.externalOrderNumber;
-      order.providerMessage = `Topza cron sync: ${normalizedProviderStatus}`;
+      order.providerMessage = `Service sync: ${normalizedProviderStatus}`;
 
       if (!Array.isArray(order.statusHistory)) {
         order.statusHistory = [];
@@ -135,8 +135,8 @@ const syncTopzaOrderStatus = async () => {
         order.statusHistory.push({
           status: mappedStatus,
           updatedAt: toDateOrNow(providerOrder?.updatedAt),
-          source: 'topza_cron',
-          notes: `Topza status: ${normalizedProviderStatus}`,
+          source: 'service_sync',
+          notes: `Service status: ${normalizedProviderStatus}`,
         });
       }
 
@@ -150,7 +150,7 @@ const syncTopzaOrderStatus = async () => {
       } else if (mappedStatus === 'failed') {
         order.completedAt = null;
         order.completedBy = null;
-        order.errorMessage = `Topza cron sync reported failed status${order.externalOrderNumber ? ` (${order.externalOrderNumber})` : ''}`;
+        order.errorMessage = `Service sync reported failed status${order.externalOrderNumber ? ` (${order.externalOrderNumber})` : ''}`;
       } else {
         order.completedAt = null;
         order.completedBy = null;
@@ -164,11 +164,11 @@ const syncTopzaOrderStatus = async () => {
     }
 
     if (updatedCount > 0) {
-      console.log(`[Topza Status Sync] Updated ${updatedCount} order(s)`);
+      console.log(`[Service Status Sync] Updated ${updatedCount} order(s)`);
     }
     lastSyncAt = new Date();
   } catch (error) {
-    console.error('[Topza Status Sync] Error syncing statuses:', error.message);
+    console.error('[Service Status Sync] Error syncing statuses:', error.message);
   } finally {
     isSyncing = false;
   }

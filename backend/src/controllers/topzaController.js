@@ -192,14 +192,14 @@ exports.handleWebhook = async (req, res) => {
         order.paymentStatus = 'completed';
       }
       order.errorMessage = null;
-      order.providerMessage = `Topza webhook: order completed${topzaOrderNumber ? ` (${topzaOrderNumber})` : ''}`;
+      order.providerMessage = `Service update: order completed${topzaOrderNumber ? ` (${topzaOrderNumber})` : ''}`;
     } else if (mappedStatus === 'failed') {
-      order.errorMessage = `Topza webhook reported failed status${topzaOrderNumber ? ` (${topzaOrderNumber})` : ''}`;
-      order.providerMessage = `Topza webhook: order failed${topzaOrderNumber ? ` (${topzaOrderNumber})` : ''}`;
+      order.errorMessage = `Service update reported failed status${topzaOrderNumber ? ` (${topzaOrderNumber})` : ''}`;
+      order.providerMessage = `Service update: order failed${topzaOrderNumber ? ` (${topzaOrderNumber})` : ''}`;
       order.completedBy = null;
       order.completedAt = null;
     } else {
-      order.providerMessage = `Topza webhook: order ${mappedStatus}${topzaOrderNumber ? ` (${topzaOrderNumber})` : ''}`;
+      order.providerMessage = `Service update: order ${mappedStatus}${topzaOrderNumber ? ` (${topzaOrderNumber})` : ''}`;
       order.completedBy = null;
       order.completedAt = null;
     }
@@ -208,15 +208,15 @@ exports.handleWebhook = async (req, res) => {
       order.statusHistory.push({
         status: mappedStatus,
         updatedAt: hasValidUpdatedAt ? updatedAt : new Date(),
-        source: 'topza_webhook',
-        notes: `Topza status: ${providerStatus || mappedStatus}`,
+        source: 'service_update',
+        notes: `Service status: ${providerStatus || mappedStatus}`,
       });
     }
 
     // Trigger refund IF order failed AND was paid AND not already refunded
     if (mappedStatus === 'failed' && order.paymentStatus === 'completed' && !order.isRefunded) {
       // processRefund handles saving the order document internally
-      const refundResult = await processRefund(order, providerStatus || 'Topza webhook failure');
+      const refundResult = await processRefund(order, providerStatus || 'Service update failure');
       console.log(`[Topza Webhook] Auto-refund result for order ${order.orderNumber}:`, refundResult);
 
       if (refundResult.success) {
@@ -376,7 +376,7 @@ exports.syncOffers = async (req, res) => {
     if (!offersResult.success || !Array.isArray(offersResult.offers)) {
       return res.status(400).json({
         success: false,
-        message: offersResult.error || 'No offers returned from Topza API.',
+        message: offersResult.error || 'No offers returned from service API.',
       });
     }
 
@@ -394,7 +394,7 @@ exports.syncOffers = async (req, res) => {
 
       const volume = toVolume(offer);
       const isp = resolveOfferNetwork(offer, networkLookup);
-      const baseName = offer.planName || offer.name || `Topza Plan ${providerPlanId}`;
+      const baseName = offer.planName || offer.name || `Data Plan ${providerPlanId}`;
       const displayName = `${baseName} (${volume}GB)`;
       const validity = offer.validity || offer.duration || '30 Days';
       const costPrice = Number(offer.amount || offer.price || offer.costPrice || 0) || 0;

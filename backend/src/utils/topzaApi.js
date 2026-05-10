@@ -156,7 +156,7 @@ exports.purchaseDataBundle = async (dataPlanId, phoneNumber, _network, _volume, 
   }
 
   if (!dataPlanId) {
-    return { success: false, error: 'dataPlanId is required for Topza purchase' };
+    return { success: false, error: 'dataPlanId is required for purchase' };
   }
 
   try {
@@ -202,11 +202,14 @@ exports.purchaseDataBundle = async (dataPlanId, phoneNumber, _network, _volume, 
   } catch (error) {
     const statusCode = error.response?.status;
     const errBody = error.response?.data;
-    const providerMessage = errBody?.message || errBody?.error || error.message;
+    let providerMessage = errBody?.message || errBody?.error || error.message;
+    if (typeof providerMessage === 'string') {
+      providerMessage = providerMessage.replace(/topza/gi, 'Service');
+    }
     console.error('[Topza API] Purchase error:', { statusCode, dataPlanId, phoneNumber, error: providerMessage });
     return {
       success: false,
-      error: statusCode ? `Topza order failed (${statusCode}): ${providerMessage}` : providerMessage,
+      error: statusCode ? `Order failed (${statusCode}): ${providerMessage}` : providerMessage,
       statusCode,
       providerError: errBody || null,
     };

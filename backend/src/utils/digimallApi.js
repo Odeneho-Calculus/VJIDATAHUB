@@ -166,20 +166,23 @@ exports.purchaseDataBundle = async (offerSlug, phoneNumber, network, volume, ide
       response: errData,
     });
 
-    const providerMessage =
+    let providerMessage =
       errData?.message ||
       errData?.error ||
       errData?.details ||
       error.message;
+    if (typeof providerMessage === 'string') {
+      providerMessage = providerMessage.replace(/digimall/gi, 'Service').replace(/digi-mall/gi, 'Service');
+    }
     const providerErrorType = errData?.type || null;
     const providerHint =
       statusCode === 500 && providerErrorType === 'DEFAULT'
-        ? 'Provider returned a generic processing error. Common causes: another unfinished order for this recipient or temporary provider outage.'
+        ? 'Service returned a generic processing error. Common causes: another unfinished order for this recipient or temporary service outage.'
         : null;
 
     return {
       success: false,
-      error: statusCode ? `DigiMall order failed (${statusCode}): ${providerMessage}` : providerMessage,
+      error: statusCode ? `Order failed (${statusCode}): ${providerMessage}` : providerMessage,
       statusCode,
       providerRequestId,
       providerErrorType,

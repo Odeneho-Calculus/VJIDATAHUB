@@ -59,10 +59,14 @@ exports.getWalletBalance = async () => {
     };
   } catch (error) {
     console.error('[XpresData API] Error fetching balance:', error.message);
+    let errorMessage = error.response?.data?.error || error.message;
+    if (typeof errorMessage === 'string') {
+      errorMessage = errorMessage.replace(/xpresdata/gi, 'Service').replace(/xpresportal/gi, 'Service');
+    }
     return {
       success: false,
       balance: 0,
-      error: error.response?.data?.error || error.message,
+      error: errorMessage,
     };
   }
 };
@@ -123,9 +127,13 @@ exports.purchaseDataBundle = async (offerSlug, phoneNumber, network, volume) => 
     };
   } catch (error) {
     console.error('[XpresData API] Error during order:', error.message);
+    let errorMessage = error.response?.data?.error || error.message;
+    if (typeof errorMessage === 'string') {
+      errorMessage = errorMessage.replace(/xpresdata/gi, 'Service').replace(/xpresportal/gi, 'Service');
+    }
     return {
       success: false,
-      error: error.response?.data?.error || error.message,
+      error: errorMessage,
     };
   }
 };
@@ -158,10 +166,14 @@ exports.getOrderStatus = async (reference) => {
         console.error('[XpresData API] Status Error Response Data:', JSON.stringify(error.response.data, null, 2));
       }
     }
+    let errorMessage = error.response?.data?.error || error.message;
+    if (typeof errorMessage === 'string') {
+      errorMessage = errorMessage.replace(/xpresdata/gi, 'Service').replace(/xpresportal/gi, 'Service');
+    }
     return {
       success: false,
       isNotFound: is404,
-      error: error.response?.data?.error || error.message,
+      error: errorMessage,
     };
   }
 };
