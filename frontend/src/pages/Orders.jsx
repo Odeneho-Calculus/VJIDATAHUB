@@ -149,50 +149,45 @@ const styles = `
     pointer-events: none;
   }
 
-  .dash-table {
+  .dash-table-container {
     width: 100%;
-    border-spacing: 0 8px;
-    border-collapse: separate;
+    overflow-x: auto;
+    border-radius: 14px;
+    border: 1.5px solid #e4e4de;
+    background: #fff;
   }
 
-  .dash-table th {
-    padding: 12px 16px;
-    font-size: 10px;
+  .dash-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .dash-th {
+    background: #fafaf7;
+    text-align: left;
+    padding: 14px 16px;
     font-weight: 800;
     color: #999;
+    border-bottom: 1.5px solid #e4e4de;
+    font-size: 10px;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    text-align: left;
+    letter-spacing: 0.05em;
+  }
+
+  .dash-td {
+    padding: 16px;
+    border-bottom: 1px solid #f0f0f0;
+    color: #111;
   }
 
   .dash-table-row {
-    background: #fff;
     transition: all 0.2s;
     cursor: pointer;
   }
 
   .dash-table-row:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  }
-
-  .dash-table td {
-    padding: 16px;
-    border-top: 1.5px solid #e4e4de;
-    border-bottom: 1.5px solid #e4e4de;
-    font-size: 13px;
-  }
-
-  .dash-table td:first-child {
-    border-left: 1.5px solid #e4e4de;
-    border-top-left-radius: 16px;
-    border-bottom-left-radius: 16px;
-  }
-
-  .dash-table td:last-child {
-    border-right: 1.5px solid #e4e4de;
-    border-top-right-radius: 16px;
-    border-bottom-right-radius: 16px;
+    background: #fafaf7;
   }
 
   .badge-premium {
@@ -543,62 +538,64 @@ export default function Orders() {
                 <p style={{ fontSize: '14px', fontWeight: '700', color: '#999' }}>No orders matching your criteria.</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                {/* Desktop Table */}
-                <table className="dash-table hidden md:table">
-                  <thead>
-                    <tr>
-                      <th>Order ID</th>
-                      <th>Service & Plan</th>
-                      <th>Amount</th>
-                      <th>Status</th>
-                      <th>Date</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredOrders.map(order => (
-                      <tr key={order.id || order._id} className="dash-table-row" onClick={() => handleViewDetails(order)}>
-                        <td>
-                          <div className="flex flex-col">
-                            <span className="font-black text-[#111]">#{order.orderNumber?.slice(-8).toUpperCase()}</span>
-                            <span className="text-[10px] text-slate-400 font-bold uppercase">{order.orderKind || 'Purchase'}</span>
-                          </div>
-                        </td>
-                        <td>
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-[#fafaf7] border border-[#e4e4de] flex items-center justify-center font-black text-[10px]">
-                              {getOrderNetworkDisplay(order)?.charAt(0).toUpperCase()}
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="font-bold text-[#111]">{getOrderNetworkDisplay(order)}</span>
-                              <span className="text-[10px] text-slate-500">{getOrderPlanDisplay(order)}</span>
-                            </div>
-                          </div>
-                        </td>
-                        <td>
-                          <span className="font-black text-[#111]">{formatCurrencyAbbreviated(order.amount)}</span>
-                        </td>
-                        <td>
-                          <span className={`badge-premium ${order.status?.toLowerCase() === 'completed' || order.status?.toLowerCase() === 'success' ? 'badge-success' : order.status?.toLowerCase() === 'pending' ? 'badge-pending' : 'badge-failed'}`}>
-                            {order.status || 'Unknown'}
-                          </span>
-                        </td>
-                        <td>
-                          <div className="flex flex-col">
-                            <span className="font-bold text-[#111] text-[11px]">{formatDate(order.date || order.createdAt)}</span>
-                            <span className="text-[10px] text-slate-400">{formatTime(order.date || order.createdAt)}</span>
-                          </div>
-                        </td>
-                        <td>
-                          <button className="p-2 rounded-lg hover:bg-[#fafaf7] text-slate-400 hover:text-[#111] transition-all">
-                            <ChevronRight size={18} />
-                          </button>
-                        </td>
+              <>
+                <div className="dash-table-container hidden md:block">
+                  {/* Desktop Table */}
+                  <table className="dash-table">
+                    <thead>
+                      <tr>
+                        <th className="dash-th">Order ID</th>
+                        <th className="dash-th">Service & Plan</th>
+                        <th className="dash-th">Amount</th>
+                        <th className="dash-th">Status</th>
+                        <th className="dash-th">Date</th>
+                        <th className="dash-th text-right">Action</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {filteredOrders.map(order => (
+                        <tr key={order.id || order._id} className="dash-table-row" onClick={() => handleViewDetails(order)}>
+                          <td className="dash-td">
+                            <div className="flex flex-col">
+                              <span className="font-black text-[#111]">#{order.orderNumber?.slice(-8).toUpperCase()}</span>
+                              <span className="text-[10px] text-slate-400 font-bold uppercase">{order.orderKind || 'Purchase'}</span>
+                            </div>
+                          </td>
+                          <td className="dash-td">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-lg bg-[#fafaf7] border border-[#e4e4de] flex items-center justify-center font-black text-[10px]">
+                                {getOrderNetworkDisplay(order)?.charAt(0).toUpperCase()}
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="font-bold text-[#111]">{getOrderNetworkDisplay(order)}</span>
+                                <span className="text-[10px] text-slate-500">{getOrderPlanDisplay(order)}</span>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="dash-td">
+                            <span className="font-black text-[#111]">{formatCurrencyAbbreviated(order.amount)}</span>
+                          </td>
+                          <td className="dash-td">
+                            <span className={`badge-premium ${order.status?.toLowerCase() === 'completed' || order.status?.toLowerCase() === 'success' ? 'badge-success' : order.status?.toLowerCase() === 'pending' ? 'badge-pending' : 'badge-failed'}`}>
+                              {order.status || 'Unknown'}
+                            </span>
+                          </td>
+                          <td className="dash-td">
+                            <div className="flex flex-col">
+                              <span className="font-bold text-[#111] text-[11px]">{formatDate(order.date || order.createdAt)}</span>
+                              <span className="text-[10px] text-slate-400">{formatTime(order.date || order.createdAt)}</span>
+                            </div>
+                          </td>
+                          <td className="dash-td text-right">
+                            <button className="p-2 rounded-lg hover:bg-[#fafaf7] text-slate-400 hover:text-[#111] transition-all">
+                              <ChevronRight size={18} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
 
                 <div className="md:hidden flex flex-col gap-3">
                   {filteredOrders.map(order => (
@@ -633,7 +630,7 @@ export default function Orders() {
                     </div>
                   ))}
                 </div>
-              </div>
+              </>
             )}
           </div>
         </div>

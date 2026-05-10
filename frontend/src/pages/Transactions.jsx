@@ -148,50 +148,45 @@ const styles = `
     pointer-events: none;
   }
 
-  .dash-table {
+  .dash-table-container {
     width: 100%;
-    border-spacing: 0 8px;
-    border-collapse: separate;
+    overflow-x: auto;
+    border-radius: 14px;
+    border: 1.5px solid #e4e4de;
+    background: #fff;
   }
 
-  .dash-table th {
-    padding: 12px 16px;
-    font-size: 10px;
+  .dash-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .dash-th {
+    background: #fafaf7;
+    text-align: left;
+    padding: 14px 16px;
     font-weight: 800;
     color: #999;
+    border-bottom: 1.5px solid #e4e4de;
+    font-size: 10px;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    text-align: left;
+    letter-spacing: 0.05em;
+  }
+
+  .dash-td {
+    padding: 16px;
+    border-bottom: 1px solid #f0f0f0;
+    color: #111;
   }
 
   .dash-table-row {
-    background: #fff;
     transition: all 0.2s;
     cursor: pointer;
   }
 
   .dash-table-row:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  }
-
-  .dash-table td {
-    padding: 16px;
-    border-top: 1.5px solid #e4e4de;
-    border-bottom: 1.5px solid #e4e4de;
-    font-size: 13px;
-  }
-
-  .dash-table td:first-child {
-    border-left: 1.5px solid #e4e4de;
-    border-top-left-radius: 16px;
-    border-bottom-left-radius: 16px;
-  }
-
-  .dash-table td:last-child {
-    border-right: 1.5px solid #e4e4de;
-    border-top-right-radius: 16px;
-    border-bottom-right-radius: 16px;
+    background: #fafaf7;
   }
 
   .badge-premium {
@@ -699,82 +694,82 @@ export default function Transactions() {
                   <p className="text-sm font-bold text-slate-400 mt-1 uppercase tracking-widest">Adjust your filters or check back later</p>
                 </div>
               ) : (
-                <div className="bg-white rounded-[2.5rem] border border-slate-200/60 shadow-sm overflow-hidden">
-                  {/* Desktop Table View */}
-                  <div className="hidden md:block overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
+                <>
+                  <div className="dash-table-container hidden md:block">
+                    {/* Desktop Table View */}
+                    <table className="dash-table">
                       <thead>
-                        <tr className="bg-slate-50/50 border-b border-slate-100">
-                          <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Type</th>
-                          <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Payment Status</th>
-                          <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Order Status</th>
-                          <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Description</th>
-                          <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Amount</th>
-                          <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                        <tr>
+                          <th className="dash-th">Type</th>
+                          <th className="dash-th text-center">Payment</th>
+                          <th className="dash-th text-center">Order</th>
+                          <th className="dash-th">Description</th>
+                          <th className="dash-th text-center">Amount</th>
+                          <th className="dash-th text-right">Actions</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-50">
+                      <tbody>
                         {paginatedTransactions.map(tx => (
                           <tr
                             key={tx.id}
                             onClick={() => { setSelectedTx(tx); setShowDetails(true); }}
-                            className="group hover:bg-slate-50/80 transition-all cursor-pointer"
+                            className="dash-table-row"
                           >
-                            <td className="px-8 py-6">
+                            <td className="dash-td">
                               <div className="flex items-center gap-4">
                                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-sm transition-transform group-hover:scale-110 ${tx.amount >= 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
                                   }`}>
                                   {getTransactionIcon(tx.type)}
                                 </div>
                                 <div>
-                                  <p className="text-xs font-black text-slate-900 uppercase tracking-tight">{tx.type}</p>
+                                  <p className="text-xs font-black text-[#111] uppercase tracking-tight">{tx.type}</p>
                                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
                                     {formatDate(tx.date)} • {formatTime(tx.date)}
                                   </p>
                                 </div>
                               </div>
                             </td>
-                            <td className="px-8 py-6 text-center">
-                              <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${getStatusStyles(getResolvedPaymentStatus(tx))}`}>
+                            <td className="dash-td text-center">
+                              <span className={`badge-premium ${getStatusStyles(getResolvedPaymentStatus(tx))}`}>
                                 {getResolvedPaymentStatus(tx)}
                               </span>
                             </td>
-                            <td className="px-8 py-6 text-center">
+                            <td className="dash-td text-center">
                               {getResolvedOrderStatus(tx) === 'n/a' ? (
-                                <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border bg-slate-50 text-slate-500 border-slate-100">
+                                <span className="badge-premium bg-slate-50 text-slate-400 border-slate-100">
                                   N/A
                                 </span>
                               ) : (
-                                <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${getStatusStyles(getResolvedOrderStatus(tx))}`}>
+                                <span className={`badge-premium ${getStatusStyles(getResolvedOrderStatus(tx))}`}>
                                   {getResolvedOrderStatus(tx)}
                                 </span>
                               )}
                             </td>
-                            <td className="px-8 py-6">
+                            <td className="dash-td">
                               <p className="text-sm font-bold text-slate-600 max-w-xs truncate">{tx.description}</p>
                               <p className="text-[10px] font-mono text-slate-400 uppercase tracking-tighter mt-0.5">Ref: {tx.reference?.slice(-12) || 'N/A'}</p>
                             </td>
-                            <td className="px-8 py-6 text-center">
-                              <p className={`text-base font-black tracking-tight ${tx.amount >= 0 ? 'text-emerald-600' : 'text-slate-900'}`}>
+                            <td className="dash-td text-center">
+                              <p className={`text-base font-black tracking-tight ${tx.amount >= 0 ? 'text-emerald-600' : 'text-[#111]'}`}>
                                 {tx.amount >= 0 ? '+' : ''}{formatNumberAbbreviated(tx.amount)}
                               </p>
                               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mt-0.5">
                                 Bal: GH₵ {formatCurrencyAbbreviated(tx.balanceAfter)}
                               </p>
                             </td>
-                            <td className="px-8 py-6 text-right">
+                            <td className="dash-td text-right">
                               <div className="flex items-center justify-end gap-2 px-1">
                                 {getResolvedPaymentStatus(tx) === 'pending' && (tx.txType === 'wallet_topup' || tx.type === 'Data Purchase' || tx.type === 'Checker Purchase') && (
                                   <button
                                     onClick={(e) => openVerificationModal(tx, e)}
-                                    className="p-2.5 bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white rounded-xl transition-all shadow-sm active:scale-95 border border-amber-100"
+                                    className="p-2 bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white rounded-xl transition-all border border-amber-100"
                                     title="Verify Payment"
                                   >
                                     <RotateCw size={14} strokeWidth={3} />
                                   </button>
                                 )}
-                                <button className="p-2.5 bg-slate-100 text-slate-400 hover:bg-slate-900 hover:text-white rounded-xl transition-all shadow-sm active:scale-95">
-                                  <ChevronRight size={16} strokeWidth={3} />
+                                <button className="p-2 rounded-lg hover:bg-[#fafaf7] text-slate-300 hover:text-[#111] transition-all">
+                                  <ChevronRight size={18} />
                                 </button>
                               </div>
                             </td>
@@ -841,7 +836,7 @@ export default function Transactions() {
                       </div>
                     ))}
                   </div>
-                </div>
+                </>
               )}
             </div>
           </div>
