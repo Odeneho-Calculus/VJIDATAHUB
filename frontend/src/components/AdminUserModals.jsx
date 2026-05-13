@@ -35,7 +35,7 @@ export const UserViewModal = ({ isOpen, onClose, user, getStatusColor, getStatus
             </div>
             <div className="flex justify-between items-center sm:border-b border-slate-200 pb-1">
               <span className="text-xs font-bold text-slate-500">Balance:</span>
-              <span className="text-xs font-black text-blue-600">GHS {formatNumberAbbreviated(user.balance) || '0'}</span>
+              <span className="text-xs font-black text-blue-600">GHS {formatNumberAbbreviated(user.wallet?.balance || user.balance) || '0'}</span>
             </div>
             <div className="flex justify-between items-center sm:border-b border-slate-200 pb-1">
               <span className="text-xs font-bold text-slate-500">Role:</span>

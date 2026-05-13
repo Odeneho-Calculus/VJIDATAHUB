@@ -555,7 +555,7 @@ export default function AdminUsers() {
                       <td className="usr-td" style={{ whiteSpace: 'nowrap' }}>
                         <span className="usr-badge" style={{ background: '#111', color: '#fff' }}>{user.role}</span>
                       </td>
-                      <td className="usr-td" style={{ whiteSpace: 'nowrap' }}>GHS {Number(user.walletBalance || 0).toFixed(2)}</td>
+                      <td className="usr-td" style={{ whiteSpace: 'nowrap' }}>GHS {Number((user.wallet?.balance || user.balance) || 0).toFixed(2)}</td>
                       <td className="usr-td" style={{ whiteSpace: 'nowrap' }}>
                         <span className="usr-badge" style={{ background: getStatusBg(user), color: getStatusColor(user) }}>
                           {user.status || (user.deletedAt ? 'Deleted' : 'Active')}
