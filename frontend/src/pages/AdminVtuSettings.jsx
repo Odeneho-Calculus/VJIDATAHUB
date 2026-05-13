@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { AlertCircle, RefreshCw, CheckCircle, DollarSign, X, Settings, Activity, Globe, Clock, Phone, Wifi, Eye, Wallet } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { formatCurrencyAbbreviated } from '../utils/formatCurrency';
@@ -271,6 +271,11 @@ export default function AdminVtuSettings() {
   const [updatingSettings, setUpdatingSettings] = useState(false);
   const [switchingProvider, setSwitchingProvider] = useState(false);
   const [networkCatalog, setNetworkCatalog] = useState([]);
+  const networkCatalogRef = useRef(networkCatalog);
+
+  useEffect(() => {
+    networkCatalogRef.current = networkCatalog;
+  }, [networkCatalog]);
 
 
   const [DigiMallNetworks, setDigiMallNetworks] = useState([]);
@@ -314,6 +319,54 @@ export default function AdminVtuSettings() {
     const [whole, fraction = ''] = absString.split('.');
     return `${sign}${whole}.${(fraction + '00').slice(0, 2)}`;
   };
+
+  const fetchDigiMallNetworks = useCallback(async (catalog) => {
+    try {
+      setDigiMallNetworksLoading(true);
+      const response = await digimallAPI.getNetworks();
+      if (response.success && Array.isArray(response.networks)) {
+        const existing = catalog || networkCatalogRef.current;
+        const merged = response.networks
+          .filter((n) => n && n.networkId !== undefined && n.name !== undefined)
+          .map((n) => {
+            const saved = existing.find((c) => c.slug === String(n.networkId));
+            return { networkId: n.networkId, name: n.name, logoUrl: saved?.logoUrl || '' };
+          });
+        setDigiMallNetworks(merged);
+      }
+    } catch (err) {
+      console.error('Failed to fetch DigiMall networks:', err);
+    } finally {
+      setDigiMallNetworksLoading(false);
+    }
+  }, []);
+
+  const fetchTopzaNetworks = useCallback(async (catalog) => {
+    try {
+      setTopzaNetworksLoading(true);
+      const response = await topzaAPI.getNetworks();
+      if (response.success && Array.isArray(response.networks)) {
+        const existing = catalog || networkCatalogRef.current;
+        const merged = response.networks
+          .filter((n) => n && n.networkId !== undefined && n.name !== undefined)
+          .map((n) => {
+            const key = String(n.code || n.networkId);
+            const saved = existing.find((c) => c.slug === key);
+            return {
+              networkId: n.networkId,
+              code: n.code || null,
+              name: n.name,
+              logoUrl: saved?.logoUrl || '',
+            };
+          });
+        setTopzaNetworks(merged);
+      }
+    } catch (err) {
+      console.error('Failed to fetch Topza networks:', err);
+    } finally {
+      setTopzaNetworksLoading(false);
+    }
+  }, []);
 
   const fetchSystemSettings = useCallback(async () => {
     try {
@@ -506,53 +559,7 @@ export default function AdminVtuSettings() {
     }
   };
 
-  const fetchDigiMallNetworks = useCallback(async (catalog) => {
-    try {
-      setDigiMallNetworksLoading(true);
-      const response = await digimallAPI.getNetworks();
-      if (response.success && Array.isArray(response.networks)) {
-        const existing = catalog || networkCatalog;
-        const merged = response.networks
-          .filter((n) => n && n.networkId !== undefined && n.name !== undefined)
-          .map((n) => {
-            const saved = existing.find((c) => c.slug === String(n.networkId));
-            return { networkId: n.networkId, name: n.name, logoUrl: saved?.logoUrl || '' };
-          });
-        setDigiMallNetworks(merged);
-      }
-    } catch (err) {
-      console.error('Failed to fetch DigiMall networks:', err);
-    } finally {
-      setDigiMallNetworksLoading(false);
-    }
-  }, [networkCatalog]);
 
-  const fetchTopzaNetworks = useCallback(async (catalog) => {
-    try {
-      setTopzaNetworksLoading(true);
-      const response = await topzaAPI.getNetworks();
-      if (response.success && Array.isArray(response.networks)) {
-        const existing = catalog || networkCatalog;
-        const merged = response.networks
-          .filter((n) => n && n.networkId !== undefined && n.name !== undefined)
-          .map((n) => {
-            const key = String(n.code || n.networkId);
-            const saved = existing.find((c) => c.slug === key);
-            return {
-              networkId: n.networkId,
-              code: n.code || null,
-              name: n.name,
-              logoUrl: saved?.logoUrl || '',
-            };
-          });
-        setTopzaNetworks(merged);
-      }
-    } catch (err) {
-      console.error('Failed to fetch Topza networks:', err);
-    } finally {
-      setTopzaNetworksLoading(false);
-    }
-  }, [networkCatalog]);
 
   const handleProviderSwitch = async (newProvider) => {
     if (newProvider === activeProvider || switchingProvider) return;
@@ -868,7 +875,7 @@ export default function AdminVtuSettings() {
                             {n.logoUrl ? (
                               <img src={n.logoUrl} alt={n.name} style={{ width: '32px', height: '32px', borderRadius: '4px', objectFit: 'contain', background: '#f9f9f9', padding: '2px' }} />
                             ) : (
-                              <div style={{ width: '32px', height: '32px', borderRadius: '4px', background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyCenter: 'center', color: '#ccc' }}>
+                              <div style={{ width: '32px', height: '32px', borderRadius: '4px', background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ccc' }}>
                                 <Globe size={16} />
                               </div>
                             )}
