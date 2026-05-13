@@ -7,9 +7,9 @@ import {
   MessageSquare, Phone, Mail, Facebook, Instagram, Twitter, ExternalLink,
   Zap, ShieldCheck, Sparkles, Activity, Minus,
   RefreshCw, Save, X, Palette, Smartphone, CreditCard, Search, Filter,
-  TrendingUp, Wallet, Send, ChevronRight, Loader2, ShoppingBag, CheckCircle, CheckCircle2, Clock
+  TrendingUp, Wallet, Send, ChevronRight, Loader2, ShoppingBag, CheckCircle, CheckCircle2, Clock, User
 } from 'lucide-react';
-import { store as storeAPI, wallet as walletAPI } from '../services/api';
+import { store as storeAPI, wallet as walletAPI, afa as afaAPI } from '../services/api';
 import { checkers as checkersAPI } from '../services/api';
 import AgentLayout from '../components/AgentLayout';
 import AlertModal from '../components/AlertModal';
@@ -414,6 +414,7 @@ export default function AdminStore() {
                 { id: 'general', label: 'Details', icon: Palette },
                 { id: 'plans', label: 'Data Plans', icon: Smartphone },
                 { id: 'checkers', label: 'Checkers', icon: CreditCard },
+                { id: 'afa', label: 'AFA', icon: User },
                 { id: 'orders', label: 'Sales', icon: ShoppingBag },
                 { id: 'commissions', label: 'Earnings', icon: Share2 },
                 { id: 'billing', label: 'Billing', icon: Settings },
@@ -451,6 +452,12 @@ export default function AdminStore() {
             )}
             {activeTab === 'checkers' && (
               <CheckerInventoryTab
+                onRefresh={fetchStore}
+                showAlert={showAlert}
+              />
+            )}
+            {activeTab === 'afa' && (
+              <AfaInventoryTab
                 onRefresh={fetchStore}
                 showAlert={showAlert}
               />
@@ -857,7 +864,7 @@ function OverviewTab({ data, onRefresh, showAlert }) {
   );
 }
 
-function InventoryTab({ plans, activeProvider = 'xpresdata', onRefresh, showAlert }) {
+function InventoryTab({ plans, onRefresh, showAlert }) {
   const [showAdd, setShowAdd] = useState(false);
   const [globalPlans, setGlobalPlans] = useState([]);
   const [loadingGlobal, setLoadingGlobal] = useState(false);
@@ -865,10 +872,7 @@ function InventoryTab({ plans, activeProvider = 'xpresdata', onRefresh, showAler
   const [networkFilter, setNetworkFilter] = useState('all');
   const [selectedPlanForPrice, setSelectedPlanForPrice] = useState(null);
   const [selectedPlanForEdit, setSelectedPlanForEdit] = useState(null);
-  const normalizedProvider = String(activeProvider || 'xpresdata').toLowerCase();
-  const activePlanType = normalizedProvider === 'digimall'
-    ? 'DigimallOffer'
-    : (normalizedProvider === 'topza' ? 'TopzaOffer' : 'XpresDataOffer');
+
 
   useEffect(() => {
     if (showAdd) fetchGlobalPlans();
@@ -1234,6 +1238,182 @@ function CheckerInventoryTab({ onRefresh, showAlert }) {
   );
 }
 
+function AfaInventoryTab({ onRefresh, showAlert }) {
+  const [loading, setLoading] = useState(true);
+  const [availableAfa, setAvailableAfa] = useState([]);
+  const [storeAfa, setStoreAfa] = useState([]);
+  const [selectedAfaId, setSelectedAfaId] = useState('');
+  const [customPrice, setCustomPrice] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const refresh = useCallback(async () => {
+    try {
+      setLoading(true);
+      const [availableRes, storeRes] = await Promise.all([
+        afaAPI.getAvailableAfa(),
+        storeAPI.getMyStore(), // getMyStore returns populated afaProducts
+      ]);
+      setAvailableAfa(availableRes?.products || []);
+      setStoreAfa(storeRes?.store?.afaProducts || []);
+    } catch (err) {
+      showAlert('error', err.message || 'Failed to load store AFA');
+    } finally {
+      setLoading(false);
+    }
+  }, [showAlert]);
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
+  const addAfa = async () => {
+    if (!selectedAfaId) return;
+    try {
+      setSaving(true);
+      await afaAPI.addAfaToStore({ afaId: selectedAfaId, customPrice: Number(customPrice || 0) });
+      showAlert('success', 'AFA Registration added to store');
+      setSelectedAfaId('');
+      setCustomPrice('');
+      await refresh();
+      onRefresh?.();
+    } catch (err) {
+      showAlert('error', err.message || 'Failed to add AFA');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const updateAfa = async (afaRow, data) => {
+    try {
+      const id = afaRow.afaId?._id || afaRow.afaId || afaRow._id;
+      await afaAPI.updateStoreAfa(id, data);
+      showAlert('success', 'Store AFA updated');
+      await refresh();
+      onRefresh?.();
+    } catch (err) {
+      showAlert('error', err.message || 'Failed to update store AFA');
+    }
+  };
+
+  const removeAfa = async (afaRow) => {
+    if (!window.confirm('Remove this AFA product from your store?')) return;
+    try {
+      const id = afaRow.afaId?._id || afaRow.afaId || afaRow._id;
+      await afaAPI.removeAfaFromStore(id);
+      showAlert('success', 'AFA removed from store');
+      await refresh();
+      onRefresh?.();
+    } catch (err) {
+      showAlert('error', err.message || 'Failed to remove store AFA');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="dash-card py-20 text-center">
+        <Loader2 className="animate-spin mx-auto text-[#f0a500]" size={32} />
+        <p className="mt-4 text-slate-500 font-medium">Loading AFA...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      <SectionCard title="Config AFA" icon={User}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Service</label>
+            <select
+              value={selectedAfaId}
+              onChange={(e) => {
+                const id = e.target.value;
+                setSelectedAfaId(id);
+                const item = availableAfa.find(r => r._id === id);
+                setCustomPrice(item ? String(item.agentPrice || 0) : '');
+              }}
+              className="w-full px-4 py-2.5 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-lg focus:outline-none focus:border-[#111] transition-all text-sm"
+            >
+              <option value="">Select AFA Service</option>
+              {availableAfa.map(item => (
+                <option key={item._id} value={item._id}>{item.serviceName}</option>
+              ))}
+            </select>
+          </div>
+          <InputGroup label="Price (GHS)" value={customPrice} onChange={setCustomPrice} placeholder="0.00" />
+          <button
+            onClick={addAfa}
+            disabled={saving || !selectedAfaId}
+            className="dash-btn-primary h-[45px]"
+          >
+            {saving ? <Loader2 className="animate-spin" size={18} /> : <Plus size={18} />}
+            Append to Store
+          </button>
+        </div>
+      </SectionCard>
+
+      <div className="dash-table-container">
+        <table className="dash-table">
+          <thead>
+            <tr>
+              <th className="dash-th">Service Name</th>
+              <th className="dash-th">Store Price</th>
+              <th className="dash-th">Status</th>
+              <th className="dash-th text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {storeAfa.map((row) => (
+              <tr key={row._id}>
+                <td className="dash-td">
+                  <p className="font-bold text-slate-900">{row.afaId?.serviceName || 'AFA Registration'}</p>
+                </td>
+                <td className="dash-td font-bold text-slate-900">GHc {Number(row.customPrice || 0).toFixed(2)}</td>
+                <td className="dash-td">
+                  <span className={`dash-badge ${row.isActive ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'}`}>
+                    {row.isActive ? 'Visible' : 'Hidden'}
+                  </span>
+                </td>
+                <td className="dash-td text-right">
+                  <div className="flex items-center justify-end gap-2">
+                    <button
+                      onClick={() => {
+                        const p = window.prompt('New price:', String(row.customPrice));
+                        if (p) updateAfa(row, { customPrice: Number(p) });
+                      }}
+                      className="p-2 text-slate-400 hover:text-[#f0a500] hover:bg-slate-50 rounded-lg transition-all"
+                    >
+                      <Edit2 size={16} />
+                    </button>
+                    <button
+                      onClick={() => updateAfa(row, { isActive: !row.isActive })}
+                      className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                    >
+                      {row.isActive ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                    <button
+                      onClick={() => removeAfa(row)}
+                      className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+            {storeAfa.length === 0 && (
+              <tr>
+                <td colSpan="4" className="dash-td py-20 text-center text-slate-400 font-medium">
+                  No AFA services configured yet.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 function SectionCard({ title, icon: Icon, children }) {
   return (
     <div className="dash-card flex flex-col gap-5">
@@ -1300,25 +1480,7 @@ function ColorInput({ label, value = '', onChange }) {
   );
 }
 
-function IconInput({ icon: Icon, label, value = '', onChange, prefix = '' }) {
-  return (
-    <div className="flex flex-col gap-2">
-      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">{label}</label>
-      <div className="flex items-center gap-3 px-4 py-2.5 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-lg focus-within:border-[#111] transition-all">
-        <Icon size={16} className="text-slate-400" />
-        <div className="flex items-center gap-1 w-full text-sm">
-          {prefix && <span className="text-slate-400 font-bold">{prefix}</span>}
-          <input
-            type="text"
-            value={value || ''}
-            onChange={(e) => onChange(e.target.value)}
-            className="w-full bg-transparent focus:outline-none font-medium text-slate-900"
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
+
 
 function InventoryCard({ plan, onEdit, onRemove }) {
   return (

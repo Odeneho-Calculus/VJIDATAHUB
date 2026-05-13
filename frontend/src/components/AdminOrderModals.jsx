@@ -11,10 +11,12 @@ export const OrderDetailsModal = ({ isOpen, onClose, order, onRefund }) => {
     String(order?.network || '').toLowerCase() === 'checker' ||
     Boolean(order?.checkerDetails?.checkerType);
 
-  const planAmountLabel = isCheckerOrder ? 'Checker Type' : 'Amount';
+  const isAfaOrder = order.isAfaRegistration || order.orderKind === 'afa' || order.orderCategory === 'afa';
+
+  const planAmountLabel = isCheckerOrder ? 'Checker Type' : (isAfaOrder ? 'Service' : 'Amount');
   const planAmountValue = isCheckerOrder
     ? (order?.planName || order?.checkerDetails?.checkerType || 'Checker')
-    : (order?.dataAmount || 'N/A');
+    : (isAfaOrder ? 'AFA Registration' : (order?.dataAmount || 'N/A'));
 
   const isFailedOrder = order.status === 'failed' || order.paymentStatus === 'failed';
   const canRefund = order.paymentStatus === 'completed' && !order.isRefunded;
@@ -136,6 +138,41 @@ export const OrderDetailsModal = ({ isOpen, onClose, order, onRefund }) => {
               <div className="p-2.5 bg-white border border-slate-200 rounded-xl sm:col-span-2">
                 <p className="text-[9px] font-bold text-slate-400 uppercase">Owner Email</p>
                 <p className="text-xs font-black text-slate-900 truncate">{order.store?.owner?.email || 'N/A'}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isAfaOrder && order.afaRegistration && (
+          <div>
+            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+              <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
+              AFA Registration Details
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="p-2.5 bg-white border border-slate-200 rounded-xl">
+                <p className="text-[9px] font-bold text-slate-400 uppercase">Applicant Name</p>
+                <p className="text-xs font-black text-slate-900">{order.afaRegistration.name}</p>
+              </div>
+              <div className="p-2.5 bg-white border border-slate-200 rounded-xl">
+                <p className="text-[9px] font-bold text-slate-400 uppercase">Phone Number</p>
+                <p className="text-xs font-black text-slate-900">{order.afaRegistration.phoneNumber}</p>
+              </div>
+              <div className="p-2.5 bg-white border border-slate-200 rounded-xl">
+                <p className="text-[9px] font-bold text-slate-400 uppercase">ID Number (Ghana Card)</p>
+                <p className="text-xs font-black text-slate-900">{order.afaRegistration.idNumber}</p>
+              </div>
+              <div className="p-2.5 bg-white border border-slate-200 rounded-xl">
+                <p className="text-[9px] font-bold text-slate-400 uppercase">Date of Birth</p>
+                <p className="text-xs font-black text-slate-900">{order.afaRegistration.dateOfBirth}</p>
+              </div>
+              <div className="p-2.5 bg-white border border-slate-200 rounded-xl">
+                <p className="text-[9px] font-bold text-slate-400 uppercase">Occupation</p>
+                <p className="text-xs font-black text-slate-900">{order.afaRegistration.occupation}</p>
+              </div>
+              <div className="p-2.5 bg-white border border-slate-200 rounded-xl">
+                <p className="text-[9px] font-bold text-slate-400 uppercase">Location / Region</p>
+                <p className="text-xs font-black text-slate-900">{order.afaRegistration.location}, {order.afaRegistration.region}</p>
               </div>
             </div>
           </div>

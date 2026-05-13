@@ -278,7 +278,7 @@ export default function Transactions() {
   const [perPage, setPerPage] = useState(10);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+
   const [selectedTx, setSelectedTx] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -393,7 +393,6 @@ export default function Transactions() {
 
       setTransactions(withBalances);
     } catch (error) {
-      setError('Failed to load transactions');
       console.error(error);
       setTransactions([]);
     } finally {

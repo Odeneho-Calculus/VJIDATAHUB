@@ -148,6 +148,8 @@ export default function AdminTransactions() {
     refund: 'Refund',
     purchase_refund: 'Refund',
     referral_bonus: 'Bonus',
+    afa_purchase: 'AFA Reg',
+    afa_registration: 'AFA Reg',
   };
 
   const filteredTransactions = transactions.filter(tx => {
@@ -160,6 +162,16 @@ export default function AdminTransactions() {
     const matchesPendingVerification = !pendingVerificationOnly || canVerifyPendingPayment(tx);
     return matchesSearch && matchesPendingVerification;
   });
+
+  const statusColors = {
+    successful: 'bg-emerald-100 text-emerald-700',
+    completed: 'bg-emerald-100 text-emerald-700',
+    pending: 'bg-amber-100 text-amber-700',
+    processing: 'bg-amber-100 text-amber-700',
+    failed: 'bg-rose-100 text-rose-700',
+    cancelled: 'bg-slate-100 text-slate-700',
+    success: 'bg-emerald-100 text-emerald-700',
+  };
 
   return (
     <div className="tx-page-container" style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f5f5f0' }}>
@@ -530,10 +542,24 @@ export default function AdminTransactions() {
         </div>
       </div>
 
-      <TransactionDetailsModal isOpen={showViewModal} onClose={() => setShowViewModal(false)} transaction={selectedTransaction} />
+      <TransactionDetailsModal 
+        isOpen={showViewModal} 
+        onClose={() => setShowViewModal(false)} 
+        transaction={selectedTransaction} 
+        typeLabels={typeLabels}
+        statusColors={statusColors}
+      />
       <VerifyingPaymentModal isOpen={showVerifyingModal} />
       <VerifiedPaymentModal isOpen={showVerifiedModal} onClose={() => setShowVerifiedModal(false)} message={verifiedMessage} />
-      <ConfirmDialog isOpen={showDeleteConfirm} onClose={() => setShowDeleteConfirm(false)} onConfirm={confirmDelete} title="Delete Transaction" message="Delete this transaction permanently?" type="danger" loading={deleteLoading} />
+      <ConfirmDialog 
+        isOpen={showDeleteConfirm} 
+        onCancel={() => setShowDeleteConfirm(false)} 
+        onConfirm={confirmDelete} 
+        title="Delete Transaction" 
+        message="Delete this transaction permanently?" 
+        isDangerous={true} 
+        loading={deleteLoading} 
+      />
     </div>
   );
 }

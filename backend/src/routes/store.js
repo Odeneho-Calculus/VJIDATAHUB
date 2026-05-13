@@ -13,6 +13,12 @@ router.post('/my-store/plans', protect, adminOrAgent, storeController.addPlanToS
 router.patch('/my-store/plans/:planId', protect, adminOrAgent, storeController.updateStorePlan);
 router.delete('/my-store/plans/:planId', protect, adminOrAgent, storeController.removePlanFromStore);
 
+// Store AFA
+router.get('/my-store/available-afa', protect, adminOrAgent, storeController.getAvailableAfaProducts);
+router.post('/my-store/afa', protect, adminOrAgent, storeController.addAfaToStore);
+router.patch('/my-store/afa/:afaId', protect, adminOrAgent, storeController.updateStoreAfa);
+router.delete('/my-store/afa/:afaId', protect, adminOrAgent, storeController.removeAfaFromStore);
+
 // Store orders
 router.get('/my-store/orders/stats', protect, adminOrAgent, storeController.getStoreOrderStats);
 router.get('/my-store/orders', protect, adminOrAgent, storeController.getStoreOrders);

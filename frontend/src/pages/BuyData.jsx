@@ -26,7 +26,7 @@ import { publicAPI } from '../services/api';
 import PurchaseModal from '../components/PurchaseModal';
 import PurchaseVerificationModal from '../components/PurchaseVerificationModal';
 import UserLayout from '../components/UserLayout';
-import { getNetworkStyles } from '../utils/networkStyles';
+
 
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');

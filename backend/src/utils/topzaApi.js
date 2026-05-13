@@ -485,3 +485,73 @@ exports.getCheckerById = async (id) => {
     };
   }
 };
+
+/**
+ * AFA (Account For All) Registration API
+ */
+
+exports.getAfaLockStatus = async () => {
+  if (!TOPZA_BASE_URL) {
+    return { success: false, error: 'TOPZA_BASE_URL is not configured' };
+  }
+
+  try {
+    const response = await retryRequest(() => topzaClient.get('/afa/lock-status'), 3, 1000);
+    return {
+      success: true,
+      data: response.data?.data || null,
+      raw: response.data || null,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.response?.data?.message || error.response?.data?.error || error.message,
+      statusCode: error.response?.status,
+    };
+  }
+};
+
+exports.registerAfa = async (registrationData) => {
+  if (!TOPZA_BASE_URL) {
+    return { success: false, error: 'TOPZA_BASE_URL is not configured' };
+  }
+
+  try {
+    const response = await retryRequest(() => topzaClient.post('/afa/register', registrationData), 3, 1000);
+    return {
+      success: true,
+      data: response.data?.data || null,
+      message: response.data?.message || 'AFA Registration submitted successfully',
+      raw: response.data || null,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.response?.data?.message || error.response?.data?.error || error.message,
+      statusCode: error.response?.status,
+      providerError: error.response?.data || null,
+    };
+  }
+};
+
+exports.getMyAfaRegistrations = async () => {
+  if (!TOPZA_BASE_URL) {
+    return { success: false, error: 'TOPZA_BASE_URL is not configured' };
+  }
+
+  try {
+    const response = await retryRequest(() => topzaClient.get('/afa/my-registrations'), 3, 1000);
+    return {
+      success: true,
+      data: response.data?.data || [],
+      count: response.data?.count || 0,
+      raw: response.data || null,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.response?.data?.message || error.response?.data?.error || error.message,
+      statusCode: error.response?.status,
+    };
+  }
+};

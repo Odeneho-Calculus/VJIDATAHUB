@@ -106,6 +106,10 @@ const systemSettingsSchema = new mongoose.Schema(
         type: Boolean,
         default: false,
       },
+      afaSalesLocked: {
+        type: Boolean,
+        default: false,
+      },
     },
   },
   { timestamps: true }
@@ -154,6 +158,9 @@ systemSettingsSchema.statics.getSettings = async function () {
   }
   if (typeof settings.orderSettings.checkerSalesLocked !== 'boolean') {
     settings.orderSettings.checkerSalesLocked = false;
+  }
+  if (typeof settings.orderSettings.afaSalesLocked !== 'boolean') {
+    settings.orderSettings.afaSalesLocked = false;
   }
   return settings;
 };

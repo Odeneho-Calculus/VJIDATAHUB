@@ -583,18 +583,4 @@ export default function Profile() {
   );
 }
 
-function SecurityAction({ icon: Icon, title, desc, status, onClick }) {
-  return (
-    <button 
-      onClick={onClick}
-      className="p-5 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-2xl text-left group transition-all hover:border-[#111] active:scale-95"
-    >
-      <div className="flex items-center justify-between mb-3">
-        <Icon size={18} className="text-slate-400 group-hover:text-[#f0a500] transition-colors" />
-        {status && <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">{status}</span>}
-      </div>
-      <h4 className="text-sm font-bold text-slate-900 mb-1">{title}</h4>
-      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">{desc}</p>
-    </button>
-  );
-}
+

@@ -101,6 +101,7 @@ export default function AgentSidebar({ isOpen, onClose }) {
     { path: '/agent/dashboard',       label: 'Dashboard',       icon: LayoutDashboard },
     { path: '/agent/store',           label: 'My Store',         icon: Store },
     { path: '/agent/results-checker', label: 'Result Checker',   icon: CreditCard },
+    { path: '/afa-registration',      label: 'AFA Registration', icon: ShieldCheck },
     { path: '/agent/orders',          label: 'Customer Orders',  icon: ShoppingBag },
     { path: '/agent/wallet',          label: 'My Wallet',        icon: Wallet },
     { path: '/agent/commissions',     label: 'My Earnings',      icon: Wallet },

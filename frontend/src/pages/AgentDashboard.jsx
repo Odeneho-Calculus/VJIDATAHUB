@@ -286,7 +286,7 @@ export default function AgentDashboard() {
   const [recentOrders, setRecentOrders] = useState([]);
   const [agentFeeStatus, setAgentFeeStatus] = useState(null);
   const [accessStatus, setAccessStatus] = useState(null);
-  const [adminContact, setAdminContact] = useState(null);
+
   const [copiedLink, setCopiedLink] = useState(false);
 
   useEffect(() => {
@@ -305,7 +305,7 @@ export default function AgentDashboard() {
 
       setStoreData(storeRes.store);
       setAccessStatus(storeRes.accessStatus || null);
-      setAdminContact(storeRes.adminContact || null);
+
       setOrderStats(statsRes.stats || {
         totalOrders: 0,
         completedOrders: 0,

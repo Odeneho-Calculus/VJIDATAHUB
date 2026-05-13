@@ -384,7 +384,7 @@ exports.getTransactions = async (req, res) => {
   try {
     const { page = 1, limit = 10, type = '', status = '', scope = '' } = req.query;
     const skip = (page - 1) * limit;
-    const ORDER_TRANSACTION_TYPES = ['data_purchase', 'checker_purchase'];
+    const ORDER_TRANSACTION_TYPES = ['data_purchase', 'checker_purchase', 'afa_registration'];
     const isOrderTypeFilter = ORDER_TRANSACTION_TYPES.includes(type);
 
     const allTransactions = [];
@@ -408,11 +408,15 @@ exports.getTransactions = async (req, res) => {
     }
 
     if (type === 'data_purchase') {
-      orderFilter.orderKind = { $ne: 'checker' };
+      orderFilter.orderKind = { $nin: ['checker', 'afa'] };
     }
 
     if (type === 'checker_purchase') {
       orderFilter.orderKind = 'checker';
+    }
+
+    if (type === 'afa_registration') {
+      orderFilter.orderKind = 'afa';
     }
 
     if (status) {
@@ -446,7 +450,7 @@ exports.getTransactions = async (req, res) => {
           userId: order.userId,
           isGuest: order.isGuest || false,
           guestInfo: order.guestInfo,
-          type: order.orderKind === 'checker' ? 'checker_purchase' : 'data_purchase',
+          type: order.orderKind === 'checker' ? 'checker_purchase' : (order.orderKind === 'afa' ? 'afa_registration' : 'data_purchase'),
           amount: order.amount,
           currency: 'GHS',
           status: order.status === 'completed' ? 'successful' : order.status,
@@ -456,7 +460,9 @@ exports.getTransactions = async (req, res) => {
           paystackReference: order.paystackReference,
           description: order.orderKind === 'checker'
             ? `Result checker purchase: ${order.planName} (${order.phoneNumber || 'N/A'})`
-            : `${order.planName} - ${order.dataAmount}`,
+            : (order.orderKind === 'afa'
+              ? `AFA Registration: ${order.afaRegistration?.name || 'N/A'} (${order.phoneNumber || 'N/A'})`
+              : `${order.planName} - ${order.dataAmount}`),
           isAPI: false,
           createdAt: order.createdAt,
           updatedAt: order.updatedAt,

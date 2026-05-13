@@ -106,6 +106,7 @@ export default function UserSidebar({ isOpen, onClose }) {
     { path: '/dashboard',      label: 'Dashboard',           icon: LayoutDashboard },
     { path: '/buy-data',       label: 'Buy Data',            icon: ShoppingCart },
     { path: '/results-checker',label: 'Result Checker',      icon: CreditCard },
+    { path: '/afa-registration',label: 'AFA Registration',   icon: ShieldCheck },
     { path: '/orders',         label: 'My Orders',           icon: Package },
     { path: '/transactions',   label: 'Transaction History', icon: TrendingUp },
     { path: '/topup',          label: 'Wallet',              icon: Wallet },

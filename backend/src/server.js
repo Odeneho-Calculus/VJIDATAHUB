@@ -104,6 +104,7 @@ app.use('/api/admin/notifications', require('./routes/notifications'));
 app.use('/api/digimall', require('./routes/digimall'));
 app.use('/api/topza', require('./routes/topza'));
 app.use('/api/checkers', require('./routes/checkers'));
+app.use('/api/afa', require('./routes/afa'));
 
 app.get('/health', (req, res) => {
   res.json({ success: true, message: 'Server is running' });

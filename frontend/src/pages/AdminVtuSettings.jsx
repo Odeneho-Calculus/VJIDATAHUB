@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { AlertCircle, RefreshCw, CheckCircle, DollarSign, X, Settings, Activity, Globe, Clock, Phone, Wifi, Eye, Wallet } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { formatCurrencyAbbreviated } from '../utils/formatCurrency';
@@ -271,7 +271,7 @@ export default function AdminVtuSettings() {
   const [updatingSettings, setUpdatingSettings] = useState(false);
   const [switchingProvider, setSwitchingProvider] = useState(false);
   const [networkCatalog, setNetworkCatalog] = useState([]);
-  const [newNetwork, setNewNetwork] = useState({ name: '', slug: '', logoUrl: '', isActive: true });
+
 
   const [DigiMallNetworks, setDigiMallNetworks] = useState([]);
   const [DigiMallNetworksLoading, setDigiMallNetworksLoading] = useState(false);
@@ -315,7 +315,7 @@ export default function AdminVtuSettings() {
     return `${sign}${whole}.${(fraction + '00').slice(0, 2)}`;
   };
 
-  const fetchSystemSettings = async () => {
+  const fetchSystemSettings = useCallback(async () => {
     try {
       const response = await adminAPI.getSystemSettings();
       if (response.success) {
@@ -332,9 +332,9 @@ export default function AdminVtuSettings() {
     } catch (err) {
       console.error('Failed to fetch system settings', err);
     }
-  };
+  }, [fetchDigiMallNetworks, fetchTopzaNetworks]);
 
-  const fetchWalletSettings = async (provider, { silent = false } = {}) => {
+  const fetchWalletSettings = useCallback(async (provider, { silent = false } = {}) => {
     const prov = provider || activeProvider;
     try {
       if (!silent) setLoading(true);
@@ -358,10 +358,10 @@ export default function AdminVtuSettings() {
     } finally {
       if (!silent) setLoading(false);
     }
-  };
+  }, [activeProvider]);
 
-  useEffect(() => { fetchSystemSettings(); }, []);
-  useEffect(() => { fetchWalletSettings(activeProvider); }, [activeProvider]);
+  useEffect(() => { fetchSystemSettings(); }, [fetchSystemSettings]);
+  useEffect(() => { fetchWalletSettings(activeProvider); }, [activeProvider, fetchWalletSettings]);
   useEffect(() => {
     if (globalSettings) {
       setSystemSettings(globalSettings);
@@ -377,7 +377,7 @@ export default function AdminVtuSettings() {
       fetchTopzaNetworks();
       fetchTopzaTransactions();
     }
-  }, [activeProvider]);
+  }, [activeProvider, fetchDigiMallNetworks, fetchTopzaNetworks]);
 
   const fetchDigiMallTransactions = async () => {
     try {
@@ -435,7 +435,7 @@ export default function AdminVtuSettings() {
       clearInterval(intervalId);
       setPollingTopza(false);
     };
-  }, [activeProvider]);
+  }, [activeProvider, fetchWalletSettings]);
 
   const handleTopzaRefresh = async () => {
     try {
@@ -506,7 +506,7 @@ export default function AdminVtuSettings() {
     }
   };
 
-  const fetchDigiMallNetworks = async (catalog) => {
+  const fetchDigiMallNetworks = useCallback(async (catalog) => {
     try {
       setDigiMallNetworksLoading(true);
       const response = await digimallAPI.getNetworks();
@@ -525,9 +525,9 @@ export default function AdminVtuSettings() {
     } finally {
       setDigiMallNetworksLoading(false);
     }
-  };
+  }, [networkCatalog]);
 
-  const fetchTopzaNetworks = async (catalog) => {
+  const fetchTopzaNetworks = useCallback(async (catalog) => {
     try {
       setTopzaNetworksLoading(true);
       const response = await topzaAPI.getNetworks();
@@ -552,7 +552,7 @@ export default function AdminVtuSettings() {
     } finally {
       setTopzaNetworksLoading(false);
     }
-  };
+  }, [networkCatalog]);
 
   const handleProviderSwitch = async (newProvider) => {
     if (newProvider === activeProvider || switchingProvider) return;
@@ -571,17 +571,7 @@ export default function AdminVtuSettings() {
     }
   };
 
-  const handleSyncAll = async () => {
-    try {
-      setSyncing(true);
-      setError('');
-      await fetchWalletSettings(activeProvider);
-    } catch (err) {
-      setError(err?.message || 'Sync failed');
-    } finally {
-      setSyncing(false);
-    }
-  };
+
 
   const formatDate = (ds) => new Date(ds).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
   const formatTime = (ds) => new Date(ds).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -594,13 +584,7 @@ export default function AdminVtuSettings() {
     });
   };
 
-  const handleAddNetwork = () => {
-    if (!newNetwork.name.trim()) return;
-    setNetworkCatalog((prev) => [...prev, { ...newNetwork, slug: newNetwork.slug || newNetwork.name }]);
-    setNewNetwork({ name: '', slug: '', logoUrl: '', isActive: true });
-  };
 
-  const handleRemoveNetwork = (index) => setNetworkCatalog((prev) => prev.filter((_, i) => i !== index));
 
   const handleSaveNetworks = async () => {
     try {

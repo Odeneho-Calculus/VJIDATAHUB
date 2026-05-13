@@ -226,6 +226,31 @@ export const checkers = {
   verifyPublicStoreCheckerPayment: (data) => api.post('/checkers/store/public/checkers/verify-payment', data),
 };
 
+export const afa = {
+  // Shared/public/user
+  getLockStatus: () => api.get('/afa/lock-status'),
+  getPublicLockStatus: () => api.get('/afa/public-lock-status'),
+  register: (data) => api.post('/afa/register', data),
+  getMyRegistrations: () => api.get('/afa/my-registrations'),
+
+  // Admin
+  sync: () => api.post('/afa/sync'),
+  getOffer: () => api.get('/afa/offer'),
+  updatePrices: (data) => api.put('/afa/prices', data),
+  updateLockStatus: (enabled) => api.put('/afa/lock-status', { enabled }),
+
+  // Agent store management
+  getAvailableAfa: () => api.get('/store/my-store/available-afa'),
+  addAfaToStore: (data) => api.post('/store/my-store/afa', data),
+  updateStoreAfa: (afaId, data) => api.patch(`/store/my-store/afa/${afaId}`, data),
+  removeAfaFromStore: (afaId) => api.delete(`/store/my-store/afa/${afaId}`),
+
+  // Public store AFA registrations
+  getPublicStoreAfa: (slug) => api.get(`/afa/store/public/${slug}/afa`),
+  initializePublicStoreAfaPurchase: (slug, data) => api.post(`/afa/store/public/${slug}/afa/purchase`, data),
+  verifyPublicStoreAfaPayment: (data) => api.post('/afa/store/public/afa/verify-payment', data),
+};
+
 export const xpresdata = {
   list: (network = '', status = 'active', page = 1, limit = 10, type = '') =>
     api.get(`/xpresdata/list?network=${network}&status=${status}&page=${page}&limit=${limit}&type=${type}`),

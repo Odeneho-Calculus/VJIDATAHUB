@@ -6,6 +6,7 @@ const transactionSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: function() {
+        // userId is only required for non-guest transactions
         return !this.isGuest;
       },
     },
@@ -20,7 +21,18 @@ const transactionSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ['data_purchase', 'checker_purchase', 'wallet_funding', 'refund', 'wallet_topup', 'purchase_refund', 'referral_bonus', 'admin_adjustment'],
+      enum: [
+        'data_purchase',
+        'checker_purchase',
+        'afa_purchase',
+        'afa_registration',
+        'wallet_funding',
+        'refund',
+        'wallet_topup',
+        'purchase_refund',
+        'referral_bonus',
+        'admin_adjustment'
+      ],
       required: true,
     },
     amount: {

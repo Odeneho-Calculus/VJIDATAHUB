@@ -332,9 +332,16 @@ export default function AgentOrders() {
     return kind === 'checker' || network === 'checker' || Boolean(order?.checkerDetails?.checkerType);
   };
 
+  const isAfaOrder = (order) => {
+    return order.isAfaRegistration || order.orderKind === 'afa' || order.orderCategory === 'afa';
+  };
+
   const getOrderPlanDisplay = (order) => {
     if (isCheckerOrder(order)) {
       return order?.planName || order?.checkerDetails?.checkerType || 'Checker';
+    }
+    if (isAfaOrder(order)) {
+      return 'AFA Registration';
     }
     return order?.dataAmount ? `${order.dataAmount} Bundle` : (order?.planName || 'N/A');
   };
@@ -540,6 +547,30 @@ export default function AgentOrders() {
                   <p style={{ fontSize: '11px', color: '#666', marginTop: '2px' }}>{formatCurrency(selectedOrder.amount)}</p>
                 </div>
               </div>
+
+              {isAfaOrder(selectedOrder) && selectedOrder.afaRegistration && (
+                <div style={{ background: '#ecfdf5', padding: '16px', borderRadius: '12px', border: '1.5px solid #d1fae5', marginBottom: '24px' }}>
+                  <p style={{ fontSize: '10px', fontWeight: '800', color: '#059669', textTransform: 'uppercase', marginBottom: '12px' }}>AFA Registration Info</p>
+                  <div className="grid grid-cols-2 gap-y-3 gap-x-4">
+                    <div>
+                      <p style={{ fontSize: '9px', fontWeight: '700', color: '#666', textTransform: 'uppercase' }}>Applicant</p>
+                      <p style={{ fontSize: '12px', fontWeight: '800', color: '#111' }}>{selectedOrder.afaRegistration.name}</p>
+                    </div>
+                    <div>
+                      <p style={{ fontSize: '9px', fontWeight: '700', color: '#666', textTransform: 'uppercase' }}>ID Number</p>
+                      <p style={{ fontSize: '12px', fontWeight: '800', color: '#111' }}>{selectedOrder.afaRegistration.idNumber}</p>
+                    </div>
+                    <div>
+                      <p style={{ fontSize: '9px', fontWeight: '700', color: '#666', textTransform: 'uppercase' }}>Occupation</p>
+                      <p style={{ fontSize: '12px', fontWeight: '800', color: '#111' }}>{selectedOrder.afaRegistration.occupation}</p>
+                    </div>
+                    <div>
+                      <p style={{ fontSize: '9px', fontWeight: '700', color: '#666', textTransform: 'uppercase' }}>Location</p>
+                      <p style={{ fontSize: '12px', fontWeight: '800', color: '#111' }}>{selectedOrder.afaRegistration.location}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div style={{ borderTop: '1.5px solid #f0f0f0', paddingTop: '16px' }}>
                 <div className="flex justify-between items-center py-2">

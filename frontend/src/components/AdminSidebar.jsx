@@ -81,6 +81,7 @@ export default function AdminSidebar({ isOpen, onClose }) {
     { path: '/admin/users',                    label: 'Users',            icon: Users },
     offersNavItem,
     { path: '/admin/result-checkers',          label: 'Result Checkers',  icon: CreditCard },
+    { path: '/admin/afa-settings',             label: 'AFA Settings',     icon: Settings2 },
     { path: '/admin/transactions',             label: 'Transactions',     icon: TrendingUp },
     { path: '/admin/orders',                   label: 'Orders',           icon: Package },
     { path: '/admin/orders?scope=agent',       label: 'Agent Orders',     icon: Package },

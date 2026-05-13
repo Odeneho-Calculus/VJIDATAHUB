@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { formatCurrency, formatCurrencyAbbreviated } from '../utils/formatCurrency';
+import { formatCurrencyAbbreviated } from '../utils/formatCurrency';
 import {
   CreditCard,
   Loader,
@@ -26,7 +26,6 @@ import AgentLayout from '../components/AgentLayout';
 import Modal from '../components/Modal';
 import { wallet as walletAPI, publicAPI } from '../services/api';
 import {
-  formatChargeDescriptor,
   getWalletFundingChargeAmount,
   parseTransactionCharges,
 } from '../utils/transactionCharges';
@@ -288,14 +287,7 @@ export default function AgentWallet() {
     admin_adjustment: 'Admin Adjustment',
   };
 
-  const statusBadgeMap = {
-    completed: 'bg-emerald-100 text-emerald-700',
-    successful: 'bg-emerald-100 text-emerald-700',
-    processing: 'bg-blue-100 text-blue-700',
-    pending: 'bg-amber-100 text-amber-700',
-    failed: 'bg-rose-100 text-rose-700',
-    cancelled: 'bg-slate-100 text-slate-700',
-  };
+
 
   const normalizeStatus = (value) => String(value || '').trim().toLowerCase();
   const getResolvedPaymentStatus = (transaction) => {
@@ -362,11 +354,7 @@ export default function AgentWallet() {
   const parsedAmount = Number(amount || 0);
   const walletFundingCharge = getWalletFundingChargeAmount(transactionCharges, parsedAmount);
   const totalAmountCharged = parsedAmount + walletFundingCharge;
-  const walletChargeDescriptor = formatChargeDescriptor(
-    transactionCharges.walletFundingChargeType,
-    transactionCharges.walletFundingCharge,
-    'GHS'
-  );
+
 
   const handleTopUp = async () => {
     const parsedAmount = Number.parseFloat(amount);

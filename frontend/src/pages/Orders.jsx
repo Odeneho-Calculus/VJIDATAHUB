@@ -5,7 +5,7 @@ import { purchases, dataplans } from '../services/api';
 import UserLayout from '../components/UserLayout';
 import Modal from '../components/Modal';
 import AlertModal from '../components/AlertModal';
-import { useAuth } from '../hooks/useAuth';
+
 
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
@@ -229,7 +229,6 @@ const styles = `
 `;
 
 export default function Orders() {
-  const { user } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [, setError] = useState('');
@@ -359,35 +358,7 @@ export default function Orders() {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
-  const getPaymentStatusStyles = (status) => {
-    switch (status?.toLowerCase()) {
-      case 'completed':
-        return 'bg-emerald-50 text-emerald-600 border-emerald-100';
-      case 'pending':
-        return 'bg-amber-50 text-amber-600 border-amber-100';
-      case 'failed':
-        return 'bg-rose-50 text-rose-600 border-rose-100';
-      default:
-        return 'bg-slate-50 text-slate-600 border-slate-100';
-    }
-  };
 
-  const getDeliveryStatusStyles = (status) => {
-    switch (status?.toLowerCase()) {
-      case 'completed':
-      case 'success':
-        return 'bg-emerald-50 text-emerald-600 border-emerald-100';
-      case 'processing':
-        return 'bg-blue-50 text-blue-600 border-blue-100';
-      case 'pending':
-        return 'bg-amber-50 text-amber-600 border-amber-100';
-      case 'failed':
-      case 'cancelled':
-        return 'bg-rose-50 text-rose-600 border-rose-100';
-      default:
-        return 'bg-slate-50 text-slate-600 border-slate-100';
-    }
-  };
 
   const handleViewDetails = (order) => {
     setSelectedOrder(order);
@@ -400,15 +371,23 @@ export default function Orders() {
     return kind === 'checker' || network === 'checker' || Boolean(order?.checkerDetails?.checkerType);
   };
 
+  const isAfaOrder = (order) => {
+    return order.isAfaRegistration || order.orderKind === 'afa' || order.orderCategory === 'afa';
+  };
+
   const getOrderPlanDisplay = (order) => {
     if (isCheckerOrder(order)) {
       return order?.planName || order?.checkerDetails?.checkerType || 'Checker';
+    }
+    if (isAfaOrder(order)) {
+      return 'AFA Registration';
     }
     return order?.dataAmount || order?.planName || 'N/A';
   };
 
   const getOrderNetworkDisplay = (order) => {
     if (isCheckerOrder(order)) return 'CHECKER';
+    if (isAfaOrder(order)) return 'AFA';
     return order?.network || 'N/A';
   };
 
@@ -672,9 +651,25 @@ export default function Orders() {
 
                 <div className="p-4 bg-[#fafaf7] rounded-2xl border border-[#e4e4de] space-y-3">
                   <div className="flex justify-between items-center">
-                    <span className="text-xs font-bold text-slate-500">Beneficiary</span>
-                    <span className="text-sm font-black text-[#111]">{selectedOrder.beneficiary || 'N/A'}</span>
+                    <span className="text-xs font-bold text-slate-500">{isAfaOrder(selectedOrder) ? 'Applicant' : 'Beneficiary'}</span>
+                    <span className="text-sm font-black text-[#111]">{isAfaOrder(selectedOrder) ? selectedOrder.afaRegistration?.name : (selectedOrder.beneficiary || 'N/A')}</span>
                   </div>
+                  {isAfaOrder(selectedOrder) && selectedOrder.afaRegistration && (
+                    <>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-bold text-slate-500">ID Number</span>
+                        <span className="text-sm font-black text-[#111]">{selectedOrder.afaRegistration.idNumber}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-bold text-slate-500">Occupation</span>
+                        <span className="text-sm font-black text-[#111]">{selectedOrder.afaRegistration.occupation}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-bold text-slate-500">Location</span>
+                        <span className="text-sm font-black text-[#111]">{selectedOrder.afaRegistration.location}</span>
+                      </div>
+                    </>
+                  )}
                   <div className="flex justify-between items-center">
                     <span className="text-xs font-bold text-slate-500">Network</span>
                     <span className="text-sm font-black text-[#111]">{getOrderNetworkDisplay(selectedOrder)}</span>

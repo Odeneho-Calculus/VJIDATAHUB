@@ -20,8 +20,8 @@ const processRefund = async (order, reason = 'Data purchase failed') => {
     const amountToRefund = (order.amount || 0) + (order.transactionCharge || 0);
     const userId = order.userId;
 
-    if (!userId) {
-      return { success: false, message: 'No user associated with this order' };
+    if (!userId || order.isGuest) {
+      return { success: false, message: order.isGuest ? 'Cannot auto-refund guest order to wallet' : 'No user associated with this order' };
     }
 
     // 3. Reverse agent commission if it was credited

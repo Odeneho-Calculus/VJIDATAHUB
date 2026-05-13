@@ -5,6 +5,7 @@ const XpresDataOffer = require('../models/XpresDataOffer');
 const DigimallOffer = require('../models/DigimallOffer');
 const TopzaOffer = require('../models/TopzaOffer');
 const TopzaCheckerOffer = require('../models/TopzaCheckerOffer');
+const AfaOffer = require('../models/AfaOffer');
 const DataPlan = require('../models/DataPlan');
 
 const getOrCreateLedger = async (storeId, storeOwnerId) => {
@@ -58,6 +59,12 @@ const resolveAdminPriceForOrder = async (order) => {
 
   if (order.planType === 'TopzaCheckerOffer') {
     planDoc = await TopzaCheckerOffer.findById(order.dataPlanId).select('agentPrice sellingPrice');
+    if (!planDoc) return 0;
+    return toNumber(planDoc.agentPrice) || toNumber(planDoc.sellingPrice);
+  }
+
+  if (order.planType === 'AfaOffer') {
+    planDoc = await AfaOffer.findById(order.dataPlanId).select('agentPrice sellingPrice');
     if (!planDoc) return 0;
     return toNumber(planDoc.agentPrice) || toNumber(planDoc.sellingPrice);
   }

@@ -15,7 +15,7 @@ const orderSchema = new mongoose.Schema(
     },
     planType: {
       type: String,
-      enum: ['DataPlan', 'XpresDataOffer', 'DigimallOffer', 'TopzaOffer', 'TopzaCheckerOffer'],
+      enum: ['DataPlan', 'XpresDataOffer', 'DigimallOffer', 'TopzaOffer', 'TopzaCheckerOffer', 'AfaOffer'],
       default: 'DataPlan',
     },
     apiPlanId: {
@@ -39,7 +39,7 @@ const orderSchema = new mongoose.Schema(
     },
     orderKind: {
       type: String,
-      enum: ['data', 'checker'],
+      enum: ['data', 'checker', 'afa'],
       default: 'data',
     },
     planName: {
@@ -237,10 +237,13 @@ const orderSchema = new mongoose.Schema(
       default: 'normal',
     },
     afaRegistration: {
-      age: Number,
-      idType: String,
+      name: String,
+      phoneNumber: String,
       idNumber: String,
-      state: String,
+      occupation: String,
+      location: String,
+      region: String,
+      dateOfBirth: String,
     },
   },
   { timestamps: true }

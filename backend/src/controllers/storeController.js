@@ -11,6 +11,7 @@ const DataPlan = require('../models/DataPlan');
 const XpresDataOffer = require('../models/XpresDataOffer');
 const DigimallOffer = require('../models/DigimallOffer');
 const TopzaOffer = require('../models/TopzaOffer');
+const AfaOffer = require('../models/AfaOffer');
 const Transaction = require('../models/Transaction');
 const { creditCommissionForOrder, getOrCreateLedger, moveToPending } = require('../services/commissionService');
 const { isPositivePrice, resolvePlanPrice } = require('../utils/planPricing');
@@ -1150,7 +1151,9 @@ exports.getPublicStore = async (req, res) => {
 
     const store = await Store.findOne({ slug: normalizedSlug })
       .populate('owner', 'name')
-      .populate('plans.planId');
+      .populate('plans.planId')
+      .populate('checkerProducts.checkerId')
+      .populate('afaProducts.afaId');
 
     const { activePlanType } = await getActiveStorePlanType();
 
@@ -1223,6 +1226,12 @@ exports.getPublicStore = async (req, res) => {
         hasSocialLinks: store.hasSocialLinks || (store.socialLinks && Object.values(store.socialLinks).some(link => link && link.value && link.value.trim().length > 0)),
         content: store.content,
         plans: publicPlans,
+        afaProducts: (store.afaProducts || []).filter(p => p.isActive && p.afaId && p.afaId.status === 'active').map(p => ({
+          _id: p._id,
+          afaId: p.afaId._id,
+          serviceName: p.afaId.serviceName,
+          sellingPrice: p.customPrice,
+        })),
         totalPlans,
         totalNetworks,
         owner: store.owner,
@@ -1771,6 +1780,163 @@ exports.trackGuestOrders = async (req, res) => {
 const isValidNetworkNumber = (_phone, _network) => {
   // Simple check for now, can be expanded based on utility patterns
   return true;
+};
+
+// 14. GET /my-store/available-afa - Get available AFA products
+exports.getAvailableAfaProducts = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (user.role !== 'agent') {
+      return res.status(403).json({ success: false, message: 'Agents only' });
+    }
+
+    const afaOffers = await AfaOffer.find({ status: 'active' });
+    const availableProducts = afaOffers.map(offer => {
+      const agentBasePrice = resolvePlanPrice(offer, { userRole: 'agent', agentFeeStatus: 'paid' });
+      return {
+        _id: offer._id,
+        serviceName: offer.serviceName,
+        agentPrice: agentBasePrice,
+        publicPrice: offer.sellingPrice,
+      };
+    });
+
+    res.status(200).json({
+      success: true,
+      products: availableProducts,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// 15. POST /my-store/afa - Add AFA product to store
+exports.addAfaToStore = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (user.role !== 'agent') {
+      return res.status(403).json({ success: false, message: 'Agents only' });
+    }
+
+    const { afaId, customPrice } = req.body;
+
+    if (!afaId || customPrice === undefined) {
+      return res.status(400).json({ success: false, message: 'afaId and customPrice required' });
+    }
+
+    const afaOffer = await AfaOffer.findById(afaId);
+    if (!afaOffer) {
+      return res.status(404).json({ success: false, message: 'AFA product not found' });
+    }
+
+    const minPrice = resolvePlanPrice(afaOffer, { userRole: 'agent', agentFeeStatus: 'paid' });
+    if (customPrice < minPrice) {
+      return res.status(400).json({
+        success: false,
+        message: `Custom price cannot be below base cost (${minPrice})`
+      });
+    }
+
+    let store = await Store.findOne({ owner: user._id });
+    if (!store) {
+      return res.status(404).json({ success: false, message: 'Store not found' });
+    }
+
+    store.afaProducts = store.afaProducts.filter(p => p.afaId && p.afaId.toString() !== afaId);
+    store.afaProducts.push({
+      afaId,
+      customPrice,
+      isActive: true,
+    });
+
+    await store.save();
+    await store.populate('afaProducts.afaId');
+
+    if (global.io) {
+      global.io.to(`store:${store.slug}`).emit('store_updated', { type: 'inventory', store });
+    }
+
+    res.status(201).json({
+      success: true,
+      store: store.toObject(),
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// 16. PATCH /my-store/afa/:afaId - Update AFA price
+exports.updateStoreAfa = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    const { afaId } = req.params;
+    const { customPrice, isActive } = req.body;
+
+    let store = await Store.findOne({ owner: user._id }).populate('afaProducts.afaId');
+    if (!store) {
+      return res.status(404).json({ success: false, message: 'Store not found' });
+    }
+
+    const afaProduct = store.afaProducts.find(p => p.afaId && (p.afaId._id.toString() === afaId || p.afaId.toString() === afaId));
+    if (!afaProduct) {
+      return res.status(404).json({ success: false, message: 'AFA product not in store' });
+    }
+
+    if (customPrice !== undefined) {
+      const minPrice = resolvePlanPrice(afaProduct.afaId, { userRole: 'agent', agentFeeStatus: 'paid' });
+      if (customPrice < minPrice) {
+        return res.status(400).json({
+          success: false,
+          message: `Custom price cannot be below base cost (${minPrice})`
+        });
+      }
+      afaProduct.customPrice = customPrice;
+    }
+
+    if (isActive !== undefined) {
+      afaProduct.isActive = isActive;
+    }
+
+    await store.save();
+
+    if (global.io) {
+      global.io.to(`store:${store.slug}`).emit('store_updated', { type: 'inventory', store });
+    }
+
+    res.status(200).json({
+      success: true,
+      store: store.toObject(),
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// 17. DELETE /my-store/afa/:afaId - Remove AFA from store
+exports.removeAfaFromStore = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    const { afaId } = req.params;
+
+    let store = await Store.findOne({ owner: user._id });
+    if (!store) {
+      return res.status(404).json({ success: false, message: 'Store not found' });
+    }
+
+    store.afaProducts = store.afaProducts.filter(p => p.afaId && p.afaId.toString() !== afaId);
+    await store.save();
+
+    if (global.io) {
+      global.io.to(`store:${store.slug}`).emit('store_updated', { type: 'inventory', store });
+    }
+
+    res.status(200).json({
+      success: true,
+      store: store.toObject(),
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 };
 
 module.exports = exports;

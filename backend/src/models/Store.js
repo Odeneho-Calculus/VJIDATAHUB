@@ -95,6 +95,24 @@ const storeSchema = new mongoose.Schema(
         },
       },
     ],
+    afaProducts: [
+      {
+        afaId: {
+          type: mongoose.Schema.Types.ObjectId,
+          required: true,
+          ref: 'AfaOffer',
+        },
+        customPrice: {
+          type: Number,
+          required: true,
+          min: 0,
+        },
+        isActive: {
+          type: Boolean,
+          default: true,
+        },
+      },
+    ],
     socialLinks: {
       whatsapp: {
         value: {

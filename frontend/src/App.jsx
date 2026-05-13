@@ -33,6 +33,7 @@ import AdminOffers from './pages/AdminOffers';
 import AdminDigimallPlans from './pages/AdminDigimallPlans';
 import AdminTopzaPlans from './pages/AdminTopzaPlans';
 import AdminResultCheckers from './pages/AdminResultCheckers';
+import AdminAfaSettings from './pages/AdminAfaSettings';
 import AdminStore from './pages/AdminStore';
 import AdminAgentStores from './pages/AdminAgentStores';
 import AdminCommissions from './pages/AdminCommissions';
@@ -50,6 +51,7 @@ import GuestTrackOrder from './pages/GuestTrackOrder';
 import GuestVerifyPayment from './pages/GuestVerifyPayment';
 import ContactFAB from './components/ContactFAB';
 import ResultsChecker from './pages/ResultsChecker';
+import AfaRegistration from './pages/AfaRegistration';
 
 function AppContent() {
   const location = useLocation();
@@ -88,6 +90,14 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <ResultsChecker />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/afa-registration"
+          element={
+            <ProtectedRoute>
+              <AfaRegistration />
             </ProtectedRoute>
           }
         />
@@ -272,6 +282,14 @@ function AppContent() {
           element={
             <AdminProtectedRoute>
               <AdminResultCheckers />
+            </AdminProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/afa-settings"
+          element={
+            <AdminProtectedRoute>
+              <AdminAfaSettings />
             </AdminProtectedRoute>
           }
         />

@@ -6,7 +6,6 @@ import UserLayout from '../components/UserLayout';
 import AgentLayout from '../components/AgentLayout';
 import PurchasePaymentModal from '../components/PurchasePaymentModal';
 import {
-  formatChargeDescriptor,
   getDataPurchaseChargeAmount,
   parseTransactionCharges,
 } from '../utils/transactionCharges';
@@ -472,11 +471,7 @@ export default function ResultsChecker() {
                   const basePrice = Number(product.finalPrice || 0);
                   const dataPurchaseCharge = getDataPurchaseChargeAmount(transactionCharges, basePrice);
                   const totalPaystackAmount = basePrice + dataPurchaseCharge;
-                  const chargeDescriptor = formatChargeDescriptor(
-                    transactionCharges.dataPurchaseChargeType,
-                    transactionCharges.dataPurchaseCharge,
-                    'GHS'
-                  );
+
 
                   return (
                     <div key={product._id} className="dash-plan-card group">

@@ -7,7 +7,7 @@ import {
     ShoppingBag, CreditCard
 } from 'lucide-react';
 import { io } from 'socket.io-client';
-import { store as storeAPI, publicAPI, checkers as checkersAPI } from '../services/api';
+import { store as storeAPI, publicAPI, checkers as checkersAPI, afa as afaAPI } from '../services/api';
 import { getSocketBaseUrl } from '../utils/apiBaseUrl';
 import {
     formatChargeDescriptor,
@@ -35,6 +35,10 @@ export default function PublicCatalog() {
     const [checkers, setCheckers] = useState([]);
     const [showCheckerModal, setShowCheckerModal] = useState(false);
     const [selectedChecker, setSelectedChecker] = useState(null);
+    const [afaProducts, setAfaProducts] = useState([]);
+    const [showAfaModal, setShowAfaModal] = useState(false);
+    const [selectedAfa, setSelectedAfa] = useState(null);
+    const [afaLockStatus, setAfaLockStatus] = useState({ enabled: true, message: '', registrationFee: 0 });
     const [networkLogos, setNetworkLogos] = useState({});
     const [transactionCharges, setTransactionCharges] = useState(parseTransactionCharges());
     const socketRef = useRef(null);
@@ -75,6 +79,28 @@ export default function PublicCatalog() {
                 setCheckers(checkerRes?.checkers || []);
             } catch {
                 setCheckers([]);
+            }
+
+            // Check AFA lock status first
+            let lockStatus = { enabled: true, message: '', registrationFee: 0 };
+            try {
+                const lockRes = await afaAPI.getPublicLockStatus();
+                lockStatus = lockRes || { enabled: true, message: '', registrationFee: 0 };
+                setAfaLockStatus(lockStatus);
+            } catch {
+                setAfaLockStatus(lockStatus);
+            }
+
+            // Only fetch AFA products if registration is enabled
+            if (lockStatus.enabled) {
+                try {
+                    const afaRes = await afaAPI.getPublicStoreAfa(slug);
+                    setAfaProducts(afaRes?.afaProducts || []);
+                } catch {
+                    setAfaProducts([]);
+                }
+            } else {
+                setAfaProducts([]);
             }
         } catch (err) {
             setError(err.message || 'Store data not found');
@@ -316,6 +342,56 @@ export default function PublicCatalog() {
                     </section>
                 )}
 
+                {afaLockStatus.enabled && afaProducts.length > 0 && (
+                    <section className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5">
+                        <div className="flex items-center justify-between gap-3 mb-4">
+                            <div>
+                                <h3 className="text-lg font-bold text-slate-900">AFA Registration</h3>
+                                <p className="text-sm text-slate-600">Register for MTN AFA bundle and enjoy more data for less</p>
+                            </div>
+                            <span className="text-xs text-slate-500">Official Registration Service</span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                            {afaProducts.map((afa) => (
+                                <article key={afa._id} className="rounded-xl border border-slate-200 p-3 bg-slate-50/40">
+                                    <div className="flex items-center justify-between gap-2">
+                                        <p className="font-semibold text-slate-900">{afa.serviceName}</p>
+                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">
+                                            Active
+                                        </span>
+                                    </div>
+                                    <p className="text-xs text-slate-500">Official Registration</p>
+                                    <p className="text-xl font-bold text-slate-900 mt-2">{formatCurrencyAbbreviated(afa.sellingPrice)}</p>
+                                    <button
+                                        onClick={() => {
+                                            setSelectedAfa(afa);
+                                            setShowAfaModal(true);
+                                        }}
+                                        className="mt-3 w-full py-2 rounded-lg font-semibold text-white transition-all hover:opacity-90"
+                                        style={{ backgroundColor: store?.theme?.buttonBg || primaryColor }}
+                                    >
+                                        Register Now
+                                    </button>
+                                </article>
+                            ))}
+                        </div>
+                    </section>
+                )}
+
+                {!afaLockStatus.enabled && (
+                    <section className="bg-amber-50 rounded-2xl border border-amber-200 p-4 sm:p-5">
+                        <div className="flex items-center gap-3">
+                            <AlertCircle className="w-6 h-6 text-amber-600 flex-shrink-0" />
+                            <div>
+                                <h3 className="text-lg font-bold text-amber-900">AFA Registration Unavailable</h3>
+                                <p className="text-sm text-amber-700 mt-1">
+                                    {afaLockStatus.message || 'AFA registration is currently disabled. Please check back later.'}
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+                )}
+
                 {filteredPlans.length === 0 && (
                     <section className="py-14 flex flex-col items-center justify-center text-slate-600 gap-3 bg-white rounded-2xl border border-dashed border-slate-300">
                         <Smartphone size={42} className="opacity-25" />
@@ -349,6 +425,235 @@ export default function PublicCatalog() {
                     }}
                 />
             )}
+
+            {showAfaModal && selectedAfa && (
+                <GuestAfaCheckoutModal
+                    afa={selectedAfa}
+                    store={store}
+                    primaryColor={primaryColor}
+                    transactionCharges={transactionCharges}
+                    onClose={() => {
+                        setShowAfaModal(false);
+                        setSelectedAfa(null);
+                    }}
+                />
+            )}
+        </div>
+    );
+}
+
+function GuestAfaCheckoutModal({ afa, store, primaryColor, transactionCharges, onClose }) {
+    const [formData, setFormData] = useState({
+        name: '',
+        phone: '',
+        idNumber: '',
+        occupation: '',
+        location: '',
+        region: '',
+        dateOfBirth: ''
+    });
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
+
+    const basePrice = Number(afa?.sellingPrice || 0);
+    const dataPurchaseCharge = getDataPurchaseChargeAmount(transactionCharges, basePrice);
+    const totalPaystackAmount = basePrice + dataPurchaseCharge;
+    const chargeDescriptor = formatChargeDescriptor(
+        transactionCharges?.dataPurchaseChargeType,
+        transactionCharges?.dataPurchaseCharge,
+        'GH₵'
+    );
+
+    const generateEmail = (phone) => `${phone}@vjidatahub.com`;
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        
+        // Basic validation
+        if (!formData.name || !formData.phone || !formData.idNumber || !formData.occupation || !formData.location || !formData.region || !formData.dateOfBirth) {
+            setError('Please fill in all required fields.');
+            return;
+        }
+
+        try {
+            setLoading(true);
+            setError('');
+            setSuccessMessage('');
+
+            const initRes = await afaAPI.initializePublicStoreAfaPurchase(store.slug, {
+                afaId: afa.afaId,
+                email: generateEmail(formData.phone),
+                ...formData
+            });
+
+            const accessCode = initRes?.data?.accessCode;
+            const reference = initRes?.data?.reference;
+
+            if (!initRes.success || !accessCode || !reference) {
+                setError(initRes.message || 'Could not start AFA payment.');
+                setLoading(false);
+                return;
+            }
+
+            if (!window.PaystackPop) {
+                setError('Paystack library not loaded. Please refresh and try again.');
+                setLoading(false);
+                return;
+            }
+
+            const paystack = new window.PaystackPop();
+            paystack.resumeTransaction(accessCode, {
+                onSuccess: async () => {
+                    try {
+                        const verifyRes = await afaAPI.verifyPublicStoreAfaPayment({ reference });
+                        if (verifyRes?.success) {
+                            setSuccessMessage('Payment successful! Your AFA registration is being processed.');
+                            setTimeout(() => onClose(), 2000);
+                        } else {
+                            setError(verifyRes?.message || 'Payment verification failed.');
+                        }
+                    } catch (verifyErr) {
+                        setError(verifyErr.message || 'Failed to verify payment.');
+                    } finally {
+                        setLoading(false);
+                    }
+                },
+                onCancel: () => {
+                    setError('Payment was cancelled.');
+                    setLoading(false);
+                },
+                onError: (paystackError) => {
+                    setError(paystackError?.message || 'Payment error occurred.');
+                    setLoading(false);
+                },
+            });
+        } catch (err) {
+            setError(err.message || 'Network error. Please try again.');
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose}></div>
+
+            <div className="relative w-full max-w-md bg-[#F8FAFC] rounded-2xl shadow-2xl overflow-hidden border border-slate-200/60 max-h-[90vh] overflow-y-auto">
+                <div className="sticky top-0 px-6 py-4 bg-white border-b border-slate-200/60 flex items-center justify-between z-10">
+                    <div>
+                        <h3 className="text-lg font-bold text-slate-900">AFA Registration</h3>
+                        <p className="text-xs text-slate-600">{afa.serviceName}</p>
+                    </div>
+                    <button onClick={onClose} className="p-2 text-slate-600 hover:text-slate-800 rounded-lg hover:bg-slate-100 transition-colors">
+                        <X size={20} />
+                    </button>
+                </div>
+
+                <div className="p-6 space-y-5">
+                    <div className="p-4 rounded-xl border border-slate-200 bg-white">
+                        <p className="text-xs text-slate-500">Registration Fee</p>
+                        <p className="text-2xl font-bold text-slate-900">{formatCurrencyAbbreviated(basePrice)}</p>
+                        {dataPurchaseCharge > 0 && (
+                            <div className="mt-2 space-y-0.5 text-xs text-slate-500 border-t border-slate-100 pt-2">
+                                <div className="flex justify-between">
+                                    <span>Transaction fee</span>
+                                    <span>+GH₵{dataPurchaseCharge.toFixed(2)} ({chargeDescriptor})</span>
+                                </div>
+                                <div className="flex justify-between font-semibold text-slate-700">
+                                    <span>Total</span>
+                                    <span>GH₵{totalPaystackAmount.toFixed(2)}</span>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {error && (
+                        <div className="p-3 bg-rose-50 border border-rose-100 rounded-xl text-rose-700 text-xs font-semibold">
+                            {error}
+                        </div>
+                    )}
+                    {successMessage && (
+                        <div className="p-3 bg-emerald-50 border border-emerald-100 rounded-xl text-emerald-700 text-xs font-semibold">
+                            {successMessage}
+                        </div>
+                    )}
+
+                    <div className="space-y-4">
+                        <InputGroup
+                            label="Full Name (As on ID)"
+                            value={formData.name}
+                            onChange={(v) => setFormData({ ...formData, name: v })}
+                            placeholder="John Doe"
+                            required
+                        />
+                        <InputGroup
+                            label="MTN Phone Number"
+                            value={formData.phone}
+                            onChange={(v) => {
+                                const cleaned = v.replace(/\D/g, '');
+                                if (cleaned.length <= 10) {
+                                    setFormData({ ...formData, phone: cleaned });
+                                }
+                            }}
+                            placeholder="024xxxxxxx"
+                            type="tel"
+                            required
+                        />
+                        <InputGroup
+                            label="Ghana Card ID"
+                            value={formData.idNumber}
+                            onChange={(v) => setFormData({ ...formData, idNumber: v })}
+                            placeholder="GHA-000000000-0"
+                            required
+                        />
+                        <InputGroup
+                            label="Occupation"
+                            value={formData.occupation}
+                            onChange={(v) => setFormData({ ...formData, occupation: v })}
+                            placeholder="Farmer or Trader"
+                            required
+                        />
+                        <div className="grid grid-cols-2 gap-4">
+                            <InputGroup
+                                label="Location / City"
+                                value={formData.location}
+                                onChange={(v) => setFormData({ ...formData, location: v })}
+                                placeholder="Accra"
+                                required
+                            />
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Region</label>
+                                <select 
+                                    className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:border-slate-900 focus:ring-1 focus:ring-slate-900 outline-none transition-all appearance-none"
+                                    value={formData.region}
+                                    onChange={(e) => setFormData({ ...formData, region: e.target.value })}
+                                >
+                                    <option value="">Select Region</option>
+                                    {['Greater Accra', 'Ashanti', 'Central', 'Eastern', 'Western', 'Northern', 'Upper East', 'Upper West', 'Volta', 'Bono', 'Bono East', 'Ahafo', 'Savannah', 'North East', 'Oti', 'Western North'].map(r => (
+                                        <option key={r} value={r}>{r}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                        <InputGroup
+                            label="Date of Birth"
+                            value={formData.dateOfBirth}
+                            onChange={(v) => setFormData({ ...formData, dateOfBirth: v })}
+                            type="date"
+                            required
+                        />
+                    </div>
+
+                    <button
+                        disabled={loading}
+                        onClick={handleSubmit}
+                        className="w-full py-3 text-white rounded-xl font-bold text-xs uppercase tracking-widest transition-all disabled:opacity-50 mt-2"
+                        style={{ backgroundColor: primaryColor }}
+                    >
+                        {loading ? 'Processing...' : 'Pay and Register'}
+                    </button>
+                </div>
+            </div>
         </div>
     );
 }

@@ -3,8 +3,8 @@ import { Database, User, Tag, Calendar, ShieldCheck } from 'lucide-react';
 import Modal from './Modal';
 import { formatNumberAbbreviated } from '../utils/formatCurrency';
 
-export const TransactionDetailsModal = ({ isOpen, onClose, transaction, typeLabels, statusColors }) => {
-  if (!transaction) return null;
+export const TransactionDetailsModal = ({ isOpen, onClose, transaction, typeLabels = {}, statusColors = {} }) => {
+  if (!isOpen || !transaction) return null;
 
   const normalizeStatus = (value) => String(value || '').trim().toLowerCase();
   const paymentStatus = transaction?.paymentStatus
