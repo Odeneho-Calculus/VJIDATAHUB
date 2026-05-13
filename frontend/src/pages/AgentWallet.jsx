@@ -13,6 +13,7 @@ import {
   ArrowUpCircle,
   History,
   AlertCircle,
+  Activity,
   CheckCircle2,
   Eye,
   ShoppingBag,
