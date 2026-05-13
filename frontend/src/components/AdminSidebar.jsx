@@ -17,6 +17,7 @@ import {
   ShieldCheck,
   ChevronRight,
   Globe,
+  User,
 } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
 
@@ -92,6 +93,7 @@ export default function AdminSidebar({ isOpen, onClose }) {
     { path: '/admin/referrals',                label: 'Referral Program', icon: Gift },
     { path: '/admin/vtu-settings',             label: 'VTU Settings',     icon: Wallet },
     { path: '/admin/notifications',            label: 'Notifications',    icon: Bell },
+    { path: '/admin/profile',                  label: 'Profile',          icon: User },
     { path: '/admin/platform-settings',        label: 'Platform Settings',icon: Globe },
   ];
 

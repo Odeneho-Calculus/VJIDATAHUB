@@ -39,6 +39,7 @@ import AdminAgentStores from './pages/AdminAgentStores';
 import AdminCommissions from './pages/AdminCommissions';
 import AdminAgentSettings from './pages/AdminAgentSettings';
 import AdminPlatformSettings from './pages/AdminPlatformSettings';
+import AdminProfile from './pages/AdminProfile';
 import AgentCommissions from './pages/AgentCommissions';
 import AgentDashboard from './pages/AgentDashboard';
 import AgentOrders from './pages/AgentOrders';
@@ -362,6 +363,14 @@ function AppContent() {
           element={
             <AdminProtectedRoute>
               <AdminPlatformSettings />
+            </AdminProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/profile"
+          element={
+            <AdminProtectedRoute>
+              <AdminProfile />
             </AdminProtectedRoute>
           }
         />
