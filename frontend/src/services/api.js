@@ -36,8 +36,16 @@ api.interceptors.response.use(
 
 export const auth = {
   register: (data) => api.post('/auth/register', data),
-  login: (data) => api.post('/auth/login', data),
+  login: (data) => api.post('/auth/login', { email: data.email, password: data.password }),
   getProfile: () => api.get('/auth/profile'),
+  verifyEmail: (token) => api.get(`/auth/verify-email?token=${token}`),
+  getVerificationStatus: (email) => api.get(`/auth/verification-status?email=${email}`),
+  getPasswordResetStatus: (params) => {
+    const query = params.email ? `email=${params.email}` : `token=${params.token}`;
+    return api.get(`/auth/password-reset-status?${query}`);
+  },
+  resendVerification: (email) => api.post('/auth/resend-verification', { email }),
+  forgotPassword: (email) => api.post('/auth/forgot-password', { email }),
   resetPassword: (data) => api.post('/auth/reset-password', data),
   changePassword: (data) => api.post('/auth/change-password', data),
 };
@@ -90,6 +98,8 @@ export const admin = {
   unbanUser: (id) => api.patch(`/admin/users/${id}/unban`),
   suspendUser: (id, days) => api.patch(`/admin/users/${id}/suspend`, { days }),
   unsuspendUser: (id) => api.patch(`/admin/users/${id}/unsuspend`),
+  temporaryDeleteUser: (id) => api.delete(`/admin/users/${id}/temporary`),
+  permanentDeleteUser: (id) => api.delete(`/admin/users/${id}/permanent`),
   deleteUser: (id) => api.delete(`/admin/users/${id}`),
   restoreUser: (id) => api.patch(`/admin/users/${id}/restore`),
   updateUser: (id, data) => api.patch(`/admin/users/${id}`, data),

@@ -20,6 +20,10 @@ export default function AdminProtectedRoute({ children }) {
     return <Navigate to="/login" replace />;
   }
 
+  if (!user.isEmailVerified) {
+    return <Navigate to={`/verify-email?email=${user.email}`} replace />;
+  }
+
   if (user.role !== 'admin') {
     if (user.role === 'agent') {
       return <Navigate to="/agent/dashboard" replace />;

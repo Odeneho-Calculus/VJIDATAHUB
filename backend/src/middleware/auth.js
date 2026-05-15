@@ -30,6 +30,10 @@ const protect = async (req, res, next) => {
       return res.status(403).json({ success: false, message: 'Your account has been banned. Reason: ' + (user.banReason || 'No reason provided') });
     }
 
+    if (user.status === 'temporarily_deleted') {
+      return res.status(403).json({ success: false, message: 'Your account has been temporarily deleted. Please contact support.' });
+    }
+
     if (user.status === 'suspended') {
       if (user.suspendedUntil && new Date() >= user.suspendedUntil) {
         user.status = 'active';
@@ -38,6 +42,15 @@ const protect = async (req, res, next) => {
       } else {
         return res.status(403).json({ success: false, message: 'Your account is suspended until ' + (user.suspendedUntil ? new Date(user.suspendedUntil).toLocaleDateString() : 'further notice') });
       }
+    }
+
+    if (!user.isEmailVerified) {
+      return res.status(403).json({ 
+        success: false, 
+        message: 'Email verification required',
+        isEmailVerified: false,
+        email: user.email 
+      });
     }
     
     next();

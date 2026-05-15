@@ -16,5 +16,13 @@ export default function ProtectedRoute({ children }) {
     );
   }
 
-  return user ? children : <Navigate to="/login" replace />;
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (!user.isEmailVerified) {
+    return <Navigate to={`/verify-email?email=${user.email}`} replace />;
+  }
+
+  return children;
 }

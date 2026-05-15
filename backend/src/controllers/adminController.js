@@ -1357,7 +1357,7 @@ exports.unsuspendUser = async (req, res) => {
   }
 };
 
-exports.deleteUser = async (req, res) => {
+exports.temporaryDeleteUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
 
@@ -1375,85 +1375,15 @@ exports.deleteUser = async (req, res) => {
       });
     }
 
-    if (user.role === 'agent') {
-      const stores = await Store.find({ owner: user._id }).select('_id');
-      const storeIds = stores.map((store) => store._id);
-
-      const orderQuery = {
-        $or: [
-          { userId: user._id },
-          ...(storeIds.length ? [{ storeId: { $in: storeIds } }] : []),
-        ],
-      };
-
-      await Promise.all([
-        Order.deleteMany(orderQuery),
-        Transaction.deleteMany({ userId: user._id }),
-        Purchase.deleteMany({ userId: user._id }),
-        Notification.deleteMany({ 'data.userId': user._id }),
-        AgentFeePayment.deleteMany({
-          $or: [
-            { agentId: user._id },
-            ...(storeIds.length ? [{ storeId: { $in: storeIds } }] : []),
-          ],
-        }),
-        AgentCommissionPayout.deleteMany({
-          $or: [
-            { agentId: user._id },
-            ...(storeIds.length ? [{ storeId: { $in: storeIds } }] : []),
-          ],
-        }),
-        ...(storeIds.length ? [Guest.deleteMany({ store: { $in: storeIds } })] : []),
-        ...(storeIds.length ? [Store.deleteMany({ _id: { $in: storeIds } })] : []),
-        Referral.deleteMany({
-          $or: [
-            { referrer: user._id },
-            { referredUser: user._id },
-          ],
-        }),
-        User.updateMany({ referredBy: user._id }, { $set: { referredBy: null } }),
-        User.findByIdAndDelete(user._id),
-      ]);
-
-      return res.status(200).json({
-        success: true,
-        message: 'Agent and all related records permanently deleted',
-        user: { id: user._id, role: user.role, isPermanent: true },
-      });
-    }
-
-    // Hard Delete: If already soft-deleted, perform permanent removal
-    if (user.deletedAt) {
-      await Promise.all([
-        Order.deleteMany({ userId: user._id }),
-        Transaction.deleteMany({ userId: user._id }),
-        Purchase.deleteMany({ userId: user._id }),
-        Notification.deleteMany({ 'data.userId': user._id }), // Clean up notifications related to user
-        Referral.deleteMany({
-          $or: [
-            { referrer: user._id },
-            { referredUser: user._id },
-          ],
-        }),
-        User.updateMany({ referredBy: user._id }, { $set: { referredBy: null } }),
-        User.findByIdAndDelete(user._id)
-      ]);
-
-      return res.status(200).json({
-        success: true,
-        message: 'User and all related records permanently deleted',
-        user: { id: user._id, deletedAt: user.deletedAt, isPermanent: true },
-      });
-    }
-
-    // Soft Delete: Mark as deleted but preserve records
+    // Soft Delete: Mark as temporarily deleted and restrict access
+    user.status = 'temporarily_deleted';
     user.deletedAt = new Date();
     await user.save();
 
     res.status(200).json({
       success: true,
-      message: 'User soft-deleted successfully',
-      user: { id: user._id, deletedAt: user.deletedAt, isPermanent: false },
+      message: 'User temporarily deleted successfully. Access restricted.',
+      user: { id: user._id, status: user.status, deletedAt: user.deletedAt },
     });
   } catch (error) {
     res.status(500).json({
@@ -1461,6 +1391,99 @@ exports.deleteUser = async (req, res) => {
       message: error.message,
     });
   }
+};
+
+exports.permanentDeleteUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
+    if (user.role === 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Cannot permanently delete admin users',
+      });
+    }
+
+    const stores = await Store.find({ owner: user._id }).select('_id');
+    const storeIds = stores.map((store) => store._id);
+
+    const orderQuery = {
+      $or: [
+        { userId: user._id },
+        ...(storeIds.length ? [{ storeId: { $in: storeIds } }] : []),
+      ],
+    };
+
+    const notificationQuery = {
+      $or: [
+        { 'data.userId': user._id },
+        ...(storeIds.length ? [{ 'data.storeId': { $in: storeIds } }] : []),
+      ],
+    };
+
+    // Define all deletion promises
+    const deletionPromises = [
+      Order.deleteMany(orderQuery),
+      Transaction.deleteMany({ userId: user._id }),
+      Purchase.deleteMany({ userId: user._id }),
+      Notification.deleteMany(notificationQuery),
+      Referral.deleteMany({
+        $or: [
+          { referrer: user._id },
+          { referredUser: user._id },
+        ],
+      }),
+      User.updateMany({ referredBy: user._id }, { $set: { referredBy: null } }),
+      AgentFeePayment.deleteMany({
+        $or: [
+          { agentId: user._id },
+          ...(storeIds.length ? [{ storeId: { $in: storeIds } }] : []),
+        ],
+      }),
+      AgentCommissionPayout.deleteMany({
+        $or: [
+          { agentId: user._id },
+          ...(storeIds.length ? [{ storeId: { $in: storeIds } }] : []),
+        ],
+      }),
+      AgentCommissionAdjustment.deleteMany({
+        $or: [
+          { agentId: user._id },
+          { performedBy: user._id }
+        ]
+      }),
+      CommissionLedger.deleteMany({ storeOwnerId: user._id }),
+      SellerCommission.deleteMany({ storeOwnerId: user._id }),
+      ...(storeIds.length ? [Guest.deleteMany({ store: { $in: storeIds } })] : []),
+      ...(storeIds.length ? [Store.deleteMany({ _id: { $in: storeIds } })] : []),
+      User.findByIdAndDelete(user._id),
+    ];
+
+    await Promise.all(deletionPromises);
+
+    res.status(200).json({
+      success: true,
+      message: 'User and all related records permanently deleted from the system.',
+      user: { id: user._id, role: user.role, isPermanent: true },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+exports.deleteUser = async (req, res) => {
+  // Legacy support for deleteUser route, mapping it to temporaryDeleteUser
+  return exports.temporaryDeleteUser(req, res);
 };
 
 exports.restoreUser = async (req, res) => {
@@ -1493,7 +1516,7 @@ exports.restoreUser = async (req, res) => {
 
 exports.updateUser = async (req, res) => {
   try {
-    const { name, email, phone, balance, role, walletOperation, walletAmount } = req.body;
+    const { name, email, phone, balance, role, walletOperation, walletAmount, isEmailVerified } = req.body;
     const userId = req.params.id;
 
     const user = await User.findById(userId);
@@ -1519,7 +1542,8 @@ exports.updateUser = async (req, res) => {
     const oldBalance = user.balance;
 
     if (name !== undefined) user.name = name;
-    if (email !== undefined) user.email = email;
+    if (email !== undefined) user.email = email.toLowerCase();
+    if (isEmailVerified !== undefined) user.isEmailVerified = isEmailVerified;
     if (phone !== undefined) {
       if (phone !== null && phone !== '') {
         const phoneValidation = validatePhoneNumber(phone);

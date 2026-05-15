@@ -11,6 +11,8 @@ import AgentProtectedRoute from './components/AgentProtectedRoute'; // Specific 
 import AdminProtectedRoute from './components/AdminProtectedRoute';
 import Home from './pages/Home';
 import ResetPassword from './pages/ResetPassword';
+import ForgotPassword from './pages/ForgotPassword';
+import VerifyEmail from './pages/VerifyEmail';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
@@ -58,7 +60,7 @@ function AppContent() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
   const isStoreRoute = location.pathname.startsWith('/store');
-  const isAuthRoute = ['/login', '/register'].includes(location.pathname);
+  const isAuthRoute = ['/login', '/register', '/verify-email', '/forgot-password', '/reset-password'].includes(location.pathname);
 
   return (
     <>
@@ -67,7 +69,9 @@ function AppContent() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* User Routes */}
         <Route

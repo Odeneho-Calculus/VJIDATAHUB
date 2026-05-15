@@ -50,6 +50,42 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    emailVerificationToken: {
+      type: String,
+      default: null,
+    },
+    emailVerificationExpires: {
+      type: Date,
+      default: null,
+    },
+    emailVerificationAttempts: {
+      type: Number,
+      default: 0,
+    },
+    lastEmailVerificationAttempt: {
+      type: Date,
+      default: null,
+    },
+    resetPasswordToken: {
+      type: String,
+      default: null,
+    },
+    resetPasswordExpires: {
+      type: Date,
+      default: null,
+    },
+    passwordResetAttempts: {
+      type: Number,
+      default: 0,
+    },
+    lastPasswordResetAttempt: {
+      type: Date,
+      default: null,
+    },
     dataUsed: {
       type: Number,
       default: 0,
@@ -65,7 +101,7 @@ const userSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['active', 'suspended', 'banned'],
+      enum: ['active', 'suspended', 'banned', 'temporarily_deleted'],
       default: 'active',
     },
     suspendedUntil: {
@@ -111,7 +147,9 @@ userSchema.pre('save', async function () {
     this.referralCode = 'REF' + this._id.toString().slice(-8).toUpperCase();
   }
 
-  if (!this.isModified('password')) return;
+  if (!this.isModified('password')) {
+    return;
+  }
 
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);

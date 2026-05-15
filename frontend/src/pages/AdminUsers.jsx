@@ -3,7 +3,7 @@ import { Search, Edit2, Ban, Clock, Trash2, Eye, RotateCcw, Users, AlertCircle, 
 import { formatNumberAbbreviated } from '../utils/formatCurrency';
 import AdminSidebar from '../components/AdminSidebar';
 import ConfirmDialog from '../components/ConfirmDialog';
-import { UserViewModal, UserRoleModal, UserBanModal, UserSuspendModal, UserEditModal } from '../components/AdminUserModals';
+import { UserViewModal, UserRoleModal, UserBanModal, UserSuspendModal, UserEditModal, UserDeleteModal } from '../components/AdminUserModals';
 import PasswordResetModal from '../components/PasswordResetModal';
 import { useSidebar } from '../hooks/useSidebar';
 import { admin as adminAPI } from '../services/api';
@@ -31,13 +31,14 @@ export default function AdminUsers() {
 
   const [showUnbanConfirm, setShowUnbanConfirm] = useState(false);
   const [showUnsuspendConfirm, setShowUnsuspendConfirm] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showRestoreConfirm, setShowRestoreConfirm] = useState(false);
   const [confirmingUserId, setConfirmingUserId] = useState(null);
 
   const [showResetModal, setShowResetModal] = useState(false);
   const [resetLink, setResetLink] = useState('');
   const [resetLoading, setResetLoading] = useState(false);
+  const [deletingUser, setDeletingUser] = useState(false);
 
   const [banReason, setBanReason] = useState('');
   const [suspendDays, setSuspendDays] = useState(7);
@@ -137,17 +138,24 @@ export default function AdminUsers() {
     }
   };
 
-  const confirmDeleteUser = async () => {
+  const handleDeleteUser = async (type) => {
     if (!selectedUser) return;
     try {
-      await adminAPI.deleteUser(selectedUser._id);
+      setDeletingUser(true);
+      if (type === 'permanent') {
+        await adminAPI.permanentDeleteUser(selectedUser._id);
+        showMessage('User and all related records permanently deleted');
+      } else {
+        await adminAPI.temporaryDeleteUser(selectedUser._id);
+        showMessage('User account temporarily deleted. Access restricted.');
+      }
       setSelectedUser(null);
       fetchUsers();
-      showMessage(selectedUser?.role === 'agent' ? 'Agent and related data deleted successfully' : 'Account deleted successfully');
     } catch (err) {
       showMessage(err?.message || 'Failed to delete user', true);
     } finally {
-      setShowDeleteConfirm(false);
+      setDeletingUser(false);
+      setShowDeleteModal(false);
     }
   };
 
@@ -198,21 +206,21 @@ export default function AdminUsers() {
   const getStatusColor = (user) => {
     if (user.status === 'banned') return '#b91c1c';
     if (user.status === 'suspended') return '#f0a500';
-    if (user.deletedAt) return '#666';
+    if (user.status === 'temporarily_deleted' || user.deletedAt) return '#666';
     return '#059669';
   };
 
   const getStatusBg = (user) => {
     if (user.status === 'banned') return '#fff5f5';
     if (user.status === 'suspended') return '#fffbeb';
-    if (user.deletedAt) return '#f3f4f6';
+    if (user.status === 'temporarily_deleted' || user.deletedAt) return '#f3f4f6';
     return '#ecfdf5';
   };
 
   const getStatusText = (user) => {
     if (user.status === 'banned') return 'Banned';
     if (user.status === 'suspended') return 'Suspended';
-    if (user.deletedAt) return 'Deleted';
+    if (user.status === 'temporarily_deleted' || user.deletedAt) return 'Temp Deleted';
     return 'Active';
   };
 
@@ -558,20 +566,24 @@ export default function AdminUsers() {
                       <td className="usr-td" style={{ whiteSpace: 'nowrap' }}>GHS {Number((user.wallet?.balance || user.balance) || 0).toFixed(2)}</td>
                       <td className="usr-td" style={{ whiteSpace: 'nowrap' }}>
                         <span className="usr-badge" style={{ background: getStatusBg(user), color: getStatusColor(user) }}>
-                          {user.status || (user.deletedAt ? 'Deleted' : 'Active')}
+                          {getStatusText(user)}
                         </span>
                       </td>
                       <td className="usr-td">
                         <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
                           <button className="usr-btn-icon" title="View" onClick={() => { setSelectedUser(user); setShowViewModal(true); }}><Eye size={14} /></button>
                           <button className="usr-btn-icon" title="Edit" onClick={() => { setSelectedUser(user); setShowEditModal(true); }}><Edit2 size={14} /></button>
-                          {user.status === 'banned' ? (
+                          
+                          { (user.status === 'temporarily_deleted' || user.deletedAt) ? (
+                            <button className="usr-btn-icon" title="Restore Account" onClick={() => { setConfirmingUserId(user._id); setShowRestoreConfirm(true); }}><RotateCcw size={14} style={{ color: '#059669' }} /></button>
+                          ) : user.status === 'banned' ? (
                             <button className="usr-btn-icon" title="Unban" onClick={() => { setConfirmingUserId(user._id); setShowUnbanConfirm(true); }}><RotateCcw size={14} style={{ color: '#059669' }} /></button>
                           ) : (
                             <button className="usr-btn-icon" title="Ban" onClick={() => { setSelectedUser(user); setShowBanModal(true); }}><Ban size={14} style={{ color: '#b91c1c' }} /></button>
                           )}
+                          
                           <button className="usr-btn-icon" title="Reset Password" onClick={() => handleGenerateReset(user._id)} disabled={resetLoading}><KeyRound size={14} /></button>
-                          <button className="usr-btn-icon" title="Delete" onClick={() => { setSelectedUser(user); setShowDeleteConfirm(true); }}><Trash2 size={14} style={{ color: '#b91c1c' }} /></button>
+                          <button className="usr-btn-icon" title="Delete" onClick={() => { setSelectedUser(user); setShowDeleteModal(true); }}><Trash2 size={14} style={{ color: '#b91c1c' }} /></button>
                         </div>
                       </td>
                     </tr>
@@ -603,15 +615,17 @@ export default function AdminUsers() {
         user={selectedUser} 
         getStatusColor={getStatusColor}
         getStatusText={getStatusText}
+        onRestore={() => { setShowViewModal(false); setConfirmingUserId(selectedUser._id); setShowRestoreConfirm(true); }}
+        onDelete={() => { setShowViewModal(false); setShowDeleteModal(true); }}
       />
       <UserEditModal isOpen={showEditModal} onClose={() => setShowEditModal(false)} user={selectedUser} onUpdate={handleUpdateUser} loading={updatingUser} />
       <UserBanModal isOpen={showBanModal} onClose={() => setShowBanModal(false)} user={selectedUser} reason={banReason} setReason={setBanReason} onConfirm={handleBanUser} loading={banningUser} />
       <UserSuspendModal isOpen={showSuspendModal} onClose={() => setShowSuspendModal(false)} user={selectedUser} days={suspendDays} setDays={setSuspendDays} onConfirm={handleSuspendUser} loading={suspendingUser} />
+      <UserDeleteModal isOpen={showDeleteModal} onClose={() => setShowDeleteModal(false)} user={selectedUser} onDelete={handleDeleteUser} loading={deletingUser} />
       <PasswordResetModal isOpen={showResetModal} onClose={() => setShowResetModal(false)} resetLink={resetLink} />
       
       <ConfirmDialog isOpen={showUnbanConfirm} onClose={() => setShowUnbanConfirm(false)} onConfirm={confirmUnbanUser} title="Unban Account" message="Are you sure you want to unban this account?" type="info" />
       <ConfirmDialog isOpen={showUnsuspendConfirm} onClose={() => setShowUnsuspendConfirm(false)} onConfirm={confirmUnsuspendUser} title="Unsuspend Account" message="Are you sure you want to unsuspend this account?" type="info" />
-      <ConfirmDialog isOpen={showDeleteConfirm} onClose={() => setShowDeleteConfirm(false)} onConfirm={confirmDeleteUser} title="Delete Account" message="This action is permanent and will delete all user data. Proceed?" type="danger" />
       <ConfirmDialog isOpen={showRestoreConfirm} onClose={() => setShowRestoreConfirm(false)} onConfirm={confirmRestoreUser} title="Restore Account" message="Restore this deleted account?" type="info" />
     </div>
   );

@@ -17,6 +17,10 @@ export default function UserProtectedRoute({ children }) {
         return <Navigate to="/login" replace />;
     }
 
+    if (!user.isEmailVerified) {
+        return <Navigate to={`/verify-email?email=${user.email}`} replace />;
+    }
+
     // If agent/admin tries to access user pages, redirect them to their respective dashboards
     if (user.role === 'agent') {
         return <Navigate to="/agent/dashboard" replace />;

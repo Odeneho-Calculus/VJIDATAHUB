@@ -1,26 +1,341 @@
+const User = require('../models/User');
+const Referral = require('../models/Referral');
+const ReferralSettings = require('../models/ReferralSettings');
+const SystemSettings = require('../models/SystemSettings');
+const Store = require('../models/Store');
+const jwt = require('jsonwebtoken');
+const { createNotification } = require('./notificationController');
+const { validatePhoneNumber } = require('../utils/phoneValidation');
+const crypto = require('crypto');
+const { sendVerificationEmail, sendPasswordResetEmail } = require('../utils/emailService');
+
+const generateToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRE,
+  });
+};
+
+/**
+ * Verify email using token
+ */
+exports.verifyEmail = async (req, res) => {
+  try {
+    const { token } = req.query;
+
+    if (!token) {
+      return res.status(400).json({ success: false, message: 'Verification token is required' });
+    }
+
+    console.log(`[VerifyEmail] Attempting to verify with token: ${token}`);
+
+    const user = await User.findOne({
+      emailVerificationToken: token,
+      emailVerificationExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      console.log(`[VerifyEmail] No user found for token or token expired: ${token}`);
+      return res.status(400).json({ success: false, message: 'Invalid or expired verification token' });
+    }
+
+    console.log(`[VerifyEmail] Found user: ${user.email}. Updating isEmailVerified to true using findOneAndUpdate.`);
+
+    await User.findOneAndUpdate(
+      { _id: user._id },
+      { 
+        $set: { 
+          isEmailVerified: true,
+          emailVerificationToken: null,
+          emailVerificationExpires: null
+        } 
+      }
+    );
+
+    console.log(`[VerifyEmail] User ${user.email} verified successfully via findOneAndUpdate.`);
+
+    res.json({ success: true, message: 'Email verified successfully. You can now login.' });
+  } catch (error) {
+    console.error(`[VerifyEmail] Error: ${error.message}`);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * Get verification status (attempts remaining, cooldown)
+ */
+exports.getVerificationStatus = async (req, res) => {
+  try {
+    const { email } = req.query;
+
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Email is required' });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const now = new Date();
+    const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+    // Reset attempts if 24 hours have passed since last attempt
+    let currentAttempts = user.emailVerificationAttempts;
+    if (user.lastEmailVerificationAttempt && user.lastEmailVerificationAttempt <= twentyFourHoursAgo) {
+      currentAttempts = 0;
+    }
+
+    const attemptsRemaining = Math.max(0, 3 - currentAttempts);
+    let cooldownSeconds = 0;
+
+    if (currentAttempts >= 3 && user.lastEmailVerificationAttempt && user.lastEmailVerificationAttempt > twentyFourHoursAgo) {
+      cooldownSeconds = Math.ceil((user.lastEmailVerificationAttempt.getTime() + 24 * 60 * 60 * 1000 - now.getTime()) / 1000);
+    }
+
+    res.json({
+      success: true,
+      isEmailVerified: user.isEmailVerified,
+      attemptsRemaining,
+      cooldownSeconds
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * Resend verification email
+ */
+exports.resendVerificationEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Email is required' });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    if (user.isEmailVerified) {
+      return res.status(400).json({ success: false, message: 'Email is already verified' });
+    }
+
+    // Check rate limiting
+    const now = new Date();
+    const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+    // If user has reached max attempts and hasn't waited 24 hours
+    if (user.emailVerificationAttempts >= 3 && user.lastEmailVerificationAttempt && user.lastEmailVerificationAttempt > twentyFourHoursAgo) {
+      const msRemaining = user.lastEmailVerificationAttempt.getTime() + 24 * 60 * 60 * 1000 - now.getTime();
+      const hoursRemaining = Math.ceil(msRemaining / (60 * 60 * 1000));
+      const secondsRemaining = Math.ceil(msRemaining / 1000);
+      
+      return res.status(429).json({
+        success: false,
+        message: `Too many verification attempts. Please wait ${hoursRemaining} hours before trying again.`,
+        attemptsRemaining: 0,
+        cooldownHours: hoursRemaining,
+        cooldownSeconds: secondsRemaining
+      });
+    }
+
+    // Reset attempts if 24 hours have passed since last attempt
+    if (user.lastEmailVerificationAttempt && user.lastEmailVerificationAttempt <= twentyFourHoursAgo) {
+      user.emailVerificationAttempts = 0;
+    }
+
+    // Increment attempts
+    user.emailVerificationAttempts += 1;
+    user.lastEmailVerificationAttempt = now;
+
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+    user.emailVerificationToken = verificationToken;
+    user.emailVerificationExpires = verificationExpires;
+    await user.save();
+
+    await sendVerificationEmail(user, verificationToken);
+
+    const attemptsRemaining = Math.max(0, 3 - user.emailVerificationAttempts);
+    res.json({
+      success: true,
+      message: 'Verification email resent successfully',
+      attemptsRemaining,
+      cooldownSeconds: attemptsRemaining > 0 ? 0 : 24 * 60 * 60,
+      nextAttemptAllowed: attemptsRemaining > 0 ? null : new Date(user.lastEmailVerificationAttempt.getTime() + 24 * 60 * 60 * 1000)
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * Get password reset status (attempts remaining, cooldown)
+ */
+exports.getPasswordResetStatus = async (req, res) => {
+  try {
+    const { email, token } = req.query;
+
+    if (!email && !token) {
+      return res.status(400).json({ success: false, message: 'Email or token is required' });
+    }
+
+    let query = {};
+    if (email) {
+      query.email = email.toLowerCase();
+    } else {
+      query.resetPasswordToken = token;
+    }
+
+    const user = await User.findOne(query);
+
+    if (!user) {
+      // For security, if user not found, return "full" attempts
+      return res.json({
+        success: true,
+        attemptsRemaining: 3,
+        cooldownSeconds: 0
+      });
+    }
+
+    const now = new Date();
+    const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+    // Reset attempts if 24 hours have passed since last attempt
+    let currentAttempts = user.passwordResetAttempts || 0;
+    if (user.lastPasswordResetAttempt && user.lastPasswordResetAttempt <= twentyFourHoursAgo) {
+      currentAttempts = 0;
+    }
+
+    const attemptsRemaining = Math.max(0, 3 - currentAttempts);
+    let cooldownSeconds = 0;
+
+    if (currentAttempts >= 3 && user.lastPasswordResetAttempt && user.lastPasswordResetAttempt > twentyFourHoursAgo) {
+      cooldownSeconds = Math.ceil((user.lastPasswordResetAttempt.getTime() + 24 * 60 * 60 * 1000 - now.getTime()) / 1000);
+    }
+
+    res.json({
+      success: true,
+      attemptsRemaining,
+      cooldownSeconds
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * Forgot password - send reset email
+ */
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Email is required' });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+
+    if (!user) {
+      // For security reasons, don't reveal if user exists
+      return res.json({ success: true, message: 'If an account exists with that email, a reset link has been sent.' });
+    }
+
+    // Check rate limiting
+    const now = new Date();
+    const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+    if (user.passwordResetAttempts >= 3 && user.lastPasswordResetAttempt && user.lastPasswordResetAttempt > twentyFourHoursAgo) {
+      const msRemaining = user.lastPasswordResetAttempt.getTime() + 24 * 60 * 60 * 1000 - now.getTime();
+      const hoursRemaining = Math.ceil(msRemaining / (60 * 60 * 1000));
+      const secondsRemaining = Math.ceil(msRemaining / 1000);
+      
+      return res.status(429).json({
+        success: false,
+        message: `Too many password reset attempts. Please wait ${hoursRemaining} hours before trying again.`,
+        attemptsRemaining: 0,
+        cooldownHours: hoursRemaining,
+        cooldownSeconds: secondsRemaining
+      });
+    }
+
+    // Reset attempts if 24 hours have passed
+    if (user.lastPasswordResetAttempt && user.lastPasswordResetAttempt <= twentyFourHoursAgo) {
+      user.passwordResetAttempts = 0;
+    }
+
+    // Increment attempts
+    user.passwordResetAttempts = (user.passwordResetAttempts || 0) + 1;
+    user.lastPasswordResetAttempt = now;
+
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetExpires = new Date(Date.now() + 1 * 60 * 60 * 1000); // 1 hour
+
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = resetExpires;
+    await user.save();
+
+    await sendPasswordResetEmail(user, resetToken);
+
+    const attemptsRemaining = Math.max(0, 3 - user.passwordResetAttempts);
+    res.json({ 
+      success: true, 
+      message: 'If an account exists with that email, a reset link has been sent.',
+      attemptsRemaining,
+      cooldownSeconds: attemptsRemaining > 0 ? 0 : 24 * 60 * 60
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 /**
  * Reset password using token
  */
 exports.resetPassword = async (req, res) => {
   try {
     const { token, password } = req.body;
+
     if (!token || !password || password.length < 6) {
       return res.status(400).json({ success: false, message: 'Invalid request' });
     }
-    const jwt = require('jsonwebtoken');
-    let payload;
-    try {
-      payload = jwt.verify(token, process.env.JWT_SECRET);
-    } catch {
-      return res.status(400).json({ success: false, message: 'Invalid or expired token' });
-    }
-    const user = await User.findById(payload.id);
+
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
+
     if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+      return res.status(400).json({ success: false, message: 'Invalid or expired reset token' });
     }
+
+    // Check lockout status
+    const now = new Date();
+    const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    if (user.passwordResetAttempts >= 3 && user.lastPasswordResetAttempt && user.lastPasswordResetAttempt > twentyFourHoursAgo) {
+      const msRemaining = user.lastPasswordResetAttempt.getTime() + 24 * 60 * 60 * 1000 - now.getTime();
+      const hoursRemaining = Math.ceil(msRemaining / (60 * 60 * 1000));
+      return res.status(429).json({
+        success: false,
+        message: `Your account recovery is currently locked. Please try again in ${hoursRemaining} hours.`
+      });
+    }
+
     user.password = password;
+    user.resetPasswordToken = null;
+    user.resetPasswordExpires = null;
+    user.passwordResetAttempts = 0; // Clear attempts on success
+    user.lastPasswordResetAttempt = null;
     await user.save();
-    res.json({ success: true, message: 'Password reset successful' });
+
+    res.json({ success: true, message: 'Password reset successful. You can now login.' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -57,21 +372,6 @@ exports.changePassword = async (req, res) => {
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
-};
-
-const User = require('../models/User');
-const Referral = require('../models/Referral');
-const ReferralSettings = require('../models/ReferralSettings');
-const SystemSettings = require('../models/SystemSettings');
-const Store = require('../models/Store');
-const jwt = require('jsonwebtoken');
-const { createNotification } = require('./notificationController');
-const { validatePhoneNumber } = require('../utils/phoneValidation');
-
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRE,
-  });
 };
 
 exports.register = async (req, res) => {
@@ -143,15 +443,32 @@ exports.register = async (req, res) => {
       }
     }
 
-    const user = await User.create({
-      email,
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    const user = new User({
+      email: email.toLowerCase(),
       password,
       name,
       phone: phoneValidation.normalized,
       referredBy,
       role,
       agentFeeStatus: role === 'agent' ? 'pending' : undefined,
+      isEmailVerified: false,
+      emailVerificationToken: verificationToken,
+      emailVerificationExpires: verificationExpires,
+      emailVerificationAttempts: 1,
+      lastEmailVerificationAttempt: new Date(),
     });
+
+    await user.save();
+
+    // Send verification email
+    try {
+      await sendVerificationEmail(user, verificationToken);
+    } catch (emailError) {
+      console.error('Failed to send verification email during registration:', emailError);
+    }
 
     // If registering as agent, auto-create store
     if (role === 'agent') {
@@ -174,8 +491,6 @@ exports.register = async (req, res) => {
       });
     }
 
-    const token = generateToken(user._id);
-
     await createNotification({
       type: 'user_created',
       title: `New ${role === 'agent' ? 'Agent' : 'User'} Registration`,
@@ -193,7 +508,7 @@ exports.register = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      token,
+      message: 'Registration successful. Please check your email to verify your account.',
       user: {
         id: user._id,
         email: user.email,
@@ -206,6 +521,7 @@ exports.register = async (req, res) => {
         totalSpent: user.totalSpent,
         dataUsed: user.dataUsed,
         referralEarnings: user.referralEarnings,
+        isEmailVerified: user.isEmailVerified,
       },
     });
   } catch (error) {
@@ -227,8 +543,11 @@ exports.login = async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ email }).select('+password');
+    console.log(`[Login] Attempting login for: ${email}`);
+
+    const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
     if (!user) {
+      console.log(`[Login] User not found: ${email}`);
       return res.status(401).json({
         success: false,
         message: 'Invalid credentials'
@@ -238,7 +557,7 @@ exports.login = async (req, res) => {
     if (user.deletedAt) {
       return res.status(401).json({
         success: false,
-        message: 'Your account has been deleted'
+        message: 'Your account has been deleted, please contact support for assistance.'
       });
     }
 
@@ -264,15 +583,27 @@ exports.login = async (req, res) => {
 
     const isMatch = await user.matchPassword(password);
     if (!isMatch) {
+      console.log(`[Login] Password mismatch for: ${email}`);
       return res.status(401).json({
         success: false,
         message: 'Invalid credentials'
       });
     }
 
+    console.log(`[Login] User ${email} isEmailVerified: ${user.isEmailVerified}`);
+
+    if (!user.isEmailVerified) {
+      return res.status(403).json({
+        success: false,
+        message: 'Email verification required.',
+        isEmailVerified: false,
+        email: user.email
+      });
+    }
+
     const token = generateToken(user._id);
 
-    res.status(200).json({
+    res.json({
       success: true,
       token,
       user: {
@@ -287,9 +618,11 @@ exports.login = async (req, res) => {
         totalSpent: user.totalSpent,
         dataUsed: user.dataUsed,
         referralEarnings: user.referralEarnings,
+        isEmailVerified: user.isEmailVerified,
       },
     });
   } catch (error) {
+    console.error(`[Login] Error: ${error.message}`);
     res.status(500).json({
       success: false,
       message: error.message
@@ -300,7 +633,11 @@ exports.login = async (req, res) => {
 exports.getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.userId);
-    res.status(200).json({
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    res.json({
       success: true,
       user: {
         id: user._id,
@@ -314,12 +651,10 @@ exports.getProfile = async (req, res) => {
         totalSpent: user.totalSpent,
         dataUsed: user.dataUsed,
         referralEarnings: user.referralEarnings,
+        isEmailVerified: user.isEmailVerified,
       },
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };

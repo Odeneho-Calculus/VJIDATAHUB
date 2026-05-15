@@ -33,9 +33,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (email, password, name, phone, referralCode, role = 'user') => {
     const data = await authAPI.register({ email, password, name, phone, referralCode, role });
-    localStorage.setItem('token', data.token);
-    const userWithRole = { ...data.user, role: data.user.role || role };
-    setUser(userWithRole);
+    // Don't set token or user yet, as verification is required
     return data;
   };
 

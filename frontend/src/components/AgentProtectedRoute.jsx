@@ -17,6 +17,10 @@ export default function AgentProtectedRoute({ children }) {
         return <Navigate to="/login" replace />;
     }
 
+    if (!user.isEmailVerified) {
+        return <Navigate to={`/verify-email?email=${user.email}`} replace />;
+    }
+
     // Ensure only agents can access agent routes
     if (user.role === 'user') {
         return <Navigate to="/dashboard" replace />;

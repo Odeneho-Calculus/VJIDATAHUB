@@ -87,11 +87,10 @@ export default function Register() {
         userType === 'agent' ? 'agent' : 'user'
       );
       await refreshSettings();
-      toast.success('Account created successfully!', { duration: 3000 });
-
-      if (data.user.role === 'admin') navigate('/admin');
-      else if (data.user.role === 'agent') navigate('/agent/store');
-      else navigate('/dashboard');
+      toast.success('Welcome to VJI DATA HUB! Your account has been created successfully. Please check your email and click the verification link to activate your access.', {
+        duration: 8000,
+      });
+      navigate(`/verify-email?email=${email}`);
     } catch (err) {
       const msg = err.message || 'Registration failed';
       setError(msg);

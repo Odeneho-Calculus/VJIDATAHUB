@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Info, Edit2, Ban, Clock, Trash2, AlertCircle, DollarSign, ShoppingCart } from 'lucide-react';
+import { Info, Edit2, Ban, Clock, Trash2, AlertCircle, DollarSign, ShoppingCart, Check, X, RotateCcw } from 'lucide-react';
 import Modal from './Modal';
 import { formatNumberAbbreviated } from '../utils/formatCurrency';
 
-export const UserViewModal = ({ isOpen, onClose, user, getStatusColor, getStatusText }) => {
+export const UserViewModal = ({ isOpen, onClose, user, getStatusColor, getStatusText, onRestore, onDelete }) => {
   const [activeTab, setActiveTab] = useState('details');
 
   if (!user) return null;
@@ -12,6 +12,8 @@ export const UserViewModal = ({ isOpen, onClose, user, getStatusColor, getStatus
   const storeRevenue = user.store?.totalRevenue || 0;
   const totalExpenses = user.role === 'agent' ? totalSpent + storeRevenue : totalSpent;
 
+  const isTempDeleted = user.status === 'temporarily_deleted' || user.deletedAt;
+
   return (
     <Modal
       isOpen={isOpen}
@@ -19,12 +21,28 @@ export const UserViewModal = ({ isOpen, onClose, user, getStatusColor, getStatus
       title="User Information"
       icon={Info}
       footer={
-        <button
-          onClick={onClose}
-          className="w-full px-4 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition"
-        >
-          Close
-        </button>
+        <div className="flex gap-2 w-full">
+          {isTempDeleted && (
+            <button
+              onClick={onRestore}
+              className="flex-1 px-4 py-3 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition flex items-center justify-center gap-2"
+            >
+              <RotateCcw size={18} />
+              Restore
+            </button>
+          )}
+          <button
+            onClick={isTempDeleted ? onDelete : onClose}
+            className={`flex-1 px-4 py-3 ${isTempDeleted ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'} text-white rounded-xl font-bold transition flex items-center justify-center gap-2`}
+          >
+            {isTempDeleted ? (
+              <>
+                <Trash2 size={18} />
+                Delete Permanent
+              </>
+            ) : 'Close'}
+          </button>
+        </div>
       }
     >
       {/* Tab Navigation */}
@@ -56,6 +74,30 @@ export const UserViewModal = ({ isOpen, onClose, user, getStatusColor, getStatus
       {/* Tab Content */}
       {activeTab === 'details' && (
       <div className="space-y-3">
+        {/* Verification Status Banner */}
+        <div className={`p-3 rounded-xl border-2 flex items-center justify-between ${
+          user.isEmailVerified 
+            ? 'bg-emerald-50 border-emerald-100 text-emerald-700' 
+            : 'bg-rose-50 border-rose-100 text-rose-700'
+        }`}>
+          <div className="flex items-center gap-2">
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+              user.isEmailVerified ? 'bg-emerald-100' : 'bg-rose-100'
+            }`}>
+              {user.isEmailVerified ? <Check size={18} /> : <AlertCircle size={18} />}
+            </div>
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider">Email Verification</p>
+              <p className="text-xs font-black">{user.isEmailVerified ? 'Verified Account' : 'Unverified Account'}</p>
+            </div>
+          </div>
+          <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded ${
+            user.isEmailVerified ? 'bg-emerald-200/50' : 'bg-rose-200/50'
+          }`}>
+            {user.isEmailVerified ? 'Standard' : 'Pending'}
+          </span>
+        </div>
+
         <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-tight mb-2">User Details</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
@@ -361,7 +403,8 @@ export const UserEditModal = ({ isOpen, onClose, user, onUpdate, loading }) => {
     phone: '',
     walletOperation: 'set',
     walletAmount: 0,
-    role: 'user'
+    role: 'user',
+    isEmailVerified: false
   });
 
   const [previewBalance, setPreviewBalance] = React.useState(0);
@@ -374,7 +417,8 @@ export const UserEditModal = ({ isOpen, onClose, user, onUpdate, loading }) => {
         phone: user.phone || '',
         walletOperation: 'set',
         walletAmount: user.balance || 0,
-        role: user.role || 'user'
+        role: user.role || 'user',
+        isEmailVerified: user.isEmailVerified || false
       });
       setPreviewBalance(user.balance || 0);
     }
@@ -529,6 +573,122 @@ export const UserEditModal = ({ isOpen, onClose, user, onUpdate, loading }) => {
             </div>
           )}
         </div>
+
+        <div className="p-3 bg-slate-50 border-2 border-slate-200 rounded-xl flex items-center justify-between">
+          <div>
+            <p className="text-[10px] font-bold text-slate-500 uppercase">Email Verification</p>
+            <p className="text-[10px] text-slate-400">Manual verification toggle</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setFormData({ ...formData, isEmailVerified: !formData.isEmailVerified })}
+            className={`px-4 h-10 flex items-center justify-center rounded-xl border-2 transition-all text-[10px] font-black uppercase ${
+              formData.isEmailVerified 
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-600' 
+                : 'bg-white border-slate-200 text-slate-400'
+            }`}
+          >
+            {formData.isEmailVerified ? 'Verified' : 'Unverified'}
+          </button>
+        </div>
+      </div>
+    </Modal>
+  );
+};
+
+export const UserDeleteModal = ({ isOpen, onClose, user, onDelete, loading }) => {
+  const [deleteType, setDeleteType] = useState('temporary');
+
+  if (!user) return null;
+
+  const isPermanent = deleteType === 'permanent';
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={loading ? null : onClose}
+      title={isPermanent ? "Permanent Deletion" : "Temporary Deletion"}
+      icon={Trash2}
+      maxWidth="max-w-md"
+      footer={
+        <>
+          <button
+            onClick={onClose}
+            disabled={loading}
+            className="flex-1 px-4 py-2.5 border border-slate-200 text-slate-900 font-bold rounded-xl hover:bg-slate-50 transition disabled:opacity-50 text-sm"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => onDelete(deleteType)}
+            disabled={loading}
+            className={`flex-1 px-4 py-2.5 ${isPermanent ? 'bg-red-700' : 'bg-red-600'} text-white font-bold rounded-xl hover:opacity-90 transition shadow-md disabled:opacity-50 text-sm flex items-center justify-center gap-2`}
+          >
+            {loading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                Deleting...
+              </>
+            ) : isPermanent ? 'Delete Permanently' : 'Delete Temporarily'}
+          </button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <div className="bg-red-50 p-4 rounded-xl border border-red-100">
+          <p className="text-[10px] font-bold text-red-600 uppercase mb-1">Target Account</p>
+          <p className="text-sm font-black text-red-900">{user.name}</p>
+          <p className="text-[10px] font-medium text-red-500">{user.email}</p>
+        </div>
+
+        <div className="space-y-3">
+          <p className="text-[10px] font-bold text-slate-500 uppercase border-l-2 border-red-600 pl-2">Deletion Type</p>
+          
+          <div className="grid grid-cols-1 gap-2">
+            <button
+              onClick={() => setDeleteType('temporary')}
+              className={`p-3 rounded-xl border-2 text-left transition-all ${
+                deleteType === 'temporary'
+                  ? 'bg-white border-red-600 shadow-sm'
+                  : 'bg-slate-50 border-transparent hover:border-slate-200'
+              }`}
+            >
+              <div className="flex justify-between items-center mb-1">
+                <p className={`text-xs font-black ${deleteType === 'temporary' ? 'text-red-600' : 'text-slate-700'}`}>Temporary Deletion</p>
+                {deleteType === 'temporary' && <div className="w-2 h-2 rounded-full bg-red-600" />}
+              </div>
+              <p className="text-[10px] font-medium text-slate-500 leading-tight">
+                Restricts platform access but preserves all data. Can be restored later by an admin.
+              </p>
+            </button>
+
+            <button
+              onClick={() => setDeleteType('permanent')}
+              className={`p-3 rounded-xl border-2 text-left transition-all ${
+                deleteType === 'permanent'
+                  ? 'bg-white border-red-800 shadow-sm'
+                  : 'bg-slate-50 border-transparent hover:border-slate-200'
+              }`}
+            >
+              <div className="flex justify-between items-center mb-1">
+                <p className={`text-xs font-black ${deleteType === 'permanent' ? 'text-red-800' : 'text-slate-700'}`}>Permanent Deletion</p>
+                {deleteType === 'permanent' && <div className="w-2 h-2 rounded-full bg-red-800" />}
+              </div>
+              <p className="text-[10px] font-medium text-slate-500 leading-tight text-red-600/70 font-bold">
+                CRITICAL: Removes all transactions, orders, and associated data. THIS ACTION CANNOT BE UNDONE.
+              </p>
+            </button>
+          </div>
+        </div>
+
+        {isPermanent && (
+          <div className="flex items-start gap-2 p-3 bg-amber-50 rounded-xl border border-amber-200">
+            <AlertCircle size={16} className="text-amber-600 shrink-0 mt-0.5" />
+            <p className="text-[10px] font-bold text-amber-700 leading-tight">
+              All records for {user.name} will be completely purged from the system.
+            </p>
+          </div>
+        )}
       </div>
     </Modal>
   );

@@ -12,6 +12,8 @@ const {
   unbanUser,
   suspendUser,
   unsuspendUser,
+  temporaryDeleteUser,
+  permanentDeleteUser,
   deleteUser,
   restoreUser,
   updateUser,
@@ -68,6 +70,8 @@ router.patch('/users/:id/ban', banUser);
 router.patch('/users/:id/unban', unbanUser);
 router.patch('/users/:id/suspend', suspendUser);
 router.patch('/users/:id/unsuspend', unsuspendUser);
+router.delete('/users/:id/temporary', temporaryDeleteUser);
+router.delete('/users/:id/permanent', permanentDeleteUser);
 router.delete('/users/:id', deleteUser);
 router.patch('/users/:id/restore', restoreUser);
 router.patch('/users/:id', updateUser);

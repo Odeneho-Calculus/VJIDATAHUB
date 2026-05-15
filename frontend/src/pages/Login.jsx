@@ -35,6 +35,18 @@ export default function Login() {
         navigate('/dashboard');
       }
     } catch (err) {
+      if (err.isEmailVerified === false) {
+        toast.error('Email verification required. We are redirecting you to the verification page to activate your account.', {
+          duration: 6000,
+          className: 'rounded-full bg-amber-50 border border-amber-200 text-amber-700 font-medium px-6 py-3 shadow-xl shadow-amber-200/50',
+          iconTheme: {
+            primary: '#d97706',
+            secondary: '#fff',
+          },
+        });
+        navigate(`/verify-email?email=${err.email || email}`);
+        return;
+      }
       const msg = err.message || 'Login failed';
       setError(msg);
       toast.error(msg, {
@@ -511,7 +523,7 @@ export default function Login() {
               <div className="login-field">
                 <div className="login-field-row">
                   <label htmlFor="password" className="login-label" style={{ margin: 0 }}>Password</label>
-                  <Link to="/reset-password" className="login-forgot">Reset password</Link>
+                  <Link to="/forgot-password" className="login-forgot">Reset password</Link>
                 </div>
                 <div className="login-pw-wrap">
                   <input
