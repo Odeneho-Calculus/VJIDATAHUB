@@ -1,7 +1,7 @@
 {
-  "name": "ag-grafix-data-hub-backend",
+  "name": "vji-data-hub-backend",
   "version": "2.0.0",
-  "description": "Backend API for ag-grafix-data-hub - Express.js + MongoDB",
+  "description": "Backend API for VJI Data Hub - Express.js + MongoDB",
   "main": "src/server.js",
   "scripts": {
     "dev": "nodemon",

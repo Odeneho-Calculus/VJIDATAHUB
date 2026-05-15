@@ -5,7 +5,7 @@ import { formatCurrencyAbbreviated } from '../utils/formatCurrency';
 import { validatePhoneNumber } from '../utils/phoneValidation';
 import { User, Mail, Phone, Copy, Shield, LogOut, Check, ChevronRight, Bell, Settings, Lock, Smartphone, Wallet, Gift, ExternalLink, ReceiptText, Loader2, CheckCircle2, ShieldCheck, Zap, X, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { auth as authAPI } from '../services/api';
+import { auth as authAPI, user as userAPI } from '../services/api';
 import UserLayout from '../components/UserLayout';
 
 const styles = `
@@ -156,7 +156,7 @@ const styles = `
 `;
 
 export default function Profile() {
-  const { user, logout } = useAuth();
+  const { user, logout, setUser } = useAuth();
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -174,6 +174,7 @@ export default function Profile() {
     confirmPassword: '',
   });
   const [passwordLoading, setPasswordLoading] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
 
@@ -193,11 +194,11 @@ export default function Profile() {
     navigate('/');
   };
 
-  const handleSaveChanges = () => {
+  const handleSaveChanges = async () => {
     setPhoneError('');
-    
-    if (!formData.name || !formData.email || !formData.phone) {
-      toast.error('Please fill in all fields', { duration: 5000 });
+
+    if (!formData.name || !formData.phone) {
+      toast.error('Please fill in name and phone fields', { duration: 5000 });
       return;
     }
 
@@ -208,9 +209,31 @@ export default function Profile() {
       return;
     }
 
-    setFormData(prev => ({ ...prev, phone: phoneValidation.formatted }));
-    toast.success('Profile updated successfully!', { duration: 3000 });
-    setEditMode(false);
+    try {
+      setProfileLoading(true);
+
+      // Update the phone number format
+      const updatedData = {
+        name: formData.name,
+        phone: phoneValidation.formatted
+      };
+
+      // Call the API to update profile
+      const response = await userAPI.updateProfile(updatedData);
+
+      // Update the user data in auth context
+      setUser(prev => prev ? { ...prev, ...response.user } : null);
+
+      // Update local form data
+      setFormData(prev => ({ ...prev, ...updatedData }));
+
+      toast.success('Profile updated successfully!', { duration: 3000 });
+      setEditMode(false);
+    } catch (error) {
+      toast.error(error.message || 'Failed to update profile', { duration: 5000 });
+    } finally {
+      setProfileLoading(false);
+    }
   };
 
   const handleChangePassword = async (e) => {
@@ -389,9 +412,8 @@ export default function Profile() {
                       <input
                         type="email"
                         value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        disabled={!editMode}
-                        className="w-full pl-11 pr-4 py-3 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:border-[#111] transition-all disabled:opacity-50"
+                        disabled={true}
+                        className="w-full pl-11 pr-4 py-3 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-xl text-sm font-bold text-slate-700 focus:outline-none transition-all disabled:opacity-50 cursor-not-allowed"
                       />
                     </div>
                   </div>
@@ -421,9 +443,17 @@ export default function Profile() {
                 {editMode && (
                   <button
                     onClick={handleSaveChanges}
-                    className="dash-btn-primary w-full !py-4 mt-8 !text-[11px] uppercase tracking-widest"
+                    disabled={profileLoading}
+                    className="dash-btn-primary w-full !py-4 mt-8 !text-[11px] uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Save Profile Changes
+                    {profileLoading ? (
+                      <>
+                        <Loader2 size={16} className="animate-spin mr-2" />
+                        Updating...
+                      </>
+                    ) : (
+                      'Save Profile Changes'
+                    )}
                   </button>
                 )}
               </div>
@@ -440,12 +470,18 @@ export default function Profile() {
                 </div>
 
                 <div className="grid grid-cols-1 gap-4">
-                  <SecurityAction 
-                    icon={Lock} 
-                    title="Change Password" 
-                    desc="Update your security credentials"
+                  <button
                     onClick={() => setShowPasswordModal(true)}
-                  />
+                    className="dash-btn-outline w-full !justify-start !gap-4 !p-4 hover:!bg-red-50 hover:!border-red-200 transition-all group"
+                  >
+                    <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center text-red-600 group-hover:bg-red-200 transition-colors">
+                      <Lock size={20} />
+                    </div>
+                    <div className="text-left">
+                      <h3 className="font-bold text-slate-900 text-sm">Change Password</h3>
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Update your security credentials</p>
+                    </div>
+                  </button>
                 </div>
               </div>
             </div>
@@ -582,23 +618,3 @@ export default function Profile() {
     </UserLayout>
   );
 }
-
-function SecurityAction({ icon: Icon, title, desc, onClick }) {
-  return (
-    <div
-      onClick={onClick}
-      className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-    >
-      <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-        <Icon size={20} className="text-blue-600" />
-      </div>
-      <div className="flex-1">
-        <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
-        <p className="text-sm text-gray-600">{desc}</p>
-      </div>
-      <ChevronRight size={16} className="text-gray-400" />
-    </div>
-  );
-}
-
-

@@ -10,7 +10,8 @@ import {
   LogOut,
   ChevronRight,
   ShieldCheck,
-  ArrowRightLeft
+  ArrowRightLeft,
+  User
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import upgradeService from '../services/upgradeService';
@@ -105,6 +106,7 @@ export default function AgentSidebar({ isOpen, onClose }) {
     { path: '/agent/orders',          label: 'Customer Orders',  icon: ShoppingBag },
     { path: '/agent/wallet',          label: 'My Wallet',        icon: Wallet },
     { path: '/agent/commissions',     label: 'My Earnings',      icon: Wallet },
+    { path: '/profile',               label: 'Profile',          icon: User },
   ];
 
   const handleLogout = () => {

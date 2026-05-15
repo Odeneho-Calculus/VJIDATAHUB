@@ -399,12 +399,18 @@ export default function AdminProfile() {
             </h2>
 
             <div className="grid grid-cols-1 gap-4">
-              <SecurityAction
-                icon={Lock}
-                title="Change Password"
-                desc="Update your security credentials"
+              <button
                 onClick={() => setShowPasswordModal(true)}
-              />
+                className="dash-btn-outline w-full !justify-start !gap-4 !p-4 hover:!bg-red-50 hover:!border-red-200 transition-all group"
+              >
+                <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center text-red-600 group-hover:bg-red-200 transition-colors">
+                  <Lock size={20} />
+                </div>
+                <div className="text-left">
+                  <h3 className="font-bold text-slate-900 text-sm">Change Password</h3>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Update your security credentials</p>
+                </div>
+              </button>
             </div>
           </div>
 
@@ -520,23 +526,5 @@ export default function AdminProfile() {
         </div>
       )}
     </AdminLayout>
-  );
-}
-
-function SecurityAction({ icon: Icon, title, desc, onClick }) {
-  return (
-    <div
-      onClick={onClick}
-      className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-    >
-      <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-        <Icon size={20} className="text-blue-600" />
-      </div>
-      <div className="flex-1">
-        <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
-        <p className="text-sm text-gray-600">{desc}</p>
-      </div>
-      <ChevronRight size={16} className="text-gray-400" />
-    </div>
   );
 }

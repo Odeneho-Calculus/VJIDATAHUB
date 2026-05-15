@@ -5,7 +5,7 @@ const Store = require('../src/models/Store');
 const SystemSettings = require('../src/models/SystemSettings');
 
 const connectDb = async () => {
-  const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/ag-grafix-data-hub';
+  const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/vji-data-hub';
   await mongoose.connect(mongoUri);
 };
 

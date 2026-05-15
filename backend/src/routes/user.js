@@ -51,6 +51,14 @@ router.put('/profile', protect, async (req, res) => {
       }
     });
   } catch (error) {
+    // Handle duplicate key error for phone number
+    if (error.code === 11000 && error.keyPattern && error.keyPattern.phone) {
+      return res.status(400).json({
+        success: false,
+        message: 'This phone number is already registered to another account. Please use a different phone number.'
+      });
+    }
+
     res.status(500).json({ success: false, message: error.message });
   }
 });

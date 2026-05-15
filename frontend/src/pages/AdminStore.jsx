@@ -1457,26 +1457,6 @@ function InputGroup({ label, value = '', onChange, placeholder = '', isTextArea 
   );
 }
 
-function IconInput({ icon: Icon, label, value = '', onChange, prefix = '' }) {
-  return (
-    <div className="flex flex-col gap-2">
-      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">{label}</label>
-      <div className="relative">
-        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 flex items-center gap-2 text-slate-400">
-          <Icon size={16} />
-          {prefix && <span className="text-xs font-medium">{prefix}</span>}
-        </div>
-        <input
-          type="text"
-          value={value || ''}
-          onChange={(e) => onChange(e.target.value)}
-          className={`w-full ${prefix ? 'pl-20' : 'pl-10'} pr-4 py-2.5 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-lg focus:outline-none focus:border-[#111] transition-all text-sm`}
-        />
-      </div>
-    </div>
-  );
-}
-
 function ColorInput({ label, value = '', onChange }) {
   return (
     <div className="flex items-center gap-4 p-3 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-xl group transition-all hover:border-slate-300">
