@@ -36,12 +36,13 @@ const styles = `
   .dash-title { font-size: 26px; font-weight: 800; color: #111; margin: 0; }
   .dash-subtitle { font-size: 14px; color: #666; margin: 8px 0 0 0; }
   .dash-error { background-color: #fff5f5; border: 1.5px solid #fecaca; border-radius: 7px; color: #b91c1c; padding: 14px 16px; font-size: 14px; display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
-  .dash-stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .dash-stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 24px; }
   .dash-stat-card { background-color: #fff; border: 1.5px solid #e4e4de; border-radius: 14px; padding: 20px; cursor: pointer; transition: all 0.2s ease; }
   .dash-stat-card:hover { border-color: #d4d4ce; box-shadow: 0 8px 40px rgba(0,0,0,0.10); }
   .dash-stat-icon { width: 36px; height: 36px; background-color: rgba(240,165,0,0.15); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #f0a500; margin-bottom: 8px; }
   .dash-stat-label { font-size: 11px; color: #999; margin-bottom: 4px; }
-  .dash-stat-value { font-size: 24px; font-weight: 800; color: #111; }
+  .dash-stat-value { font-size: 24px; font-weight: 800; color: #111; white-space: nowrap; overflow: visible; text-overflow: unset; }
+  .dash-stat-meta { font-size: 12px; color: #999; margin-top: 8px; }
   .dash-card { background-color: #fff; border: 1.5px solid #e4e4de; border-radius: 14px; padding: 20px; box-shadow: 0 8px 40px rgba(0,0,0,0.10); margin-bottom: 24px; }
   .dash-card-title { font-size: 16px; font-weight: 700; color: #111; margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px; }
   .dash-info-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; font-size: 14px; }
@@ -49,7 +50,20 @@ const styles = `
   .dash-action-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
   .dash-action-btn { padding: 12px 16px; border: 1.5px solid #e0e0d8; border-radius: 7px; background-color: #fafaf7; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; }
   .dash-action-btn:hover { background-color: #f0f0ed; border-color: #d0d0c8; }
-  @media (max-width: 768px) { .dash-content { padding: 16px 12px; } .dash-stat-grid { grid-template-columns: repeat(2, 1fr); } .dash-action-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 768px) {
+    .dash-content { padding: 16px 12px; }
+    .dash-stat-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .dash-action-grid { grid-template-columns: repeat(2, 1fr); }
+    .dash-stat-card { padding: 16px; }
+    .dash-stat-label, .dash-stat-meta { white-space: normal; word-wrap: break-word; }
+  }
+  @media (max-width: 480px) {
+    .dash-stat-grid { gap: 6px; }
+    .dash-stat-card { padding: 12px; }
+  }
+  @media (min-width: 769px) {
+    .dash-stat-label, .dash-stat-meta { white-space: nowrap; overflow: visible; text-overflow: unset; }
+  }
 `;
 
 
@@ -96,6 +110,10 @@ export default function AdminDashboard() {
   const totalAdmins = Number(stats?.totalAdmins || 0);
   const totalBalance = Number(stats?.totalBalance || 0);
   const totalReferralEarnings = Number(stats?.totalReferralEarnings || 0);
+  const totalAgentEarnings = Number(stats?.totalAgentEarnings || 0);
+  const totalAgentWithdrawn = Number(stats?.totalAgentWithdrawn || 0);
+  const totalAgentPending = Number(stats?.totalAgentPending || 0);
+  const totalAgentRemaining = Number(stats?.totalAgentRemaining || 0);
   const activeRate = totalUsers > 0 ? Math.round((activeUsers / totalUsers) * 100) : 0;
   const purchaseConversion = totalTransactions > 0 ? ((totalPurchases / totalTransactions) * 100).toFixed(1) : '0.0';
   const todayLabel = new Date().toLocaleDateString('en-US', {
@@ -160,6 +178,50 @@ export default function AdminDashboard() {
       },
       meta: 'Total referral payout flow',
       action: () => navigate('/admin/referrals'),
+    },
+    {
+      title: 'Agent Earnings',
+      value: `GHS ${formatNumberAbbreviated(totalAgentEarnings)}`,
+      icon: DollarSign,
+      tone: {
+        iconBg: 'bg-green-50',
+        iconColor: 'text-green-700',
+      },
+      meta: 'Total earned by all agents',
+      action: () => navigate('/admin/commissions'),
+    },
+    {
+      title: 'Agent Withdrawals',
+      value: `GHS ${formatNumberAbbreviated(totalAgentWithdrawn)}`,
+      icon: HandCoins,
+      tone: {
+        iconBg: 'bg-orange-50',
+        iconColor: 'text-orange-700',
+      },
+      meta: 'Total withdrawn by agents',
+      action: () => navigate('/admin/commissions'),
+    },
+    {
+      title: 'Agent Pending',
+      value: `GHS ${formatNumberAbbreviated(totalAgentPending)}`,
+      icon: Clock,
+      tone: {
+        iconBg: 'bg-yellow-50',
+        iconColor: 'text-yellow-700',
+      },
+      meta: 'Pending withdrawal requests',
+      action: () => navigate('/admin/commissions'),
+    },
+    {
+      title: 'Agent Balance',
+      value: `GHS ${formatNumberAbbreviated(totalAgentRemaining)}`,
+      icon: Wallet,
+      tone: {
+        iconBg: 'bg-blue-50',
+        iconColor: 'text-blue-700',
+      },
+      meta: 'Available agent balance',
+      action: () => navigate('/admin/commissions'),
     },
   ];
 
@@ -236,7 +298,7 @@ export default function AdminDashboard() {
                             <p className="dash-stat-value">
                               {typeof card.value === 'number' ? card.value.toLocaleString() : card.value}
                             </p>
-                            <p style={{ fontSize: '12px', color: '#999', marginTop: '8px' }}>{card.meta}</p>
+                            <p className="dash-stat-meta">{card.meta}</p>
                           </div>
                           <div className="dash-stat-icon">
                             <Icon size={18} />
@@ -269,6 +331,38 @@ export default function AdminDashboard() {
                     <ArrowRight size={20} style={{ color: '#999' }} />
                   </div>
                 </button>
+              </section>
+
+              {/* Agent Earnings Stats */}
+              <section>
+                <div className="dash-stat-grid">
+                  {statCards.slice(5, 9).map((card, idx) => {
+                    const Icon = card.icon;
+                    return (
+                      <button
+                        key={idx}
+                        onClick={card.action}
+                        className="dash-stat-card"
+                        style={{ display: 'flex', flexDirection: 'column' }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
+                          <div style={{ flex: 1 }}>
+                            <p className="dash-stat-label">
+                              {card.title}
+                            </p>
+                            <p className="dash-stat-value">
+                              {typeof card.value === 'number' ? card.value.toLocaleString() : card.value}
+                            </p>
+                            <p className="dash-stat-meta">{card.meta}</p>
+                          </div>
+                          <div className="dash-stat-icon">
+                            <Icon size={18} />
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
               </section>
 
               <section className="grid grid-cols-1 xl:grid-cols-3 gap-3 sm:gap-5">

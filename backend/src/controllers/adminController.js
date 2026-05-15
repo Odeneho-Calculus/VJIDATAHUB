@@ -34,6 +34,7 @@ const AgentFeePayment = require('../models/AgentFeePayment');
 const AgentCommissionPayout = require('../models/AgentCommissionPayout');
 const SellerCommission = require('../models/SellerCommission');
 const AgentCommissionAdjustment = require('../models/AgentCommissionAdjustment');
+const CommissionLedger = require('../models/CommissionLedger');
 const Referral = require('../models/Referral');
 const Guest = require('../models/Guest');
 const { creditCommissionForOrder, getOrCreateLedger, markAsWithdrawn, returnPendingToEarned } = require('../services/commissionService');
@@ -197,6 +198,27 @@ exports.getDashboardStats = async (req, res) => {
     const totalOrders = await Order.countDocuments();
     const completedOrders = await Order.countDocuments({ status: 'completed' });
 
+    // Calculate comprehensive agent earnings statistics from CommissionLedger
+    const agentEarningsResult = await CommissionLedger.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalAgentEarnings: { $sum: '$totalEarned' },
+          totalAgentWithdrawn: { $sum: '$totalWithdrawn' },
+          totalAgentPending: { $sum: '$totalPending' },
+          totalAgentCommissions: { $sum: '$totalCommissions' }
+        }
+      }
+    ]);
+    const agentEarningsStats = agentEarningsResult[0] || {
+      totalAgentEarnings: 0,
+      totalAgentWithdrawn: 0,
+      totalAgentPending: 0,
+      totalAgentCommissions: 0
+    };
+    // Calculate remaining balance (earned - withdrawn - pending)
+    agentEarningsStats.totalAgentRemaining = agentEarningsStats.totalAgentEarnings - agentEarningsStats.totalAgentWithdrawn - agentEarningsStats.totalAgentPending;
+
     res.status(200).json({
       success: true,
       stats: {
@@ -211,6 +233,11 @@ exports.getDashboardStats = async (req, res) => {
         completedOrders,
         totalBalance: userStats.totalBalance,
         totalReferralEarnings: userStats.totalReferralEarnings,
+        totalAgentEarnings: agentEarningsStats.totalAgentEarnings,
+        totalAgentWithdrawn: agentEarningsStats.totalAgentWithdrawn,
+        totalAgentPending: agentEarningsStats.totalAgentPending,
+        totalAgentRemaining: agentEarningsStats.totalAgentRemaining,
+        totalAgentCommissions: agentEarningsStats.totalAgentCommissions,
       },
     });
   } catch (error) {
