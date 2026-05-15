@@ -23,14 +23,6 @@ export default function VerifyEmail() {
   const token = params.get('token');
   const email = params.get('email');
 
-  useEffect(() => {
-    if (token) {
-      handleVerify();
-    } else if (email) {
-      fetchVerificationStatus();
-    }
-  }, [token, email, handleVerify, fetchVerificationStatus]);
-
   const fetchVerificationStatus = useCallback(async () => {
     try {
       const res = await auth.getVerificationStatus(email);
@@ -107,6 +99,14 @@ export default function VerifyEmail() {
       setVerifying(false);
     }
   }, [token]);
+
+  useEffect(() => {
+    if (token) {
+      handleVerify();
+    } else if (email) {
+      fetchVerificationStatus();
+    }
+  }, [token, email, handleVerify, fetchVerificationStatus]);
 
   const handleResend = async (isAuto = false) => {
     if (!email) {

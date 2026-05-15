@@ -288,6 +288,7 @@ exports.switchRole = async (req, res) => {
                 totalSpent: user.totalSpent,
                 dataUsed: user.dataUsed,
                 referralEarnings: user.referralEarnings,
+                isEmailVerified: user.isEmailVerified,
             }
         });
     } catch (error) {
