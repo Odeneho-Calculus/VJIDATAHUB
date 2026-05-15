@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect, useRef } from 'react';
+import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { auth } from '../services/api';
@@ -25,7 +25,7 @@ export default function ResetPassword() {
     if (token) {
       fetchResetStatus();
     }
-  }, [token]);
+  }, [token, fetchResetStatus]);
 
   // Handle countdown timer
   useEffect(() => {
@@ -52,7 +52,7 @@ export default function ResetPassword() {
     return `${h}h ${m}m ${s}s`;
   };
 
-  const fetchResetStatus = async () => {
+  const fetchResetStatus = useCallback(async () => {
     try {
       const res = await auth.getPasswordResetStatus({ token });
       if (res.success) {
@@ -64,7 +64,7 @@ export default function ResetPassword() {
     } catch (err) {
       console.error('Failed to fetch reset status:', err);
     }
-  };
+  }, [token]);
 
   const strength = useMemo(() => {
     let score = 0;

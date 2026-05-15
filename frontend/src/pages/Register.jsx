@@ -81,7 +81,7 @@ export default function Register() {
         return;
       }
 
-      const data = await register(
+      await register(
         email, password, name,
         phoneValidation.formatted, referralCode,
         userType === 'agent' ? 'agent' : 'user'

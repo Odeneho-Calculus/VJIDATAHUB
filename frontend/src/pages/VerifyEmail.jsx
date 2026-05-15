@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { auth } from '../services/api';
@@ -15,8 +15,6 @@ export default function VerifyEmail() {
   const [timer, setTimer] = useState(60); // 60 seconds cooldown
   const [canResend, setCanResend] = useState(false);
   const [attemptsRemaining, setAttemptsRemaining] = useState(3);
-  const [cooldownHours, setCooldownHours] = useState(0);
-  const hasAutoSent = useRef(false);
   const timerRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
@@ -31,16 +29,15 @@ export default function VerifyEmail() {
     } else if (email) {
       fetchVerificationStatus();
     }
-  }, [token, email]);
+  }, [token, email, handleVerify, fetchVerificationStatus]);
 
-  const fetchVerificationStatus = async () => {
+  const fetchVerificationStatus = useCallback(async () => {
     try {
       const res = await auth.getVerificationStatus(email);
       if (res.success) {
         setAttemptsRemaining(res.attemptsRemaining);
         if (res.cooldownSeconds > 0) {
           setTimer(res.cooldownSeconds);
-          setCooldownHours(Math.ceil(res.cooldownSeconds / 3600));
         }
         if (res.isEmailVerified) {
           setStatus('success');
@@ -50,7 +47,7 @@ export default function VerifyEmail() {
     } catch (err) {
       console.error('Failed to fetch verification status:', err);
     }
-  };
+  }, [email]);
 
   // Handle countdown timer
   useEffect(() => {
@@ -90,7 +87,7 @@ export default function VerifyEmail() {
     return `${h}h ${m}m ${s}s`;
   };
 
-  const handleVerify = async () => {
+  const handleVerify = useCallback(async () => {
     setVerifying(true);
     setStatus('pending');
     try {
@@ -109,7 +106,7 @@ export default function VerifyEmail() {
     } finally {
       setVerifying(false);
     }
-  };
+  }, [token]);
 
   const handleResend = async (isAuto = false) => {
     if (!email) {
@@ -131,7 +128,6 @@ export default function VerifyEmail() {
         
         if (res.cooldownSeconds) {
           setTimer(res.cooldownSeconds);
-          setCooldownHours(Math.ceil(res.cooldownSeconds / 3600));
         } else {
           setTimer(60); // Default 1 min cooldown between successful resends if not locked
         }
@@ -146,7 +142,6 @@ export default function VerifyEmail() {
         }
         if (res.cooldownSeconds) {
           setTimer(res.cooldownSeconds);
-          setCooldownHours(Math.ceil(res.cooldownSeconds / 3600));
           setCanResend(false);
         }
       }
@@ -162,7 +157,6 @@ export default function VerifyEmail() {
         }
         if (errorData.cooldownSeconds) {
           setTimer(errorData.cooldownSeconds);
-          setCooldownHours(Math.ceil(errorData.cooldownSeconds / 3600));
           setCanResend(false);
         }
       }
