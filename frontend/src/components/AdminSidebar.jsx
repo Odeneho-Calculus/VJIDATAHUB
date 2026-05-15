@@ -32,9 +32,9 @@ const styles = `
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 9px 12px;
+    padding: 10px 12px;
     border-radius: 7px;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     text-decoration: none;
     transition: background 0.15s, color 0.15s;
@@ -45,7 +45,7 @@ const styles = `
     color: #fff;
   }
   .asb-link-inactive {
-    color: #777;
+    color: #374151;
   }
   .asb-link-inactive:hover {
     background: #f5f5f0;
@@ -53,11 +53,11 @@ const styles = `
   }
 
   .asb-section-title {
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    color: #bbb;
+    color: #6b7280;
     padding: 18px 12px 7px;
   }
 
