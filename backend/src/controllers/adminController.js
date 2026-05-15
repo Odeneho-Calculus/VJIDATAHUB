@@ -285,6 +285,20 @@ exports.getAllUsers = async (req, res) => {
       .skip(skip)
       .sort({ createdAt: -1 });
 
+    // Populate store data for agents
+    const usersWithStoreData = await Promise.all(
+      users.map(async (user) => {
+        if (user.role === 'agent') {
+          const store = await Store.findOne({ owner: user._id }).select('totalRevenue totalOrders');
+          return {
+            ...user.toObject(),
+            store: store || null
+          };
+        }
+        return user;
+      })
+    );
+
     const total = await User.countDocuments(query);
 
     const statsResult = await User.aggregate([
@@ -304,7 +318,7 @@ exports.getAllUsers = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      users,
+      users: usersWithStoreData,
       stats,
       pagination: {
         total,

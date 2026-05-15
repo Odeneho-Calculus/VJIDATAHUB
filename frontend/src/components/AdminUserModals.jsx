@@ -1,10 +1,16 @@
-import React from 'react';
-import { Info, Edit2, Ban, Clock, Trash2, AlertCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { Info, Edit2, Ban, Clock, Trash2, AlertCircle, DollarSign, ShoppingCart } from 'lucide-react';
 import Modal from './Modal';
 import { formatNumberAbbreviated } from '../utils/formatCurrency';
 
 export const UserViewModal = ({ isOpen, onClose, user, getStatusColor, getStatusText }) => {
+  const [activeTab, setActiveTab] = useState('details');
+
   if (!user) return null;
+
+  const totalSpent = user.totalSpent || 0;
+  const storeRevenue = user.store?.totalRevenue || 0;
+  const totalExpenses = user.role === 'agent' ? totalSpent + storeRevenue : totalSpent;
 
   return (
     <Modal
@@ -21,6 +27,34 @@ export const UserViewModal = ({ isOpen, onClose, user, getStatusColor, getStatus
         </button>
       }
     >
+      {/* Tab Navigation */}
+      <div className="flex border-b border-slate-200 mb-4">
+        <button
+          onClick={() => setActiveTab('details')}
+          className={`flex-1 py-3 px-4 text-sm font-bold border-b-2 transition ${
+            activeTab === 'details'
+              ? 'border-blue-600 text-blue-600'
+              : 'border-transparent text-slate-500 hover:text-slate-700'
+          }`}
+        >
+          <Info size={16} className="inline mr-2" />
+          Details
+        </button>
+        <button
+          onClick={() => setActiveTab('expenses')}
+          className={`flex-1 py-3 px-4 text-sm font-bold border-b-2 transition ${
+            activeTab === 'expenses'
+              ? 'border-blue-600 text-blue-600'
+              : 'border-transparent text-slate-500 hover:text-slate-700'
+          }`}
+        >
+          <DollarSign size={16} className="inline mr-2" />
+          Expenses
+        </button>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === 'details' && (
       <div className="space-y-3">
         <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-tight mb-2">User Details</p>
@@ -85,6 +119,67 @@ export const UserViewModal = ({ isOpen, onClose, user, getStatusColor, getStatus
           </div>
         )}
       </div>
+      )}
+
+      {activeTab === 'expenses' && (
+        <div className="space-y-4">
+          <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-tight mb-3">Total Expenses</p>
+
+            {user.role === 'agent' ? (
+              <div className="space-y-3">
+                <div className="flex justify-between items-center p-3 bg-white rounded-lg border border-slate-200">
+                  <div className="flex items-center gap-2">
+                    <ShoppingCart size={16} className="text-blue-600" />
+                    <span className="text-sm font-bold text-slate-700">Personal Spending</span>
+                  </div>
+                  <span className="text-sm font-black text-blue-600">GHS {formatNumberAbbreviated(totalSpent)}</span>
+                </div>
+
+                <div className="flex justify-between items-center p-3 bg-white rounded-lg border border-slate-200">
+                  <div className="flex items-center gap-2">
+                    <DollarSign size={16} className="text-emerald-600" />
+                    <span className="text-sm font-bold text-slate-700">Store Revenue</span>
+                  </div>
+                  <span className="text-sm font-black text-emerald-600">GHS {formatNumberAbbreviated(storeRevenue)}</span>
+                </div>
+
+                <div className="flex justify-between items-center p-3 bg-gradient-to-r from-blue-50 to-emerald-50 rounded-lg border-2 border-blue-200">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle size={16} className="text-blue-600" />
+                    <span className="text-sm font-bold text-slate-700">Total Expenses</span>
+                  </div>
+                  <span className="text-lg font-black text-blue-600">GHS {formatNumberAbbreviated(totalExpenses)}</span>
+                </div>
+              </div>
+            ) : (
+              <div className="flex justify-between items-center p-4 bg-white rounded-lg border border-slate-200">
+                <div className="flex items-center gap-2">
+                  <DollarSign size={16} className="text-blue-600" />
+                  <span className="text-sm font-bold text-slate-700">Total Spent</span>
+                </div>
+                <span className="text-lg font-black text-blue-600">GHS {formatNumberAbbreviated(totalSpent)}</span>
+              </div>
+            )}
+          </div>
+
+          {user.role === 'agent' && user.store && (
+            <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
+              <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-tight mb-2">Store Performance</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="text-center">
+                  <p className="text-2xl font-black text-emerald-600">{user.store.totalOrders || 0}</p>
+                  <p className="text-[10px] font-bold text-emerald-500 uppercase">Total Orders</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-black text-emerald-600">GHS {formatNumberAbbreviated(storeRevenue)}</p>
+                  <p className="text-[10px] font-bold text-emerald-500 uppercase">Revenue</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </Modal>
   );
 };
