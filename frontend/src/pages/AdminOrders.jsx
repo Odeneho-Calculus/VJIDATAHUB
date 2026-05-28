@@ -85,8 +85,8 @@ export default function AdminOrders() {
       if (response.success) {
         setOrders(response.data?.orders || response.orders || []);
         setTotalPages(response.data?.pagination?.pages || response.pagination?.pages || 0);
-        if (response.data?.stats) {
-          setStats(response.data.stats);
+        if (response.stats) {
+          setStats(response.stats);
         }
       } else {
         if (!silent) toast.error(response.message || 'Failed to fetch orders', { duration: 5000 });
@@ -718,8 +718,8 @@ export default function AdminOrders() {
                               <div style={{ fontSize: '11px', color: '#666', fontWeight: 700 }}>{order.network}</div>
                             </td>
                             <td>
-                              <div style={{ fontSize: '13px', fontWeight: 700 }}>{order.store?.name || (order.isGuest ? (order.guestInfo?.name || 'Guest') : (order.user?.name || 'User'))}</div>
-                              <div style={{ fontSize: '11px', color: '#999' }}>{order.store ? order.store.owner?.name : (order.isGuest ? order.guestInfo?.email : order.user?.email)}</div>
+                              <div style={{ fontSize: '13px', fontWeight: 700 }}>{order.store?.name || (order.isGuest ? (order.guestInfo?.name || 'Guest') : (order.userId?.name || 'User'))}</div>
+                              <div style={{ fontSize: '11px', color: '#999' }}>{order.store ? order.store.owner?.name : (order.isGuest ? order.guestInfo?.email : order.userId?.email)}</div>
                             </td>
                             <td>
                               <div style={{ fontSize: '13px', fontWeight: 700 }}>{getPlanDisplayValue(order)}</div>

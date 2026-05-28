@@ -993,6 +993,20 @@ exports.getOrders = async (req, res) => {
 
     const total = await Order.countDocuments(query);
 
+    // Get overall stats (not filtered by status/network)
+    let statsQuery = {};
+    if (scope === 'agent') {
+      statsQuery.$or = [
+        { source: 'store' },
+        { storeId: { $ne: null } },
+      ];
+    }
+    const [completed, pending, processing] = await Promise.all([
+      Order.countDocuments({ ...statsQuery, status: 'completed' }),
+      Order.countDocuments({ ...statsQuery, status: 'pending' }),
+      Order.countDocuments({ ...statsQuery, status: 'processing' }),
+    ]);
+
     res.status(200).json({
       success: true,
       orders,
@@ -1001,6 +1015,12 @@ exports.getOrders = async (req, res) => {
         page: parseInt(page),
         limit: parseInt(limit),
         pages: Math.ceil(total / limit),
+      },
+      stats: {
+        total: await Order.countDocuments(statsQuery),
+        completed,
+        pending,
+        processing,
       },
     });
   } catch (error) {
