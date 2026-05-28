@@ -735,7 +735,7 @@ function GuestCheckoutModal({ plan, store, primaryColor, transactionCharges, onC
             const res = await storeAPI.purchasePublicBundle(store.slug, {
                 planId: plan.planId,
                 email: generatedEmail,
-                phone: formData.phone,
+                phoneNumber: formData.phone,
                 name: generatedName
             });
 

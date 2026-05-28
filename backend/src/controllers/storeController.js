@@ -1066,8 +1066,11 @@ exports.getPublicPlans = async (req, res) => {
     const mappedPlans = plans.map(p => {
       const planObj = p.toObject ? p.toObject() : p;
       const basePlan = planObj.planId || {};
+      // planId is populated — extract the actual ObjectId string for the frontend
+      const actualPlanId = basePlan._id ? basePlan._id.toString() : (planObj.planId?.toString?.() || planObj.planId);
       return {
         ...planObj,
+        planId: actualPlanId,
         sellingPrice: planObj.customPrice,
         package: basePlan.package || basePlan.name || basePlan.planName || 'Data Bundle',
         size: planObj.dataSize || basePlan.size || basePlan.dataSize || 'N/A',
@@ -1140,12 +1143,14 @@ exports.purchasePublicBundle = async (req, res) => {
       storeId: store._id,
       dataPlanId: storePlan.planId,
       planType: storePlan.planType,
+      apiPlanId: planData.providerPlanId || storePlan.planId,
       orderNumber,
       network: storePlan.network,
       phoneNumber: normalizedPhone,
       dataAmount: storePlan.dataSize,
       planName: planData.name,
       amount: storePlan.customPrice,
+      adminBasePrice: planData.costPrice || planData.sellingPrice || storePlan.customPrice,
       paymentMethod: 'paystack',
       status: 'pending',
       paymentStatus: 'pending',
@@ -1194,7 +1199,7 @@ exports.purchasePublicBundle = async (req, res) => {
       res.status(200).json({
         success: true,
         data: {
-          authorizationUrl: paystackResponse.data.data.authorization_url,
+          accessCode: paystackResponse.data.data.access_code,
           reference: paystackResponse.data.data.reference,
           orderNumber,
           orderId: order._id,
@@ -1259,17 +1264,103 @@ exports.verifyPublicPayment = async (req, res) => {
     await transaction.save();
 
     const order = await Order.findOne({ transactionReference: transaction.reference });
-    if (order) {
-      order.paymentStatus = 'completed';
-      order.status = 'processing';
-      await order.save();
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
     }
 
-    res.json({
-      success: true,
-      message: 'Payment verified and order is being processed',
-      data: { order, transaction },
-    });
+    order.paymentStatus = 'completed';
+    order.paidAt = new Date();
+    await order.save();
+
+    // Place the order with the provider (Topza)
+    const topzaApi = require('../utils/topzaApi');
+    const { createNotification } = require('./notificationController');
+    const Store = require('../models/Store');
+    const TopzaOffer = require('../models/TopzaOffer');
+    const DataPlan = require('../models/DataPlan');
+
+    // Resolve the correct provider plan ID for Topza API
+    let topzaPlanId = order.apiPlanId;
+    if (!topzaPlanId && order.dataPlanId) {
+      const planDoc = order.planType === 'TopzaOffer'
+        ? await TopzaOffer.findById(order.dataPlanId).select('providerPlanId')
+        : await DataPlan.findById(order.dataPlanId).select('providerPlanId');
+      topzaPlanId = planDoc?.providerPlanId || order.dataPlanId;
+    }
+
+    const providerResponse = await topzaApi.purchaseDataBundle(
+      topzaPlanId,
+      order.phoneNumber,
+      order.network,
+      order.dataAmount,
+      order.orderNumber
+    );
+
+    if (providerResponse.success) {
+      order.status = 'processing';
+      order.externalOrderId = providerResponse.data?.orderId || null;
+      order.externalOrderNumber = providerResponse.data?.orderNumber || null;
+      order.providerStatus = 'Processing';
+      order.providerMessage = providerResponse.data?.message || 'Order placed successfully and is being processed';
+      order.statusHistory.push({
+        status: 'processing',
+        updatedAt: new Date(),
+        source: 'topza_api',
+        notes: providerResponse.data?.message || 'Order placed successfully',
+      });
+      await order.save();
+
+      res.json({
+        success: true,
+        message: 'Payment verified and order is being processed',
+        data: { order, transaction },
+      });
+    } else {
+      // Provider failed — mark order as failed and trigger refund to agent
+      order.status = 'failed';
+      order.providerStatus = 'Failed';
+      order.errorMessage = providerResponse.error || 'Provider failed to process the order';
+      order.providerMessage = providerResponse.error || 'Provider failed to process the order';
+      order.statusHistory.push({
+        status: 'failed',
+        updatedAt: new Date(),
+        source: 'topza_api',
+        notes: providerResponse.error || 'Provider purchase failed',
+      });
+      await order.save();
+
+      // Process refund to the store owner (agent)
+      const { processStoreOrderRefund } = require('../utils/refund');
+      const refundResult = await processStoreOrderRefund(order, providerResponse.error || 'Provider purchase failed');
+
+      // Notify the agent about the failed order
+      const store = await Store.findById(order.storeId).populate('owner', '_id name email');
+      if (store && store.owner) {
+        await createNotification({
+          type: 'order_failed',
+          title: 'Store Order Failed',
+          message: `A customer order for ${order.dataAmount} (${order.phoneNumber}) failed after payment.`,
+          description: `Order ${order.orderNumber} failed: ${providerResponse.error || 'Provider purchase failed'}. The admin base price has been refunded to your wallet. Please repurchase for the customer.`,
+          severity: 'error',
+          userId: store.owner._id,
+          data: {
+            orderId: order._id.toString(),
+            orderNumber: order.orderNumber,
+            phoneNumber: order.phoneNumber,
+            dataAmount: order.dataAmount,
+            amount: order.amount,
+            storeId: order.storeId?.toString(),
+          },
+          actionUrl: `/store/orders`,
+        });
+      }
+
+      res.json({
+        success: true,
+        message: 'Payment verified but provider failed. Refund processed to agent.',
+        data: { order, transaction, refund: refundResult },
+      });
+    }
   } catch (error) {
     console.error('verifyPublicPayment error:', error);
     res.status(500).json({ success: false, message: error.message });

@@ -5,7 +5,7 @@ const TopzaWebhookLog = require('../models/TopzaWebhookLog');
 const SystemSettings = require('../models/SystemSettings');
 const topzaApi = require('../utils/topzaApi');
 const { hasAnyConfiguredPrice, toPriceNumber } = require('../utils/planPricing');
-const { processRefund } = require('../utils/refund');
+const { processRefund, processStoreOrderRefund } = require('../utils/refund');
 const { createNotification } = require('./notificationController');
 
 const mapTopzaStatusToOrderStatus = (status = '') => {
@@ -215,25 +215,58 @@ exports.handleWebhook = async (req, res) => {
 
     // Trigger refund IF order failed AND was paid AND not already refunded
     if (mappedStatus === 'failed' && order.paymentStatus === 'completed' && !order.isRefunded) {
-      // processRefund handles saving the order document internally
-      const refundResult = await processRefund(order, providerStatus || 'Service update failure');
-      console.log(`[Topza Webhook] Auto-refund result for order ${order.orderNumber}:`, refundResult);
+      let refundResult;
 
-      if (refundResult.success) {
-        // Notify user about refund
-        await createNotification({
-          type: 'refund',
-          title: 'Order Failed - Refunded',
-          message: `Your order ${order.orderNumber} failed and GHS ${(order.amount + (order.transactionCharge || 0)).toFixed(2)} has been refunded to your wallet.`,
-          description: `The data purchase for ${order.phoneNumber} (${order.dataAmount}) failed. We have automatically refunded the full amount to your wallet.`,
-          severity: 'warning',
-          data: {
-            userId: order.userId.toString(),
-            amount: order.amount + (order.transactionCharge || 0),
-            orderId: order._id.toString(),
-          },
-          actionUrl: `/orders/${order._id}`,
-        });
+      if (order.source === 'store' && order.storeId) {
+        // Store orders: refund to agent's main wallet
+        refundResult = await processStoreOrderRefund(order, providerStatus || 'Service update failure');
+        console.log(`[Topza Webhook] Store order auto-refund result for order ${order.orderNumber}:`, refundResult);
+
+        if (refundResult.success) {
+          // Notify the agent about the failed store order
+          const Store = require('../models/Store');
+          const store = await Store.findById(order.storeId).populate('owner', '_id name email');
+          if (store && store.owner) {
+            await createNotification({
+              type: 'order_failed',
+              title: 'Store Order Failed',
+              message: `A customer order for ${order.dataAmount} (${order.phoneNumber}) failed after payment.`,
+              description: `Order ${order.orderNumber} failed: ${providerStatus || 'Service update failure'}. The admin base price has been refunded to your wallet. Please repurchase for the customer.`,
+              severity: 'error',
+              userId: store.owner._id,
+              data: {
+                orderId: order._id.toString(),
+                orderNumber: order.orderNumber,
+                phoneNumber: order.phoneNumber,
+                dataAmount: order.dataAmount,
+                amount: order.amount,
+                storeId: order.storeId?.toString(),
+              },
+              actionUrl: `/store/orders`,
+            });
+          }
+        }
+      } else {
+        // Regular user orders: refund to user wallet
+        refundResult = await processRefund(order, providerStatus || 'Service update failure');
+        console.log(`[Topza Webhook] Auto-refund result for order ${order.orderNumber}:`, refundResult);
+
+        if (refundResult.success && order.userId) {
+          // Notify user about refund
+          await createNotification({
+            type: 'refund',
+            title: 'Order Failed - Refunded',
+            message: `Your order ${order.orderNumber} failed and GHS ${(order.amount + (order.transactionCharge || 0)).toFixed(2)} has been refunded to your wallet.`,
+            description: `The data purchase for ${order.phoneNumber} (${order.dataAmount}) failed. We have automatically refunded the full amount to your wallet.`,
+            severity: 'warning',
+            data: {
+              userId: order.userId.toString(),
+              amount: order.amount + (order.transactionCharge || 0),
+              orderId: order._id.toString(),
+            },
+            actionUrl: `/orders/${order._id}`,
+          });
+        }
       }
     } else {
       // Regular save if no refund was triggered

@@ -2,6 +2,8 @@ const cron = require('node-cron');
 const Order = require('../models/Order');
 const SystemSettings = require('../models/SystemSettings');
 const topzaApi = require('../utils/topzaApi');
+const { processRefund, processStoreOrderRefund } = require('../utils/refund');
+const { createNotification } = require('../controllers/notificationController');
 
 let isSyncing = false;
 let lastSyncAt = null;
@@ -157,6 +159,57 @@ const syncTopzaOrderStatus = async () => {
       }
 
       await order.save();
+
+      // Trigger refund IF order failed AND was paid AND not already refunded
+      if (mappedStatus === 'failed' && order.paymentStatus === 'completed' && !order.isRefunded) {
+        if (order.source === 'store' && order.storeId) {
+          const refundResult = await processStoreOrderRefund(order, normalizedProviderStatus || 'Service sync failure');
+          console.log(`[Service Status Sync] Store order auto-refund result for order ${order.orderNumber}:`, refundResult);
+
+          if (refundResult.success) {
+            const Store = require('../models/Store');
+            const store = await Store.findById(order.storeId).populate('owner', '_id name email');
+            if (store && store.owner) {
+              await createNotification({
+                type: 'order_failed',
+                title: 'Store Order Failed',
+                message: `A customer order for ${order.dataAmount} (${order.phoneNumber}) failed after payment.`,
+                description: `Order ${order.orderNumber} failed: ${normalizedProviderStatus || 'Service sync failure'}. The admin base price has been refunded to your wallet. Please repurchase for the customer.`,
+                severity: 'error',
+                userId: store.owner._id,
+                data: {
+                  orderId: order._id.toString(),
+                  orderNumber: order.orderNumber,
+                  phoneNumber: order.phoneNumber,
+                  dataAmount: order.dataAmount,
+                  amount: order.amount,
+                  storeId: order.storeId?.toString(),
+                },
+                actionUrl: `/store/orders`,
+              });
+            }
+          }
+        } else if (order.userId && !order.isGuest) {
+          const refundResult = await processRefund(order, normalizedProviderStatus || 'Service sync failure');
+          console.log(`[Service Status Sync] Auto-refund result for order ${order.orderNumber}:`, refundResult);
+
+          if (refundResult.success) {
+            await createNotification({
+              type: 'refund',
+              title: 'Order Failed - Refunded',
+              message: `Your order ${order.orderNumber} failed and GHS ${(order.amount + (order.transactionCharge || 0)).toFixed(2)} has been refunded to your wallet.`,
+              description: `The data purchase for ${order.phoneNumber} (${order.dataAmount}) failed. We have automatically refunded the full amount to your wallet.`,
+              severity: 'warning',
+              data: {
+                userId: order.userId.toString(),
+                amount: order.amount + (order.transactionCharge || 0),
+                orderId: order._id.toString(),
+              },
+              actionUrl: `/orders/${order._id}`,
+            });
+          }
+        }
+      }
 
       if (beforeStatus !== order.status) {
         updatedCount += 1;
