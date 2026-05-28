@@ -31,8 +31,6 @@ import AdminReferrals from './pages/AdminReferrals';
 import AdminTransactions from './pages/AdminTransactions';
 import AdminVtuSettings from './pages/AdminVtuSettings';
 import AdminNotifications from './pages/AdminNotifications';
-import AdminOffers from './pages/AdminOffers';
-import AdminDigimallPlans from './pages/AdminDigimallPlans';
 import AdminTopzaPlans from './pages/AdminTopzaPlans';
 import AdminResultCheckers from './pages/AdminResultCheckers';
 import AdminAfaSettings from './pages/AdminAfaSettings';
@@ -255,22 +253,6 @@ function AppContent() {
           element={
             <AdminProtectedRoute>
               <AdminDataPlans />
-            </AdminProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/offers"
-          element={
-            <AdminProtectedRoute>
-              <AdminOffers />
-            </AdminProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/digimall-plans"
-          element={
-            <AdminProtectedRoute>
-              <AdminDigimallPlans />
             </AdminProtectedRoute>
           }
         />

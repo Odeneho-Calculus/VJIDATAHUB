@@ -14,10 +14,10 @@ router.patch('/my-store/plans/:planId', protect, adminOrAgent, storeController.u
 router.delete('/my-store/plans/:planId', protect, adminOrAgent, storeController.removePlanFromStore);
 
 // Store AFA
-router.get('/my-store/available-afa', protect, adminOrAgent, storeController.getAvailableAfaProducts);
-router.post('/my-store/afa', protect, adminOrAgent, storeController.addAfaToStore);
-router.patch('/my-store/afa/:afaId', protect, adminOrAgent, storeController.updateStoreAfa);
-router.delete('/my-store/afa/:afaId', protect, adminOrAgent, storeController.removeAfaFromStore);
+// router.get('/my-store/available-afa', protect, adminOrAgent, storeController.getAvailableAfaProducts);
+// router.post('/my-store/afa', protect, adminOrAgent, storeController.addAfaToStore);
+// router.patch('/my-store/afa/:afaId', protect, adminOrAgent, storeController.updateStoreAfa);
+// router.delete('/my-store/afa/:afaId', protect, adminOrAgent, storeController.removeAfaFromStore);
 
 // Store orders
 router.get('/my-store/orders/stats', protect, adminOrAgent, storeController.getStoreOrderStats);
@@ -35,9 +35,9 @@ router.post('/my-store/agent-fee/verify', protect, adminOrAgent, storeController
 
 // Public store APIs (no auth required)
 router.get('/public/:slug', storeController.getPublicStore);
-router.get('/public/:slug/plans', storeController.getPublicStorePlans);
-router.get('/public/:slug/track/:phone', storeController.trackGuestOrders);
-router.post('/public/:slug/purchase', storeController.purchasePublicStoreBundle);
-router.post('/public/verify-payment', storeController.verifyPublicStorePayment);
+router.get('/public/:slug/plans', storeController.getPublicPlans);
+router.get('/public/:slug/track/:phone', storeController.trackGuestOrdersByStore);
+router.post('/public/:slug/purchase', storeController.purchasePublicBundle);
+router.post('/public/verify-payment', storeController.verifyPublicPayment);
 
 module.exports = router;

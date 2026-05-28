@@ -5,7 +5,6 @@ const {
   initializeGuestPurchase,
   verifyGuestPayment,
   trackGuestOrders,
-  getGuestOrderDetails,
 } = require('../controllers/guestController');
 
 // Public routes for guest purchases
@@ -13,6 +12,6 @@ router.get('/plans', getGuestDataPlans);
 router.post('/purchase/initialize', initializeGuestPurchase);
 router.post('/payment/verify', verifyGuestPayment);
 router.get('/orders/track', trackGuestOrders);
-router.get('/orders/details', getGuestOrderDetails);
+// router.get('/orders/details', getGuestOrderDetails);
 
 module.exports = router;

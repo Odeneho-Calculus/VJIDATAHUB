@@ -69,9 +69,8 @@ export default function AdminTopzaPlans() {
   }, [page, selectedNetwork, fetchPlans, fetchStats]);
 
   useEffect(() => {
-    const provider = settings?.vtuProvider || 'xpresdata';
-    if (provider === 'xpresdata') navigate('/admin/offers', { replace: true });
-    if (provider === 'digimall') navigate('/admin/digimall-plans', { replace: true });
+    const provider = settings?.vtuProvider || 'topza';
+    if (provider !== 'topza') navigate('/admin/topza-plans', { replace: true });
   }, [settings?.vtuProvider, navigate]);
 
   const showMessage = (msg, isError = false) => {

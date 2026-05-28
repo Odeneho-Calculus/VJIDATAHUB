@@ -94,14 +94,14 @@ app.use('/api/user', require('./routes/user'));
 app.use('/api/wallet', require('./routes/wallet'));
 app.use('/api/purchases', require('./routes/purchases'));
 app.use('/api/dataplans', require('./routes/dataplans'));
-app.use('/api/xpresdata', require('./routes/xpresdata'));
+
 app.use('/api/public', require('./routes/public'));
 app.use('/api/guest', require('./routes/guest'));
 app.use('/api/store', require('./routes/store'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/upgrade', require('./routes/upgrade'));
 app.use('/api/admin/notifications', require('./routes/notifications'));
-app.use('/api/digimall', require('./routes/digimall'));
+
 app.use('/api/topza', require('./routes/topza'));
 app.use('/api/checkers', require('./routes/checkers'));
 app.use('/api/afa', require('./routes/afa'));

@@ -4,7 +4,7 @@ const systemSettingsSchema = new mongoose.Schema(
   {
     vtuProvider: {
       type: String,
-      enum: ['xpresdata', 'digimall', 'topza'],
+      enum: ['topza'],
       default: 'topza',
     },
     recruitNewAgents: {
@@ -122,7 +122,7 @@ systemSettingsSchema.statics.getSettings = async function () {
     settings = await this.create({ vtuProvider: 'topza' });
   }
   // Migrate old values if needed
-  if (!['xpresdata', 'digimall', 'topza'].includes(settings.vtuProvider)) {
+  if (settings.vtuProvider !== 'topza') {
     settings.vtuProvider = 'topza';
   }
   if (!settings.orderSettings) {

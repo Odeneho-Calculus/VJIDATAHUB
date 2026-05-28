@@ -8,14 +8,12 @@ const AgentCommissionPayout = require('../models/AgentCommissionPayout');
 const SellerCommission = require('../models/SellerCommission');
 const SystemSettings = require('../models/SystemSettings');
 const DataPlan = require('../models/DataPlan');
-const XpresDataOffer = require('../models/XpresDataOffer');
-const DigimallOffer = require('../models/DigimallOffer');
 const TopzaOffer = require('../models/TopzaOffer');
-const AfaOffer = require('../models/AfaOffer');
+// const AfaOffer = require('../models/AfaOffer');
 const Transaction = require('../models/Transaction');
-const { creditCommissionForOrder, getOrCreateLedger, moveToPending } = require('../services/commissionService');
+const { getOrCreateLedger, moveToPending } = require('../services/commissionService');
 const { isPositivePrice, resolvePlanPrice } = require('../utils/planPricing');
-const { calculateDataPurchaseCharge } = require('../utils/transactionCharges');
+// const { calculateDataPurchaseCharge } = require('../utils/transactionCharges');
 
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 const PAYSTACK_BASE_URL = process.env.PAYSTACK_BASE_URL || 'https://api.paystack.co';
@@ -27,18 +25,18 @@ const paystackAPI = axios.create({
   },
 });
 
-const DEFAULT_ORDER_DUPLICATE_COOLDOWN_MINUTES = 10;
+// const DEFAULT_ORDER_DUPLICATE_COOLDOWN_MINUTES = 10;
 
-const resolveDuplicateCooldownMinutes = (value) => {
-  const parsed = Number(value);
-  if (Number.isNaN(parsed)) return DEFAULT_ORDER_DUPLICATE_COOLDOWN_MINUTES;
-  return Math.min(1440, Math.max(1, Math.floor(parsed)));
-};
+// const resolveDuplicateCooldownMinutes = (value) => {
+//   const parsed = Number(value);
+//   if (Number.isNaN(parsed)) return DEFAULT_ORDER_DUPLICATE_COOLDOWN_MINUTES;
+//   return Math.min(1440, Math.max(1, Math.floor(parsed)));
+// };
 
-const getOrderDuplicateCooldownMinutes = async () => {
-  const settings = await SystemSettings.getSettings();
-  return resolveDuplicateCooldownMinutes(settings?.orderSettings?.duplicateOrderCooldownMinutes);
-};
+// const getOrderDuplicateCooldownMinutes = async () => {
+//   const settings = await SystemSettings.getSettings();
+//   return resolveDuplicateCooldownMinutes(settings?.orderSettings?.duplicateOrderCooldownMinutes);
+// };
 
 // Helper: Resolve temporary ban status
 const resolveTemporaryBanStatus = (store) => {
@@ -66,14 +64,12 @@ const computeAccessStatus = (user, store) => {
     return { isAccessible: false, code: 'STORE_INACTIVE', message: 'Store is inactive' };
   }
 
-  // For agent stores, check fee payment
   if (user.role === 'agent' && isStoreOwner) {
     if (user.agentFeeStatus === 'pending') {
       return { isAccessible: false, code: 'AGENT_FEE_UNPAID', message: 'Agent fee not paid' };
     }
   }
 
-  // Check temporary ban
   if (store.isTemporarilyBanned) {
     return { isAccessible: false, code: 'STORE_TEMP_BANNED', message: 'Store is temporarily banned' };
   }
@@ -81,39 +77,34 @@ const computeAccessStatus = (user, store) => {
   return { isAccessible: true, code: null, message: null };
 };
 
-const normalizeSlug = (rawSlug = '') =>
-  rawSlug
-    .toString()
-    .trim()
-    .toLowerCase();
+// const normalizeSlug = (rawSlug = '') =>
+//   rawSlug
+//     .toString()
+//     .trim()
+//     .toLowerCase();
 
-const phoneVariants = (phoneNumber) => {
-  const raw = String(phoneNumber || '').trim();
-  const digits = raw.replace(/\D/g, '');
-  const variants = new Set([raw, digits]);
+// const phoneVariants = (phoneNumber) => {
+//   const raw = String(phoneNumber || '').trim();
+//   const digits = raw.replace(/\D/g, '');
+//   const variants = new Set([raw, digits]);
+//
+//   if (digits.startsWith('0') && digits.length === 10) {
+//     variants.add(`233${digits.slice(1)}`);
+//   }
+//   if (digits.startsWith('233') && digits.length === 12) {
+//     variants.add(`0${digits.slice(3)}`);
+//   }
+//   if (digits.length === 9) {
+//     variants.add(`0${digits}`);
+//     variants.add(`233${digits}`);
+//   }
+//
+//   return Array.from(variants).filter(Boolean);
+// };
 
-  if (digits.startsWith('0') && digits.length === 10) {
-    variants.add(`233${digits.slice(1)}`);
-  }
-  if (digits.startsWith('233') && digits.length === 12) {
-    variants.add(`0${digits.slice(3)}`);
-  }
-  if (digits.length === 9) {
-    variants.add(`0${digits}`);
-    variants.add(`233${digits}`);
-  }
-
-  return Array.from(variants).filter(Boolean);
-};
-
-const getActiveStorePlanType = async () => {
-  const settings = await SystemSettings.getSettings();
-  const activeProvider = settings.vtuProvider || 'topza';
-  let activePlanType = 'XpresDataOffer';
-  if (activeProvider === 'digimall') activePlanType = 'DigimallOffer';
-  if (activeProvider === 'topza') activePlanType = 'TopzaOffer';
-  return { activeProvider, activePlanType };
-};
+// const getActiveStorePlanType = async () => {
+//   return { activeProvider: 'topza', activePlanType: 'TopzaOffer' };
+// };
 
 // 1. GET /my-store - Get or auto-create owner store
 exports.getMyStore = async (req, res) => {
@@ -139,14 +130,12 @@ exports.getMyStore = async (req, res) => {
       await store.populate('owner', 'name email agentFeeStatus agentFeePaidAt agentFeePaidReference protocolActivatedAt');
     }
 
-    // Migrate legacy social links if needed
     if (store.socialLinks) {
       for (const key in store.socialLinks) {
         if (typeof store.socialLinks[key] === 'string') {
           store.socialLinks[key] = { value: store.socialLinks[key], label: key };
         }
       }
-      // Calculate hasSocialLinks
       store.hasSocialLinks = Object.values(store.socialLinks).some(link =>
         link && link.value && link.value.trim().length > 0
       );
@@ -190,7 +179,6 @@ exports.updateMyStore = async (req, res) => {
 
     const { name, slug, logo, description, theme, socialLinks, content } = req.body;
 
-    // Validate slug uniqueness if changed
     if (slug && slug !== store.slug) {
       const slugExists = await Store.findOne({ slug });
       if (slugExists) {
@@ -205,7 +193,6 @@ exports.updateMyStore = async (req, res) => {
     if (theme) store.theme = { ...store.theme, ...theme };
     if (socialLinks) {
       store.socialLinks = socialLinks;
-      // Calculate hasSocialLinks
       const hasLinks = Object.values(socialLinks).some(link =>
         link && link.value && link.value.trim().length > 0
       );
@@ -215,7 +202,6 @@ exports.updateMyStore = async (req, res) => {
 
     await store.save();
 
-    // Emit live update
     if (global.io) {
       global.io.to(`store:${store.slug}`).emit('store_updated', { type: 'branding', store });
     }
@@ -232,21 +218,12 @@ exports.updateMyStore = async (req, res) => {
 // GET /my-store/available-plans - Get unified plans based on active provider
 exports.getAvailablePlans = async (req, res) => {
   try {
-    const settings = await SystemSettings.getSettings();
-    const activeProvider = settings.vtuProvider || 'topza';
-
-    let availablePlans = [];
-
-    if (activeProvider === 'digimall') {
-      // Only show plans that are in stock (respects both provider sync status and admin overrides)
-      const digimallOffers = await DigimallOffer.find({
-        status: 'active',
-        inStock: true,
-      }).sort({ isp: 1, volume: 1 });
-      availablePlans = digimallOffers
-        .map(p => {
-          const agentBasePrice = resolvePlanPrice(p, { userRole: 'agent', agentFeeStatus: 'paid' });
-          return agentBasePrice > 0 ? {
+    const topzaOffers = await TopzaOffer.find({ status: 'active', inStock: true }).sort({ isp: 1, volume: 1 });
+    const availablePlans = topzaOffers
+      .map((p) => {
+        const agentBasePrice = resolvePlanPrice(p, { userRole: 'agent', agentFeeStatus: 'paid' });
+        return agentBasePrice > 0
+          ? {
             _id: p._id,
             name: p.name,
             network: p.isp,
@@ -254,55 +231,17 @@ exports.getAvailablePlans = async (req, res) => {
             agentPrice: agentBasePrice,
             publicPrice: p.sellingPrice,
             validity: p.validity,
-            provider: 'digimall',
-            planType: 'DigimallOffer',
-          } : null;
-        })
-        .filter(Boolean);
-    } else if (activeProvider === 'topza') {
-      const topzaOffers = await TopzaOffer.find({ status: 'active', inStock: true }).sort({ isp: 1, volume: 1 });
-      availablePlans = topzaOffers
-        .map((p) => {
-          const agentBasePrice = resolvePlanPrice(p, { userRole: 'agent', agentFeeStatus: 'paid' });
-          return agentBasePrice > 0
-            ? {
-              _id: p._id,
-              name: p.name,
-              network: p.isp,
-              sellingPrice: agentBasePrice,
-              agentPrice: agentBasePrice,
-              publicPrice: p.sellingPrice,
-              validity: p.validity,
-              provider: 'topza',
-              planType: 'TopzaOffer',
-            }
-            : null;
-        })
-        .filter(Boolean);
-    } else {
-      const xpdOffers = await XpresDataOffer.find({ status: 'active', inStock: true }).sort({ isp: 1, volume: 1 });
-      availablePlans = xpdOffers
-        .map(offer => {
-          const agentBasePrice = resolvePlanPrice(offer, { userRole: 'agent', agentFeeStatus: 'paid' });
-          return agentBasePrice > 0 ? {
-            _id: offer._id,
-            name: offer.name,
-            network: offer.isp,
-            sellingPrice: agentBasePrice,
-            agentPrice: agentBasePrice,
-            publicPrice: offer.sellingPrice,
-            validity: offer.validity,
-            provider: 'xpresdata',
-            planType: 'XpresDataOffer',
-          } : null;
-        })
-        .filter(Boolean);
-    }
+            provider: 'topza',
+            planType: 'TopzaOffer',
+          }
+          : null;
+      })
+      .filter(Boolean);
 
     res.status(200).json({
       success: true,
       plans: availablePlans,
-      provider: activeProvider,
+      provider: 'topza',
     });
   } catch (error) {
     console.error('getAvailablePlans error:', error);
@@ -328,13 +267,8 @@ exports.addPlanToStore = async (req, res) => {
       return res.status(400).json({ success: false, message: 'customPrice must be a non-negative number' });
     }
 
-    // Verify plan exists based on type
     let planData;
-    if (planType === 'XpresDataOffer') {
-      planData = await XpresDataOffer.findById(planId);
-    } else if (planType === 'DigimallOffer') {
-      planData = await DigimallOffer.findById(planId);
-    } else if (planType === 'TopzaOffer') {
+    if (planType === 'TopzaOffer') {
       planData = await TopzaOffer.findById(planId);
     } else {
       planData = await DataPlan.findById(planId);
@@ -344,8 +278,7 @@ exports.addPlanToStore = async (req, res) => {
       return res.status(404).json({ success: false, message: `${planType} not found` });
     }
 
-    // For agents, check price floor
-    const minPrice = (planType === 'XpresDataOffer' || planType === 'DigimallOffer' || planType === 'TopzaOffer')
+    const minPrice = (planType === 'TopzaOffer')
       ? resolvePlanPrice(planData, { userRole: 'agent', agentFeeStatus: 'paid' })
       : planData.sellingPrice;
     if (!isPositivePrice(minPrice)) {
@@ -365,21 +298,19 @@ exports.addPlanToStore = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Store not found' });
     }
 
-    // Remove existing plan with same ID and add new one
     store.plans = store.plans.filter(p => p.planId.toString() !== planId);
     store.plans.push({
       planId,
       planType,
       customPrice,
       isActive: true,
-      network: (planType === 'XpresDataOffer' || planType === 'DigimallOffer' || planType === 'TopzaOffer') ? planData.isp : planData.network,
-      dataSize: (planType === 'XpresDataOffer' || planType === 'DigimallOffer' || planType === 'TopzaOffer') ? `${planData.volume}GB` : planData.dataSize,
+      network: (planType === 'TopzaOffer') ? planData.isp : planData.network,
+      dataSize: (planType === 'TopzaOffer') ? `${planData.volume}GB` : planData.dataSize,
     });
 
     await store.save();
     await store.populate('plans.planId');
 
-    // Emit live update
     if (global.io) {
       global.io.to(`store:${store.slug}`).emit('store_updated', { type: 'inventory', store });
     }
@@ -425,13 +356,8 @@ exports.updateStorePlan = async (req, res) => {
     const effectivePlanType = targetStorePlan.planType || planType;
     const effectivePlanId = targetStorePlan.planId;
 
-    // Verify plan exists based on actual store plan type
     let planData;
-    if (effectivePlanType === 'XpresDataOffer') {
-      planData = await XpresDataOffer.findById(effectivePlanId);
-    } else if (effectivePlanType === 'DigimallOffer') {
-      planData = await DigimallOffer.findById(effectivePlanId);
-    } else if (effectivePlanType === 'TopzaOffer') {
+    if (effectivePlanType === 'TopzaOffer') {
       planData = await TopzaOffer.findById(effectivePlanId);
     } else {
       planData = await DataPlan.findById(effectivePlanId);
@@ -441,8 +367,7 @@ exports.updateStorePlan = async (req, res) => {
       return res.status(404).json({ success: false, message: `${effectivePlanType} not found` });
     }
 
-    // Price floor check
-    const minPrice = (effectivePlanType === 'XpresDataOffer' || effectivePlanType === 'DigimallOffer' || effectivePlanType === 'TopzaOffer') ? (planData.agentPrice || planData.sellingPrice) : planData.sellingPrice;
+    const minPrice = (effectivePlanType === 'TopzaOffer') ? (planData.agentPrice || planData.sellingPrice) : planData.sellingPrice;
     if (customPrice < minPrice) {
       return res.status(400).json({
         success: false,
@@ -454,7 +379,6 @@ exports.updateStorePlan = async (req, res) => {
     await store.save();
     await store.populate('plans.planId');
 
-    // Emit live update
     if (global.io) {
       global.io.to(`store:${store.slug}`).emit('store_updated', { type: 'inventory', store });
     }
@@ -494,7 +418,6 @@ exports.removePlanFromStore = async (req, res) => {
 
     await store.save();
 
-    // Emit live update
     if (global.io) {
       global.io.to(`store:${store.slug}`).emit('store_updated', { type: 'inventory', store });
     }
@@ -734,7 +657,6 @@ exports.createCommissionPayout = async (req, res) => {
       return res.status(400).json({ success: false, message: 'amount, method, and details required' });
     }
 
-    // Validate method specifics
     if (method === 'mobile_money') {
       if (!details.phone || !details.network) {
         return res.status(400).json({ success: false, message: 'Phone and network required for Mobile Money' });
@@ -776,7 +698,6 @@ exports.createCommissionPayout = async (req, res) => {
       });
     }
 
-    // Calculate fee
     const feeAmountRaw = settings.commissionSettings.withdrawalFeeType === 'fixed'
       ? settings.commissionSettings.withdrawalFeeValue
       : (parsedAmount * settings.commissionSettings.withdrawalFeeValue) / 100;
@@ -807,7 +728,6 @@ exports.createCommissionPayout = async (req, res) => {
 
     await moveToPending({ storeId: store._id, amount: parsedAmount });
 
-    // Allocate earned commission rows to this payout. For partials, whole rows may be linked.
     let remaining = parsedAmount;
     const earnedRows = await SellerCommission.find({
       storeId: store._id,
@@ -903,13 +823,11 @@ exports.initializeAgentFeePayment = async (req, res) => {
     }
 
     if (registrationFee === 0) {
-      // Instant activation
       user.agentFeeStatus = 'paid';
       user.agentFeePaidAt = new Date();
       user.agentFeePaidReference = 'FREE_TIER_' + user._id.toString();
       await user.save();
 
-      const store = await Store.findOne({ owner: user._id });
       const feePayment = await AgentFeePayment.create({
         agentId: user._id,
         storeId: store._id,
@@ -980,8 +898,6 @@ exports.initializeAgentFeePayment = async (req, res) => {
       });
     }
 
-    // Create pending payment and initialize Paystack
-
     const reference = 'AFE' + Date.now() + Math.random().toString(36).substr(2, 5).toUpperCase();
 
     const feePayment = await AgentFeePayment.create({
@@ -994,11 +910,7 @@ exports.initializeAgentFeePayment = async (req, res) => {
 
     const transaction = await Transaction.create({
       userId: user._id,
-      type: 'wallet_topup', // Reusing wallet_topup pattern for simplicity or maybe create a new 'agent_fee' type?
-      // Actually Transaction.js allows: enum: ['data_purchase', 'wallet_funding', 'refund', 'wallet_topup', 'purchase_refund', 'referral_bonus', 'admin_adjustment']
-      // Let's use 'wallet_topup' for consistency with existing wallet funding logic if Transaction model doesn't have 'agent_fee'
-      // Wait, Transaction model I saw: enum: ['data_purchase', 'wallet_funding', 'refund', 'wallet_topup', 'purchase_refund', 'referral_bonus', 'admin_adjustment']
-      // Let's use 'wallet_topup' or 'wallet_funding'
+      type: 'wallet_topup',
       amount: registrationFee,
       reference,
       status: 'pending',
@@ -1008,935 +920,398 @@ exports.initializeAgentFeePayment = async (req, res) => {
 
     const paystackPayload = {
       email: user.email,
-      amount: registrationFee * 100,
+      amount: Math.round(registrationFee * 100),
       reference,
       metadata: {
         userId: user._id.toString(),
-        feePaymentId: feePayment._id.toString(),
+        transactionId: transaction._id.toString(),
         type: 'agent_fee',
       },
     };
 
-    const response = await paystackAPI.post('/transaction/initialize', paystackPayload);
+    const paystackResponse = await paystackAPI.post('/transaction/initialize', paystackPayload);
 
-    if (!response.data.status) {
-      feePayment.status = 'failed';
-      transaction.status = 'failed';
-      await Promise.all([feePayment.save(), transaction.save()]);
-
-      return res.status(400).json({
-        success: false,
-        message: response.data.message,
+    if (paystackResponse.data.status) {
+      res.status(200).json({
+        success: true,
+        message: 'Paystack payment initialized',
+        data: {
+          authorizationUrl: paystackResponse.data.data.authorization_url,
+          reference,
+        },
+        feePayment: feePayment.toObject(),
       });
+    } else {
+      throw new Error('Failed to initialize Paystack payment');
     }
-
-    res.status(200).json({
-      success: true,
-      data: {
-        reference,
-        authorizationUrl: response.data.data.authorization_url,
-        accessCode: response.data.data.access_code,
-        feePaymentId: feePayment._id,
-      },
-    });
   } catch (error) {
-    console.error('Initialize agent fee error:', error.response?.data || error.message);
-    res.status(500).json({
-      success: false,
-      message: error.response?.data?.message || error.message,
-    });
+    console.error('initializeAgentFeePayment error:', error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// 13. POST /my-store/agent-fee/verify - Verify fee payment
+// 13. POST /my-store/agent-fee/verify - Verify agent fee payment
 exports.verifyAgentFeePayment = async (req, res) => {
   try {
     const { reference } = req.body;
 
     if (!reference) {
-      return res.status(400).json({ success: false, message: 'reference required' });
+      return res.status(400).json({ success: false, message: 'Reference is required' });
     }
 
-    const user = await User.findById(req.userId);
-    if (user.role !== 'agent') {
-      return res.status(403).json({ success: false, message: 'Agents only' });
+    const feePayment = await AgentFeePayment.findOne({ reference });
+
+    if (!feePayment) {
+      return res.status(404).json({ success: false, message: 'Fee payment not found' });
     }
 
-    // Verify with Paystack
-    const response = await paystackAPI.get(`/transaction/verify/${reference}`);
+    if (feePayment.status === 'paid') {
+      return res.status(200).json({
+        success: true,
+        message: 'Payment already verified',
+        feePayment: feePayment.toObject(),
+      });
+    }
 
-    if (!response.data.status) {
+    const verifyResponse = await paystackAPI.get(`/transaction/verify/${reference}`);
+
+    if (verifyResponse.data.data.status !== 'success') {
+      feePayment.status = 'failed';
+      await feePayment.save();
+
       return res.status(400).json({
         success: false,
         message: 'Payment verification failed',
       });
     }
 
-    const paystackData = response.data.data;
-
-    if (paystackData.status !== 'success') {
-      return res.status(400).json({
-        success: false,
-        message: 'Payment was not successful',
-        status: paystackData.status,
-      });
-    }
-
-    const feePayment = await AgentFeePayment.findOne({
-      agentId: user._id,
-      reference,
-    });
-
-    if (!feePayment) {
-      return res.status(404).json({ success: false, message: 'Fee payment record not found' });
-    }
-
-    if (feePayment.status === 'paid' || feePayment.status === 'protocol') {
-      return res.status(200).json({ success: true, message: 'Payment already processed', feePayment });
-    }
-
-    // Mark as paid
     feePayment.status = 'paid';
     feePayment.paidAt = new Date();
-    feePayment.paystackResponse = paystackData;
     await feePayment.save();
 
-    // Update linked transaction
-    await Transaction.findOneAndUpdate(
-      { reference },
-      { status: 'completed', paymentStatus: 'completed', paystackReference: paystackData.reference }
-    );
-
-    // Fail competing pending fees
-    await AgentFeePayment.updateMany(
-      {
-        agentId: user._id,
-        _id: { $ne: feePayment._id },
-        status: 'pending',
-      },
-      { status: 'failed' }
-    );
-
-    // Update user
-    user.agentFeeStatus = 'paid';
-    user.agentFeePaidAt = new Date();
-    user.agentFeePaidReference = reference;
-    await user.save();
+    const user = await User.findById(feePayment.agentId);
+    if (user) {
+      user.agentFeeStatus = 'paid';
+      user.agentFeePaidAt = feePayment.paidAt;
+      user.agentFeePaidReference = reference;
+      await user.save();
+    }
 
     res.status(200).json({
       success: true,
-      message: 'Agent fee payment verified',
+      message: 'Agent fee payment verified successfully',
       feePayment: feePayment.toObject(),
     });
   } catch (error) {
-    console.error('Verify agent fee error:', error.response?.data || error.message);
-    res.status(500).json({
-      success: false,
-      message: error.response?.data?.message || error.message,
-    });
+    console.error('verifyAgentFeePayment error:', error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// PUBLIC ENDPOINTS (no auth required)
-
-// GET /public/:slug - Get public store
+// Public store APIs
 exports.getPublicStore = async (req, res) => {
   try {
     const { slug } = req.params;
-    const normalizedSlug = normalizeSlug(slug);
 
-    if (!normalizedSlug) {
-      return res.status(400).json({ success: false, message: 'Store slug is required' });
-    }
-
-    const store = await Store.findOne({ slug: normalizedSlug })
-      .populate('owner', 'name')
-      .populate('plans.planId')
-      .populate('checkerProducts.checkerId')
-      .populate('afaProducts.afaId');
-
-    const { activePlanType } = await getActiveStorePlanType();
+    const store = await Store.findOne({ slug })
+      .populate('owner', 'name email');
 
     if (!store) {
       return res.status(404).json({ success: false, message: 'Store not found' });
     }
 
-    const owner = await User.findById(store.owner._id);
-    resolveTemporaryBanStatus(store);
-
-    const accessStatus = {
-      isAccessible: store.isActive && !store.isTemporarilyBanned,
-      code: null,
-      message: null,
-    };
-
     if (!store.isActive) {
-      accessStatus.isAccessible = false;
-      accessStatus.code = 'STORE_INACTIVE';
-      accessStatus.message = 'This store is currently inactive.';
+      return res.status(403).json({ success: false, message: 'Store is inactive' });
     }
-
-    if (owner.role === 'agent' && owner.agentFeeStatus === 'pending') {
-      accessStatus.isAccessible = false;
-      accessStatus.code = 'AGENT_FEE_UNPAID';
-      accessStatus.message = 'This agent store is locked until activation is completed by payment or admin protocol.';
-    }
-
-    if (store.isTemporarilyBanned) {
-      accessStatus.isAccessible = false;
-      accessStatus.code = 'STORE_TEMP_BANNED';
-      accessStatus.message = 'This store is temporarily unavailable.';
-    }
-
-    const activePlans = (store.plans || []).filter((plan) => {
-      if (!plan || !plan.isActive || !plan.planId) return false;
-      if (plan.planType !== activePlanType) return false;
-      const p = plan.planId;
-      // Check global status (works for both DataPlan and XpresDataOffer)
-      const isGlobalActive = p.status === 'active';
-      // Check model-specific availability
-      const isAvailable = (plan.planType === 'XpresDataOffer' || plan.planType === 'DigimallOffer' || plan.planType === 'TopzaOffer') ? p.inStock !== false : p.isActive !== false;
-      return isGlobalActive && isAvailable;
-    });
-    const totalPlans = activePlans.length;
-    const totalNetworks = new Set(
-      activePlans
-        .map((plan) => (plan.planType === 'XpresDataOffer' || plan.planType === 'DigimallOffer' || plan.planType === 'TopzaOffer') ? plan.planId?.isp : plan.planId?.network)
-        .filter(Boolean)
-    ).size;
-
-    const publicPlans = activePlans.map((plan) => ({
-      _id: plan._id,
-      planId: plan.planId?._id,
-      network: (plan.planType === 'XpresDataOffer' || plan.planType === 'DigimallOffer' || plan.planType === 'TopzaOffer') ? plan.planId?.isp : plan.planId?.network,
-      planType: plan.planType,
-      isActive: plan.isActive,
-    }));
 
     res.status(200).json({
       success: true,
-      store: {
-        _id: store._id,
-        name: store.name,
-        logo: store.logo,
-        description: store.description,
-        slug: store.slug,
-        theme: store.theme,
-        socialLinks: store.socialLinks,
-        hasSocialLinks: store.hasSocialLinks || (store.socialLinks && Object.values(store.socialLinks).some(link => link && link.value && link.value.trim().length > 0)),
-        content: store.content,
-        plans: publicPlans,
-        afaProducts: (store.afaProducts || []).filter(p => p.isActive && p.afaId && p.afaId.status === 'active').map(p => ({
-          _id: p._id,
-          afaId: p.afaId._id,
-          serviceName: p.afaId.serviceName,
-          sellingPrice: p.customPrice,
-        })),
-        totalPlans,
-        totalNetworks,
-        owner: store.owner,
-      },
-      accessStatus,
+      store: store.toObject(),
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// GET /public/:slug/plans - Get store plans
-exports.getPublicStorePlans = async (req, res) => {
+exports.getPublicPlans = async (req, res) => {
   try {
     const { slug } = req.params;
     const { network } = req.query;
 
-    const normalizedSlug = normalizeSlug(slug);
-
-    if (!normalizedSlug) {
-      return res.status(400).json({ success: false, message: 'Store slug is required' });
-    }
-
-    const store = await Store.findOne({ slug: normalizedSlug })
+    const store = await Store.findOne({ slug })
       .populate('plans.planId');
 
     if (!store) {
       return res.status(404).json({ success: false, message: 'Store not found' });
     }
 
-    // Check store accessibility
-    const owner = await User.findById(store.owner._id);
-    resolveTemporaryBanStatus(store);
-
-    if (!store.isActive) {
-      return res.status(403).json({ success: false, code: 'STORE_INACTIVE', message: 'Store is not available' });
-    }
-
-    if (owner.role === 'agent' && owner.agentFeeStatus === 'pending') {
-      return res.status(403).json({ success: false, code: 'AGENT_FEE_UNPAID', message: 'Agent store not yet activated' });
-    }
-
-    if (store.isTemporarilyBanned) {
-      return res.status(403).json({ success: false, code: 'STORE_TEMP_BANNED', message: 'Store is temporarily unavailable' });
-    }
-
-    const settings = await SystemSettings.getSettings();
-    const activeProvider = settings.vtuProvider || 'topza';
-    const activePlanType = activeProvider === 'digimall'
-      ? 'DigimallOffer'
-      : (activeProvider === 'topza' ? 'TopzaOffer' : 'XpresDataOffer');
-    const networkCatalog = Array.isArray(settings?.networkCatalog) ? settings.networkCatalog : [];
-    const normalizeNetwork = (val = '') => val.toString().trim().toLowerCase().replace(/\s+/g, '');
-
-    // Maps a normalised network string to a canonical family key so that
-    // cross-provider name variants resolve to the same catalog entry.
-    // e.g. XpresData "AIRTELTIGO" and DigiMall "AirtelTigo" both -> "at".
-    const getNetworkFamily = (n) => {
-      if (!n) return '';
-      if (n.startsWith('mtn')) return 'mtn';
-      if (n.startsWith('telecel') || n.startsWith('vodafone')) return 'telecel';
-      if (
-        n.startsWith('airtel') || n.startsWith('tigo') || n.startsWith('at') ||
-        n.includes('airteltigo') || n.includes('ishare')
-      ) return 'at';
-      return n;
-    };
-
-    // Find a matching catalog entry for a given raw network name/isp.
-    // Priority: 1) exact name  2) exact slug  3) catalog name starts-with target
-    //           4) network-family match — handles cross-provider mismatches
-    //              (e.g. XpresData "AIRTELTIGO" → catalog "AT - iSHare")
-    const findCatalogEntry = (networkName = '') => {
-      const target = normalizeNetwork(networkName);
-      const active = networkCatalog.filter(e => e?.isActive !== false);
-      // 1. Exact name
-      let entry = active.find(e => normalizeNetwork(e?.name) === target);
-      if (entry) return entry;
-      // 2. Exact slug
-      entry = active.find(e => normalizeNetwork(e?.slug) === target);
-      if (entry) return entry;
-      // 3. Catalog name starts with the raw value (e.g. "MTNUP2U" starts with "MTN")
-      if (target.length >= 2) {
-        entry = active.find(e => normalizeNetwork(e?.name).startsWith(target));
-        if (entry) return entry;
-      }
-      // 4. Network-family fallback (last resort for totally different naming conventions)
-      const targetFamily = getNetworkFamily(target);
-      if (targetFamily) {
-        entry = active.find(e => {
-          const nameFam = getNetworkFamily(normalizeNetwork(e?.name));
-          const slugFam = getNetworkFamily(normalizeNetwork(e?.slug || ''));
-          return nameFam === targetFamily || slugFam === targetFamily;
-        });
-        if (entry) return entry;
-      }
-      return null;
-    };
-
-    const findNetworkLogo = (networkName = '') => {
-      return findCatalogEntry(networkName)?.logoUrl || null;
-    };
-
-    let plans = store.plans.filter(p => {
-      if (!p.isActive || !p.planId) return false;
-      if (p.planType !== activePlanType) return false;
-      const gp = p.planId;
-      const isGlobalActive = gp.status === 'active';
-      let isAvailable;
-      if (p.planType === 'DigimallOffer') {
-        // Hide if out of stock — respects both provider sync status and admin manual overrides
-        isAvailable = gp.inStock === true;
-      } else if (p.planType === 'XpresDataOffer' || p.planType === 'TopzaOffer') {
-        isAvailable = gp.inStock !== false;
-      } else {
-        isAvailable = gp.isActive !== false;
-      }
-      return isGlobalActive && isAvailable;
-    });
+    let plans = store.plans.filter(p => p.isActive);
 
     if (network) {
-      plans = plans.filter(p => {
-        const planNetwork = (p.planType === 'XpresDataOffer' || p.planType === 'DigimallOffer' || p.planType === 'TopzaOffer') ? p.planId.isp : p.planId.network;
-        const catalogName = findCatalogEntry(planNetwork)?.name || planNetwork;
-        const planName = (p.planType === 'XpresDataOffer' || p.planType === 'TopzaOffer') ? p.planId.name : (p.planId.planName || p.planId.name);
-        return planNetwork === network || catalogName === network ||
-          normalizeNetwork(planNetwork) === normalizeNetwork(network) ||
-          normalizeNetwork(catalogName) === normalizeNetwork(network) ||
-          (planName && planName.toLowerCase().includes(network.toLowerCase()));
-      });
+      plans = plans.filter(p => p.network && p.network.toLowerCase() === network.toLowerCase());
     }
-
-    const enrichedPlans = plans.map(p => {
-      const isXPD = p.planType === 'XpresDataOffer';
-      const isDigimall = p.planType === 'DigimallOffer';
-      const isTopza = p.planType === 'TopzaOffer';
-      const planNetwork = (isXPD || isDigimall || isTopza) ? p.planId.isp : p.planId.network;
-      // Use the catalog display name so tabs in the public catalog always match
-      // the network cards on the store page, regardless of provider naming conventions.
-      const catalogEntry = findCatalogEntry(planNetwork);
-      const displayNetwork = catalogEntry?.name || planNetwork;
-      return {
-        _id: p._id,
-        planId: p.planId._id,
-        package: isXPD ? p.planId.name : (p.planId.planName || p.planId.name),
-        network: displayNetwork,
-        networkLogo: catalogEntry?.logoUrl || findNetworkLogo(planNetwork),
-        size: (isXPD || isDigimall || isTopza) ? `${p.planId.volume}GB` : p.planId.dataSize,
-        sellingPrice: p.customPrice,
-        planType: p.planType,
-        provider: isXPD ? 'xpresdata' : (isDigimall ? 'digimall' : (isTopza ? 'topza' : 'xpresdata')),
-      };
-    });
 
     res.status(200).json({
       success: true,
-      plans: enrichedPlans,
-      provider: activeProvider,
+      plans,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// POST /public/:slug/purchase - Initialize guest purchase
-exports.purchasePublicStoreBundle = async (req, res) => {
+exports.purchasePublicBundle = async (req, res) => {
   try {
     const { slug } = req.params;
-    const { planId, email, phone, name } = req.body;
+    const { planId, phoneNumber, email } = req.body;
 
-    if (!planId || !email || !phone || !name) {
-      return res.status(400).json({ success: false, message: 'Missing required fields' });
+    if (!planId || !phoneNumber || !email) {
+      return res.status(400).json({ success: false, message: 'planId, phoneNumber, and email are required' });
     }
 
-    const normalizedSlug = normalizeSlug(slug);
+    const store = await Store.findOne({ slug });
 
-    if (!normalizedSlug) {
-      return res.status(400).json({ success: false, message: 'Store slug is required' });
-    }
-
-    const store = await Store.findOne({ slug: normalizedSlug }).populate('owner');
     if (!store) {
       return res.status(404).json({ success: false, message: 'Store not found' });
     }
 
-    // Check accessibility
-    const owner = store.owner;
-    resolveTemporaryBanStatus(store);
+    const storePlan = store.plans.find(p => p.planId.toString() === planId);
 
-    if (!store.isActive || (owner.role === 'agent' && owner.agentFeeStatus === 'pending') || store.isTemporarilyBanned) {
-      return res.status(403).json({ success: false, message: 'Store is currently unavailable' });
+    if (!storePlan || !storePlan.isActive) {
+      return res.status(404).json({ success: false, message: 'Plan not found or inactive' });
     }
 
-    const storePlan = store.plans.find(p => p.planId && p.planId.toString() === planId.toString() && p.isActive);
-    if (!storePlan) {
-      return res.status(404).json({ success: false, message: 'Plan not found or inactive in this store' });
+    const phoneValidation = { isValid: true, normalized: phoneNumber.replace(/\D/g, '') };
+    if (!phoneValidation.isValid) {
+      return res.status(400).json({ success: false, message: phoneValidation.error });
     }
 
-    const { activeProvider, activePlanType } = await getActiveStorePlanType();
-    if (storePlan.planType !== activePlanType) {
-      return res.status(400).json({
-        success: false,
-        message: `Selected plan is not available because active VTU is ${activeProvider}`,
-      });
-    }
+    const normalizedPhone = phoneValidation.normalized;
 
     let planData;
-    if (storePlan.planType === 'XpresDataOffer') {
-      planData = await XpresDataOffer.findById(planId);
-    } else if (storePlan.planType === 'DigimallOffer') {
-      planData = await DigimallOffer.findById(planId);
-    } else if (storePlan.planType === 'TopzaOffer') {
-      planData = await TopzaOffer.findById(planId);
+    if (storePlan.planType === 'TopzaOffer') {
+      planData = await TopzaOffer.findById(storePlan.planId);
     } else {
-      planData = await DataPlan.findById(planId);
+      planData = await DataPlan.findById(storePlan.planId);
     }
 
-    if (!planData || planData.status !== 'active') {
-      return res.status(404).json({ success: false, message: 'This data plan is currently unavailable globally' });
+    if (!planData) {
+      return res.status(404).json({ success: false, message: 'Plan data not found' });
     }
 
-    if ((storePlan.planType === 'XpresDataOffer' || storePlan.planType === 'DigimallOffer' || storePlan.planType === 'TopzaOffer') && planData.inStock === false) {
-      return res.status(400).json({ success: false, message: 'This data plan is currently out of stock' });
-    }
-
-    const planProvider = storePlan.planType === 'DigimallOffer'
-      ? 'digimall'
-      : (storePlan.planType === 'TopzaOffer' ? 'topza' : 'xpresdata');
-
-    const baseCost = (storePlan.planType === 'XpresDataOffer' || storePlan.planType === 'DigimallOffer' || storePlan.planType === 'TopzaOffer')
-      ? resolvePlanPrice(planData, { userRole: 'agent', agentFeeStatus: 'paid' })
-      : planData.sellingPrice;
-    if (!isPositivePrice(baseCost)) {
-      return res.status(400).json({ success: false, message: 'This data plan does not have a valid admin price yet' });
-    }
-
-    if (!isPositivePrice(storePlan.customPrice)) {
-      return res.status(400).json({ success: false, message: 'This store plan does not have a valid selling price' });
-    }
-
-    const planNetwork = (storePlan.planType === 'XpresDataOffer' || storePlan.planType === 'DigimallOffer' || storePlan.planType === 'TopzaOffer') ? planData.isp : planData.network;
-
-    // Validate phone for network
-    if (!isValidNetworkNumber(phone, planNetwork)) {
-      return res.status(400).json({
-        success: false,
-        message: `Phone number does not match ${planNetwork} network`
-      });
-    }
-
-    const cooldownMinutes = await getOrderDuplicateCooldownMinutes();
-    const cooldownSince = new Date(Date.now() - cooldownMinutes * 60 * 1000);
-    const existingInFlightOrder = await Order.findOne({
-      provider: planProvider,
-      phoneNumber: { $in: phoneVariants(phone) },
-      status: { $in: ['pending', 'processing'] },
-      paymentStatus: { $ne: 'failed' },
-      createdAt: { $gte: cooldownSince },
-    }).sort({ createdAt: -1 });
-
-    if (existingInFlightOrder) {
-      return res.status(409).json({
-        success: false,
-        message: `A recent order (${existingInFlightOrder.orderNumber}) for this number is still ${existingInFlightOrder.status}. Please wait ${cooldownMinutes} minutes before buying this number again.`,
-        existingOrder: {
-          id: existingInFlightOrder._id,
-          orderNumber: existingInFlightOrder.orderNumber,
-          status: existingInFlightOrder.status,
-          phoneNumber: existingInFlightOrder.phoneNumber,
-          createdAt: existingInFlightOrder.createdAt,
-        },
-      });
-    }
-
-    // Create/Update Guest
-    let guest = await Guest.findOne({ email, store: store._id });
-    if (!guest) {
-      guest = await Guest.create({ email, phone, name, store: store._id });
-    } else {
-      guest.phone = phone;
-      guest.name = name;
-      await guest.save();
-    }
-
-    const reference = 'GSP' + Date.now() + Math.random().toString(36).substr(2, 5).toUpperCase();
-    const orderNumber = 'ORD-G' + Date.now().toString().slice(-6) + Math.random().toString(36).substr(2, 4).toUpperCase();
-
-    const agentCommission = storePlan.customPrice - baseCost;
-
-    // Build provider-specific apiPlanId
-    let apiPlanId;
-    if (storePlan.planType === 'XpresDataOffer') {
-      apiPlanId = `${planData.offerSlug}|${planData.volume}`;
-    } else if (storePlan.planType === 'DigimallOffer') {
-      apiPlanId = `${planData.offerSlug}|${planData.volume}`;
-    } else if (storePlan.planType === 'TopzaOffer') {
-      apiPlanId = planData.providerPlanId;
-    } else {
-      apiPlanId = planData.apiPlanId;
-    }
+    const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 
     const order = await Order.create({
-      userId: owner._id,
-      dataPlanId: planId,
+      userId: null,
+      isGuest: true,
+      storeId: store._id,
+      dataPlanId: storePlan.planId,
       planType: storePlan.planType,
-      apiPlanId,
       orderNumber,
-      network: planNetwork,
-      phoneNumber: phone,
-      dataAmount: (storePlan.planType === 'XpresDataOffer' || storePlan.planType === 'DigimallOffer' || storePlan.planType === 'TopzaOffer') ? `${planData.volume}GB` : planData.dataSize,
-      planName: (storePlan.planType === 'XpresDataOffer' || storePlan.planType === 'TopzaOffer') ? planData.name : (planData.planName || planData.name),
+      network: storePlan.network,
+      phoneNumber: normalizedPhone,
+      dataAmount: storePlan.dataSize,
+      planName: planData.name,
       amount: storePlan.customPrice,
       paymentMethod: 'paystack',
       status: 'pending',
       paymentStatus: 'pending',
+      provider: 'topza',
       source: 'store',
-      isGuest: true,
-      guestInfo: guest._id,
-      storeId: store._id,
-      adminBasePrice: baseCost,
-      agentCommission: agentCommission > 0 ? agentCommission : 0,
-      provider: planProvider,
     });
 
+    const txReference = `TXN-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
     const transaction = await Transaction.create({
-      userId: owner._id,
+      userId: null,
+      guestId: null,
+      isGuest: true,
       type: 'data_purchase',
       amount: storePlan.customPrice,
-      reference,
+      currency: 'GHS',
+      reference: txReference,
       status: 'pending',
       paymentStatus: 'pending',
-      description: `Guest Purchase: ${planData.name || planData.planName} for ${phone} (Store: ${store.name})`,
+      description: `Store purchase - ${planData.name} for ${normalizedPhone}`,
     });
 
-    const sysSettings = await SystemSettings.getSettings();
-    const dataPurchaseCharge = calculateDataPurchaseCharge({
-      dataPurchaseChargeType: sysSettings.transactionCharges?.dataPurchaseChargeType,
-      dataPurchaseCharge: sysSettings.transactionCharges?.dataPurchaseCharge,
-      isStoreBuyer: true,
-      paymentMethod: 'paystack',
-      baseAmount: storePlan.customPrice,
-    });
-    const storeTotal = storePlan.customPrice + dataPurchaseCharge;
+    order.transactionId = transaction._id;
+    order.transactionReference = txReference;
+    await order.save();
 
     const paystackPayload = {
       email,
-      amount: Math.round(storeTotal * 100),
-      reference,
+      amount: Math.round(storePlan.customPrice * 100),
+      reference: txReference,
       metadata: {
         orderId: order._id.toString(),
-        transactionId: transaction._id.toString(),
-        type: 'public_store_purchase',
-        storeSlug: store.slug,
-        guestId: guest._id.toString(),
-        transactionCharge: dataPurchaseCharge,
+        storeSlug: slug,
+        phoneNumber: normalizedPhone,
+        isGuest: true,
       },
     };
 
-    const response = await paystackAPI.post('/transaction/initialize', paystackPayload);
+    const paystackResponse = await paystackAPI.post('/transaction/initialize', paystackPayload);
 
-    if (!response.data.status) {
-      order.status = 'failed';
-      transaction.status = 'failed';
-      await Promise.all([order.save(), transaction.save()]);
-      return res.status(400).json({ success: false, message: response.data.message });
+    if (paystackResponse.data.status) {
+      order.paystackReference = paystackResponse.data.data.reference;
+      transaction.paystackReference = paystackResponse.data.data.reference;
+      await order.save();
+      await transaction.save();
+
+      res.status(200).json({
+        success: true,
+        data: {
+          authorizationUrl: paystackResponse.data.data.authorization_url,
+          reference: paystackResponse.data.data.reference,
+          orderNumber,
+          orderId: order._id,
+        },
+      });
+    } else {
+      throw new Error('Failed to initialize Paystack payment');
     }
-
-    // Link references to order
-    order.paystackReference = reference;
-    order.transactionReference = reference;
-    order.transactionId = transaction._id;
-    await order.save();
-
-    // Link order to guest
-    guest.orders.push(order._id);
-    await guest.save();
-
-    res.status(200).json({
-      success: true,
-      data: {
-        reference,
-        authorizationUrl: response.data.data.authorization_url,
-        accessCode: response.data.data.access_code,
-        orderId: order._id,
-      },
-    });
   } catch (error) {
-    console.error('Public store purchase init error:', error.response?.data || error.message);
+    console.error('purchasePublicBundle error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// POST /api/store/verify-payment - Verify public payment
-exports.verifyPublicStorePayment = async (req, res) => {
+exports.verifyPublicPayment = async (req, res) => {
   try {
     const { reference } = req.body;
+
     if (!reference) {
-      return res.status(400).json({ success: false, message: 'Reference required' });
+      return res.status(400).json({ success: false, message: 'Reference is required' });
     }
 
-    const order = await Order.findOne({ transactionReference: reference }).populate('guestInfo storeId');
-    if (!order) {
-      return res.status(404).json({ success: false, message: 'Order not found' });
+    const transaction = await Transaction.findOne({ reference });
+
+    if (!transaction) {
+      return res.status(404).json({ success: false, message: 'Transaction not found' });
     }
 
-    if (order.status === 'completed' || order.status === 'processing') {
-      return res.status(200).json({ success: true, message: 'Order already processed', order });
+    if (transaction.paymentStatus === 'completed') {
+      const order = await Order.findOne({ transactionReference: transaction.reference });
+      return res.json({
+        success: true,
+        message: 'Payment already verified',
+        data: { order, transaction },
+      });
     }
 
-    const response = await paystackAPI.get(`/transaction/verify/${reference}`);
-    if (!response.data.status || response.data.data.status !== 'success') {
-      order.paymentStatus = 'failed';
-      await order.save();
+    const verifyResponse = await paystackAPI.get(`/transaction/verify/${reference}`);
+
+    if (verifyResponse.data.data.status !== 'success') {
+      transaction.status = 'failed';
+      transaction.paymentStatus = 'failed';
+      await transaction.save();
+
+      await Order.updateOne(
+        { transactionReference: transaction.reference },
+        {
+          $set: {
+            paymentStatus: 'failed',
+            status: 'failed',
+            errorMessage: 'Payment verification failed',
+          },
+        }
+      );
+
       return res.status(400).json({ success: false, message: 'Payment verification failed' });
     }
 
-    const paystackData = response.data.data;
-    order.paymentStatus = 'completed';
-    order.paidAt = new Date();
-    order.paystackReference = paystackData.reference;
-    order.status = 'processing';
-    await order.save();
+    transaction.status = 'completed';
+    transaction.paymentStatus = 'completed';
+    transaction.paystackReference = verifyResponse.data.data.reference;
+    await transaction.save();
 
-    await creditCommissionForOrder(order);
-
-    // Update Transaction
-    await Transaction.findOneAndUpdate(
-      { reference },
-      { status: 'completed', paymentStatus: 'completed', paystackReference: paystackData.reference }
-    );
-
-    // Update Guest stats
-    if (order.guestInfo) {
-      const guest = await Guest.findById(order.guestInfo);
-      if (guest) {
-        guest.totalPurchases += 1;
-        guest.lastPurchaseAt = new Date();
-        await guest.save();
-      }
-    }
-
-    // Dispatch purchase to correct provider
-    let purchaseResult;
-    if (order.provider === 'digimall') {
-      const { purchaseDataBundle: digimallBuy } = require('../utils/digimallApi');
-      const [offerSlug, volume] = typeof order.apiPlanId === 'string' ? order.apiPlanId.split('|') : [order.apiPlanId, ''];
-      const idempotencyKey = 'DGM' + order.orderNumber;
-      purchaseResult = await digimallBuy(offerSlug, order.phoneNumber, order.network, volume, idempotencyKey);
-      if (purchaseResult.success) {
-        order.externalOrderId = purchaseResult.data?.orderId || purchaseResult.data?.reference || 'UNTRACKED_' + Date.now();
-        order.transactionReference = purchaseResult.data?.reference || purchaseResult.data?.orderId || order.transactionReference;
-      }
-    } else if (order.provider === 'topza') {
-      const { purchaseDataBundle: topzaBuy } = require('../utils/topzaApi');
-      const idempotencyKey = 'TPZ' + order.orderNumber;
-      purchaseResult = await topzaBuy(order.apiPlanId, order.phoneNumber, order.network, null, idempotencyKey);
-      if (purchaseResult.success) {
-        order.externalOrderId = purchaseResult.data?.orderId || purchaseResult.data?.reference || 'UNTRACKED_' + Date.now();
-        order.externalOrderNumber = purchaseResult.data?.orderNumber || purchaseResult.data?.raw?.data?.order?.orderNumber || order.externalOrderNumber;
-        order.transactionReference = purchaseResult.data?.reference || purchaseResult.data?.orderId || order.transactionReference;
-        order.providerMessage = purchaseResult.data?.message || order.providerMessage;
-        order.providerStatus = purchaseResult.data?.status || 'Processing';
-      }
-    } else {
-      const [offerSlug, volume] = typeof order.apiPlanId === 'string' ? order.apiPlanId.split('|') : [order.apiPlanId, ''];
-      const { purchaseDataBundle } = require('../utils/xpresDataApi');
-      purchaseResult = await purchaseDataBundle(offerSlug, order.phoneNumber, order.network, volume);
-      if (purchaseResult.success) {
-        order.externalOrderId = purchaseResult.data.orderId || purchaseResult.data.reference || purchaseResult.data.order?.id;
-        if (!order.externalOrderId) {
-          console.error(`[Store Verify] WARNING: externalOrderId not captured! Full response:`, purchaseResult.data);
-          order.externalOrderId = 'UNTRACKED_' + Date.now();
-        }
-        order.providerMessage = purchaseResult.data.message;
-      }
-    }
-
-    if (purchaseResult.success) {
+    const order = await Order.findOne({ transactionReference: transaction.reference });
+    if (order) {
+      order.paymentStatus = 'completed';
       order.status = 'processing';
-      order.syncAttempts = 0;
-      await order.save();
-
-      // Update Store stats
-      await Store.findByIdAndUpdate(order.storeId, {
-        $inc: { totalRevenue: order.amount, totalOrders: 1 }
-      });
-    } else {
-      order.status = 'failed';
-      order.errorMessage = purchaseResult.error || 'Provider purchase failed';
       await order.save();
     }
 
-    res.status(200).json({ success: true, message: 'Payment verified and order processed', order });
+    res.json({
+      success: true,
+      message: 'Payment verified and order is being processed',
+      data: { order, transaction },
+    });
   } catch (error) {
-    console.error('Public store verify error:', error.response?.data || error.message);
+    console.error('verifyPublicPayment error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// 14. GET /public/:slug/track/:phone - Track guest orders
-exports.trackGuestOrders = async (req, res) => {
+exports.trackGuestOrdersByStore = async (req, res) => {
   try {
     const { slug, phone } = req.params;
 
-    if (!slug || !phone) {
-      return res.status(400).json({ success: false, message: 'Slug and phone number required' });
+    if (!phone) {
+      return res.status(400).json({ success: false, message: 'Phone number is required' });
     }
 
-    const normalizedSlug = normalizeSlug(slug);
-
-    if (!normalizedSlug) {
-      return res.status(400).json({ success: false, message: 'Store slug is required' });
-    }
-
-    const store = await Store.findOne({ slug: normalizedSlug });
+    const store = await Store.findOne({ slug });
     if (!store) {
       return res.status(404).json({ success: false, message: 'Store not found' });
     }
 
-    // Find orders for this store matching the phone number
-    // We check both the main phoneNumber field and the guestInfo phone field
-    const orders = await Order.find({
-      storeId: store._id,
-      $or: [
-        { phoneNumber: phone },
-        { 'guestInfo.phone': phone }
-      ]
+    const guest = await Guest.findOne({
+      phone: phone,
+      store: store._id,
     })
-      .select('orderNumber network phoneNumber dataAmount planName amount status createdAt completedAt')
-      .sort({ createdAt: -1 });
+      .populate({
+        path: 'orders',
+        match: { storeId: store._id },
+        options: { sort: { createdAt: -1 } },
+      });
 
-    res.status(200).json({
-      success: true,
-      orders,
-      store: {
-        name: store.name,
-        theme: store.theme,
-        logo: store.logo
-      }
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-const isValidNetworkNumber = (_phone, _network) => {
-  // Simple check for now, can be expanded based on utility patterns
-  return true;
-};
-
-// 14. GET /my-store/available-afa - Get available AFA products
-exports.getAvailableAfaProducts = async (req, res) => {
-  try {
-    const user = await User.findById(req.userId);
-    if (user.role !== 'agent') {
-      return res.status(403).json({ success: false, message: 'Agents only' });
-    }
-
-    const afaOffers = await AfaOffer.find({ status: 'active' });
-    const availableProducts = afaOffers.map(offer => {
-      const agentBasePrice = resolvePlanPrice(offer, { userRole: 'agent', agentFeeStatus: 'paid' });
-      return {
-        _id: offer._id,
-        serviceName: offer.serviceName,
-        agentPrice: agentBasePrice,
-        publicPrice: offer.sellingPrice,
-      };
-    });
-
-    res.status(200).json({
-      success: true,
-      products: availableProducts,
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-// 15. POST /my-store/afa - Add AFA product to store
-exports.addAfaToStore = async (req, res) => {
-  try {
-    const user = await User.findById(req.userId);
-    if (user.role !== 'agent') {
-      return res.status(403).json({ success: false, message: 'Agents only' });
-    }
-
-    const { afaId, customPrice } = req.body;
-
-    if (!afaId || customPrice === undefined) {
-      return res.status(400).json({ success: false, message: 'afaId and customPrice required' });
-    }
-
-    const afaOffer = await AfaOffer.findById(afaId);
-    if (!afaOffer) {
-      return res.status(404).json({ success: false, message: 'AFA product not found' });
-    }
-
-    const minPrice = resolvePlanPrice(afaOffer, { userRole: 'agent', agentFeeStatus: 'paid' });
-    if (customPrice < minPrice) {
-      return res.status(400).json({
-        success: false,
-        message: `Custom price cannot be below base cost (${minPrice})`
+    if (!guest || guest.orders.length === 0) {
+      return res.json({
+        success: true,
+        data: {
+          orders: [],
+          totalOrders: 0,
+        },
+        message: 'No orders found for this phone number',
       });
     }
 
-    let store = await Store.findOne({ owner: user._id });
-    if (!store) {
-      return res.status(404).json({ success: false, message: 'Store not found' });
-    }
+    const orders = guest.orders.map((order) => ({
+      orderNumber: order.orderNumber,
+      network: order.network,
+      phoneNumber: order.phoneNumber,
+      dataAmount: order.dataAmount,
+      planName: order.planName,
+      amount: order.amount,
+      status: order.status,
+      paymentStatus: order.paymentStatus,
+      paymentMethod: order.paymentMethod,
+      createdAt: order.createdAt,
+      completedAt: order.completedAt,
+      errorMessage: order.errorMessage,
+      providerMessage: order.providerMessage,
+    }));
 
-    store.afaProducts = store.afaProducts.filter(p => p.afaId && p.afaId.toString() !== afaId);
-    store.afaProducts.push({
-      afaId,
-      customPrice,
-      isActive: true,
-    });
-
-    await store.save();
-    await store.populate('afaProducts.afaId');
-
-    if (global.io) {
-      global.io.to(`store:${store.slug}`).emit('store_updated', { type: 'inventory', store });
-    }
-
-    res.status(201).json({
+    res.json({
       success: true,
-      store: store.toObject(),
+      data: {
+        orders: orders,
+        totalOrders: orders.length,
+        guestInfo: {
+          email: guest.email,
+          name: guest.name,
+          phone: guest.phone,
+          totalPurchases: guest.totalPurchases,
+          lastPurchaseAt: guest.lastPurchaseAt,
+        },
+      },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-// 16. PATCH /my-store/afa/:afaId - Update AFA price
-exports.updateStoreAfa = async (req, res) => {
-  try {
-    const user = await User.findById(req.userId);
-    const { afaId } = req.params;
-    const { customPrice, isActive } = req.body;
-
-    let store = await Store.findOne({ owner: user._id }).populate('afaProducts.afaId');
-    if (!store) {
-      return res.status(404).json({ success: false, message: 'Store not found' });
-    }
-
-    const afaProduct = store.afaProducts.find(p => p.afaId && (p.afaId._id.toString() === afaId || p.afaId.toString() === afaId));
-    if (!afaProduct) {
-      return res.status(404).json({ success: false, message: 'AFA product not in store' });
-    }
-
-    if (customPrice !== undefined) {
-      const minPrice = resolvePlanPrice(afaProduct.afaId, { userRole: 'agent', agentFeeStatus: 'paid' });
-      if (customPrice < minPrice) {
-        return res.status(400).json({
-          success: false,
-          message: `Custom price cannot be below base cost (${minPrice})`
-        });
-      }
-      afaProduct.customPrice = customPrice;
-    }
-
-    if (isActive !== undefined) {
-      afaProduct.isActive = isActive;
-    }
-
-    await store.save();
-
-    if (global.io) {
-      global.io.to(`store:${store.slug}`).emit('store_updated', { type: 'inventory', store });
-    }
-
-    res.status(200).json({
-      success: true,
-      store: store.toObject(),
+    console.error('Error tracking guest orders by store:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to track orders',
     });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
   }
 };
-
-// 17. DELETE /my-store/afa/:afaId - Remove AFA from store
-exports.removeAfaFromStore = async (req, res) => {
-  try {
-    const user = await User.findById(req.userId);
-    const { afaId } = req.params;
-
-    let store = await Store.findOne({ owner: user._id });
-    if (!store) {
-      return res.status(404).json({ success: false, message: 'Store not found' });
-    }
-
-    store.afaProducts = store.afaProducts.filter(p => p.afaId && p.afaId.toString() !== afaId);
-    await store.save();
-
-    if (global.io) {
-      global.io.to(`store:${store.slug}`).emit('store_updated', { type: 'inventory', store });
-    }
-
-    res.status(200).json({
-      success: true,
-      store: store.toObject(),
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-module.exports = exports;

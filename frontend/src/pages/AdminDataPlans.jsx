@@ -52,7 +52,7 @@ export default function AdminDataPlans() {
   const [totalPages, setTotalPages] = useState(0);
   const [stats, setStats] = useState({ totalPlans: 0, activePlans: 0, outOfStockPlans: 0, avgMargin: 0 });
 
-  const activeProviderDisplayName = 'XpresData';
+  const activeProviderDisplayName = 'Topza';
 
   const networkCatalog = (settings?.networkCatalog || []).filter(n => n?.isActive !== false);
 

@@ -19,7 +19,7 @@ import {
   Globe,
   User,
 } from 'lucide-react';
-import { useSettings } from '../context/SettingsContext';
+// import { useSettings } from '../context/SettingsContext';
 
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
@@ -68,14 +68,8 @@ const styles = `
 
 export default function AdminSidebar({ isOpen, onClose }) {
   const location = useLocation();
-  const { settings } = useSettings();
-  const vtuProvider = settings?.vtuProvider || 'topza';
-
-  const offersNavItem = vtuProvider === 'digimall'
-    ? { path: '/admin/digimall-plans', label: 'DigiMall Offers', icon: Tag }
-    : vtuProvider === 'topza'
-      ? { path: '/admin/topza-plans', label: 'Topza Offers', icon: Tag }
-      : { path: '/admin/offers', label: 'Offers', icon: Tag };
+  // const { settings } = useSettings();
+  const offersNavItem = { path: '/admin/topza-plans', label: 'Topza Offers', icon: Tag };
 
   const navItems = [
     { path: '/admin',                          label: 'Dashboard',        icon: LayoutDashboard },
@@ -141,7 +135,7 @@ export default function AdminSidebar({ isOpen, onClose }) {
           position: 'fixed', inset: 0,
           background: 'rgba(0,0,0,0.45)',
           backdropFilter: 'blur(3px)',
-          zIndex: 40,
+          zIndex: 30,
           transition: 'opacity 0.25s',
           opacity: isOpen ? 1 : 0,
           pointerEvents: isOpen ? 'auto' : 'none',
@@ -157,7 +151,7 @@ export default function AdminSidebar({ isOpen, onClose }) {
           top: 0, left: 0,
           height: '100vh',
           width: 264,
-          zIndex: 50,
+          zIndex: 40,
           background: '#fff',
           borderRight: '1.5px solid #e4e4de',
           display: 'flex',

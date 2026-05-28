@@ -5,7 +5,7 @@ import { formatCurrencyAbbreviated } from '../utils/formatCurrency';
 import AdminSidebar from '../components/AdminSidebar';
 import { OrderDetailsModal } from '../components/AdminOrderModals';
 import { useSidebar } from '../hooks/useSidebar';
-import { admin as adminAPI, digimall as digimallAPI, topza as topzaAPI } from '../services/api';
+import { admin as adminAPI, topza as topzaAPI } from '../services/api';
 import { useSettings } from '../context/SettingsContext';
 
 const styles = `
@@ -239,37 +239,18 @@ const styles = `
     align-items: center;
     gap: 4px;
   }
-
-  .vtu-provider-pill {
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    border: 1.5px solid #e4e4de;
-    background: #fff;
-    color: #666;
-  }
-
-  .vtu-provider-pill.active {
-    background: #111;
-    color: #fff;
-    border-color: #111;
-  }
 `;
 
 export default function AdminVtuSettings() {
   const TOPZA_WALLET_URL = 'https://www.topzagh.com/wallet';
   const { sidebarOpen, closeSidebar } = useSidebar();
-  const { settings: globalSettings, updateVtuProvider } = useSettings();
+  const { settings: globalSettings } = useSettings();
   const [walletData, setWalletData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [syncing, setSyncing] = useState(false);
-  const [systemSettings, setSystemSettings] = useState(globalSettings || { vtuProvider: 'xpresdata' });
+  const [, setSystemSettings] = useState(globalSettings || { vtuProvider: 'topza' });
   const [updatingSettings, setUpdatingSettings] = useState(false);
-  const [switchingProvider, setSwitchingProvider] = useState(false);
   const [networkCatalog, setNetworkCatalog] = useState([]);
   const networkCatalogRef = useRef(networkCatalog);
 
@@ -277,9 +258,6 @@ export default function AdminVtuSettings() {
     networkCatalogRef.current = networkCatalog;
   }, [networkCatalog]);
 
-
-  const [DigiMallNetworks, setDigiMallNetworks] = useState([]);
-  const [DigiMallNetworksLoading, setDigiMallNetworksLoading] = useState(false);
   const [topzaNetworks, setTopzaNetworks] = useState([]);
   const [topzaNetworksLoading, setTopzaNetworksLoading] = useState(false);
   const [transactions, setTransactions] = useState([]);
@@ -291,8 +269,6 @@ export default function AdminVtuSettings() {
   const [showRefundConfirm, setShowRefundConfirm] = useState(false);
   const [refundLoading, setRefundLoading] = useState(false);
 
-  const activeProvider = systemSettings?.vtuProvider || 'topza';
-
   const showMessage = (msg, isError = false) => {
     if (isError) {
       toast.error(msg, { duration: 5000 });
@@ -300,10 +276,6 @@ export default function AdminVtuSettings() {
       toast.success(msg, { duration: 3000 });
     }
   };
-
-  const activeProviderDisplayName = activeProvider === 'digimall'
-    ? 'DigiMall'
-    : (activeProvider === 'topza' ? 'Topza' : 'XpresData');
 
   const formatPrice2dpNoRound = (value) => {
     const numeric = Number(value);
@@ -319,27 +291,6 @@ export default function AdminVtuSettings() {
     const [whole, fraction = ''] = absString.split('.');
     return `${sign}${whole}.${(fraction + '00').slice(0, 2)}`;
   };
-
-  const fetchDigiMallNetworks = useCallback(async (catalog) => {
-    try {
-      setDigiMallNetworksLoading(true);
-      const response = await digimallAPI.getNetworks();
-      if (response.success && Array.isArray(response.networks)) {
-        const existing = catalog || networkCatalogRef.current;
-        const merged = response.networks
-          .filter((n) => n && n.networkId !== undefined && n.name !== undefined)
-          .map((n) => {
-            const saved = existing.find((c) => c.slug === String(n.networkId));
-            return { networkId: n.networkId, name: n.name, logoUrl: saved?.logoUrl || '' };
-          });
-        setDigiMallNetworks(merged);
-      }
-    } catch (err) {
-      console.error('Failed to fetch DigiMall networks:', err);
-    } finally {
-      setDigiMallNetworksLoading(false);
-    }
-  }, []);
 
   const fetchTopzaNetworks = useCallback(async (catalog) => {
     try {
@@ -375,33 +326,22 @@ export default function AdminVtuSettings() {
         setSystemSettings(response.settings);
         const catalog = response.settings?.networkCatalog || [];
         setNetworkCatalog(catalog);
-        if ((response.settings?.vtuProvider || 'xpresdata') === 'digimall') {
-          fetchDigiMallNetworks(catalog);
-        }
-        if ((response.settings?.vtuProvider || 'xpresdata') === 'topza') {
-          fetchTopzaNetworks(catalog);
-        }
+        fetchTopzaNetworks(catalog);
       }
     } catch (err) {
       console.error('Failed to fetch system settings', err);
     }
-  }, [fetchDigiMallNetworks, fetchTopzaNetworks]);
+  }, [fetchTopzaNetworks]);
 
-  const fetchWalletSettings = useCallback(async (provider, { silent = false } = {}) => {
-    const prov = provider || activeProvider;
+  const fetchWalletSettings = useCallback(async ({ silent = false } = {}) => {
     try {
       if (!silent) setLoading(true);
       setError('');
-      const response = prov === 'digimall'
-        ? await adminAPI.getDigimallWalletSettings()
-        : (prov === 'topza'
-          ? await adminAPI.getTopzaWalletSettings()
-          : await adminAPI.getXpresDataWalletSettings());
+      const response = await adminAPI.getTopzaWalletSettings();
       if (response.success) {
         setWalletData(response.data);
         if (response.data?.error) {
-          const providerLabel = prov === 'digimall' ? 'DigiMall' : (prov === 'topza' ? 'Topza' : 'XpresData');
-          setError(`${providerLabel} API Error: ${response.data.error}`);
+          setError(`Topza API Error: ${response.data.error}`);
         }
       } else {
         setError(response.message || 'Failed to fetch wallet settings');
@@ -411,38 +351,7 @@ export default function AdminVtuSettings() {
     } finally {
       if (!silent) setLoading(false);
     }
-  }, [activeProvider]);
-
-  useEffect(() => { fetchSystemSettings(); }, [fetchSystemSettings]);
-  useEffect(() => { fetchWalletSettings(activeProvider); }, [activeProvider, fetchWalletSettings]);
-  useEffect(() => {
-    if (globalSettings) {
-      setSystemSettings(globalSettings);
-      setNetworkCatalog(globalSettings?.networkCatalog || []);
-    }
-  }, [globalSettings]);
-
-  useEffect(() => {
-    if (activeProvider === 'digimall') {
-      fetchDigiMallNetworks();
-      fetchDigiMallTransactions();
-    } else if (activeProvider === 'topza') {
-      fetchTopzaNetworks();
-      fetchTopzaTransactions();
-    }
-  }, [activeProvider, fetchDigiMallNetworks, fetchTopzaNetworks]);
-
-  const fetchDigiMallTransactions = async () => {
-    try {
-      setTransactionsLoading(true);
-      setTransactionsError('');
-      setTransactions([]);
-    } catch (err) {
-      setTransactionsError(err?.message || 'Failed to fetch transactions');
-    } finally {
-      setTransactionsLoading(false);
-    }
-  };
+  }, []);
 
   const fetchTopzaTransactions = async ({ silent = false } = {}) => {
     try {
@@ -462,17 +371,27 @@ export default function AdminVtuSettings() {
     }
   };
 
+  useEffect(() => { fetchSystemSettings(); }, [fetchSystemSettings]);
+  useEffect(() => { fetchWalletSettings(); }, [fetchWalletSettings]);
   useEffect(() => {
-    if (activeProvider !== 'topza') {
-      setPollingTopza(false);
-      return undefined;
+    if (globalSettings) {
+      setSystemSettings(globalSettings);
+      setNetworkCatalog(globalSettings?.networkCatalog || []);
     }
+  }, [globalSettings]);
+
+  useEffect(() => {
+    fetchTopzaNetworks();
+    fetchTopzaTransactions();
+  }, [fetchTopzaNetworks]);
+
+  useEffect(() => {
     let cancelled = false;
     setPollingTopza(true);
     const pollTopza = async () => {
       try {
         await Promise.all([
-          fetchWalletSettings('topza', { silent: true }),
+          fetchWalletSettings({ silent: true }),
           fetchTopzaTransactions({ silent: true }),
         ]);
       } catch {
@@ -488,13 +407,13 @@ export default function AdminVtuSettings() {
       clearInterval(intervalId);
       setPollingTopza(false);
     };
-  }, [activeProvider, fetchWalletSettings]);
+  }, [fetchWalletSettings]);
 
   const handleTopzaRefresh = async () => {
     try {
       setSyncing(true);
       await Promise.all([
-        fetchWalletSettings('topza', { silent: false }),
+        fetchWalletSettings({ silent: false }),
         fetchTopzaTransactions({ silent: false }),
       ]);
     } finally {
@@ -546,9 +465,7 @@ export default function AdminVtuSettings() {
           setSelectedTransaction(updatedTransaction);
           setShowOrderDetailsModal(true);
         }
-        if (activeProvider === 'topza') {
-          await fetchTopzaTransactions();
-        }
+        await fetchTopzaTransactions();
       } else {
         showMessage(response.message || 'Failed to refund order', true);
       }
@@ -559,83 +476,31 @@ export default function AdminVtuSettings() {
     }
   };
 
-
-
-  const handleProviderSwitch = async (newProvider) => {
-    if (newProvider === activeProvider || switchingProvider) return;
-    try {
-      setSwitchingProvider(true);
-      setError('');
-      await adminAPI.updateSystemSettings({ vtuProvider: newProvider });
-      const updated = { ...systemSettings, vtuProvider: newProvider };
-      setSystemSettings(updated);
-      updateVtuProvider(newProvider);
-      setWalletData(null);
-    } catch (err) {
-      setError(err?.message || 'Failed to switch provider');
-    } finally {
-      setSwitchingProvider(false);
-    }
-  };
-
-
-
   const formatDate = (ds) => new Date(ds).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
   const formatTime = (ds) => new Date(ds).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
-  const handleNetworkChange = (index, field, value) => {
-    setNetworkCatalog((prev) => {
-      const updated = [...prev];
-      updated[index] = { ...updated[index], [field]: value };
-      return updated;
-    });
-  };
-
-
-
-  const handleSaveNetworks = async () => {
-    try {
-      setUpdatingSettings(true);
-      const payload = networkCatalog.map((n) => ({
-        name: n.name || '', slug: n.slug || n.name, logoUrl: n.logoUrl || '', isActive: n.isActive !== false,
-      }));
-      await adminAPI.updateSystemSettings({ networkCatalog: payload });
-      await fetchSystemSettings();
-    } catch (err) {
-      setError(err?.message || 'Failed to save networks');
-    } finally {
-      setUpdatingSettings(false);
-    }
-  };
-
-  const handleDigiMallLogoChange = (networkId, logoUrl) => {
-    setDigiMallNetworks((prev) => prev.map((n) => n.networkId === networkId ? { ...n, logoUrl } : n));
-  };
-
-  const handleSaveDigiMallNetworks = async () => {
-    try {
-      setUpdatingSettings(true);
-      const payload = DigiMallNetworks
-        .filter((n) => n && n.networkId !== undefined && n.name !== undefined)
-        .map((n) => ({
-          name: n.name,
-          slug: String(n.networkId),
-          logoUrl: n.logoUrl || '',
-          isActive: true,
-        }));
-      if (payload.length === 0) {
-        setError('No valid networks to save');
-        setUpdatingSettings(false);
-        return;
-      }
-      await adminAPI.updateSystemSettings({ networkCatalog: payload });
-      setNetworkCatalog(payload);
-    } catch (err) {
-      setError(err?.message || 'Failed to save network logos');
-    } finally {
-      setUpdatingSettings(false);
-    }
-  };
+  // const handleNetworkChange = (index, field, value) => {
+  //   setNetworkCatalog((prev) => {
+  //     const updated = [...prev];
+  //     updated[index] = { ...updated[index], [field]: value };
+  //     return updated;
+  //   });
+  // };
+  //
+  // const handleSaveNetworks = async () => {
+  //   try {
+  //     setUpdatingSettings(true);
+  //     const payload = networkCatalog.map((n) => ({
+  //       name: n.name || '', slug: n.slug || n.name, logoUrl: n.logoUrl || '', isActive: n.isActive !== false,
+  //     }));
+  //     await adminAPI.updateSystemSettings({ networkCatalog: payload });
+  //     await fetchSystemSettings();
+  //   } catch (err) {
+  //     setError(err?.message || 'Failed to save networks');
+  //   } finally {
+  //     setUpdatingSettings(false);
+  //   }
+  // };
 
   const handleTopzaLogoChange = (networkId, logoUrl) => {
     setTopzaNetworks((prev) => prev.map((n) => n.networkId === networkId ? { ...n, logoUrl } : n));
@@ -678,20 +543,6 @@ export default function AdminVtuSettings() {
           <div style={{ flex: 1 }}>
             <h2 className="vtu-h2">VTU Service Settings</h2>
             <p className="vtu-p">Manage your VTU providers and view wallet activity</p>
-          </div>
-          <div className="flex gap-2">
-            {['topza'].map((p) => (
-              <button
-                key={p}
-                disabled={switchingProvider}
-                onClick={() => handleProviderSwitch(p)}
-                className={`vtu-provider-pill ${activeProvider === p ? 'active' : ''}`}
-              >
-                {p === 'digimall' ? 'DigiMall' : (p === 'topza' ? 'Topza' : 'XpresData')}
-                {activeProvider === p && <span style={{ marginLeft: '4px', fontSize: '10px', opacity: 0.8 }}>(ACTIVE)</span>}
-              </button>
-            ))}
-            {switchingProvider && <RefreshCw size={16} className="animate-spin" style={{ margin: 'auto 0' }} />}
           </div>
         </div>
 
@@ -741,7 +592,7 @@ export default function AdminVtuSettings() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div>
                     <p className="vtu-stat-label">Active Provider</p>
-                    <p className="vtu-stat-value" style={{ textTransform: 'capitalize' }}>{activeProvider}</p>
+                    <p className="vtu-stat-value" style={{ textTransform: 'capitalize' }}>topza</p>
                   </div>
                   <Activity size={20} style={{ color: '#f0a500' }} />
                 </div>
@@ -780,29 +631,27 @@ export default function AdminVtuSettings() {
               <div className="vtu-banner-flex">
                 <div>
                   <h3 style={{ fontSize: '20px', fontWeight: '800', margin: 0, color: '#fff', letterSpacing: '-0.01em' }}>
-                    {activeProviderDisplayName} Integration
+                    Topza Integration
                   </h3>
                   <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', marginTop: '6px', fontWeight: '500' }}>
-                    Real-time connection with <span style={{ color: '#f0a500' }}>{activeProviderDisplayName}</span> is active and healthy.
+                    Real-time connection with <span style={{ color: '#f0a500' }}>Topza</span> is active and healthy.
                   </p>
                 </div>
                 <div className="flex gap-3">
-                  {activeProvider === 'topza' && (
-                    <a
-                      href={TOPZA_WALLET_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="vtu-btn-primary"
-                      style={{ 
-                        background: '#f0a500', 
-                        color: '#111', 
-                        boxShadow: '0 4px 15px rgba(240, 165, 0, 0.2)'
-                      }}
-                    >
-                      <Wallet size={18} />
-                      Top Up Wallet
-                    </a>
-                  )}
+                  <a
+                    href={TOPZA_WALLET_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="vtu-btn-primary"
+                    style={{ 
+                      background: '#f0a500', 
+                      color: '#111', 
+                      boxShadow: '0 4px 15px rgba(240, 165, 0, 0.2)'
+                    }}
+                  >
+                    <Wallet size={18} />
+                    Top Up Wallet
+                  </a>
                   <button
                     onClick={handleTopzaRefresh}
                     disabled={syncing || transactionsLoading}
@@ -827,7 +676,7 @@ export default function AdminVtuSettings() {
                   <p className="vtu-p">Manage display logos for available networks</p>
                 </div>
                 <button
-                  onClick={activeProvider === 'digimall' ? handleSaveDigiMallNetworks : (activeProvider === 'topza' ? handleSaveTopzaNetworks : handleSaveNetworks)}
+                  onClick={handleSaveTopzaNetworks}
                   disabled={updatingSettings}
                   className="vtu-btn-primary"
                 >
@@ -836,7 +685,7 @@ export default function AdminVtuSettings() {
                 </button>
               </div>
 
-              {(activeProvider === 'digimall' ? DigiMallNetworksLoading : topzaNetworksLoading) ? (
+              {topzaNetworksLoading ? (
                 <div style={{ textAlign: 'center', padding: '40px' }}>
                   <RefreshCw size={24} className="animate-spin" style={{ margin: '0 auto 12px', color: '#999' }} />
                   <p style={{ fontSize: '13px', color: '#999' }}>Fetching networks...</p>
@@ -853,7 +702,7 @@ export default function AdminVtuSettings() {
                       </tr>
                     </thead>
                     <tbody>
-                      {(activeProvider === 'digimall' ? DigiMallNetworks : (activeProvider === 'topza' ? topzaNetworks : networkCatalog)).map((n, idx) => (
+                      {topzaNetworks.map((n, idx) => (
                         <tr key={n.networkId || n.code || idx}>
                           <td className="vtu-td" style={{ fontWeight: '700' }}>{n.name}</td>
                           <td className="vtu-td font-mono" style={{ fontSize: '12px' }}>{n.slug || n.code || n.networkId}</td>
@@ -861,11 +710,7 @@ export default function AdminVtuSettings() {
                             <input
                               type="text"
                               value={n.logoUrl || ''}
-                              onChange={(e) => {
-                                if (activeProvider === 'digimall') handleDigiMallLogoChange(n.networkId, e.target.value);
-                                else if (activeProvider === 'topza') handleTopzaLogoChange(n.networkId, e.target.value);
-                                else handleNetworkChange(idx, 'logoUrl', e.target.value);
-                              }}
+                              onChange={(e) => handleTopzaLogoChange(n.networkId, e.target.value)}
                               placeholder="https://example.com/logo.png"
                               className="vtu-input"
                               style={{ height: '36px' }}
@@ -889,156 +734,146 @@ export default function AdminVtuSettings() {
             </div>
 
             {/* Transactions Section */}
-            {(activeProvider === 'topza' || activeProvider === 'digimall') && (
-              <div className="vtu-main-card">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                  <div>
-                    <h3 style={{ fontSize: '18px', fontWeight: '800', margin: 0 }}>Recent API Transactions</h3>
-                    <p className="vtu-p">Monitor real-time purchase activity from your provider</p>
-                  </div>
-                  {pollingTopza && (
-                    <div className="vtu-badge" style={{ background: '#ecfdf5', color: '#059669', border: '1px solid #d1fae5' }}>
-                      <RefreshCw size={10} className="animate-spin" />
-                      Live Polling
-                    </div>
-                  )}
+            <div className="vtu-main-card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                <div>
+                  <h3 style={{ fontSize: '18px', fontWeight: '800', margin: 0 }}>Recent API Transactions</h3>
+                  <p className="vtu-p">Monitor real-time purchase activity from your provider</p>
                 </div>
-
-                {transactionsLoading && transactions.length === 0 ? (
-                  <div style={{ textAlign: 'center', padding: '40px' }}>
-                    <RefreshCw size={24} className="animate-spin" style={{ margin: '0 auto 12px', color: '#999' }} />
-                    <p style={{ fontSize: '13px', color: '#999' }}>Loading transactions...</p>
-                  </div>
-                ) : transactionsError ? (
-                  <div style={{ padding: '20px', textAlign: 'center', color: '#b91c1c', background: '#fff5f5', borderRadius: '8px' }}>
-                    {transactionsError}
-                  </div>
-                ) : transactions.length === 0 ? (
-                  <div style={{ padding: '40px', textAlign: 'center', color: '#999', border: '1.5px dashed #e4e4de', borderRadius: '14px' }}>
-                    No recent transactions found
-                  </div>
-                ) : (
-                  <div className="vtu-table-container">
-                    <table className="vtu-table">
-                      <thead>
-                        <tr>
-                          <th className="vtu-th">ID</th>
-                          <th className="vtu-th">Recipient</th>
-                          <th className="vtu-th">Details</th>
-                          <th className="vtu-th">Amount</th>
-                          <th className="vtu-th">Status</th>
-                          <th className="vtu-th">Date</th>
-                          <th className="vtu-th">Action</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {transactions.map((txn, i) => {
-                          const item = txn.order_items?.[0] || {};
-                          const providerOrder = txn.order || txn.data?.order || {};
-                          const txnId = txn.orderNumber || txn.orderId || txn.transaction_code || txn.transaction_id || txn.trx_ref || txn.id || txn.reference || providerOrder.orderNumber || providerOrder.orderId || '-';
-                          const recipient = item.beneficiary_number || txn.phoneNumber || txn.recipient_msisdn || txn.phone || txn.recipient || providerOrder.phoneNumber || '-';
-                          const network = item.network || txn.network || txn.network_name || providerOrder.network || (txn.network_id ? `Network ${txn.network_id}` : '-');
-                          const bundle = item.volume || txn.planName || providerOrder.planName || providerOrder.dataAmount || txn.dataAmount || (txn.shared_bundle ? `${(txn.shared_bundle / 1000).toFixed(1)}GB` : '-');
-                          const amount = Number.isFinite(Number(txn.amount)) ? `GHS ${formatPrice2dpNoRound(txn.amount)}` : '-';
-                          const status = item.status || txn.status || txn.transaction_status || '-';
-                          const date = txn.createdAt || txn.created_at || txn.lastUpdated || txn.date || txn.timestamp;
-                          
-                          const statusLower = String(status).toLowerCase();
-                          let badgeStyles = { background: '#f3f4f6', color: '#6b7280' };
-                          if (statusLower.includes('success') || statusLower.includes('complete')) {
-                            badgeStyles = { background: '#ecfdf5', color: '#059669', border: '1px solid #d1fae5' };
-                          } else if (statusLower.includes('fail') || statusLower.includes('error')) {
-                            badgeStyles = { background: '#fff5f5', color: '#b91c1c', border: '1px solid #fecaca' };
-                          } else if (statusLower.includes('pending') || statusLower.includes('processing')) {
-                            badgeStyles = { background: '#fffbeb', color: '#d97706', border: '1px solid #fef3c7' };
-                          }
-
-                          return (
-                            <tr key={txnId + i}>
-                              <td className="vtu-td font-mono" style={{ fontSize: '11px', color: '#999' }}>{String(txnId).slice(-8)}</td>
-                              <td className="vtu-td">
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                  <Phone size={12} style={{ color: '#999' }} />
-                                  <span style={{ fontWeight: '700' }}>{recipient}</span>
-                                </div>
-                              </td>
-                              <td className="vtu-td">
-                                <div style={{ fontSize: '12px' }}>
-                                  <div style={{ fontWeight: '600' }}>{network}</div>
-                                  <div style={{ color: '#666' }}>{bundle}</div>
-                                </div>
-                              </td>
-                              <td className="vtu-td font-bold" style={{ color: '#059669' }}>{amount}</td>
-                              <td className="vtu-td">
-                                <span className="vtu-badge" style={badgeStyles}>{status}</span>
-                              </td>
-                              <td className="vtu-td" style={{ fontSize: '11px', color: '#999' }}>
-                                {date ? (isNaN(Date.parse(date)) ? date : new Date(date).toLocaleString()) : '-'}
-                              </td>
-                              <td className="vtu-td">
-                                <button
-                                  onClick={() => openTransactionDetails(txn)}
-                                  style={{ padding: '6px', borderRadius: '6px', border: '1px solid #e4e4de', background: '#fff', cursor: 'pointer' }}
-                                >
-                                  <Eye size={14} style={{ color: '#666' }} />
-                                </button>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
+                {pollingTopza && (
+                  <div className="vtu-badge" style={{ background: '#ecfdf5', color: '#059669', border: '1px solid #d1fae5' }}>
+                    <RefreshCw size={10} className="animate-spin" />
+                    Live Polling
                   </div>
                 )}
               </div>
-            )}
+
+              {transactionsLoading && transactions.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '40px' }}>
+                  <RefreshCw size={24} className="animate-spin" style={{ margin: '0 auto 12px', color: '#999' }} />
+                  <p style={{ fontSize: '13px', color: '#999' }}>Loading transactions...</p>
+                </div>
+              ) : transactionsError ? (
+                <div style={{ padding: '20px', textAlign: 'center', color: '#b91c1c', background: '#fff5f5', borderRadius: '8px' }}>
+                  {transactionsError}
+                </div>
+              ) : transactions.length === 0 ? (
+                <div style={{ padding: '40px', textAlign: 'center', color: '#999', border: '1.5px dashed #e4e4de', borderRadius: '14px' }}>
+                  No recent transactions found
+                </div>
+              ) : (
+                <div className="vtu-table-container">
+                  <table className="vtu-table">
+                    <thead>
+                      <tr>
+                        <th className="vtu-th">ID</th>
+                        <th className="vtu-th">Recipient</th>
+                        <th className="vtu-th">Details</th>
+                        <th className="vtu-th">Amount</th>
+                        <th className="vtu-th">Status</th>
+                        <th className="vtu-th">Date</th>
+                        <th className="vtu-th">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {transactions.map((txn, i) => {
+                        const item = txn.order_items?.[0] || {};
+                        const providerOrder = txn.order || txn.data?.order || {};
+                        const txnId = txn.orderNumber || txn.orderId || txn.transaction_code || txn.transaction_id || txn.trx_ref || txn.id || txn.reference || providerOrder.orderNumber || providerOrder.orderId || '-';
+                        const recipient = item.beneficiary_number || txn.phoneNumber || txn.recipient_msisdn || txn.phone || txn.recipient || providerOrder.phoneNumber || '-';
+                        const network = item.network || txn.network || txn.network_name || providerOrder.network || (txn.network_id ? `Network ${txn.network_id}` : '-');
+                        const bundle = item.volume || txn.planName || providerOrder.planName || providerOrder.dataAmount || txn.dataAmount || (txn.shared_bundle ? `${(txn.shared_bundle / 1000).toFixed(1)}GB` : '-');
+                        const amount = Number.isFinite(Number(txn.amount)) ? `GHS ${formatPrice2dpNoRound(txn.amount)}` : '-';
+                        const status = item.status || txn.status || txn.transaction_status || '-';
+                        const date = txn.createdAt || txn.created_at || txn.lastUpdated || txn.date || txn.timestamp;
+                        
+                        const statusLower = String(status).toLowerCase();
+                        let badgeStyles = { background: '#f3f4f6', color: '#6b7280' };
+                        if (statusLower.includes('success') || statusLower.includes('complete')) {
+                          badgeStyles = { background: '#ecfdf5', color: '#059669', border: '1px solid #d1fae5' };
+                        } else if (statusLower.includes('fail') || statusLower.includes('error')) {
+                          badgeStyles = { background: '#fff5f5', color: '#b91c1c', border: '1px solid #fecaca' };
+                        } else if (statusLower.includes('pending') || statusLower.includes('processing')) {
+                          badgeStyles = { background: '#fffbeb', color: '#d97706', border: '1px solid #fef3c7' };
+                        }
+
+                        return (
+                          <tr key={txnId + i}>
+                            <td className="vtu-td font-mono" style={{ fontSize: '11px', color: '#999' }}>{String(txnId).slice(-8)}</td>
+                            <td className="vtu-td">
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <Phone size={12} style={{ color: '#999' }} />
+                                <span style={{ fontWeight: '700' }}>{recipient}</span>
+                              </div>
+                            </td>
+                            <td className="vtu-td">
+                              <div style={{ fontSize: '12px' }}>
+                                <div style={{ fontWeight: '600' }}>{network}</div>
+                                <div style={{ color: '#666' }}>{bundle}</div>
+                              </div>
+                            </td>
+                            <td className="vtu-td font-bold" style={{ color: '#059669' }}>{amount}</td>
+                            <td className="vtu-td">
+                              <span className="vtu-badge" style={badgeStyles}>{status}</span>
+                            </td>
+                            <td className="vtu-td" style={{ fontSize: '11px', color: '#999' }}>
+                              {date ? (isNaN(Date.parse(date)) ? date : new Date(date).toLocaleString()) : '-'}
+                            </td>
+                            <td className="vtu-td">
+                              <button
+                                onClick={() => openTransactionDetails(txn)}
+                                style={{ padding: '6px', borderRadius: '6px', border: '1px solid #e4e4de', background: '#fff', cursor: 'pointer' }}
+                              >
+                                <Eye size={14} style={{ color: '#666' }} />
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           </>
         )}
       </div>
 
       <OrderDetailsModal
         isOpen={showOrderDetailsModal}
-        onClose={() => {
-          setShowOrderDetailsModal(false);
-          setSelectedTransaction(null);
-        }}
+        onClose={() => setShowOrderDetailsModal(false)}
         order={selectedTransaction}
         onRefund={handleRefund}
       />
 
-      {showRefundConfirm && selectedTransaction && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" style={{ fontFamily: 'DM Sans, sans-serif' }}>
-          <div className="bg-white rounded-xl max-w-md w-full shadow-2xl overflow-hidden border border-slate-200">
-            <div className="p-6 border-b border-slate-100">
-              <h3 className="text-xl font-bold text-slate-900">Confirm Refund</h3>
-            </div>
-            <div className="p-6">
-              <p className="text-slate-600 mb-4">
-                Are you sure you want to refund order <span className="font-bold text-slate-900">{selectedTransaction.orderNumber}</span>?
-              </p>
-              <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-slate-500">Refund Amount</span>
-                  <span className="font-bold text-emerald-700">GHS {formatPrice2dpNoRound(selectedTransaction.amount)}</span>
-                </div>
-              </div>
-            </div>
-            <div className="p-6 border-t border-slate-100 flex gap-3">
+      {showRefundConfirm && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
+        }}>
+          <div style={{
+            background: '#fff', borderRadius: '14px', padding: '24px', maxWidth: '400px', width: '100%',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.2)'
+          }}>
+            <h3 style={{ fontSize: '18px', fontWeight: '800', margin: '0 0 8px 0' }}>Confirm Refund</h3>
+            <p style={{ fontSize: '14px', color: '#666', margin: '0 0 20px 0' }}>
+              Are you sure you want to refund this order? This action cannot be undone.
+            </p>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
               <button
-                type="button"
-                onClick={() => { setShowRefundConfirm(false); setSelectedTransaction(null); }}
-                disabled={refundLoading}
-                className="flex-1 px-4 py-2.5 bg-slate-100 text-slate-700 rounded-lg font-bold hover:bg-slate-200 transition disabled:opacity-50"
+                onClick={() => setShowRefundConfirm(false)}
+                className="vtu-btn-primary"
+                style={{ background: '#f5f5f0', color: '#111' }}
               >
                 Cancel
               </button>
               <button
-                type="button"
                 onClick={confirmRefund}
                 disabled={refundLoading}
-                className="flex-1 px-4 py-2.5 bg-orange-600 text-white rounded-lg font-bold hover:bg-orange-700 transition shadow-lg shadow-orange-200 disabled:opacity-50"
+                className="vtu-btn-primary"
+                style={{ background: '#dc2626' }}
               >
-                {refundLoading ? 'Processing...' : 'Confirm Refund'}
+                {refundLoading ? <RefreshCw size={16} className="animate-spin" /> : 'Confirm Refund'}
               </button>
             </div>
           </div>

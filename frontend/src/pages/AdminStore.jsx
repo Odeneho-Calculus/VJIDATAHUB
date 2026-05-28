@@ -13,7 +13,7 @@ import { store as storeAPI, wallet as walletAPI, afa as afaAPI } from '../servic
 import { checkers as checkersAPI } from '../services/api';
 import AgentLayout from '../components/AgentLayout';
 import AlertModal from '../components/AlertModal';
-import { useSettings } from '../context/SettingsContext';
+// import { useSettings } from '../context/SettingsContext';
 
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
@@ -274,7 +274,7 @@ const styles = `
 `;
 
 export default function AdminStore() {
-  const { settings } = useSettings();
+  // const { settings } = useSettings();
   const [storeData, setStoreData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -445,7 +445,7 @@ export default function AdminStore() {
             {activeTab === 'plans' && (
               <InventoryTab
                 plans={storeData.plans || []}
-                activeProvider={settings?.vtuProvider || 'xpresdata'}
+                activeProvider='topza'
                 onRefresh={fetchStore}
                 showAlert={showAlert}
               />
@@ -1026,7 +1026,7 @@ function InventoryTab({ plans, onRefresh, showAlert }) {
           submitLabel="Add Plan"
           onClose={() => setSelectedPlanForPrice(null)}
           onConfirm={async (price) => {
-            const planType = selectedPlanForPrice.planType || 'XpresDataOffer';
+            const planType = selectedPlanForPrice.planType || 'TopzaOffer';
             await storeAPI.addPlan({ planId: selectedPlanForPrice._id, customPrice: price, planType });
             onRefresh();
             setSelectedPlanForPrice(null);

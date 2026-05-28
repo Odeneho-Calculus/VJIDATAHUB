@@ -24,7 +24,7 @@ import {
 import { formatNumberAbbreviated } from '../utils/formatCurrency';
 import AdminSidebar from '../components/AdminSidebar';
 import { useSidebar } from '../hooks/useSidebar';
-import { useSettings } from '../context/SettingsContext';
+// import { useSettings } from '../context/SettingsContext';
 import { admin as adminAPI } from '../services/api';
 
 const styles = `
@@ -70,7 +70,7 @@ const styles = `
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const { sidebarOpen, closeSidebar } = useSidebar();
-  const { settings } = useSettings();
+  // const { settings } = useSettings();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -226,14 +226,7 @@ export default function AdminDashboard() {
   ];
 
   const handleDataPlansNavigation = () => {
-    const activeProvider = settings?.vtuProvider || 'topza';
-    if (activeProvider === 'topza') {
-      navigate('/admin/topza-plans');
-    } else if (activeProvider === 'digimall') {
-      navigate('/admin/digimall-plans');
-    } else {
-      navigate('/admin/dataplans');
-    }
+    navigate('/admin/topza-plans');
   };
 
   const quickActions = [

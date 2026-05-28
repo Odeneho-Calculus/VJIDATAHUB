@@ -1,13 +1,9 @@
-﻿const axios = require('axios');
+const axios = require('axios');
 const User = require('../models/User');
 const Order = require('../models/Order');
-const XpresDataOffer = require('../models/XpresDataOffer');
-const DigimallOffer = require('../models/DigimallOffer');
 const TopzaOffer = require('../models/TopzaOffer');
 const Transaction = require('../models/Transaction');
 const SystemSettings = require('../models/SystemSettings');
-const xpresDataApi = require('../utils/xpresDataApi');
-const digimallApi = require('../utils/digimallApi');
 const topzaApi = require('../utils/topzaApi');
 const { createNotification } = require('./notificationController');
 const { isValidNetworkNumber } = require('../utils/validation');
@@ -58,11 +54,10 @@ const phoneVariants = (phoneNumber) => {
   return Array.from(variants).filter(Boolean);
 };
 
-const findInFlightOrderByPhone = async ({ provider, phoneNumber, cooldownMinutes, excludeOrderId = null }) => {
+const findInFlightOrderByPhone = async ({ phoneNumber, cooldownMinutes, excludeOrderId = null }) => {
   const cooldownMs = resolveDuplicateCooldownMinutes(cooldownMinutes) * 60 * 1000;
   const cooldownSince = new Date(Date.now() - cooldownMs);
   const query = {
-    provider,
     phoneNumber: { $in: phoneVariants(phoneNumber) },
     status: { $in: ['pending', 'processing'] },
     paymentStatus: { $ne: 'failed' },
@@ -74,18 +69,6 @@ const findInFlightOrderByPhone = async ({ provider, phoneNumber, cooldownMinutes
   }
 
   return Order.findOne(query).sort({ createdAt: -1 });
-};
-
-const resolveProviderApi = (provider) => {
-  if (provider === 'digimall') return digimallApi;
-  if (provider === 'topza') return topzaApi;
-  return xpresDataApi;
-};
-
-const resolvePlanTypeForProvider = (provider) => {
-  if (provider === 'digimall') return 'DigimallOffer';
-  if (provider === 'topza') return 'TopzaOffer';
-  return 'XpresDataOffer';
 };
 
 const normalizeTopzaProviderStatus = (status) => {
@@ -130,98 +113,34 @@ exports.buyDataBundle = async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    // Determine active provider
-    const settings = await SystemSettings.getSettings();
-    const activeProvider = settings.vtuProvider || 'topza';
-
-    let plan;
-
-    if (activeProvider === 'digimall') {
-      const digimallOffer = await DigimallOffer.findById(dataPlanId);
-      if (!digimallOffer) {
-        return res.status(404).json({ success: false, message: 'Plan not found' });
-      }
-      const digimallUnavailable =
-        digimallOffer.status !== 'active' ||
-        (digimallOffer.stockOverriddenByAdmin === true && digimallOffer.inStock === false);
-      if (digimallUnavailable) {
-        return res.status(400).json({ success: false, message: 'This data plan is currently unavailable' });
-      }
-
-      const price = resolvePlanPrice(digimallOffer, { userRole: user.role, agentFeeStatus: user.agentFeeStatus });
-      if (price <= 0) {
-        return res.status(400).json({ success: false, message: 'This data plan does not have a valid price yet' });
-      }
-
-      plan = {
-        ...digimallOffer.toObject(),
-        planName: digimallOffer.name,
-        // apiPlanId: "offerSlug|volume"
-        apiPlanId: `${digimallOffer.offerSlug}|${digimallOffer.volume}`,
-        network: digimallOffer.isp,
-        dataSize: `${digimallOffer.volume}GB`,
-        provider: 'digimall',
-        sellingPrice: price,
-        costPrice: digimallOffer.costPrice || 0,
-        planType: 'DigimallOffer',
-      };
-    } else if (activeProvider === 'topza') {
-      const topzaOffer = await TopzaOffer.findById(dataPlanId);
-      if (!topzaOffer) {
-        return res.status(404).json({ success: false, message: 'Plan not found' });
-      }
-
-      const topzaUnavailable =
-        topzaOffer.status !== 'active' ||
-        (topzaOffer.stockOverriddenByAdmin === true && topzaOffer.inStock === false);
-      if (topzaUnavailable) {
-        return res.status(400).json({ success: false, message: 'This data plan is currently unavailable' });
-      }
-
-      const price = resolvePlanPrice(topzaOffer, { userRole: user.role, agentFeeStatus: user.agentFeeStatus });
-      if (price <= 0) {
-        return res.status(400).json({ success: false, message: 'This data plan does not have a valid price yet' });
-      }
-
-      plan = {
-        ...topzaOffer.toObject(),
-        planName: topzaOffer.name,
-        apiPlanId: topzaOffer.providerPlanId,
-        network: topzaOffer.isp,
-        dataSize: `${topzaOffer.volume}GB`,
-        provider: 'topza',
-        sellingPrice: price,
-        costPrice: topzaOffer.costPrice || 0,
-        planType: 'TopzaOffer',
-      };
-    } else {
-      // xpresdata (default)
-      const offer = await XpresDataOffer.findById(dataPlanId);
-      if (!offer) {
-        return res.status(404).json({ success: false, message: 'Plan not found or inactive in this store' });
-      }
-
-      if (offer.status !== 'active' || offer.isActive === false || !offer.inStock) {
-        return res.status(400).json({ success: false, message: 'This data plan is currently unavailable' });
-      }
-
-      const price = resolvePlanPrice(offer, { userRole: user.role, agentFeeStatus: user.agentFeeStatus });
-      if (price <= 0) {
-        return res.status(400).json({ success: false, message: 'This data plan does not have a valid price yet' });
-      }
-
-      plan = {
-        ...offer.toObject(),
-        planName: offer.name,
-        network: offer.isp,
-        dataSize: `${offer.volume}GB`,
-        apiPlanId: `${offer.offerSlug}|${offer.volume}`,
-        provider: 'xpresdata',
-        sellingPrice: price,
-        costPrice: offer.costPrice || 0,
-        planType: 'XpresDataOffer',
-      };
+    const topzaOffer = await TopzaOffer.findById(dataPlanId);
+    if (!topzaOffer) {
+      return res.status(404).json({ success: false, message: 'Plan not found' });
     }
+
+    const topzaUnavailable =
+      topzaOffer.status !== 'active' ||
+      (topzaOffer.stockOverriddenByAdmin === true && topzaOffer.inStock === false);
+    if (topzaUnavailable) {
+      return res.status(400).json({ success: false, message: 'This data plan is currently unavailable' });
+    }
+
+    const price = resolvePlanPrice(topzaOffer, { userRole: user.role, agentFeeStatus: user.agentFeeStatus });
+    if (price <= 0) {
+      return res.status(400).json({ success: false, message: 'This data plan does not have a valid price yet' });
+    }
+
+    const plan = {
+      ...topzaOffer.toObject(),
+      planName: topzaOffer.name,
+      apiPlanId: topzaOffer.providerPlanId,
+      network: topzaOffer.isp,
+      dataSize: `${topzaOffer.volume}GB`,
+      provider: 'topza',
+      sellingPrice: price,
+      costPrice: topzaOffer.costPrice || 0,
+      planType: 'TopzaOffer',
+    };
 
     // Validate phone number and network match
     if (!isValidNetworkNumber(normalizedPhone, plan.network)) {
@@ -233,7 +152,6 @@ exports.buyDataBundle = async (req, res) => {
 
     const cooldownMinutes = await getOrderDuplicateCooldownMinutes();
     const existingInFlightOrder = await findInFlightOrderByPhone({
-      provider: activeProvider,
       phoneNumber: normalizedPhone,
       cooldownMinutes,
     });
@@ -257,7 +175,7 @@ exports.buyDataBundle = async (req, res) => {
     const order = await Order.create({
       userId: req.userId,
       dataPlanId: plan._id,
-      planType: plan.planType || resolvePlanTypeForProvider(activeProvider),
+      planType: plan.planType,
       apiPlanId: plan.apiPlanId,
       orderNumber,
       network: plan.network,
@@ -268,14 +186,15 @@ exports.buyDataBundle = async (req, res) => {
       paymentMethod,
       status: 'pending',
       paymentStatus: 'pending',
-      provider: activeProvider,
+      provider: 'topza',
       adminBasePrice: plan.costPrice || plan.sellingPrice,
       agentCommission: ((user.agentFeeStatus === 'paid' || user.agentFeeStatus === 'protocol') && plan.sellingPrice && plan.costPrice) ? (plan.sellingPrice - plan.costPrice) : 0,
     });
 
     if (paymentMethod === 'wallet') {
-      return handleWalletPayment(req, res, user, plan, order, activeProvider);
+      return handleWalletPayment(req, res, user, plan, order);
     } else if (paymentMethod === 'paystack') {
+      const settings = await SystemSettings.getSettings();
       const dataPurchaseCharge = calculateDataPurchaseCharge({
         dataPurchaseChargeType: settings.transactionCharges?.dataPurchaseChargeType,
         dataPurchaseCharge: settings.transactionCharges?.dataPurchaseCharge,
@@ -283,7 +202,7 @@ exports.buyDataBundle = async (req, res) => {
         paymentMethod,
         baseAmount: plan.sellingPrice,
       });
-      return handlePaystackPayment(req, res, user, plan, order, activeProvider, dataPurchaseCharge);
+      return handlePaystackPayment(req, res, user, plan, order, dataPurchaseCharge);
     }
   } catch (error) {
     console.error('[Buy Data Bundle] Error:', error);
@@ -294,7 +213,7 @@ exports.buyDataBundle = async (req, res) => {
   }
 };
 
-const handleWalletPayment = async (req, res, user, plan, order, provider = 'xpresdata') => {
+const handleWalletPayment = async (req, res, user, plan, order) => {
   try {
     const cooldownMinutes = await getOrderDuplicateCooldownMinutes();
 
@@ -313,15 +232,14 @@ const handleWalletPayment = async (req, res, user, plan, order, provider = 'xpre
     }
 
     // Check provider balance
-    const activeApi = resolveProviderApi(provider);
-    const balanceCheck = await activeApi.getWalletBalance();
+    const balanceCheck = await topzaApi.getWalletBalance();
 
     if (!balanceCheck.success || (!balanceCheck.isPlaceholder && balanceCheck.balance < plan.costPrice)) {
       order.status = 'failed';
       order.paymentStatus = 'failed';
       order.errorMessage = 'Data purchase currently unavailable';
       await order.save();
-      console.error(`[Wallet Payment] ${provider} balance check failed:`, balanceCheck);
+      console.error(`[Wallet Payment] topza balance check failed:`, balanceCheck);
       return res.status(503).json({
         success: false,
         message: 'Data purchase currently unavailable',
@@ -332,7 +250,6 @@ const handleWalletPayment = async (req, res, user, plan, order, provider = 'xpre
     await order.save();
 
     const existingInFlightOrder = await findInFlightOrderByPhone({
-      provider: order.provider,
       phoneNumber: order.phoneNumber,
       cooldownMinutes,
       excludeOrderId: order._id,
@@ -349,18 +266,8 @@ const handleWalletPayment = async (req, res, user, plan, order, provider = 'xpre
       });
     }
 
-    let purchaseResponse;
-    if (provider === 'digimall') {
-      const [offerSlug, volume] = plan.apiPlanId.split('|');
-      const idempotencyKey = 'DGM' + order.orderNumber;
-      purchaseResponse = await digimallApi.purchaseDataBundle(offerSlug, order.phoneNumber, order.network, volume, idempotencyKey);
-    } else if (provider === 'topza') {
-      const idempotencyKey = 'TPZ' + order.orderNumber;
-      purchaseResponse = await topzaApi.purchaseDataBundle(plan.apiPlanId, order.phoneNumber, order.network, null, idempotencyKey);
-    } else {
-      const [offerSlug, volume] = plan.apiPlanId.split('|');
-      purchaseResponse = await xpresDataApi.purchaseDataBundle(offerSlug, order.phoneNumber, plan.network, volume);
-    }
+    const idempotencyKey = 'TPZ' + order.orderNumber;
+    const purchaseResponse = await topzaApi.purchaseDataBundle(plan.apiPlanId, order.phoneNumber, order.network, null, idempotencyKey);
 
     if (!purchaseResponse.success) {
       order.status = 'failed';
@@ -406,11 +313,8 @@ const handleWalletPayment = async (req, res, user, plan, order, provider = 'xpre
     order.status = 'processing';
     order.paymentStatus = 'completed';
     order.externalOrderId = responseData.orderId || responseData.reference || responseData.transaction_code || responseData.order?.id;
-
-    if (provider === 'topza') {
-      order.externalOrderNumber = responseData.orderNumber || responseData.raw?.data?.order?.orderNumber || order.externalOrderNumber;
-      order.providerStatus = normalizeTopzaProviderStatus(responseData.status || 'Processing');
-    }
+    order.externalOrderNumber = responseData.orderNumber || responseData.raw?.data?.order?.orderNumber || order.externalOrderNumber;
+    order.providerStatus = normalizeTopzaProviderStatus(responseData.status || 'Processing');
 
     // Ensure externalOrderId is set before saving
     if (!order.externalOrderId) {
@@ -418,13 +322,7 @@ const handleWalletPayment = async (req, res, user, plan, order, provider = 'xpre
       order.externalOrderId = 'UNTRACKED_' + Date.now();
     }
 
-    if (provider === 'xpresdata' && responseData.reference) {
-      order.transactionReference = responseData.reference || transaction.reference;
-    }
-    if (provider === 'digimall' && (responseData.reference || responseData.orderId)) {
-      order.transactionReference = responseData.reference || responseData.orderId;
-    }
-    if (provider === 'topza' && (responseData.reference || responseData.orderId)) {
+    if (responseData.reference || responseData.orderId) {
       order.transactionReference = responseData.reference || responseData.orderId;
     }
     order.transactionId = transaction._id;
@@ -500,12 +398,11 @@ const handleWalletPayment = async (req, res, user, plan, order, provider = 'xpre
   }
 };
 
-const handlePaystackPayment = async (req, res, user, plan, order, provider = 'xpresdata', charge = 0) => {
+const handlePaystackPayment = async (req, res, user, plan, order, charge = 0) => {
   try {
     const cooldownMinutes = await getOrderDuplicateCooldownMinutes();
 
     const existingInFlightOrder = await findInFlightOrderByPhone({
-      provider: order.provider,
       phoneNumber: order.phoneNumber,
       cooldownMinutes,
       excludeOrderId: order._id,
@@ -530,8 +427,7 @@ const handlePaystackPayment = async (req, res, user, plan, order, provider = 'xp
       });
     }
 
-    const activeApi = resolveProviderApi(provider);
-    const balanceCheck = await activeApi.getWalletBalance();
+    const balanceCheck = await topzaApi.getWalletBalance();
 
     if (!balanceCheck.success || (!balanceCheck.isPlaceholder && balanceCheck.balance < plan.costPrice)) {
       order.status = 'failed';
@@ -570,7 +466,7 @@ const handlePaystackPayment = async (req, res, user, plan, order, provider = 'xp
         type: 'data_purchase',
         dataPlanId: plan._id.toString(),
         phoneNumber: order.phoneNumber,
-        provider: provider,
+        provider: 'topza',
         transactionCharge: charge,
       },
     };
@@ -666,7 +562,6 @@ exports.verifyDataPurchase = async (req, res) => {
     await order.save();
 
     const existingInFlightOrder = await findInFlightOrderByPhone({
-      provider: order.provider,
       phoneNumber: order.phoneNumber,
       cooldownMinutes,
       excludeOrderId: order._id,
@@ -688,18 +583,8 @@ exports.verifyDataPurchase = async (req, res) => {
       });
     }
 
-    let purchaseResponse;
-    if (order.provider === 'digimall') {
-      const [offerSlug, volume] = order.apiPlanId.split('|');
-      const idempotencyKey = 'DGM' + order.orderNumber;
-      purchaseResponse = await digimallApi.purchaseDataBundle(offerSlug, order.phoneNumber, order.network, volume, idempotencyKey);
-    } else if (order.provider === 'topza') {
-      const idempotencyKey = 'TPZ' + order.orderNumber;
-      purchaseResponse = await topzaApi.purchaseDataBundle(order.apiPlanId, order.phoneNumber, order.network, null, idempotencyKey);
-    } else {
-      const [offerSlug, volume] = order.apiPlanId.split('|');
-      purchaseResponse = await xpresDataApi.purchaseDataBundle(offerSlug, order.phoneNumber, order.network, volume);
-    }
+    const idempotencyKey = 'TPZ' + order.orderNumber;
+    const purchaseResponse = await topzaApi.purchaseDataBundle(order.apiPlanId, order.phoneNumber, order.network, null, idempotencyKey);
 
     if (!purchaseResponse.success) {
       order.status = 'failed';
@@ -751,11 +636,8 @@ exports.verifyDataPurchase = async (req, res) => {
 
     order.status = 'processing';
     order.externalOrderId = responseData.orderId || responseData.reference || responseData.transaction_code || responseData.order?.id;
-
-    if (order.provider === 'topza') {
-      order.externalOrderNumber = responseData.orderNumber || responseData.raw?.data?.order?.orderNumber || order.externalOrderNumber;
-      order.providerStatus = normalizeTopzaProviderStatus(responseData.status || 'Processing');
-    }
+    order.externalOrderNumber = responseData.orderNumber || responseData.raw?.data?.order?.orderNumber || order.externalOrderNumber;
+    order.providerStatus = normalizeTopzaProviderStatus(responseData.status || 'Processing');
 
     // Ensure externalOrderId is set before saving
     if (!order.externalOrderId) {
@@ -763,12 +645,8 @@ exports.verifyDataPurchase = async (req, res) => {
       order.externalOrderId = 'UNTRACKED_' + Date.now();
     }
 
-    if (order.provider === 'digimall' && (responseData.reference || responseData.orderId)) {
+    if (responseData.reference || responseData.orderId) {
       order.transactionReference = responseData.reference || responseData.orderId;
-    } else if (order.provider === 'topza' && (responseData.reference || responseData.orderId)) {
-      order.transactionReference = responseData.reference || responseData.orderId;
-    } else if (responseData.reference) {
-      order.transactionReference = responseData.reference;
     }
 
     order.providerMessage = responseData.message || responseData.providerMessage;

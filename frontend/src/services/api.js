@@ -129,10 +129,6 @@ export const admin = {
     api.patch(`/admin/referrals/${id}/status`, { status }),
   getReferralSettings: () => api.get('/admin/referrals/settings'),
   updateReferralSettings: (settings) => api.patch('/admin/referrals/settings', settings),
-  getXpresDataWalletSettings: () => api.get('/admin/xpresdata/settings'),
-  getXpresDataWalletTransactions: (page = 1, limit = 20, type = '', status = '') =>
-    api.get(`/admin/xpresdata/transactions?page=${page}&limit=${limit}&type=${type}&status=${status}`),
-  getDigimallWalletSettings: () => api.get('/admin/digimall/settings'),
   getTopzaWalletSettings: () => api.get('/admin/topza/settings'),
   getTopzaWalletTransactions: (page = 1, limit = 25) =>
     api.get(`/admin/topza/transactions?page=${page}&limit=${limit}`),
@@ -170,21 +166,6 @@ export const dataplans = {
   delete: (id) => api.delete(`/dataplans/${id}`),
 };
 
-export const digimall = {
-  list: (network = '', status = 'active', page = 1, limit = 50) =>
-    api.get(`/digimall/offers?network=${network}&status=${status}&page=${page}&limit=${limit}`),
-  getStats: (network = 'all') => api.get(`/digimall/stats?network=${network}`),
-  getNetworks: () => api.get('/digimall/networks'),
-  sync: () => api.post('/digimall/sync'),
-  updatePrices: (id, prices) => api.patch(`/digimall/${id}/prices`, prices),
-  toggleStatus: (id) => api.patch(`/digimall/${id}/toggle-status`),
-  delete: (id) => api.delete(`/digimall/${id}`),
-  bulkDelete: (ids) => api.delete('/digimall/offers', { data: { ids } }),
-  updateStock: (ids, inStock, resetOverride = false) =>
-    api.patch('/digimall/offers/stock', { ids, inStock, resetOverride }),
-  getWalletSettings: () => api.get('/digimall/wallet'),
-};
-
 export const topza = {
   list: (network = '', status = 'active', page = 1, limit = 50) =>
     api.get(`/topza/offers?network=${network}&status=${status}&page=${page}&limit=${limit}`),
@@ -201,13 +182,11 @@ export const topza = {
 };
 
 export const checkers = {
-  // Shared/public
   getLockStatus: () => api.get('/checkers/lock-status'),
   getAvailability: (checkerType = '') =>
     api.get(`/checkers/availability${checkerType ? `?checkerType=${checkerType}` : ''}`),
   getTypes: () => api.get('/checkers/types'),
 
-  // Authenticated
   getProducts: () => api.get('/checkers/products/list'),
   buyChecker: (data) => api.post('/checkers/check', data),
   verifyCheckerPurchase: (data) => api.post('/checkers/verify', data),
@@ -215,7 +194,6 @@ export const checkers = {
     api.get(`/checkers?page=${page}&limit=${limit}&status=${status}&checkerType=${checkerType}`),
   getCheckerById: (id) => api.get(`/checkers/${id}`),
 
-  // Admin
   sync: () => api.post('/checkers/sync'),
   listOffers: (status = '', search = '', page = 1, limit = 50) =>
     api.get(`/checkers/offers?status=${status}&search=${search}&page=${page}&limit=${limit}`),
@@ -223,84 +201,60 @@ export const checkers = {
   toggleStatus: (id) => api.patch(`/checkers/${id}/toggle-status`),
   updateLockStatus: (enabled) => api.patch('/checkers/lock', { enabled }),
 
-  // Agent store checker management
   getStoreCheckers: () => api.get('/checkers/store/my-store/checkers'),
   getStoreAvailableCheckers: () => api.get('/checkers/store/my-store/checkers/available'),
   addStoreChecker: (data) => api.post('/checkers/store/my-store/checkers', data),
   updateStoreChecker: (checkerId, data) => api.patch(`/checkers/store/my-store/checkers/${checkerId}`, data),
   removeStoreChecker: (checkerId) => api.delete(`/checkers/store/my-store/checkers/${checkerId}`),
 
-  // Public store checker purchases
   getPublicStoreCheckers: (slug) => api.get(`/checkers/store/public/${slug}/checkers`),
   initializePublicStoreCheckerPurchase: (slug, data) => api.post(`/checkers/store/public/${slug}/checkers/purchase`, data),
   verifyPublicStoreCheckerPayment: (data) => api.post('/checkers/store/public/checkers/verify-payment', data),
 };
 
 export const afa = {
-  // Shared/public/user
   getLockStatus: () => api.get('/afa/lock-status'),
   getPublicLockStatus: () => api.get('/afa/public-lock-status'),
   register: (data) => api.post('/afa/register', data),
   getMyRegistrations: () => api.get('/afa/my-registrations'),
 
-  // Admin
   sync: () => api.post('/afa/sync'),
   getOffer: () => api.get('/afa/offer'),
   updatePrices: (data) => api.put('/afa/prices', data),
   updateLockStatus: (enabled) => api.put('/afa/lock-status', { enabled }),
 
-  // Agent store management
   getAvailableAfa: () => api.get('/store/my-store/available-afa'),
   addAfaToStore: (data) => api.post('/store/my-store/afa', data),
   updateStoreAfa: (afaId, data) => api.patch(`/store/my-store/afa/${afaId}`, data),
   removeAfaFromStore: (afaId) => api.delete(`/store/my-store/afa/${afaId}`),
 
-  // Public store AFA registrations
   getPublicStoreAfa: (slug) => api.get(`/afa/store/public/${slug}/afa`),
   initializePublicStoreAfaPurchase: (slug, data) => api.post(`/afa/store/public/${slug}/afa/purchase`, data),
   verifyPublicStoreAfaPayment: (data) => api.post('/afa/store/public/afa/verify-payment', data),
 };
 
-export const xpresdata = {
-  list: (network = '', status = 'active', page = 1, limit = 10, type = '') =>
-    api.get(`/xpresdata/list?network=${network}&status=${status}&page=${page}&limit=${limit}&type=${type}`),
-  getStats: (network = 'all') =>
-    api.get(`/xpresdata/stats?network=${network}`),
-  sync: () => api.post('/xpresdata/sync'),
-  updatePrices: (id, prices) =>
-    api.patch(`/xpresdata/${id}/prices`, prices),
-  toggleStatus: (id) => api.patch(`/xpresdata/${id}/toggle-status`),
-  delete: (id) => api.delete(`/xpresdata/${id}`),
-};
-
 export const store = {
-  // Private store owner APIs
   getMyStore: () => api.get('/store/my-store'),
   updateMyStore: (data) => api.patch('/store/my-store', data),
 
-  // Store plans
   getAvailablePlans: () => api.get('/store/my-store/available-plans'),
   addPlan: (data) => api.post('/store/my-store/plans', data),
   updatePlan: (planId, data) => api.patch(`/store/my-store/plans/${planId}`, data),
   removePlan: (planId) => api.delete(`/store/my-store/plans/${planId}`),
 
-  // Store orders
   getOrderStats: () => api.get('/store/my-store/orders/stats'),
   getOrders: (page = 1, limit = 20, status = '', search = '', network = '') =>
     api.get(`/store/my-store/orders?page=${page}&limit=${limit}&status=${status}&search=${search}&network=${network}`),
 
-  // Commissions
   getCommissionSummary: () => api.get('/store/my-store/commissions/summary'),
   getPayouts: (page = 1, limit = 20, status = '') =>
     api.get(`/store/my-store/commissions/payouts?page=${page}&limit=${limit}&status=${status}`),
   createPayout: (data) => api.post('/store/my-store/commissions/payouts', data),
 
-  // Agent fee payment
   getAgentFeeStatus: () => api.get('/store/my-store/agent-fee/status'),
   initializeAgentFeePayment: (data = {}) => api.post('/store/my-store/agent-fee/initialize', data),
   verifyAgentFeePayment: (data) => api.post('/store/my-store/agent-fee/verify', data),
 
-  // Public store APIs
   getPublicStore: (slug) => api.get(`/store/public/${slug}`),
   getPublicPlans: (slug, network = '') =>
     api.get(`/store/public/${slug}/plans${network ? `?network=${network}` : ''}`),

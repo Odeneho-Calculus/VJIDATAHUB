@@ -8,7 +8,7 @@ const SettingsContext = createContext();
 const SOCKET_URL = getSocketBaseUrl();
 
 export function SettingsProvider({ children }) {
-  const [settings, setSettings] = useState({ vtuProvider: 'xpresdata' });
+  const [settings, setSettings] = useState({ vtuProvider: 'topza' });
   const [loading, setLoading] = useState(true);
   const socketRef = useRef(null);
 

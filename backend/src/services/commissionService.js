@@ -1,8 +1,6 @@
 const Order = require('../models/Order');
 const SellerCommission = require('../models/SellerCommission');
 const CommissionLedger = require('../models/CommissionLedger');
-const XpresDataOffer = require('../models/XpresDataOffer');
-const DigimallOffer = require('../models/DigimallOffer');
 const TopzaOffer = require('../models/TopzaOffer');
 const TopzaCheckerOffer = require('../models/TopzaCheckerOffer');
 const AfaOffer = require('../models/AfaOffer');
@@ -39,18 +37,6 @@ const resolveAdminPriceForOrder = async (order) => {
   }
 
   let planDoc = null;
-  if (order.planType === 'XpresDataOffer') {
-    planDoc = await XpresDataOffer.findById(order.dataPlanId).select('agentPrice sellingPrice');
-    if (!planDoc) return 0;
-    return toNumber(planDoc.agentPrice) || toNumber(planDoc.sellingPrice);
-  }
-
-  if (order.planType === 'DigimallOffer') {
-    planDoc = await DigimallOffer.findById(order.dataPlanId).select('agentPrice sellingPrice');
-    if (!planDoc) return 0;
-    return toNumber(planDoc.agentPrice) || toNumber(planDoc.sellingPrice);
-  }
-
   if (order.planType === 'TopzaOffer') {
     planDoc = await TopzaOffer.findById(order.dataPlanId).select('agentPrice sellingPrice');
     if (!planDoc) return 0;

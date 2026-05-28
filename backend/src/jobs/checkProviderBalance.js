@@ -1,6 +1,4 @@
 const cron = require('node-cron');
-const xpresDataApi = require('../utils/xpresDataApi');
-const digimallApi = require('../utils/digimallApi');
 const topzaApi = require('../utils/topzaApi');
 const { createNotification } = require('../controllers/notificationController');
 
@@ -12,29 +10,14 @@ const checkProviderBalance = async () => {
         if (isChecking) return;
         isChecking = true;
 
-        const SystemSettings = require('../models/SystemSettings');
-        const settings = await SystemSettings.getSettings();
-        const activeProvider = settings.vtuProvider || 'topza';
-
-        let activeApi = xpresDataApi;
-        let providerLabel = 'XpresData';
-        if (activeProvider === 'digimall') {
-            activeApi = digimallApi;
-            providerLabel = 'DigiMall';
-        } else if (activeProvider === 'topza') {
-            activeApi = topzaApi;
-            providerLabel = 'Topza';
-        }
-
-        const result = await activeApi.getWalletBalance();
+        const result = await topzaApi.getWalletBalance();
 
         if (!result.success) {
-            console.warn(`[Provider Balance] Failed to fetch ${providerLabel} balance:`, result.error);
+            console.warn(`[Provider Balance] Failed to fetch Topza balance:`, result.error);
             isChecking = false;
             return;
         }
 
-        // Skip notification if it's a placeholder (provider doesn't support balance API)
         if (result.isPlaceholder) {
             isChecking = false;
             return;
@@ -54,14 +37,14 @@ const checkProviderBalance = async () => {
             if (timeSinceLastNotification >= notificationInterval) {
                 const notificationResult = await createNotification({
                     type: 'low_balance',
-                    title: `Low ${providerLabel} Wallet Balance`,
-                    message: `Your ${providerLabel} wallet balance is low (${balance.toFixed(2)} GHS)`,
+                    title: `Low Topza Wallet Balance`,
+                    message: `Your Topza wallet balance is low (${balance.toFixed(2)} GHS)`,
                     description: `Current balance is below the threshold of ${threshold} GHS. Please top up your provider wallet to ensure uninterrupted service.`,
                     severity: 'warning',
                     data: {
                         balance,
                         threshold,
-                        provider: activeProvider,
+                        provider: 'topza',
                         metadata: { timestamp: now, source: 'cron-job' },
                     },
                     actionUrl: '/admin/vtu-settings',
@@ -69,7 +52,7 @@ const checkProviderBalance = async () => {
 
                 if (notificationResult.success) {
                     lastNotificationTime = now;
-                    console.log(`[Provider Balance] Low balance notification sent for ${providerLabel}`);
+                    console.log(`[Provider Balance] Low balance notification sent for Topza`);
                 } else {
                     console.error('[Provider Balance] Failed to create notification:', notificationResult.error);
                 }

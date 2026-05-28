@@ -69,8 +69,8 @@ const dataPlanSchema = new mongoose.Schema(
     },
     provider: {
       type: String,
-      enum: ['xpresdata', 'digimall', 'topza'],
-      default: 'xpresdata',
+      enum: ['topza'],
+      default: 'topza',
       required: true,
     },
     lastSyncedAt: {
