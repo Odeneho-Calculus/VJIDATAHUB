@@ -58,8 +58,8 @@ export default function PublicCatalog() {
                 publicAPI.getSystemSettings(),
             ]);
             setStore(storeData.store);
-            if (!storeData.accessStatus?.isAccessible) {
-                setError(storeData.accessStatus?.message || 'Store is not available');
+            if (storeData.accessStatus && !storeData.accessStatus.isAccessible) {
+                setError(storeData.accessStatus.message || 'Store is not available');
             } else {
                 setPlans(plansData.plans || []);
             }

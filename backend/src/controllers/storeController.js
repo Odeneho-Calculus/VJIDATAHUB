@@ -1063,9 +1063,21 @@ exports.getPublicPlans = async (req, res) => {
       plans = plans.filter(p => p.network && p.network.toLowerCase() === network.toLowerCase());
     }
 
+    const mappedPlans = plans.map(p => {
+      const planObj = p.toObject ? p.toObject() : p;
+      const basePlan = planObj.planId || {};
+      return {
+        ...planObj,
+        sellingPrice: planObj.customPrice,
+        package: basePlan.package || basePlan.name || basePlan.planName || 'Data Bundle',
+        size: planObj.dataSize || basePlan.size || basePlan.dataSize || 'N/A',
+        networkLogo: basePlan.networkLogo || null,
+      };
+    });
+
     res.status(200).json({
       success: true,
-      plans,
+      plans: mappedPlans,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

@@ -90,8 +90,8 @@ export default function PublicStore() {
         }));
       setNetworkCatalog(normalizedCatalog);
 
-      if (!storeData.accessStatus?.isAccessible) {
-        setError(storeData.accessStatus?.message || 'Store is not available');
+      if (storeData.accessStatus && !storeData.accessStatus.isAccessible) {
+        setError(storeData.accessStatus.message || 'Store is not available');
       }
 
       try {
