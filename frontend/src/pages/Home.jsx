@@ -117,51 +117,69 @@ export default function Home() {
   const features = useMemo(() => [
     {
       icon: Store,
-      title: 'Storefront Control',
-      desc: 'Give every agent a branded store URL with configurable catalogs and pricing windows.',
+      title: 'Your Own Shop',
+      desc: 'Get your own shop link to sell data with your own prices.',
+      color: '#7C3AED', /* purple */
+      bg: '#EDE9FE',
     },
     {
       icon: Wallet,
-      title: 'Wallet & Payout Engine',
-      desc: 'Track balances, commissions, fees, and payout history from one financial workspace.',
+      title: 'Wallet & Earnings',
+      desc: 'Keep track of your money, fees, and how much you have earned.',
+      color: '#0F6E56', /* teal */
+      bg: '#D1FAE5',
     },
     {
       icon: Activity,
-      title: 'Order Lifecycle Visibility',
-      desc: 'See statuses in real time from purchase request through delivery and resolution.',
+      title: 'Track Orders',
+      desc: 'See exactly when your data is delivered in real time.',
+      color: '#DC2626', /* coral/red */
+      bg: '#FEE2E2',
     },
     {
       icon: LayoutDashboard,
-      title: 'Unified Dashboard',
-      desc: 'Agents work from focused views with role-based actions, reports, and controls.',
+      title: 'Simple Dashboard',
+      desc: 'Everything you need to manage your shop in one easy view.',
+      color: '#1D4ED8', /* blue */
+      bg: '#DBEAFE',
     },
     {
       icon: Settings,
-      title: 'Policy Governance',
-      desc: 'Manage referral rules, provider settings, and operational safeguards centrally.',
+      title: 'Settings & Rules',
+      desc: 'Easily change your shop settings and how you refer others.',
+      color: '#B45309', /* amber */
+      bg: '#FEF3C7',
     },
     {
       icon: Shield,
-      title: 'Secure by Design',
-      desc: 'Permissioned routes, protected actions, and auditable activity for every account.',
+      title: 'Safe & Secure',
+      desc: 'Your account and money are always protected and safe.',
+      color: '#BE185D', /* pink */
+      bg: '#FCE7F3',
     },
   ], []);
 
   const workflow = [
     {
       icon: Briefcase,
-      title: '1. Onboard Roles',
-      desc: 'Register users, promote agents, and assign clear operational responsibilities.',
+      title: '1. Sign Up',
+      desc: 'Join us and start setting up your account to sell data.',
+      color: '#7C3AED',
+      bg: '#EDE9FE',
     },
     {
       icon: Gauge,
-      title: '2. Operate at Speed',
-      desc: 'Monitor orders, transaction flow, and payout queues from streamlined dashboards.',
+      title: '2. Sell Data',
+      desc: 'Manage your orders and money quickly from your easy dashboard.',
+      color: '#0F6E56',
+      bg: '#D1FAE5',
     },
     {
       icon: BadgeCheck,
-      title: '3. Scale with Confidence',
-      desc: 'Use analytics and controls to improve margin, reliability, and support outcomes.',
+      title: '3. Grow Bigger',
+      desc: 'Use our tools to earn more money and keep your customers happy.',
+      color: '#1D4ED8',
+      bg: '#DBEAFE',
     },
   ];
 
@@ -185,6 +203,18 @@ export default function Home() {
     return '/become-agent';
   }, [user]);
 
+  /* Plan card colours cycling */
+  const planColors = [
+    { pill: '#7C3AED', pillBg: '#EDE9FE', dataBg: '#F5F3FF', dataBorder: '#DDD6FE', priceColor: '#5B21B6' },
+    { pill: '#0F6E56', pillBg: '#D1FAE5', dataBg: '#F0FDF4', dataBorder: '#A7F3D0', priceColor: '#065F46' },
+    { pill: '#1D4ED8', pillBg: '#DBEAFE', dataBg: '#EFF6FF', dataBorder: '#BFDBFE', priceColor: '#1E40AF' },
+    { pill: '#B45309', pillBg: '#FEF3C7', dataBg: '#FFFBEB', dataBorder: '#FDE68A', priceColor: '#92400E' },
+    { pill: '#BE185D', pillBg: '#FCE7F3', dataBg: '#FDF2F8', dataBorder: '#FBCFE8', priceColor: '#9D174D' },
+    { pill: '#DC2626', pillBg: '#FEE2E2', dataBg: '#FFF5F5', dataBorder: '#FECACA', priceColor: '#991B1B' },
+    { pill: '#0369A1', pillBg: '#E0F2FE', dataBg: '#F0F9FF', dataBorder: '#BAE6FD', priceColor: '#075985' },
+    { pill: '#4D7C0F', pillBg: '#ECFCCB', dataBg: '#F7FEE7', dataBorder: '#D9F99D', priceColor: '#3F6212' },
+  ];
+
   return (
     <div style={{ fontFamily: "'DM Sans', 'Nunito', sans-serif", background: '#f5f5f0', minHeight: '100vh' }}>
       <style>{`
@@ -193,8 +223,18 @@ export default function Home() {
         .vji-hero {
           position: relative;
           overflow: hidden;
-          background: #111;
-          min-height: 400px;
+          background: #000;
+          min-height: 320px;
+        }
+        .vji-hero::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.45);
+          z-index: 1;
+        }
+        @media (min-width: 768px) {
+          .vji-hero { min-height: 400px; }
         }
         .vji-hero-img {
           position: absolute;
@@ -202,8 +242,8 @@ export default function Home() {
           width: 100%;
           height: 100%;
           object-fit: cover;
-          object-position: 70% center;
-          opacity: 0.38;
+          object-position: center;
+          opacity: 1;
         }
         .vji-hero-content {
           position: relative;
@@ -216,8 +256,8 @@ export default function Home() {
           display: inline-flex;
           align-items: center;
           gap: 6px;
-          background: #f0a500;
-          color: #111;
+          background: #34D399;
+          color: #064E3B;
           font-size: 10px;
           font-weight: 800;
           letter-spacing: 0.12em;
@@ -225,6 +265,7 @@ export default function Home() {
           padding: 5px 12px;
           border-radius: 4px;
           margin-bottom: 20px;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
         }
         .vji-hero h1 {
           font-size: clamp(28px, 5vw, 52px);
@@ -233,28 +274,34 @@ export default function Home() {
           line-height: 1.15;
           margin: 0 0 16px;
           max-width: 640px;
+          text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        .vji-hero h1 span {
+          color: #A78BFA;
         }
         .vji-hero p {
           font-size: clamp(14px, 2vw, 16px);
-          color: #ccc;
+          color: #C4B5FD;
           max-width: 520px;
           line-height: 1.6;
           margin: 0 0 28px;
+          text-shadow: 0 1px 2px rgba(0,0,0,0.5);
         }
         .vji-btn-primary {
           display: inline-flex;
           align-items: center;
           gap: 8px;
-          background: #f0a500;
-          color: #111;
+          background: #34D399;
+          color: #064E3B;
           font-weight: 700;
           font-size: 14px;
           padding: 12px 22px;
           border-radius: 6px;
           text-decoration: none;
           transition: background 0.15s;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
         }
-        .vji-btn-primary:hover { background: #d49200; }
+        .vji-btn-primary:hover { background: #10B981; }
         .vji-btn-outline {
           display: inline-flex;
           align-items: center;
@@ -265,16 +312,17 @@ export default function Home() {
           font-size: 14px;
           padding: 12px 22px;
           border-radius: 6px;
-          border: 1.5px solid rgba(255,255,255,0.3);
+          border: 1.5px solid rgba(255,255,255,0.35);
           text-decoration: none;
           transition: border-color 0.15s, background 0.15s;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
         }
-        .vji-btn-outline:hover { border-color: #fff; background: rgba(255,255,255,0.07); }
+        .vji-btn-outline:hover { border-color: #A78BFA; background: rgba(167,139,250,0.12); }
         .vji-btn-dark {
           display: inline-flex;
           align-items: center;
           gap: 8px;
-          background: #111;
+          background: #7C3AED;
           color: #fff;
           font-weight: 700;
           font-size: 14px;
@@ -283,7 +331,7 @@ export default function Home() {
           text-decoration: none;
           transition: background 0.15s;
         }
-        .vji-btn-dark:hover { background: #222; }
+        .vji-btn-dark:hover { background: #6D28D9; }
 
         .vji-main {
           max-width: 1200px;
@@ -294,7 +342,6 @@ export default function Home() {
           gap: 20px;
         }
 
-        /* Section wrapper */
         .vji-card {
           background: #fff;
           border: 1.5px solid #e4e4de;
@@ -322,12 +369,12 @@ export default function Home() {
           text-transform: uppercase;
           padding: 4px 10px;
           border-radius: 4px;
-          background: #111;
-          color: #f0a500;
+          background: #7C3AED;
+          color: #fff;
         }
         .vji-badge-muted {
-          background: #f0f0ea;
-          color: #555;
+          background: #EDE9FE;
+          color: #5B21B6;
           font-size: 11px;
           font-weight: 700;
           letter-spacing: 0.06em;
@@ -336,7 +383,6 @@ export default function Home() {
           border-radius: 4px;
         }
 
-        /* Plan grid */
         .vji-plans-grid {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
@@ -353,7 +399,6 @@ export default function Home() {
           transition: border-color 0.15s, box-shadow 0.15s;
         }
         .vji-plan-card:hover {
-          border-color: #f0a500;
           box-shadow: 0 4px 16px rgba(0,0,0,0.08);
         }
         .vji-plan-card-lg-only {
@@ -361,29 +406,6 @@ export default function Home() {
         }
         @media (min-width: 1024px) {
           .vji-plan-card-lg-only { display: block; }
-        }
-        .vji-network-pill {
-          display: inline-block;
-          background: #111;
-          color: #fff;
-          font-size: 9px;
-          font-weight: 800;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
-          padding: 3px 8px;
-          border-radius: 3px;
-        }
-        .vji-data-pill {
-          display: inline-block;
-          background: #f0f0ea;
-          color: #333;
-          font-size: 9px;
-          font-weight: 700;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
-          padding: 3px 8px;
-          border-radius: 3px;
-          border: 1px solid #e0e0d8;
         }
         .vji-plan-price-label {
           font-size: 10px;
@@ -398,10 +420,8 @@ export default function Home() {
           font-family: 'DM Mono', monospace;
           font-size: 17px;
           font-weight: 600;
-          color: #111;
         }
 
-        /* Skeleton */
         .vji-skeleton {
           background: #ececea;
           border-radius: 4px;
@@ -412,7 +432,6 @@ export default function Home() {
           50% { opacity: 0.45; }
         }
 
-        /* Features grid */
         .vji-features-grid {
           display: grid;
           grid-template-columns: repeat(1, 1fr);
@@ -432,20 +451,9 @@ export default function Home() {
           border: 1.5px solid #e4e4de;
           border-radius: 8px;
           background: #fafaf7;
-          transition: border-color 0.15s;
+          transition: border-color 0.15s, transform 0.15s;
         }
-        .vji-feature-item:hover { border-color: #ccc; }
-        .vji-feature-icon {
-          width: 36px;
-          height: 36px;
-          background: #111;
-          color: #f0a500;
-          border-radius: 6px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
-        }
+        .vji-feature-item:hover { transform: translateY(-2px); }
         .vji-feature-title {
           font-size: 14px;
           font-weight: 700;
@@ -459,7 +467,6 @@ export default function Home() {
           margin: 0;
         }
 
-        /* Stats + performance section */
         .vji-perf-grid {
           display: grid;
           grid-template-columns: 1fr;
@@ -493,19 +500,40 @@ export default function Home() {
           font-weight: 600;
           color: #111;
         }
-        .vji-stat-box-accent {
-          border-color: #111;
-          background: #111;
+        .vji-stat-box-agents {
+          border-color: #7C3AED;
+          background: #F5F3FF;
         }
-        .vji-stat-box-accent .vji-stat-label { color: #f0a500; }
-        .vji-stat-box-accent .vji-stat-value { color: #fff; }
-        .vji-stat-box-accent p {
+        .vji-stat-box-agents .vji-stat-label { color: #7C3AED; }
+        .vji-stat-box-agents .vji-stat-value { color: #5B21B6; }
+
+        .vji-stat-box-tx {
+          border-color: #0F6E56;
+          background: #ECFDF5;
+        }
+        .vji-stat-box-tx .vji-stat-label { color: #0F6E56; }
+        .vji-stat-box-tx .vji-stat-value { color: #065F46; }
+
+        .vji-stat-box-orders {
+          border-color: #1D4ED8;
+          background: #EFF6FF;
+        }
+        .vji-stat-box-orders .vji-stat-label { color: #1D4ED8; }
+        .vji-stat-box-orders .vji-stat-value { color: #1E40AF; }
+
+        .vji-stat-box-uptime {
+          border-color: #B45309;
+          background: #FFFBEB;
+        }
+        .vji-stat-box-uptime .vji-stat-label { color: #B45309; }
+        .vji-stat-box-uptime .vji-stat-value { color: #92400E; }
+        .vji-stat-box-uptime p {
           font-size: 11px;
-          color: #aaa;
+          color: #92400E;
           margin: 4px 0 0;
+          opacity: 0.75;
         }
 
-        /* Columns layout */
         .vji-two-col {
           display: grid;
           grid-template-columns: 1fr;
@@ -515,7 +543,6 @@ export default function Home() {
           .vji-two-col { grid-template-columns: 3fr 2fr; }
         }
 
-        /* Workflow items */
         .vji-workflow-item {
           display: flex;
           align-items: flex-start;
@@ -524,17 +551,6 @@ export default function Home() {
           border: 1.5px solid #e4e4de;
           border-radius: 8px;
           background: #fafaf7;
-        }
-        .vji-workflow-icon {
-          width: 36px;
-          height: 36px;
-          background: #f0a500;
-          color: #111;
-          border-radius: 6px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
         }
         .vji-workflow-title {
           font-size: 14px;
@@ -549,7 +565,6 @@ export default function Home() {
           margin: 0;
         }
 
-        /* Role outcomes */
         .vji-role-box {
           border: 1.5px solid #e4e4de;
           border-radius: 8px;
@@ -577,24 +592,23 @@ export default function Home() {
           margin: 0;
         }
         .vji-referral-box {
-          border: 1.5px solid #f0a500;
+          border: 1.5px solid #0F6E56;
           border-radius: 8px;
           padding: 14px;
-          background: #fffbf0;
+          background: #ECFDF5;
           display: flex;
           align-items: flex-start;
           gap: 8px;
         }
         .vji-referral-box p {
           font-size: 12.5px;
-          color: #333;
+          color: #065F46;
           margin: 0;
           line-height: 1.5;
         }
 
-        /* CTA section */
         .vji-cta {
-          background: #111;
+          background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%);
           border-radius: 10px;
           padding: 24px 20px;
           display: flex;
@@ -616,7 +630,7 @@ export default function Home() {
         }
         .vji-cta p {
           font-size: 13px;
-          color: #aaa;
+          color: #C4B5FD;
           margin: 0;
         }
         .vji-cta-btns {
@@ -626,27 +640,6 @@ export default function Home() {
           flex-shrink: 0;
         }
 
-        /* Divider line */
-        .vji-divider-label {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          font-size: 11px;
-          font-weight: 700;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
-          color: #999;
-          margin-bottom: 4px;
-        }
-        .vji-divider-label::before,
-        .vji-divider-label::after {
-          content: '';
-          flex: 1;
-          height: 1px;
-          background: #e0e0d8;
-        }
-
-        /* perf checklist */
         .vji-check-list {
           list-style: none;
           margin: 12px 0 0;
@@ -665,7 +658,6 @@ export default function Home() {
         .vji-check-list li svg {
           flex-shrink: 0;
           margin-top: 1px;
-          color: #f0a500;
         }
       `}</style>
 
@@ -680,11 +672,11 @@ export default function Home() {
         <div className="vji-hero-content">
           <div className="vji-tag">
             <Sparkles style={{ width: 11, height: 11 }} />
-            Data Reselling Control Center
+            Fast & Automated
           </div>
-          <h1>Built for Agents Who Run Data Operations at Scale</h1>
+          <h1>The Best Platform for <span>Cheap Data</span> Bundles</h1>
           <p>
-            One compact platform for storefront management, order processing, commissions, and oversight. Browse plans here, then continue to purchase in the right flow.
+            Buy cheap data bundles and pay bills instantly. Start your own data business and earn extra money today.
           </p>
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
             <Link to={user ? dashboardRoute : '/register'} className="vji-btn-primary">
@@ -740,17 +732,42 @@ export default function Home() {
                   || (plan?.dataSizeMB ? `${plan.dataSizeMB}GB` : '')
                   || (plan?.planName?.match(/\d+(?:\.\d+)?\s*GB/i)?.[0] ?? '')
                   || 'Data';
+                const c = planColors[index % planColors.length];
                 return (
                   <div
                     key={plan._id || `${plan.network}-${plan.name}-${plan.dataAmount}`}
                     className={`vji-plan-card${index >= 4 ? ' vji-plan-card-lg-only' : ''}`}
+                    style={{ borderColor: c.pill + '55' }}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = c.pill}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = c.pill + '55'}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
-                      <span className="vji-network-pill">{plan.network || 'Network'}</span>
-                      <span className="vji-data-pill">{displayDataSize}</span>
+                      <span style={{
+                        display: 'inline-block',
+                        background: c.pill,
+                        color: '#fff',
+                        fontSize: 9,
+                        fontWeight: 800,
+                        letterSpacing: '0.1em',
+                        textTransform: 'uppercase',
+                        padding: '3px 8px',
+                        borderRadius: 3,
+                      }}>{plan.network || 'Network'}</span>
+                      <span style={{
+                        display: 'inline-block',
+                        background: c.dataBg,
+                        color: c.priceColor,
+                        fontSize: 9,
+                        fontWeight: 700,
+                        letterSpacing: '0.08em',
+                        textTransform: 'uppercase',
+                        padding: '3px 8px',
+                        borderRadius: 3,
+                        border: `1px solid ${c.dataBorder}`,
+                      }}>{displayDataSize}</span>
                     </div>
                     <p className="vji-plan-price-label">Price</p>
-                    <p className="vji-plan-price">GHS {displayPrice.toFixed(2)}</p>
+                    <p className="vji-plan-price" style={{ color: c.priceColor }}>GHS {displayPrice.toFixed(2)}</p>
                   </div>
                 );
               })}
@@ -770,12 +787,23 @@ export default function Home() {
           </div>
           <div className="vji-features-grid">
             {features.map((feature) => (
-              <div key={feature.title} className="vji-feature-item">
-                <div className="vji-feature-icon">
+              <div key={feature.title} className="vji-feature-item" style={{ borderColor: feature.color + '33' }}>
+                <div style={{
+                  width: 36,
+                  height: 36,
+                  background: feature.bg,
+                  color: feature.color,
+                  borderRadius: 6,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  border: `1.5px solid ${feature.color}33`,
+                }}>
                   <feature.icon style={{ width: 18, height: 18 }} />
                 </div>
                 <div>
-                  <p className="vji-feature-title">{feature.title}</p>
+                  <p className="vji-feature-title" style={{ color: feature.color }}>{feature.title}</p>
                   <p className="vji-feature-desc">{feature.desc}</p>
                 </div>
               </div>
@@ -794,33 +822,33 @@ export default function Home() {
               </p>
               <ul className="vji-check-list">
                 <li>
-                  <CheckCircle2 style={{ width: 14, height: 14 }} />
+                  <CheckCircle2 style={{ width: 14, height: 14, color: '#7C3AED' }} />
                   Real-time order visibility.
                 </li>
                 <li>
-                  <CheckCircle2 style={{ width: 14, height: 14 }} />
+                  <CheckCircle2 style={{ width: 14, height: 14, color: '#0F6E56' }} />
                   Clean wallet and payout reconciliation.
                 </li>
                 <li>
-                  <CheckCircle2 style={{ width: 14, height: 14 }} />
+                  <CheckCircle2 style={{ width: 14, height: 14, color: '#1D4ED8' }} />
                   Reliable uptime with responsive support.
                 </li>
               </ul>
             </div>
             <div className="vji-stats-grid">
-              <div className="vji-stat-box">
+              <div className="vji-stat-box vji-stat-box-agents">
                 <p className="vji-stat-label">Agents</p>
                 <p className="vji-stat-value">{heroCount(stats.totalUsers)}</p>
               </div>
-              <div className="vji-stat-box">
+              <div className="vji-stat-box vji-stat-box-tx">
                 <p className="vji-stat-label">Transactions</p>
                 <p className="vji-stat-value">{heroCount(stats.transactions)}</p>
               </div>
-              <div className="vji-stat-box">
+              <div className="vji-stat-box vji-stat-box-orders">
                 <p className="vji-stat-label">Completed Orders</p>
                 <p className="vji-stat-value">{heroCount(stats.totalOrdersCompleted)}</p>
               </div>
-              <div className="vji-stat-box vji-stat-box-accent">
+              <div className="vji-stat-box vji-stat-box-uptime">
                 <p className="vji-stat-label">Uptime</p>
                 <p className="vji-stat-value">{stats.uptime}%</p>
                 <p>Reliable for day-to-day operations.</p>
@@ -835,12 +863,23 @@ export default function Home() {
             <h2 className="vji-section-title" style={{ marginBottom: 14 }}>How Operations Flow</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {workflow.map((item) => (
-                <div key={item.title} className="vji-workflow-item">
-                  <div className="vji-workflow-icon">
+                <div key={item.title} className="vji-workflow-item" style={{ borderColor: item.color + '33' }}>
+                  <div style={{
+                    width: 36,
+                    height: 36,
+                    background: item.bg,
+                    color: item.color,
+                    borderRadius: 6,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    border: `1.5px solid ${item.color}44`,
+                  }}>
                     <item.icon style={{ width: 18, height: 18 }} />
                   </div>
                   <div>
-                    <p className="vji-workflow-title">{item.title}</p>
+                    <p className="vji-workflow-title" style={{ color: item.color }}>{item.title}</p>
                     <p className="vji-workflow-desc">{item.desc}</p>
                   </div>
                 </div>
@@ -850,22 +889,22 @@ export default function Home() {
 
           <div className="vji-card">
             <h2 className="vji-section-title" style={{ marginBottom: 14 }}>Role Outcomes</h2>
-            <div className="vji-role-box">
+            <div className="vji-role-box" style={{ borderColor: '#7C3AED33', background: '#F5F3FF' }}>
               <div className="vji-role-header">
-                <Users style={{ width: 15, height: 15, color: '#f0a500' }} />
-                <p className="vji-role-title">For Agents</p>
+                <Users style={{ width: 15, height: 15, color: '#7C3AED' }} />
+                <p className="vji-role-title" style={{ color: '#5B21B6' }}>For Agents</p>
               </div>
               <p className="vji-role-desc">Run storefront orders, track commissions, and manage wallet activity in one focused workspace.</p>
             </div>
-            <div className="vji-role-box">
+            <div className="vji-role-box" style={{ borderColor: '#1D4ED833', background: '#EFF6FF' }}>
               <div className="vji-role-header">
-                <Shield style={{ width: 15, height: 15, color: '#f0a500' }} />
-                <p className="vji-role-title">For Agent Operations</p>
+                <Shield style={{ width: 15, height: 15, color: '#1D4ED8' }} />
+                <p className="vji-role-title" style={{ color: '#1E40AF' }}>For Agent Operations</p>
               </div>
               <p className="vji-role-desc">Oversee teams, providers, orders, referrals, and financial controls with complete visibility.</p>
             </div>
             <div className="vji-referral-box">
-              <CheckCircle2 style={{ width: 16, height: 16, color: '#f0a500', flexShrink: 0, marginTop: 1 }} />
+              <CheckCircle2 style={{ width: 16, height: 16, color: '#0F6E56', flexShrink: 0, marginTop: 1 }} />
               <p>
                 {referralSettings
                   ? `Referral bonus configured at GHS ${referralSettings.amountPerReferral} per successful signup.`
