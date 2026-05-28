@@ -394,6 +394,8 @@ exports.getTransactions = async (req, res) => {
   try {
     const { page = 1, limit = 10, type = '', status = '', scope = '' } = req.query;
     const skip = (page - 1) * limit;
+    const parsedLimit = parseInt(limit);
+    const bufferLimit = skip + parsedLimit;
     const ORDER_TRANSACTION_TYPES = ['data_purchase', 'checker_purchase', 'afa_registration'];
     const isOrderTypeFilter = ORDER_TRANSACTION_TYPES.includes(type);
 
@@ -442,16 +444,39 @@ exports.getTransactions = async (req, res) => {
       }
     }
 
+    // Fetch orders with buffered limit for performance
     if (!type || isOrderTypeFilter) {
       const orders = await Order.find(orderFilter)
         .populate('userId', 'name email phone')
         .populate('guestInfo', 'name email phone')
-        .sort({ createdAt: -1 });
+        .populate({
+          path: 'storeId',
+          select: 'name slug owner',
+          populate: { path: 'owner', select: 'name email phone' }
+        })
+        .sort({ createdAt: -1 })
+        .limit(bufferLimit);
 
       const formattedOrders = orders.map(order => {
+        // Determine the best display name for the customer
+        let displayUser = order.userId;
+        if (order.source === 'store' || order.storeId) {
+          // For store orders, prefer guest info, then phone number
+          if (order.guestInfo && (order.guestInfo.name || order.guestInfo.phone)) {
+            displayUser = order.guestInfo;
+          } else if (!order.userId || !order.userId.name) {
+            // Fallback to phone number as name for data bundle store orders
+            displayUser = {
+              name: order.phoneNumber ? `Customer (${order.phoneNumber})` : 'Store Customer',
+              email: '',
+              phone: order.phoneNumber || '',
+            };
+          }
+        }
+
         return {
           _id: order._id,
-          userId: order.userId,
+          userId: displayUser,
           isGuest: order.isGuest || false,
           guestInfo: order.guestInfo,
           type: order.orderKind === 'checker' ? 'checker_purchase' : (order.orderKind === 'afa' ? 'afa_registration' : 'data_purchase'),
@@ -471,12 +496,17 @@ exports.getTransactions = async (req, res) => {
           createdAt: order.createdAt,
           updatedAt: order.updatedAt,
           _isOrder: true,
+          storeId: order.storeId,
+          storeName: order.storeId?.name || null,
+          agentName: order.storeId?.owner?.name || null,
+          agentPhone: order.storeId?.owner?.phone || null,
         };
       });
 
       allTransactions.push(...formattedOrders);
     }
 
+    // Fetch transactions with buffered limit for performance
     if (!type || !isOrderTypeFilter) {
       if (!type) {
         txFilter.type = { $nin: ORDER_TRANSACTION_TYPES };
@@ -485,31 +515,113 @@ exports.getTransactions = async (req, res) => {
       const transactions = await Transaction.find(txFilter)
         .populate('userId', 'name email phone')
         .populate('guestId', 'name email phone')
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: -1 })
+        .limit(bufferLimit);
 
       allTransactions.push(...transactions);
     }
 
     allTransactions.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-    const total = allTransactions.length;
+    // Compute accurate stats using fast count/aggregate queries
+    let orderCount = 0;
+    let txCount = 0;
+    let orderSuccessful = 0;
+    let orderPending = 0;
+    let orderAmount = 0;
+    let txSuccessful = 0;
+    let txPending = 0;
+    let txAmount = 0;
+
+    if (!type || isOrderTypeFilter) {
+      orderCount = await Order.countDocuments(orderFilter);
+      const orderStatsAgg = await Order.aggregate([
+        { $match: orderFilter },
+        {
+          $group: {
+            _id: null,
+            successful: {
+              $sum: {
+                $cond: [
+                  { $in: ['$status', ['completed', 'successful', 'success']] },
+                  1, 0
+                ]
+              }
+            },
+            pending: {
+              $sum: {
+                $cond: [
+                  { $and: [
+                    { $eq: ['$paymentStatus', 'pending'] },
+                    { $ne: ['$status', 'failed'] }
+                  ]},
+                  1, 0
+                ]
+              }
+            },
+            totalAmount: { $sum: '$amount' }
+          }
+        }
+      ]);
+      const os = orderStatsAgg[0];
+      if (os) {
+        orderSuccessful = os.successful;
+        orderPending = os.pending;
+        orderAmount = os.totalAmount || 0;
+      }
+    }
+
+    if (!type || !isOrderTypeFilter) {
+      txCount = await Transaction.countDocuments(txFilter);
+      const txStatsAgg = await Transaction.aggregate([
+        { $match: txFilter },
+        {
+          $group: {
+            _id: null,
+            successful: {
+              $sum: {
+                $cond: [
+                  { $or: [
+                    { $in: [{ $toLower: { $ifNull: ['$status', ''] } }, ['completed', 'successful', 'success']] },
+                    { $in: [{ $toLower: { $ifNull: ['$paymentStatus', ''] } }, ['completed', 'success']] }
+                  ]},
+                  1, 0
+                ]
+              }
+            },
+            pending: {
+              $sum: {
+                $cond: [
+                  { $and: [
+                    { $eq: [{ $toLower: { $ifNull: ['$paymentStatus', ''] } }, 'pending'] },
+                    { $ne: [{ $toLower: { $ifNull: ['$status', ''] } }, 'failed'] }
+                  ]},
+                  1, 0
+                ]
+              }
+            },
+            totalAmount: { $sum: '$amount' }
+          }
+        }
+      ]);
+      const ts = txStatsAgg[0];
+      if (ts) {
+        txSuccessful = ts.successful;
+        txPending = ts.pending;
+        txAmount = ts.totalAmount || 0;
+      }
+    }
+
+    const total = orderCount + txCount;
 
     const stats = {
-      total: allTransactions.length,
-      successful: allTransactions.filter(t => {
-        const status = String(t.status || '').toLowerCase();
-        const pStatus = String(t.paymentStatus || '').toLowerCase();
-        return status === 'successful' || status === 'completed' || status === 'success' || pStatus === 'completed' || pStatus === 'success';
-      }).length,
-      pending: allTransactions.filter(t => {
-        const status = String(t.status || '').toLowerCase();
-        const pStatus = String(t.paymentStatus || '').toLowerCase();
-        return status === 'pending' || (pStatus === 'pending' && status !== 'failed');
-      }).length,
-      totalAmount: allTransactions.reduce((sum, t) => sum + (Number(t.amount) || 0), 0)
+      total,
+      successful: orderSuccessful + txSuccessful,
+      pending: orderPending + txPending,
+      totalAmount: orderAmount + txAmount,
     };
 
-    const paginatedTransactions = allTransactions.slice(skip, skip + parseInt(limit));
+    const paginatedTransactions = allTransactions.slice(skip, skip + parsedLimit);
 
     res.status(200).json({
       success: true,
@@ -518,11 +630,12 @@ exports.getTransactions = async (req, res) => {
       pagination: {
         total,
         page: parseInt(page),
-        limit: parseInt(limit),
-        pages: Math.ceil(total / limit),
+        limit: parsedLimit,
+        pages: Math.ceil(total / parsedLimit),
       },
     });
   } catch (error) {
+    console.error('getTransactions error:', error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -987,6 +1100,11 @@ exports.getOrders = async (req, res) => {
     const orders = await Order.find(query)
       .populate('userId', 'name email phone')
       .populate('guestInfo', 'name email phone')
+      .populate({
+        path: 'storeId',
+        select: 'name slug owner',
+        populate: { path: 'owner', select: 'name email phone' }
+      })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));

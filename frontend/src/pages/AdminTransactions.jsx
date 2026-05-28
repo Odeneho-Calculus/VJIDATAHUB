@@ -20,6 +20,7 @@ export default function AdminTransactions() {
   const [success, setSuccess] = useState('');
 
   const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({ total: 0, page: 1, limit: 10, pages: 1 });
   const [stats, setStats] = useState({ total: 0, successful: 0, pending: 0, totalAmount: 0 });
   const [typeFilter, setTypeFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -44,6 +45,9 @@ export default function AdminTransactions() {
         if (response.stats) {
           setStats(response.stats);
         }
+        if (response.pagination) {
+          setPagination(response.pagination);
+        }
       } else {
         setError(response.message || 'Failed to fetch transactions');
       }
@@ -56,7 +60,7 @@ export default function AdminTransactions() {
 
   useEffect(() => {
     setPage(1);
-  }, [typeFilter, searchTerm, pendingVerificationOnly]);
+  }, [typeFilter, scope]);
 
   useEffect(() => {
     fetchTransactions();
@@ -162,6 +166,12 @@ export default function AdminTransactions() {
     const matchesPendingVerification = !pendingVerificationOnly || canVerifyPendingPayment(tx);
     return matchesSearch && matchesPendingVerification;
   });
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= pagination.pages) {
+      setPage(newPage);
+    }
+  };
 
   const statusColors = {
     successful: 'bg-emerald-100 text-emerald-700',
@@ -502,8 +512,27 @@ export default function AdminTransactions() {
                   {filteredTransactions.map(tx => (
                     <tr key={tx._id}>
                       <td className="tx-td" style={{ whiteSpace: 'nowrap' }}>
-                        <div style={{ fontWeight: '700', color: '#111' }}>{tx.userId?.name || 'Unknown'}</div>
+                        {tx.storeName ? (
+                          <>
+                            <div style={{ fontWeight: '700', color: '#111' }}>
+                              {tx.agentName || 'Agent'}
+                              <span style={{ color: '#888', fontWeight: '500' }}> → {tx.storeName}</span>
+                            </div>
+                            <div style={{ fontSize: '11px', color: '#666' }}>
+                              Customer: {tx.userId?.name || tx.guestInfo?.name || tx.userId?.phone || tx.guestInfo?.phone || 'N/A'}
+                            </div>
+                          </>
+                        ) : (
+                          <div style={{ fontWeight: '700', color: '#111' }}>
+                            {tx.userId?.name || tx.guestId?.name || tx.guestInfo?.name || 'Unknown'}
+                          </div>
+                        )}
                         <div style={{ fontSize: '11px', color: '#888', fontFamily: 'monospace' }}>{tx.reference}</div>
+                        {(tx.userId?.phone || tx.guestId?.phone || tx.guestInfo?.phone) && !tx.storeName && (
+                          <div style={{ fontSize: '11px', color: '#888' }}>
+                            {tx.userId?.phone || tx.guestId?.phone || tx.guestInfo?.phone}
+                          </div>
+                        )}
                       </td>
                       <td className="tx-td" style={{ whiteSpace: 'nowrap' }}>
                         <span style={{ fontSize: '12px', fontWeight: '600' }}>{typeLabels[tx.type] || tx.type}</span>
@@ -539,6 +568,31 @@ export default function AdminTransactions() {
               </table>
             )}
           </div>
+
+          {/* Pagination */}
+          {!loading && pagination.pages > 1 && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '24px' }}>
+              <button
+                className="tx-btn-primary"
+                style={{ padding: '8px 14px', fontSize: '13px', opacity: page <= 1 ? 0.5 : 1, cursor: page <= 1 ? 'not-allowed' : 'pointer' }}
+                onClick={() => handlePageChange(page - 1)}
+                disabled={page <= 1}
+              >
+                Previous
+              </button>
+              <span style={{ fontSize: '13px', fontWeight: '700', color: '#333', minWidth: '80px', textAlign: 'center' }}>
+                Page {page} of {pagination.pages}
+              </span>
+              <button
+                className="tx-btn-primary"
+                style={{ padding: '8px 14px', fontSize: '13px', opacity: page >= pagination.pages ? 0.5 : 1, cursor: page >= pagination.pages ? 'not-allowed' : 'pointer' }}
+                onClick={() => handlePageChange(page + 1)}
+                disabled={page >= pagination.pages}
+              >
+                Next
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

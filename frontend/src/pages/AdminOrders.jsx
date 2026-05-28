@@ -718,8 +718,22 @@ export default function AdminOrders() {
                               <div style={{ fontSize: '11px', color: '#666', fontWeight: 700 }}>{order.network}</div>
                             </td>
                             <td>
-                              <div style={{ fontSize: '13px', fontWeight: 700 }}>{order.store?.name || (order.isGuest ? (order.guestInfo?.name || 'Guest') : (order.userId?.name || 'User'))}</div>
-                              <div style={{ fontSize: '11px', color: '#999' }}>{order.store ? order.store.owner?.name : (order.isGuest ? order.guestInfo?.email : order.userId?.email)}</div>
+                              {order.storeId?.name ? (
+                                <>
+                                  <div style={{ fontSize: '13px', fontWeight: 700 }}>
+                                    {order.storeId.owner?.name || 'Agent'}
+                                    <span style={{ color: '#888', fontWeight: 500 }}> → {order.storeId.name}</span>
+                                  </div>
+                                  <div style={{ fontSize: '11px', color: '#999' }}>
+                                    Customer: {order.guestInfo?.name || order.userId?.name || order.phoneNumber || 'N/A'}
+                                  </div>
+                                </>
+                              ) : (
+                                <>
+                                  <div style={{ fontSize: '13px', fontWeight: 700 }}>{order.isGuest ? (order.guestInfo?.name || 'Guest') : (order.userId?.name || 'User')}</div>
+                                  <div style={{ fontSize: '11px', color: '#999' }}>{order.isGuest ? order.guestInfo?.email : order.userId?.email}</div>
+                                </>
+                              )}
                             </td>
                             <td>
                               <div style={{ fontSize: '13px', fontWeight: 700 }}>{getPlanDisplayValue(order)}</div>

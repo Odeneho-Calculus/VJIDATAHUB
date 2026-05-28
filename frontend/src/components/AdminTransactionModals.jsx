@@ -53,14 +53,33 @@ export const TransactionDetailsModal = ({ isOpen, onClose, transaction, typeLabe
         </div>
 
         <div className="space-y-3">
+          {transaction.storeName && (
+            <div className="flex items-start gap-3 p-2.5 bg-white border border-slate-200 rounded-xl">
+              <div className="p-1.5 bg-indigo-50 rounded-lg text-indigo-600 flex-shrink-0">
+                <User size={14} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Agent & Store</p>
+                <p className="text-sm font-black text-slate-900 truncate">{transaction.agentName || 'Agent'}</p>
+                <p className="text-[10px] font-medium text-slate-500 truncate">{transaction.storeName}</p>
+                {transaction.agentPhone && (
+                  <p className="text-[10px] font-medium text-slate-500 truncate">{transaction.agentPhone}</p>
+                )}
+              </div>
+            </div>
+          )}
+
           <div className="flex items-start gap-3 p-2.5 bg-white border border-slate-200 rounded-xl">
             <div className="p-1.5 bg-blue-50 rounded-lg text-blue-600 flex-shrink-0">
               <User size={14} />
             </div>
             <div className="min-w-0">
               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Customer</p>
-              <p className="text-sm font-black text-slate-900 truncate">{transaction.userId?.name || 'Unknown User'}</p>
-              <p className="text-[10px] font-medium text-slate-500 truncate">{transaction.userId?.email || 'N/A'}</p>
+              <p className="text-sm font-black text-slate-900 truncate">{transaction.userId?.name || transaction.guestId?.name || transaction.guestInfo?.name || 'Unknown User'}</p>
+              <p className="text-[10px] font-medium text-slate-500 truncate">{transaction.userId?.email || transaction.guestId?.email || transaction.guestInfo?.email || 'N/A'}</p>
+              {(transaction.userId?.phone || transaction.guestId?.phone || transaction.guestInfo?.phone) && (
+                <p className="text-[10px] font-medium text-slate-500 truncate">{transaction.userId?.phone || transaction.guestId?.phone || transaction.guestInfo?.phone}</p>
+              )}
             </div>
           </div>
 
