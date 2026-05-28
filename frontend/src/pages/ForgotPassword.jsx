@@ -89,7 +89,7 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div style={{ fontFamily: "'DM Sans', 'Nunito', sans-serif", minHeight: '100vh', background: '#f5f5f0', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 16px' }}>
+    <div style={{ fontFamily: "'DM Sans', 'Nunito', sans-serif", minHeight: '100vh', background: 'linear-gradient(135deg, #e0e7ff 0%, #fce7f3 40%, #fef3c7 70%, #dbeafe 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 16px' }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@500&display=swap');
 
@@ -112,7 +112,7 @@ export default function ForgotPassword() {
         .login-left {
           display: none;
           flex-direction: column;
-          background: #111;
+          background: linear-gradient(135deg, #4c1d95 0%, #5b21b6 50%, #7c3aed 100%);
           padding: 40px;
           position: relative;
           overflow: hidden;
@@ -132,7 +132,7 @@ export default function ForgotPassword() {
           gap: 6px;
           font-size: 13px;
           font-weight: 600;
-          color: #888;
+          color: #c4b5fd;
           text-decoration: none;
           transition: color 0.15s;
           position: relative;
@@ -145,8 +145,8 @@ export default function ForgotPassword() {
           display: inline-flex;
           align-items: center;
           gap: 6px;
-          background: #f0a500;
-          color: #111;
+          background: #a78bfa;
+          color: #2e1065;
           font-size: 10px;
           font-weight: 800;
           letter-spacing: 0.12em;
@@ -169,7 +169,7 @@ export default function ForgotPassword() {
         }
         .login-left-sub {
           font-size: 13px;
-          color: #999;
+          color: #ddd6fe;
           line-height: 1.65;
           margin: 0 0 28px;
           position: relative;
@@ -196,13 +196,13 @@ export default function ForgotPassword() {
         .login-feature-icon {
           width: 36px;
           height: 36px;
-          background: rgba(240,165,0,0.15);
+          background: rgba(167,139,250,0.20);
           border-radius: 6px;
           display: flex;
           align-items: center;
           justify-content: center;
           flex-shrink: 0;
-          color: #f0a500;
+          color: #c4b5fd;
         }
         .login-feature-title {
           font-size: 13px;
@@ -212,7 +212,7 @@ export default function ForgotPassword() {
         }
         .login-feature-desc {
           font-size: 12px;
-          color: #888;
+          color: #c4b5fd;
           line-height: 1.5;
           margin: 0;
         }
@@ -241,7 +241,7 @@ export default function ForgotPassword() {
         }
         .login-subtitle {
           font-size: 13px;
-          color: #777;
+          color: #4b5563;
           margin: 12px 0 24px;
           line-height: 1.5;
         }
@@ -283,9 +283,9 @@ export default function ForgotPassword() {
           box-sizing: border-box;
         }
         .login-input:focus {
-          border-color: #111;
+          border-color: #7c3aed;
           background: #fff;
-          box-shadow: 0 0 0 3px rgba(17,17,17,0.07);
+          box-shadow: 0 0 0 3px rgba(124,58,237,0.12);
         }
 
         .login-field { margin-bottom: 16px; position: relative; }
@@ -303,19 +303,19 @@ export default function ForgotPassword() {
           align-items: center;
           justify-content: center;
           gap: 8px;
-          background: #111;
+          background: linear-gradient(90deg, #2563eb 0%, #7c3aed 100%);
           color: #fff;
           font-family: inherit;
           font-size: 14px;
           font-weight: 700;
           padding: 13px 20px;
           border: none;
-          border-radius: 7px;
+          border-radius: 10px;
           cursor: pointer;
-          transition: background 0.15s;
+          transition: opacity 0.15s, transform 0.15s;
           margin-top: 4px;
         }
-        .login-submit:hover:not(:disabled) { background: #222; }
+        .login-submit:hover:not(:disabled) { opacity: 0.92; transform: translateY(-1px); }
         .login-submit:disabled { opacity: 0.55; cursor: not-allowed; }
 
         .login-footer-box {
@@ -327,7 +327,7 @@ export default function ForgotPassword() {
         }
         .login-footer-box p {
           font-size: 13px;
-          color: #666;
+          color: #374151;
           margin: 0;
         }
         .login-footer-box a {
@@ -335,7 +335,7 @@ export default function ForgotPassword() {
           color: #111;
           text-decoration: none;
         }
-        .login-footer-box a:hover { color: #f0a500; }
+        .login-footer-box a:hover { color: #7c3aed; }
 
         @keyframes spin { to { transform: rotate(360deg); } }
         .animate-spin { animation: spin 1s linear infinite; }
@@ -353,15 +353,15 @@ export default function ForgotPassword() {
             <ShieldCheck style={{ width: 11, height: 11 }} />
             Account Recovery
           </div>
-          <h1>Regain access to your workspace securely.</h1>
+          <h1>Reset your password</h1>
           <p className="login-left-sub">
-            Lost your password? No worries. We'll send a secure link to your email to help you reset it and get back to work.
+            Forgot your password? No problem. We'll send a secure link to your email so you can reset it.
           </p>
           <div className="login-feature-list">
             {[
-              { icon: KeyRound, title: 'Secure Reset', desc: 'Password reset links are unique and time-bound for your safety.' },
-              { icon: ShieldCheck, title: 'Verified Identity', desc: 'We only send reset links to registered and confirmed emails.' },
-              { icon: Activity, title: 'Quick Recovery', desc: 'Get back into your account in just a few clicks.' },
+              { icon: KeyRound, title: 'Secure Reset', desc: 'Reset links are unique and expire after a short time.' },
+              { icon: ShieldCheck, title: 'Verified Identity', desc: 'We only send links to registered email addresses.' },
+              { icon: Activity, title: 'Quick Recovery', desc: 'Get back into your account in a few clicks.' },
             ].map((item) => (
               <div key={item.title} className="login-feature-item">
                 <div className="login-feature-icon">

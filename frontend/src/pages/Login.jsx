@@ -63,7 +63,7 @@ export default function Login() {
   };
 
   return (
-    <div style={{ fontFamily: "'DM Sans', 'Nunito', sans-serif", minHeight: '100vh', background: '#f5f5f0', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 16px' }}>
+    <div style={{ fontFamily: "'DM Sans', 'Nunito', sans-serif", minHeight: '100vh', background: 'linear-gradient(135deg, #e0e7ff 0%, #fce7f3 40%, #fef3c7 70%, #dbeafe 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 16px' }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@500&display=swap');
 
@@ -86,7 +86,7 @@ export default function Login() {
         .login-left {
           display: none;
           flex-direction: column;
-          background: #111;
+          background: linear-gradient(135deg, #4c1d95 0%, #5b21b6 50%, #7c3aed 100%);
           padding: 40px;
           position: relative;
           overflow: hidden;
@@ -106,7 +106,7 @@ export default function Login() {
           gap: 6px;
           font-size: 13px;
           font-weight: 600;
-          color: #888;
+          color: #c4b5fd;
           text-decoration: none;
           transition: color 0.15s;
           position: relative;
@@ -119,8 +119,8 @@ export default function Login() {
           display: inline-flex;
           align-items: center;
           gap: 6px;
-          background: #f0a500;
-          color: #111;
+          background: #a78bfa;
+          color: #2e1065;
           font-size: 10px;
           font-weight: 800;
           letter-spacing: 0.12em;
@@ -143,7 +143,7 @@ export default function Login() {
         }
         .login-left-sub {
           font-size: 13px;
-          color: #999;
+          color: #ddd6fe;
           line-height: 1.65;
           margin: 0 0 28px;
           position: relative;
@@ -170,13 +170,13 @@ export default function Login() {
         .login-feature-icon {
           width: 36px;
           height: 36px;
-          background: rgba(240,165,0,0.15);
+          background: rgba(167,139,250,0.20);
           border-radius: 6px;
           display: flex;
           align-items: center;
           justify-content: center;
           flex-shrink: 0;
-          color: #f0a500;
+          color: #c4b5fd;
         }
         .login-feature-title {
           font-size: 13px;
@@ -186,7 +186,7 @@ export default function Login() {
         }
         .login-feature-desc {
           font-size: 12px;
-          color: #888;
+          color: #c4b5fd;
           line-height: 1.5;
           margin: 0;
         }
@@ -205,12 +205,12 @@ export default function Login() {
           font-weight: 700;
           letter-spacing: 0.1em;
           text-transform: uppercase;
-          color: #f0a500;
+          color: #c4b5fd;
           margin: 0 0 6px;
         }
         .login-left-footer p:last-child {
           font-size: 12.5px;
-          color: #888;
+          color: #ddd6fe;
           line-height: 1.55;
           margin: 0;
         }
@@ -263,13 +263,13 @@ export default function Login() {
         .login-icon-box {
           width: 46px;
           height: 46px;
-          background: #111;
-          border-radius: 8px;
+          background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+          border-radius: 10px;
           display: flex;
           align-items: center;
           justify-content: center;
           flex-shrink: 0;
-          color: #f0a500;
+          color: #fff;
         }
         .login-title {
           font-size: 26px;
@@ -279,7 +279,7 @@ export default function Login() {
         }
         .login-subtitle {
           font-size: 13px;
-          color: #777;
+          color: #4b5563;
           margin: 0 0 24px;
           line-height: 1.5;
         }
@@ -308,9 +308,9 @@ export default function Login() {
         }
         .login-input::placeholder { color: #bbb; }
         .login-input:focus {
-          border-color: #111;
+          border-color: #7c3aed;
           background: #fff;
-          box-shadow: 0 0 0 3px rgba(17,17,17,0.07);
+          box-shadow: 0 0 0 3px rgba(124,58,237,0.12);
         }
         .login-input:disabled { opacity: 0.5; cursor: not-allowed; }
 
@@ -342,11 +342,11 @@ export default function Login() {
         .login-forgot {
           font-size: 12px;
           font-weight: 600;
-          color: #f0a500;
+          color: #2563eb;
           text-decoration: none;
           transition: color 0.15s;
         }
-        .login-forgot:hover { color: #d49200; }
+        .login-forgot:hover { color: #1d4ed8; }
 
         /* Submit btn */
         .login-submit {
@@ -355,19 +355,19 @@ export default function Login() {
           align-items: center;
           justify-content: center;
           gap: 8px;
-          background: #111;
+          background: linear-gradient(90deg, #2563eb 0%, #7c3aed 100%);
           color: #fff;
           font-family: inherit;
           font-size: 14px;
           font-weight: 700;
           padding: 13px 20px;
           border: none;
-          border-radius: 7px;
+          border-radius: 10px;
           cursor: pointer;
-          transition: background 0.15s;
+          transition: opacity 0.15s, transform 0.15s;
           margin-top: 4px;
         }
-        .login-submit:hover:not(:disabled) { background: #222; }
+        .login-submit:hover:not(:disabled) { opacity: 0.92; transform: translateY(-1px); }
         .login-submit:disabled { opacity: 0.55; cursor: not-allowed; }
 
         /* Spinner */
@@ -406,7 +406,7 @@ export default function Login() {
         }
         .login-footer-box p {
           font-size: 13px;
-          color: #666;
+          color: #374151;
           margin: 0;
         }
         .login-footer-box a {
@@ -414,13 +414,13 @@ export default function Login() {
           color: #111;
           text-decoration: none;
         }
-        .login-footer-box a:hover { color: #f0a500; }
+        .login-footer-box a:hover { color: #7c3aed; }
 
         .login-secure-note {
           text-align: center;
           font-size: 11.5px;
           font-weight: 600;
-          color: #bbb;
+          color: #9ca3af;
           margin-top: 14px;
           letter-spacing: 0.03em;
         }
@@ -442,9 +442,9 @@ export default function Login() {
             Secure Agent Access
           </div>
 
-          <h1>Sign in to manage orders, wallets and storefront activity.</h1>
+          <h1>Sign in to your account</h1>
           <p className="login-left-sub">
-            Access your dashboard with a workflow built for data operations, commissions, and performance visibility.
+            Manage your orders, wallet, and store from one place.
           </p>
 
           <div className="login-feature-list">
@@ -466,8 +466,8 @@ export default function Login() {
           </div>
 
           <div className="login-left-footer">
-            <p>Why sign in</p>
-            <p>Move directly into your dashboard and continue working without extra steps.</p>
+            <p>Why sign in?</p>
+            <p>Go straight to your dashboard and keep working.</p>
           </div>
         </section>
 

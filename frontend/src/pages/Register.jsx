@@ -107,7 +107,7 @@ export default function Register() {
   const agentDisabled = !recruitNewAgents;
 
   return (
-    <div style={{ fontFamily: "'DM Sans', 'Nunito', sans-serif", minHeight: '100vh', background: '#f5f5f0', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 16px' }}>
+    <div style={{ fontFamily: "'DM Sans', 'Nunito', sans-serif", minHeight: '100vh', background: 'linear-gradient(135deg, #e0e7ff 0%, #fce7f3 40%, #fef3c7 70%, #dbeafe 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 16px' }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@500&display=swap');
 
@@ -130,7 +130,7 @@ export default function Register() {
         .reg-left {
           display: none;
           flex-direction: column;
-          background: #111;
+          background: linear-gradient(135deg, #4c1d95 0%, #5b21b6 50%, #7c3aed 100%);
           padding: 40px;
           position: relative;
           overflow: hidden;
@@ -150,7 +150,7 @@ export default function Register() {
           gap: 6px;
           font-size: 13px;
           font-weight: 600;
-          color: #888;
+          color: #c4b5fd;
           text-decoration: none;
           transition: color 0.15s;
           position: relative;
@@ -162,8 +162,8 @@ export default function Register() {
           display: inline-flex;
           align-items: center;
           gap: 6px;
-          background: #f0a500;
-          color: #111;
+          background: #a78bfa;
+          color: #2e1065;
           font-size: 10px;
           font-weight: 800;
           letter-spacing: 0.12em;
@@ -186,7 +186,7 @@ export default function Register() {
         }
         .reg-left-sub {
           font-size: 13px;
-          color: #999;
+          color: #ddd6fe;
           line-height: 1.65;
           margin: 0 0 28px;
           position: relative;
@@ -212,16 +212,16 @@ export default function Register() {
         .reg-feature-icon {
           width: 36px;
           height: 36px;
-          background: rgba(240,165,0,0.15);
+          background: rgba(167,139,250,0.20);
           border-radius: 6px;
           display: flex;
           align-items: center;
           justify-content: center;
           flex-shrink: 0;
-          color: #f0a500;
+          color: #c4b5fd;
         }
         .reg-feature-title { font-size: 13px; font-weight: 700; color: #fff; margin: 0 0 3px; }
-        .reg-feature-desc  { font-size: 12px; color: #888; line-height: 1.5; margin: 0; }
+        .reg-feature-desc  { font-size: 12px; color: #c4b5fd; line-height: 1.5; margin: 0; }
         .reg-left-footer {
           border: 1.5px solid rgba(255,255,255,0.08);
           border-radius: 8px;
@@ -233,9 +233,9 @@ export default function Register() {
         }
         .reg-left-footer p:first-child {
           font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
-          text-transform: uppercase; color: #f0a500; margin: 0 0 6px;
+          text-transform: uppercase; color: #c4b5fd; margin: 0 0 6px;
         }
-        .reg-left-footer p:last-child { font-size: 12.5px; color: #888; line-height: 1.55; margin: 0; }
+        .reg-left-footer p:last-child { font-size: 12.5px; color: #ddd6fe; line-height: 1.55; margin: 0; }
 
         /* ── RIGHT PANEL ── */
         .reg-right {
@@ -266,12 +266,12 @@ export default function Register() {
         /* Heading */
         .reg-heading-row { display: flex; align-items: center; gap: 14px; margin-bottom: 6px; }
         .reg-icon-box {
-          width: 46px; height: 46px; background: #111; border-radius: 8px;
+          width: 46px; height: 46px; background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%); border-radius: 10px;
           display: flex; align-items: center; justify-content: center;
-          flex-shrink: 0; color: #f0a500;
+          flex-shrink: 0; color: #fff;
         }
         .reg-title  { font-size: 26px; font-weight: 800; color: #111; margin: 0; }
-        .reg-subtitle { font-size: 13px; color: #777; margin: 0 0 20px; line-height: 1.5; }
+        .reg-subtitle { font-size: 13px; color: #4b5563; margin: 0 0 20px; line-height: 1.5; }
 
         /* Role selector */
         .reg-role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
@@ -286,21 +286,21 @@ export default function Register() {
           font-family: inherit;
         }
         .reg-role-btn:hover:not(:disabled) { background: #fff; border-color: #bbb; }
-        .reg-role-btn.active-buyer  { border-color: #111; background: #111; box-shadow: 0 2px 12px rgba(0,0,0,0.18); }
-        .reg-role-btn.active-agent  { border-color: #f0a500; background: #f0a500; box-shadow: 0 2px 12px rgba(240,165,0,0.25); }
+        .reg-role-btn.active-buyer  { border-color: #5b21b6; background: #5b21b6; box-shadow: 0 2px 12px rgba(91,33,182,0.22); }
+        .reg-role-btn.active-agent  { border-color: #7c3aed; background: #7c3aed; box-shadow: 0 2px 12px rgba(124,58,237,0.25); }
         .reg-role-btn:disabled      { opacity: 0.45; cursor: not-allowed; }
         .reg-role-icon-row { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; }
         .reg-role-name { font-size: 13px; font-weight: 700; }
         .reg-role-btn.active-buyer  .reg-role-name { color: #fff; }
-        .reg-role-btn.active-agent  .reg-role-name { color: #111; }
+        .reg-role-btn.active-agent  .reg-role-name { color: #fff; }
         .reg-role-btn:not(.active-buyer):not(.active-agent) .reg-role-name { color: #333; }
-        .reg-role-btn.active-buyer  .reg-role-icon-row { color: #f0a500; }
-        .reg-role-btn.active-agent  .reg-role-icon-row { color: #111; }
+        .reg-role-btn.active-buyer  .reg-role-icon-row { color: #c4b5fd; }
+        .reg-role-btn.active-agent  .reg-role-icon-row { color: #e9d5ff; }
         .reg-role-btn:not(.active-buyer):not(.active-agent) .reg-role-icon-row { color: #888; }
         .reg-role-desc { font-size: 11.5px; line-height: 1.5; margin: 0; }
         .reg-role-btn.active-buyer  .reg-role-desc { color: #aaa; }
-        .reg-role-btn.active-agent  .reg-role-desc { color: #6b5000; }
-        .reg-role-btn:not(.active-buyer):not(.active-agent) .reg-role-desc { color: #999; }
+        .reg-role-btn.active-agent  .reg-role-desc { color: #e9d5ff; }
+        .reg-role-btn:not(.active-buyer):not(.active-agent) .reg-role-desc { color: #6b7280; }
 
         /* Info banners */
         .reg-info-banner {
@@ -311,8 +311,8 @@ export default function Register() {
           line-height: 1.55;
           margin-bottom: 16px;
         }
-        .reg-info-banner.agent-open   { background: rgba(240,165,0,0.10); border: 1.5px solid rgba(240,165,0,0.35); color: #7a5200; }
-        .reg-info-banner.agent-closed { background: #fafaf7; border: 1.5px solid #e0e0d8; color: #888; }
+        .reg-info-banner.agent-open   { background: rgba(124,58,237,0.08); border: 1.5px solid rgba(124,58,237,0.30); color: #5b21b6; }
+        .reg-info-banner.agent-closed { background: #fafaf7; border: 1.5px solid #e0e0d8; color: #6b7280; }
 
         /* Fields */
         .reg-label { display: block; font-size: 12.5px; font-weight: 700; color: #333; margin-bottom: 7px; letter-spacing: 0.02em; }
@@ -330,7 +330,7 @@ export default function Register() {
           box-sizing: border-box;
         }
         .reg-input::placeholder { color: #bbb; }
-        .reg-input:focus  { border-color: #111; background: #fff; box-shadow: 0 0 0 3px rgba(17,17,17,0.07); }
+        .reg-input:focus  { border-color: #7c3aed; background: #fff; box-shadow: 0 0 0 3px rgba(124,58,237,0.12); }
         .reg-input:disabled { opacity: 0.5; cursor: not-allowed; }
         .reg-input.error  { border-color: #fca5a5; }
         .reg-input.error:focus { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,0.08); }
@@ -353,12 +353,12 @@ export default function Register() {
         .reg-submit {
           width: 100%;
           display: flex; align-items: center; justify-content: center; gap: 8px;
-          background: #111; color: #fff; font-family: inherit;
+          background: linear-gradient(90deg, #2563eb 0%, #7c3aed 100%); color: #fff; font-family: inherit;
           font-size: 14px; font-weight: 700;
-          padding: 13px 20px; border: none; border-radius: 7px;
-          cursor: pointer; transition: background 0.15s; margin-top: 4px;
+          padding: 13px 20px; border: none; border-radius: 10px;
+          cursor: pointer; transition: opacity 0.15s, transform 0.15s; margin-top: 4px;
         }
-        .reg-submit:hover:not(:disabled) { background: #222; }
+        .reg-submit:hover:not(:disabled) { opacity: 0.92; transform: translateY(-1px); }
         .reg-submit:disabled { opacity: 0.55; cursor: not-allowed; }
 
         @keyframes reg-spin { to { transform: rotate(360deg); } }
@@ -384,13 +384,13 @@ export default function Register() {
           border: 1.5px solid #e4e4de; border-radius: 7px;
           background: #fafaf7; padding: 13px 16px; margin-top: 16px;
         }
-        .reg-footer-box p { font-size: 13px; color: #666; margin: 0; }
+        .reg-footer-box p { font-size: 13px; color: #374151; margin: 0; }
         .reg-footer-box a { font-weight: 700; color: #111; text-decoration: none; }
-        .reg-footer-box a:hover { color: #f0a500; }
+        .reg-footer-box a:hover { color: #7c3aed; }
 
         .reg-secure-note {
           text-align: center; font-size: 11.5px; font-weight: 600;
-          color: #bbb; margin-top: 14px; letter-spacing: 0.03em;
+          color: #9ca3af; margin-top: 14px; letter-spacing: 0.03em;
         }
       `}</style>
 
@@ -410,9 +410,9 @@ export default function Register() {
             Create Your Workspace
           </div>
 
-          <h1>Register once and move directly into your dashboard, buyer workspace, or agent storefront.</h1>
+          <h1>Create your account</h1>
           <p className="reg-left-sub">
-            Built for buyers and agents — manage orders, wallets, and storefront operations from a single account.
+            One account for buyers and agents. Manage orders, wallet, and store in one place.
           </p>
 
           <div className="reg-feature-list">
@@ -434,8 +434,8 @@ export default function Register() {
           </div>
 
           <div className="reg-left-footer">
-            <p>Account access</p>
-            <p>Buyer accounts go to the dashboard. Agent accounts proceed to store setup when recruitment is enabled.</p>
+            <p>Account type</p>
+            <p>Buyers go to the dashboard. Agents can set up their store after signup.</p>
           </div>
         </section>
 

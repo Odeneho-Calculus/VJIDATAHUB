@@ -55,19 +55,22 @@ const resolveTemporaryBanStatus = (store) => {
 const computeAccessStatus = (user, store) => {
   resolveTemporaryBanStatus(store);
 
-  const storeOwnerId = store?.owner?._id
-    ? store.owner._id.toString()
-    : (store?.owner ? store.owner.toString() : null);
+  const storeOwner = store?.owner;
+  const storeOwnerId = storeOwner?._id
+    ? storeOwner._id.toString()
+    : (storeOwner ? storeOwner.toString() : null);
+  
   const isStoreOwner = !!storeOwnerId && user?._id?.toString() === storeOwnerId;
 
   if (!store.isActive) {
     return { isAccessible: false, code: 'STORE_INACTIVE', message: 'Store is inactive' };
   }
 
-  if (user.role === 'agent' && isStoreOwner) {
-    if (user.agentFeeStatus === 'pending') {
-      return { isAccessible: false, code: 'AGENT_FEE_UNPAID', message: 'Agent fee not paid' };
-    }
+  // Check agent fee status - if owner hasn't paid, store is restricted for everyone
+  const ownerFeeStatus = storeOwner?.agentFeeStatus || (isStoreOwner ? user?.agentFeeStatus : null);
+  
+  if (ownerFeeStatus === 'pending') {
+    return { isAccessible: false, code: 'AGENT_FEE_UNPAID', message: 'Store is currently unavailable' };
   }
 
   if (store.isTemporarilyBanned) {
@@ -1014,19 +1017,18 @@ exports.getPublicStore = async (req, res) => {
     const { slug } = req.params;
 
     const store = await Store.findOne({ slug })
-      .populate('owner', 'name email');
+      .populate('owner', 'name email agentFeeStatus');
 
     if (!store) {
       return res.status(404).json({ success: false, message: 'Store not found' });
     }
 
-    if (!store.isActive) {
-      return res.status(403).json({ success: false, message: 'Store is inactive' });
-    }
+    const accessStatus = computeAccessStatus(null, store);
 
     res.status(200).json({
       success: true,
       store: store.toObject(),
+      accessStatus,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -1039,10 +1041,20 @@ exports.getPublicPlans = async (req, res) => {
     const { network } = req.query;
 
     const store = await Store.findOne({ slug })
+      .populate('owner', 'name email agentFeeStatus')
       .populate('plans.planId');
 
     if (!store) {
       return res.status(404).json({ success: false, message: 'Store not found' });
+    }
+
+    const accessStatus = computeAccessStatus(null, store);
+    if (!accessStatus.isAccessible) {
+      return res.status(200).json({
+        success: true,
+        plans: [],
+        accessStatus,
+      });
     }
 
     let plans = store.plans.filter(p => p.isActive);
@@ -1069,10 +1081,19 @@ exports.purchasePublicBundle = async (req, res) => {
       return res.status(400).json({ success: false, message: 'planId, phoneNumber, and email are required' });
     }
 
-    const store = await Store.findOne({ slug });
+    const store = await Store.findOne({ slug })
+      .populate('owner', 'name email agentFeeStatus');
 
     if (!store) {
       return res.status(404).json({ success: false, message: 'Store not found' });
+    }
+
+    const accessStatus = computeAccessStatus(null, store);
+    if (!accessStatus.isAccessible) {
+      return res.status(403).json({ 
+        success: false, 
+        message: accessStatus.message || 'Store is currently unavailable' 
+      });
     }
 
     const storePlan = store.plans.find(p => p.planId.toString() === planId);
@@ -1251,9 +1272,21 @@ exports.trackGuestOrdersByStore = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Phone number is required' });
     }
 
-    const store = await Store.findOne({ slug });
+    const store = await Store.findOne({ slug })
+      .populate('owner', 'name email agentFeeStatus');
+      
     if (!store) {
       return res.status(404).json({ success: false, message: 'Store not found' });
+    }
+
+    const accessStatus = computeAccessStatus(null, store);
+    if (!accessStatus.isAccessible) {
+      return res.status(200).json({
+        success: true,
+        data: { orders: [], totalOrders: 0 },
+        accessStatus,
+        message: accessStatus.message,
+      });
     }
 
     const guest = await Guest.findOne({
