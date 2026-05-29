@@ -1,6 +1,7 @@
 const Order = require('../models/Order');
 const SellerCommission = require('../models/SellerCommission');
 const CommissionLedger = require('../models/CommissionLedger');
+const Store = require('../models/Store');
 const TopzaOffer = require('../models/TopzaOffer');
 const TopzaCheckerOffer = require('../models/TopzaCheckerOffer');
 const AfaOffer = require('../models/AfaOffer');
@@ -27,37 +28,34 @@ const toNumber = (value) => {
 };
 
 const resolveAdminPriceForOrder = async (order) => {
-  const existingBasePrice = toNumber(order.adminBasePrice);
-  if (existingBasePrice > 0) {
-    return existingBasePrice;
-  }
-
+  // ALWAYS look up current price from the plan — never use stale order.adminBasePrice
+  // This ensures refunds and commissions use the latest synced price from Topza
   if (!order.dataPlanId) {
-    return 0;
+    return toNumber(order.adminBasePrice) || 0;
   }
 
   let planDoc = null;
   if (order.planType === 'TopzaOffer') {
-    planDoc = await TopzaOffer.findById(order.dataPlanId).select('agentPrice sellingPrice');
-    if (!planDoc) return 0;
-    return toNumber(planDoc.agentPrice) || toNumber(planDoc.sellingPrice);
+    planDoc = await TopzaOffer.findById(order.dataPlanId).select('agentPrice sellingPrice costPrice');
+    if (!planDoc) return toNumber(order.adminBasePrice) || 0;
+    return toNumber(planDoc.agentPrice) || toNumber(planDoc.sellingPrice) || toNumber(planDoc.costPrice) || 0;
   }
 
   if (order.planType === 'TopzaCheckerOffer') {
-    planDoc = await TopzaCheckerOffer.findById(order.dataPlanId).select('agentPrice sellingPrice');
-    if (!planDoc) return 0;
-    return toNumber(planDoc.agentPrice) || toNumber(planDoc.sellingPrice);
+    planDoc = await TopzaCheckerOffer.findById(order.dataPlanId).select('agentPrice sellingPrice costPrice');
+    if (!planDoc) return toNumber(order.adminBasePrice) || 0;
+    return toNumber(planDoc.agentPrice) || toNumber(planDoc.sellingPrice) || toNumber(planDoc.costPrice) || 0;
   }
 
   if (order.planType === 'AfaOffer') {
-    planDoc = await AfaOffer.findById(order.dataPlanId).select('agentPrice sellingPrice');
-    if (!planDoc) return 0;
-    return toNumber(planDoc.agentPrice) || toNumber(planDoc.sellingPrice);
+    planDoc = await AfaOffer.findById(order.dataPlanId).select('agentPrice sellingPrice costPrice');
+    if (!planDoc) return toNumber(order.adminBasePrice) || 0;
+    return toNumber(planDoc.agentPrice) || toNumber(planDoc.sellingPrice) || toNumber(planDoc.costPrice) || 0;
   }
 
   planDoc = await DataPlan.findById(order.dataPlanId).select('costPrice sellingPrice price');
-  if (!planDoc) return 0;
-  return toNumber(planDoc.costPrice) || toNumber(planDoc.sellingPrice) || toNumber(planDoc.price);
+  if (!planDoc) return toNumber(order.adminBasePrice) || 0;
+  return toNumber(planDoc.costPrice) || toNumber(planDoc.sellingPrice) || toNumber(planDoc.price) || 0;
 };
 
 const calculateStoreOrderCommission = async (order) => {
@@ -119,10 +117,21 @@ const creditCommissionForOrder = async (orderOrId) => {
     return { credited: false, reason: 'duplicate_order_record' };
   }
 
+  // Always resolve store owner from Store model — never trust order.userId
+  // (guest orders have userId=null, and order.userId is the buyer, not the agent)
+  const store = await Store.findById(order.storeId).select('owner');
+  const storeOwnerId = store?.owner || null;
+
+  if (!storeOwnerId) {
+    order.commissionStatus = 'earned';
+    await order.save();
+    return { credited: false, reason: 'store_owner_not_found', commissionEarned };
+  }
+
   try {
     await SellerCommission.create({
       storeId: order.storeId,
-      storeOwnerId: order.userId,
+      storeOwnerId,
       orderId: order._id,
       adminPlanPrice: adminPrice,
       sellerPrice,
@@ -139,7 +148,7 @@ const creditCommissionForOrder = async (orderOrId) => {
     throw createError;
   }
 
-  const ledger = await getOrCreateLedger(order.storeId, order.userId);
+  const ledger = await getOrCreateLedger(order.storeId, storeOwnerId);
   ledger.totalEarned += commissionEarned;
   ledger.totalCommissions += commissionEarned;
   await ledger.save();

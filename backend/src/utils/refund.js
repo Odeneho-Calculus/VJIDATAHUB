@@ -101,12 +101,13 @@ const processStoreOrderRefund = async (order, reason = 'Store order failed') => 
 
     const agentId = store.owner._id;
 
-    // 4. Resolve the admin base price (cost to agent) — lookup from plan if not stored
-    let adminBasePrice = order.adminBasePrice || 0;
-    if (!adminBasePrice) {
-      adminBasePrice = await resolveAdminPriceForOrder(order);
+    // 4. Resolve the admin base price (cost to agent) — ALWAYS lookup current price from plan
+    // Never use order.adminBasePrice (stale price at order creation time)
+    let adminBasePrice = await resolveAdminPriceForOrder(order);
+    // Fallback chain: current plan price → order.adminBasePrice → order.amount
+    if (!adminBasePrice || adminBasePrice <= 0) {
+      adminBasePrice = order.adminBasePrice || 0;
     }
-    // Ensure we have a positive amount to refund
     if (!adminBasePrice || adminBasePrice <= 0) {
       adminBasePrice = order.amount || 0;
     }

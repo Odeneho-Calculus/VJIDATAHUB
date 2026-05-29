@@ -11,9 +11,9 @@ const DataPlan = require('../models/DataPlan');
 const TopzaOffer = require('../models/TopzaOffer');
 const AfaOffer = require('../models/AfaOffer');
 const Transaction = require('../models/Transaction');
-const { getOrCreateLedger, moveToPending } = require('../services/commissionService');
+const { getOrCreateLedger, moveToPending, creditCommissionForOrder } = require('../services/commissionService');
 const { isPositivePrice, resolvePlanPrice } = require('../utils/planPricing');
-// const { calculateDataPurchaseCharge } = require('../utils/transactionCharges');
+const { calculateDataPurchaseCharge } = require('../utils/transactionCharges');
 
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 const PAYSTACK_BASE_URL = process.env.PAYSTACK_BASE_URL || 'https://api.paystack.co';
@@ -1349,6 +1349,17 @@ exports.purchasePublicBundle = async (req, res) => {
 
     const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 
+    // Calculate transaction charge (fees)
+    const settings = await SystemSettings.getSettings();
+    const dataPurchaseCharge = calculateDataPurchaseCharge({
+      dataPurchaseChargeType: settings.transactionCharges?.dataPurchaseChargeType,
+      dataPurchaseCharge: settings.transactionCharges?.dataPurchaseCharge,
+      isStoreBuyer: true,
+      paymentMethod: 'paystack',
+      baseAmount: storePlan.customPrice,
+    });
+    const totalAmount = storePlan.customPrice + dataPurchaseCharge;
+
     const order = await Order.create({
       userId: null,
       isGuest: true,
@@ -1362,6 +1373,7 @@ exports.purchasePublicBundle = async (req, res) => {
       dataAmount: storePlan.dataSize,
       planName: planData.name,
       amount: storePlan.customPrice,
+      transactionCharge: dataPurchaseCharge,
       adminBasePrice: planData.costPrice || planData.sellingPrice || storePlan.customPrice,
       paymentMethod: 'paystack',
       status: 'pending',
@@ -1377,6 +1389,7 @@ exports.purchasePublicBundle = async (req, res) => {
       isGuest: true,
       type: 'data_purchase',
       amount: storePlan.customPrice,
+      transactionCharge: dataPurchaseCharge,
       currency: 'GHS',
       reference: txReference,
       status: 'pending',
@@ -1390,13 +1403,14 @@ exports.purchasePublicBundle = async (req, res) => {
 
     const paystackPayload = {
       email,
-      amount: Math.round(storePlan.customPrice * 100),
+      amount: Math.round(totalAmount * 100),
       reference: txReference,
       metadata: {
         orderId: order._id.toString(),
         storeSlug: slug,
         phoneNumber: normalizedPhone,
         isGuest: true,
+        transactionCharge: dataPurchaseCharge,
       },
     };
 
@@ -1521,6 +1535,13 @@ exports.verifyPublicPayment = async (req, res) => {
         notes: providerResponse.data?.message || 'Order placed successfully',
       });
       await order.save();
+
+      // Credit commission to agent for store order
+      try {
+        await creditCommissionForOrder(order);
+      } catch (commissionError) {
+        console.error(`[Store Verify] Commission credit failed for order ${order.orderNumber}:`, commissionError.message);
+      }
 
       res.json({
         success: true,
