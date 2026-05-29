@@ -2,12 +2,12 @@ import { useEffect } from 'react';
 import { CheckCircle, AlertCircle, Info, X } from 'lucide-react';
 
 const CONFIG = {
-  success: { icon: CheckCircle, iconCls: 'text-emerald-500', bg: 'bg-emerald-50', label: 'Success' },
-  error:   { icon: AlertCircle, iconCls: 'text-rose-500',    bg: 'bg-rose-50',    label: 'Error'   },
-  info:    { icon: Info,         iconCls: 'text-blue-500',    bg: 'bg-blue-50',    label: 'Info'    },
+  success: { icon: CheckCircle, main: '#10B981', soft: '#ECFDF5', glow: 'rgba(16,185,129,0.15)', label: 'Success' },
+  error:   { icon: AlertCircle, main: '#EF4444', soft: '#FEF2F2', glow: 'rgba(239,68,68,0.15)', label: 'Error' },
+  info:    { icon: Info,        main: '#3B82F6', soft: '#EFF6FF', glow: 'rgba(59,130,246,0.15)', label: 'Info' },
 };
 
-export default function AlertModal({ isOpen, onClose, type = 'info', title, message }) {
+export default function AlertModal({ isOpen, onClose, type = 'info', title, message, themeColor }) {
   useEffect(() => {
     if (!isOpen) return;
     const onKey = (e) => { if (e.key === 'Escape') onClose?.(); };
@@ -17,44 +17,50 @@ export default function AlertModal({ isOpen, onClose, type = 'info', title, mess
 
   if (!isOpen) return null;
 
-  const { icon: Icon, iconCls, bg, label } = CONFIG[type] ?? CONFIG.info;
-  const heading = title || label;
+  const cfg = CONFIG[type] ?? CONFIG.info;
+  const c = themeColor || cfg;
+  const Icon = cfg.icon;
+  const heading = title || cfg.label;
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-[2px] animate-in fade-in duration-150"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-[4px] animate-in fade-in duration-300"
       onClick={(e) => { if (e.target === e.currentTarget) onClose?.(); }}
     >
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-xs border border-slate-200 animate-in zoom-in-95 duration-150">
+      <div className="bg-white rounded-[28px] shadow-2xl w-full max-w-sm border border-slate-200/60 overflow-hidden animate-in zoom-in-95 duration-300 ease-out">
         {/* Header */}
-        <div className="flex items-center gap-2.5 px-4 pt-4 pb-3 border-b border-slate-100">
-          <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${bg}`}>
-            <Icon size={15} strokeWidth={2.5} className={iconCls} />
+        <div className="flex items-center gap-3 px-5 pt-5 pb-4 border-b border-slate-50">
+          <div 
+            className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform hover:scale-105"
+            style={{ background: c.soft, color: c.main, boxShadow: `0 4px 12px ${c.glow}` }}
+          >
+            <Icon size={20} strokeWidth={2.5} />
           </div>
-          <span className="text-sm font-bold text-slate-900 tracking-tight uppercase leading-none flex-1">{heading}</span>
+          <span className="text-base font-black text-[#111] tracking-tight uppercase leading-none flex-1">{heading}</span>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+            className="p-2 rounded-xl text-slate-300 hover:text-[#111] bg-[#fafaf7] border-1.5 border-[#e4e4de] hover:border-slate-200 transition-all active:scale-90"
             aria-label="Close"
           >
-            <X size={15} strokeWidth={2.5} />
+            <X size={18} strokeWidth={2.5} />
           </button>
         </div>
 
         {/* Body */}
         {message && (
-          <div className="px-4 py-3">
-            <p className="text-sm text-slate-600 leading-relaxed">{message}</p>
+          <div className="px-6 py-5">
+            <p className="text-sm font-bold text-slate-600 leading-relaxed">{message}</p>
           </div>
         )}
 
         {/* Action */}
-        <div className="px-4 pb-4">
+        <div className="px-6 pb-6">
           <button
             onClick={onClose}
-            className="w-full py-2 rounded-xl text-sm font-semibold text-white bg-slate-900 hover:bg-slate-800 transition-colors"
+            className="w-full py-3.5 rounded-2xl text-xs font-black text-white uppercase tracking-widest transition-all shadow-xl active:scale-95"
+            style={{ background: c.main, boxShadow: `0 8px 20px ${c.glow}` }}
           >
-            OK
+            Acknowledge
           </button>
         </div>
       </div>

@@ -97,45 +97,52 @@ export default function ProfileDropdown() {
         ref={triggerRef}
         type="button"
         onClick={toggleDropdown}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 transition"
+        className="flex items-center gap-3 px-3.5 py-2 rounded-2xl hover:bg-[#fafaf7] border-1.5 border-transparent hover:border-[#e4e4de] transition-all duration-300"
         aria-expanded={isOpen}
         aria-haspopup="menu"
       >
-        <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold bg-gradient-to-br from-blue-600 to-purple-600">
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-xs font-black bg-gradient-to-br from-[#111] to-[#444] shadow-lg shadow-black/10">
           {initials}
         </div>
-        <span className="text-sm font-medium hidden sm:inline text-slate-900">
-          {firstName}
-        </span>
+        <div className="hidden sm:flex flex-col items-start leading-none">
+          <span className="text-[13px] font-black text-[#111]">
+            {firstName}
+          </span>
+          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Account</span>
+        </div>
       </button>
 
       {isOpen && createPortal(
         <div
           ref={menuRef}
-          className="fixed w-56 rounded-2xl shadow-xl z-[3000] bg-white border-2 border-slate-200 overflow-hidden pointer-events-auto"
+          className="fixed w-64 rounded-[28px] shadow-2xl z-[3000] bg-white border-1.5 border-[#e4e4de] overflow-hidden pointer-events-auto animate-in zoom-in-95 fade-in duration-200"
           style={{ top: `${menuPos.top}px`, left: `${menuPos.left}px` }}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="px-4 py-3 border-b-2 border-slate-200">
-            <p className="text-sm font-semibold text-slate-900">{user.name}</p>
-            <p className="text-xs text-slate-600">{user.email}</p>
-            {isAdmin && (
-              <span className="inline-block mt-2 px-2 py-1 text-xs font-semibold rounded-lg bg-blue-100 text-blue-700">👑 Admin</span>
-            )}
-            {isAgent && (
-              <span className="inline-block mt-2 px-2 py-1 text-xs font-semibold rounded-lg bg-indigo-100 text-indigo-700">🇬🇭 Agent Seller</span>
-            )}
+          <div className="px-6 py-5 border-b border-[#f5f5f0] bg-[#fafaf7]">
+            <p className="text-sm font-black text-[#111] tracking-tight">{user.name}</p>
+            <p className="text-[11px] font-bold text-slate-400 truncate">{user.email}</p>
+            <div className="flex flex-wrap gap-2 mt-3">
+              {isAdmin && (
+                <span className="px-2 py-0.5 text-[9px] font-black rounded-md bg-blue-50 text-blue-600 border border-blue-100 uppercase">👑 Admin</span>
+              )}
+              {isAgent && (
+                <span className="px-2 py-0.5 text-[9px] font-black rounded-md bg-indigo-50 text-indigo-600 border border-indigo-100 uppercase">🇬🇭 Agent</span>
+              )}
+            </div>
           </div>
 
-          <nav className="py-2">
+          <nav className="p-3">
             {isAdmin ? (
               <>
                 <Link
                   to="/admin"
-                  className="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition"
+                  className="flex items-center gap-3 px-4 py-3 text-xs font-black text-slate-600 hover:text-[#111] hover:bg-[#fafaf7] rounded-xl transition-all group"
                   onClick={() => setIsOpen(false)}
                 >
-                  <LayoutDashboard size={16} />
+                  <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-white border border-transparent group-hover:border-[#e4e4de] transition-all">
+                    <LayoutDashboard size={14} />
+                  </div>
                   Admin Dashboard
                 </Link>
               </>
@@ -143,34 +150,42 @@ export default function ProfileDropdown() {
               <>
                 <Link
                   to="/agent/dashboard"
-                  className="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition"
+                  className="flex items-center gap-3 px-4 py-3 text-xs font-black text-slate-600 hover:text-[#111] hover:bg-[#fafaf7] rounded-xl transition-all group"
                   onClick={() => setIsOpen(false)}
                 >
-                  <LayoutDashboard size={16} />
-                  My Dashboard
+                  <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-white border border-transparent group-hover:border-[#e4e4de] transition-all">
+                    <LayoutDashboard size={14} />
+                  </div>
+                  Dashboard
                 </Link>
                 <Link
                   to="/agent/store"
-                  className="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition"
+                  className="flex items-center gap-3 px-4 py-3 text-xs font-black text-slate-600 hover:text-[#111] hover:bg-[#fafaf7] rounded-xl transition-all group"
                   onClick={() => setIsOpen(false)}
                 >
-                  <Store size={16} />
+                  <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-white border border-transparent group-hover:border-[#e4e4de] transition-all">
+                    <Store size={14} />
+                  </div>
                   My Store
                 </Link>
                 <Link
                   to="/agent/commissions"
-                  className="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition"
+                  className="flex items-center gap-3 px-4 py-3 text-xs font-black text-slate-600 hover:text-[#111] hover:bg-[#fafaf7] rounded-xl transition-all group"
                   onClick={() => setIsOpen(false)}
                 >
-                  <Wallet size={16} />
+                  <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-white border border-transparent group-hover:border-[#e4e4de] transition-all">
+                    <Wallet size={14} />
+                  </div>
                   My Earnings
                 </Link>
                 <Link
                   to="/profile"
-                  className="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition"
+                  className="flex items-center gap-3 px-4 py-3 text-xs font-black text-slate-600 hover:text-[#111] hover:bg-[#fafaf7] rounded-xl transition-all group"
                   onClick={() => setIsOpen(false)}
                 >
-                  <User size={16} />
+                  <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-white border border-transparent group-hover:border-[#e4e4de] transition-all">
+                    <User size={14} />
+                  </div>
                   Profile
                 </Link>
               </>
@@ -178,31 +193,37 @@ export default function ProfileDropdown() {
               <>
                 <Link
                   to="/profile"
-                  className="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition"
+                  className="flex items-center gap-3 px-4 py-3 text-xs font-black text-slate-600 hover:text-[#111] hover:bg-[#fafaf7] rounded-xl transition-all group"
                   onClick={() => setIsOpen(false)}
                 >
-                  <User size={16} />
-                  Profile
+                  <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-white border border-transparent group-hover:border-[#e4e4de] transition-all">
+                    <User size={14} />
+                  </div>
+                  Profile Center
                 </Link>
                 <Link
                   to="/dashboard"
-                  className="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition"
+                  className="flex items-center gap-3 px-4 py-3 text-xs font-black text-slate-600 hover:text-[#111] hover:bg-[#fafaf7] rounded-xl transition-all group"
                   onClick={() => setIsOpen(false)}
                 >
-                  <LayoutDashboard size={16} />
-                  Dashboard
+                  <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-white border border-transparent group-hover:border-[#e4e4de] transition-all">
+                    <LayoutDashboard size={14} />
+                  </div>
+                  User Console
                 </Link>
               </>
             )}
           </nav>
 
-          <div className="py-2 border-t-2 border-slate-200">
+          <div className="p-3 border-t border-[#f5f5f0]">
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition"
+              className="w-full flex items-center gap-3 px-4 py-3 text-xs font-black text-rose-600 hover:bg-rose-50 rounded-xl transition-all group"
             >
-              <LogOut size={16} />
-              Logout
+              <div className="w-8 h-8 rounded-lg bg-rose-100/50 flex items-center justify-center group-hover:bg-white border border-transparent group-hover:border-rose-200 transition-all">
+                <LogOut size={14} />
+              </div>
+              Sign Out
             </button>
           </div>
         </div>,

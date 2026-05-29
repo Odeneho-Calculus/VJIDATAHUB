@@ -11,9 +11,23 @@ import {
 } from '../utils/transactionCharges';
 import { formatCurrencyAbbreviated } from '../utils/formatCurrency';
 
+/* ── Homepage multi-colour palette ── */
+const palette = [
+  { main: '#7C3AED', bg: '#EDE9FE', soft: '#F5F3FF', glow: 'rgba(124,58,237,0.15)' },   // purple
+  { main: '#0F6E56', bg: '#D1FAE5', soft: '#ECFDF5', glow: 'rgba(15,110,86,0.15)' },    // teal
+  { main: '#1D4ED8', bg: '#DBEAFE', soft: '#EFF6FF', glow: 'rgba(29,78,216,0.15)' },    // blue
+  { main: '#B45309', bg: '#FEF3C7', soft: '#FFFBEB', glow: 'rgba(180,83,9,0.15)' },     // amber
+  { main: '#BE185D', bg: '#FCE7F3', soft: '#FDF2F8', glow: 'rgba(190,24,93,0.15)' },    // pink
+  { main: '#DC2626', bg: '#FEE2E2', soft: '#FFF5F5', glow: 'rgba(220,38,38,0.15)' },    // coral/red
+  { main: '#0369A1', bg: '#E0F2FE', soft: '#F0F9FF', glow: 'rgba(3,105,161,0.15)' },    // sky
+  { main: '#4D7C0F', bg: '#ECFCCB', soft: '#F7FEE7', glow: 'rgba(77,124,15,0.15)' },    // lime/green
+];
+
+const getColor = (index) => palette[index % palette.length];
+
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
-  
+
   .dash-wrapper {
     font-family: 'DM Sans', sans-serif;
     background-color: #f5f5f0;
@@ -56,13 +70,14 @@ const styles = `
   .dash-icon-box {
     width: 40px;
     height: 40px;
-    background: #111;
+    background: #1D4ED8;
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #f0a500;
+    color: #fff;
     flex-shrink: 0;
+    box-shadow: 0 4px 16px rgba(29,78,216,0.25);
   }
 
   .dash-h2 {
@@ -111,8 +126,8 @@ const styles = `
   }
 
   .dash-stat-card:hover {
-    border-color: #d4d4ce;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.06);
+    border-color: var(--stat-color, #d4d4ce);
+    box-shadow: 0 8px 40px var(--stat-glow, rgba(0,0,0,0.06));
   }
 
   .dash-stat-label {
@@ -252,8 +267,8 @@ const styles = `
 
   .dash-plan-card:hover {
     transform: translateY(-4px);
-    border-color: #111;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+    border-color: var(--plan-color, #111);
+    box-shadow: 0 12px 30px var(--plan-glow, rgba(0,0,0,0.08));
   }
 `;
 
@@ -347,92 +362,116 @@ export default function ResultsChecker() {
     }
   };
 
+  const pageTheme = getColor(2); // Blue
+  const walletColor = getColor(1); // Teal
+  const historyColor = getColor(3); // Amber
+  const paystackColor = getColor(4); // Pink
+
   return (
     <Layout>
       <div className="dash-wrapper overflow-x-hidden">
         <style>{styles}</style>
-        
+
         <div className="dash-content">
           {/* Header Card */}
-          <div className="dash-header !p-4">
+          <div className="dash-header !p-5">
             <div className="flex items-center justify-between gap-4">
               <div className="dash-heading-row">
-                <div className="dash-icon-box !w-10 !h-10">
-                  <LayoutIcon size={20} />
+                <div className="dash-icon-box !w-11 !h-11" style={{ background: pageTheme.main, boxShadow: `0 8px 20px ${pageTheme.glow}` }}>
+                  <CheckCircle2 size={22} strokeWidth={2.5} />
                 </div>
                 <div className="min-w-0">
-                  <h2 className="dash-h2 !text-base sm:!text-xl">Result Checker</h2>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-slate-400 font-mono uppercase truncate">Buy WAEC, NECO, JAMB PINS</span>
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: pageTheme.main }} />
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: pageTheme.main }}>Exam Portal</span>
                   </div>
+                  <h2 className="dash-h2 !text-lg sm:!text-2xl">Result Checker</h2>
                 </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  onClick={fetchData}
-                  className="p-1.5 text-slate-400 hover:text-[#f0a500] transition-colors"
-                  title="Refresh Data"
-                >
-                  <RefreshCw size={16} />
-                </button>
-              </div>
+              <button
+                onClick={fetchData}
+                className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#fafaf7] border-1.5 border-[#e4e4de] text-slate-400 hover:text-[#111] transition-all"
+                title="Refresh Data"
+              >
+                <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
+              </button>
             </div>
           </div>
 
           <div className="dash-stat-grid">
-            <div className="md:col-span-2 dash-card !p-5">
-              <div className="flex flex-col gap-4">
-                <div className="flex flex-col gap-2">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Phone number for notification</label>
+            <div className="dash-stat-card" style={{ '--stat-color': historyColor.main + '66', '--stat-glow': historyColor.glow }}>
+              <div className="flex items-center justify-between mb-2">
+                <span className="dash-stat-label" style={{ color: historyColor.main }}>Total Checks</span>
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: historyColor.soft, color: historyColor.main, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 2px 8px ${historyColor.glow}` }}>
+                  <History size={16} strokeWidth={2.5} />
+                </div>
+              </div>
+              <div className="dash-stat-value">{history.length}</div>
+              <div className="mt-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                <Clock size={12} style={{ color: historyColor.main }} /> Lifetime Activity
+              </div>
+            </div>
+
+            <div className="dash-stat-card" style={{ '--stat-color': walletColor.main + '66', '--stat-glow': walletColor.glow }}>
+              <div className="flex items-center justify-between mb-2">
+                <span className="dash-stat-label" style={{ color: walletColor.main }}>Wallet Balance</span>
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: walletColor.soft, color: walletColor.main, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 2px 8px ${walletColor.glow}` }}>
+                  <Wallet size={16} strokeWidth={2.5} />
+                </div>
+              </div>
+              <div className="dash-stat-value">{formatCurrencyAbbreviated(Number(user?.balance || 0))}</div>
+              <div className="mt-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                <CheckCircle2 size={12} style={{ color: walletColor.main }} /> Instant Funding
+              </div>
+            </div>
+
+            <div className="md:col-span-1 dash-card !p-5 !flex !flex-col !justify-center" style={{ borderColor: pageTheme.main + '22' }}>
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Recipient Number</label>
                   <input
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
                     placeholder="0240000000"
-                    className="w-full px-4 py-2.5 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-xl focus:outline-none focus:border-[#111] transition-all text-sm font-bold"
+                    className="w-full px-4 py-2.5 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-xl focus:outline-none transition-all text-sm font-bold"
+                    style={{ focusBorderColor: pageTheme.main }}
                   />
                 </div>
-                <label className="flex items-center gap-2 text-xs font-bold text-slate-600 cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    checked={skipSms} 
+                <label className="flex items-center gap-2 text-[10px] font-black text-slate-600 cursor-pointer uppercase tracking-wide">
+                  <input
+                    type="checkbox"
+                    checked={skipSms}
                     onChange={(e) => setSkipSms(e.target.checked)}
-                    className="w-4 h-4 rounded border-[#e4e4de] text-[#111] focus:ring-[#111]" 
+                    className="w-4 h-4 rounded border-[#e4e4de]"
+                    style={{ accentColor: pageTheme.main }}
                   />
-                  Skip SMS notification
+                  Skip SMS Alert
                 </label>
-              </div>
-            </div>
-
-            <div className="dash-stat-card justify-center">
-              <div className="flex items-center justify-between mb-1">
-                <span className="dash-stat-label">Wallet Balance</span>
-                <Wallet size={14} className="text-[#f0a500]" />
-              </div>
-              <div className="dash-stat-value">{formatCurrencyAbbreviated(Number(user?.balance || 0))}</div>
-              <div className="mt-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                <CheckCircle2 size={12} className="text-emerald-500" /> Secure Payments
               </div>
             </div>
           </div>
 
           <div className="dash-card !p-5">
-            <h3 className="dash-card-title !mb-4 !text-xs uppercase tracking-widest">Select Payment Method</h3>
+            <h3 className="dash-card-title !mb-4 !text-xs uppercase tracking-widest">
+              <div style={{ width: 24, height: 24, borderRadius: 5, background: pageTheme.soft, color: pageTheme.main, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CreditCard size={12} strokeWidth={2.5} />
+              </div>
+              Select Payment Method
+            </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-1.5 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-xl">
               <button
                 type="button"
                 onClick={() => setPaymentMethod('wallet')}
-                className={`py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
-                  paymentMethod === 'wallet' ? 'bg-[#111] text-white shadow-md' : 'text-slate-500 hover:text-slate-800'
-                }`}
+                className="py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all"
+                style={paymentMethod === 'wallet' ? { background: walletColor.main, color: '#fff', boxShadow: `0 4px 12px ${walletColor.glow}` } : { color: '#64748b' }}
               >
                 Wallet Balance
               </button>
               <button
                 type="button"
                 onClick={() => setPaymentMethod('paystack')}
-                className={`py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
-                  paymentMethod === 'paystack' ? 'bg-[#111] text-white shadow-md' : 'text-slate-500 hover:text-slate-800'
-                }`}
+                className="py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all"
+                style={paymentMethod === 'paystack' ? { background: paystackColor.main, color: '#fff', boxShadow: `0 4px 12px ${paystackColor.glow}` } : { color: '#64748b' }}
               >
                 Online (Paystack)
               </button>
@@ -450,14 +489,14 @@ export default function ResultsChecker() {
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Available Checkers</h3>
               <div className="flex gap-1">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#f0a500]"></div>
+                <div className="w-1.5 h-1.5 rounded-full" style={{ background: pageTheme.main }}></div>
                 <div className="w-1.5 h-1.5 rounded-full bg-slate-200"></div>
               </div>
             </div>
 
             {loading ? (
               <div className="dash-card py-20 text-center">
-                <Loader2 className="animate-spin mx-auto text-[#f0a500]" size={32} />
+                <Loader2 className="animate-spin mx-auto" size={32} style={{ color: pageTheme.main }} />
                 <p className="mt-4 text-slate-500 font-medium text-sm">Loading available products...</p>
               </div>
             ) : products.length === 0 ? (
@@ -467,21 +506,21 @@ export default function ResultsChecker() {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {products.map((product) => {
+                {products.map((product, idx) => {
                   const basePrice = Number(product.finalPrice || 0);
                   const dataPurchaseCharge = getDataPurchaseChargeAmount(transactionCharges, basePrice);
                   const totalPaystackAmount = basePrice + dataPurchaseCharge;
-
+                  const c = getColor(idx);
 
                   return (
-                    <div key={product._id} className="dash-plan-card group">
+                    <div key={product._id} className="dash-plan-card group" style={{ '--plan-color': c.main + '66', '--plan-glow': c.glow }}>
                       <div className="flex items-center gap-3 mb-4">
-                        <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-[#111] group-hover:text-white transition-all">
-                          <Smartphone size={20} />
+                        <div style={{ width: 40, height: 40, borderRadius: 10, background: c.soft, color: c.main, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1.5px solid ${c.main}22`, boxShadow: `0 2px 8px ${c.glow}` }}>
+                          <Smartphone size={20} strokeWidth={2} />
                         </div>
                         <div className="min-w-0">
                           <h4 className="font-black text-[#111] truncate uppercase text-sm tracking-tight">{product.displayName || product.checkerType}</h4>
-                          <p className="text-[10px] font-bold text-[#f0a500] uppercase tracking-[0.2em] mt-0.5">{product.checkerType}</p>
+                          <p className="text-[10px] font-bold uppercase tracking-[0.2em] mt-0.5" style={{ color: c.main }}>{product.checkerType}</p>
                         </div>
                       </div>
 
@@ -492,14 +531,14 @@ export default function ResultsChecker() {
                             {formatCurrencyAbbreviated(basePrice)}
                           </span>
                         </div>
-                        
+
                         {paymentMethod === 'paystack' && dataPurchaseCharge > 0 && (
-                          <div className="mt-3 p-2 bg-slate-50 rounded-lg space-y-1">
-                            <div className="flex justify-between text-[9px] font-bold text-slate-400 uppercase">
+                          <div className="mt-3 p-2 rounded-lg space-y-1" style={{ background: c.soft }}>
+                            <div className="flex justify-between text-[9px] font-bold text-slate-500 uppercase">
                               <span>Fee</span>
                               <span>+{formatCurrencyAbbreviated(dataPurchaseCharge)}</span>
                             </div>
-                            <div className="flex justify-between text-[10px] font-black text-slate-700 uppercase">
+                            <div className="flex justify-between text-[10px] font-black uppercase" style={{ color: c.main }}>
                               <span>Total</span>
                               <span>{formatCurrencyAbbreviated(totalPaystackAmount)}</span>
                             </div>
@@ -509,7 +548,8 @@ export default function ResultsChecker() {
                         <button
                           onClick={() => handleBuy(product)}
                           disabled={buyingId === product._id || (paymentMethod === 'wallet' && Number(user?.balance || 0) < Number(product.finalPrice || 0))}
-                          className="w-full py-3 bg-[#111] text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-[#333] transition-all flex items-center justify-center gap-2 mt-4 disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-slate-100"
+                          className="w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
+                          style={{ background: c.main, color: '#fff', boxShadow: `0 4px 12px ${c.glow}` }}
                         >
                           {buyingId === product._id ? <Loader2 size={16} className="animate-spin" /> : <ShoppingBag size={14} strokeWidth={3} />}
                           Buy PIN
@@ -524,10 +564,12 @@ export default function ResultsChecker() {
 
           <div className="flex flex-col gap-4 mt-4">
             <div className="flex items-center gap-2">
-              <History size={16} className="text-[#f0a500]" />
+              <div style={{ width: 24, height: 24, borderRadius: 5, background: pageTheme.soft, color: pageTheme.main, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <History size={12} strokeWidth={2.5} />
+              </div>
               <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Purchase History</h3>
             </div>
-            
+
             <div className="dash-table-container">
               <table className="dash-table">
                 <thead>
@@ -540,26 +582,31 @@ export default function ResultsChecker() {
                   </tr>
                 </thead>
                 <tbody>
-                  {history.map((row) => (
-                    <tr key={row._id}>
-                      <td className="dash-td">
-                        <p className="font-bold text-slate-900">#{row.purchaseId}</p>
-                        <p className="text-[10px] text-slate-400 font-medium">{new Date(row.createdAt).toLocaleDateString()}</p>
-                      </td>
-                      <td className="dash-td font-bold text-slate-700 uppercase">{row.checkerType}</td>
-                      <td className="dash-td font-bold text-slate-600">{row.phoneNumber}</td>
-                      <td className="dash-td font-black text-slate-900">{formatCurrencyAbbreviated(row.price)}</td>
-                      <td className="dash-td">
-                        <span className={`dash-badge ${
-                          row.status === 'completed' ? 'bg-green-100 text-green-700' : 
-                          row.status === 'failed' ? 'bg-rose-100 text-rose-700' : 
-                          'bg-amber-100 text-amber-700'
-                        }`}>
-                          {row.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
+                  {history.map((row, idx) => {
+                    const c = getColor(idx);
+                    return (
+                      <tr key={row._id}>
+                        <td className="dash-td">
+                          <p className="font-bold text-slate-900">#{row.purchaseId}</p>
+                          <p className="text-[10px] text-slate-400 font-medium">{new Date(row.createdAt).toLocaleDateString()}</p>
+                        </td>
+                        <td className="dash-td font-bold text-slate-700 uppercase">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase" style={{ background: c.soft, color: c.main }}>{row.checkerType}</span>
+                        </td>
+                        <td className="dash-td font-bold text-slate-600">{row.phoneNumber}</td>
+                        <td className="dash-td font-black" style={{ color: c.main }}>{formatCurrencyAbbreviated(row.price)}</td>
+                        <td className="dash-td">
+                          <span className={`dash-badge ${
+                            row.status === 'completed' ? 'bg-green-100 text-green-700' :
+                            row.status === 'failed' ? 'bg-rose-100 text-rose-700' :
+                            'bg-amber-100 text-amber-700'
+                          }`}>
+                            {row.status}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
                   {history.length === 0 && (
                     <tr>
                       <td colSpan="5" className="dash-td py-12 text-center text-slate-400 font-bold uppercase text-xs">No purchase history found</td>

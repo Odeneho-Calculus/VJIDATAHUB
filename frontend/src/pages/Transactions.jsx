@@ -5,6 +5,21 @@ import { wallet, purchases, checkers as checkersAPI } from '../services/api';
 import UserLayout from '../components/UserLayout';
 import Modal from '../components/Modal';
 import AlertModal from '../components/AlertModal';
+import Pagination from '../components/Pagination';
+
+/* ── Homepage multi-colour palette ── */
+const palette = [
+  { main: '#7C3AED', bg: '#EDE9FE', soft: '#F5F3FF', glow: 'rgba(124,58,237,0.15)' },   // purple
+  { main: '#0F6E56', bg: '#D1FAE5', soft: '#ECFDF5', glow: 'rgba(15,110,86,0.15)' },    // teal
+  { main: '#1D4ED8', bg: '#DBEAFE', soft: '#EFF6FF', glow: 'rgba(29,78,216,0.15)' },    // blue
+  { main: '#B45309', bg: '#FEF3C7', soft: '#FFFBEB', glow: 'rgba(180,83,9,0.15)' },     // amber
+  { main: '#BE185D', bg: '#FCE7F3', soft: '#FDF2F8', glow: 'rgba(190,24,93,0.15)' },    // pink
+  { main: '#DC2626', bg: '#FEE2E2', soft: '#FFF5F5', glow: 'rgba(220,38,38,0.15)' },    // coral/red
+  { main: '#0369A1', bg: '#E0F2FE', soft: '#F0F9FF', glow: 'rgba(3,105,161,0.15)' },    // sky
+  { main: '#4D7C0F', bg: '#ECFCCB', soft: '#F7FEE7', glow: 'rgba(77,124,15,0.15)' },    // lime/green
+];
+
+const getColor = (index) => palette[index % palette.length];
 
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
@@ -44,12 +59,13 @@ const styles = `
   .dash-icon-box {
     width: 48px;
     height: 48px;
-    background: #111;
+    background: #DC2626;
     border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #fff;
+    box-shadow: 0 4px 16px rgba(220,38,38,0.25);
   }
 
   .dash-heading-row {
@@ -73,8 +89,8 @@ const styles = `
   }
 
   .dash-btn-outline:hover {
-    border-color: #111;
-    background: #fafaf7;
+    border-color: #DC2626;
+    background: #FFF5F5;
   }
 
   .dash-stat-grid {
@@ -88,6 +104,12 @@ const styles = `
     border: 1.5px solid #e4e4de;
     border-radius: 20px;
     padding: 20px;
+    transition: all 0.2s;
+  }
+
+  .dash-stat-card:hover {
+    border-color: var(--stat-color, #d4d4ce);
+    box-shadow: 0 8px 40px var(--stat-glow, rgba(0,0,0,0.06));
   }
 
   .dash-stat-label {
@@ -129,7 +151,7 @@ const styles = `
   }
 
   .dash-premium-banner {
-    background: linear-gradient(135deg, #111 0%, #333 100%);
+    background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
     border-radius: 24px;
     padding: 32px;
     color: #fff;
@@ -143,7 +165,7 @@ const styles = `
     right: -20px;
     width: 120px;
     height: 120px;
-    background: rgba(255,255,255,0.05);
+    background: rgba(255,255,255,0.08);
     border-radius: 50%;
     pointer-events: none;
   }
@@ -220,14 +242,14 @@ const styles = `
   }
 
   .dash-tab.active {
-    background: #111;
+    background: #DC2626;
     color: #fff;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(220,38,38,0.25);
   }
 
   .dash-tab:not(.active):hover {
-    background: #f1f5f9;
-    color: #1e293b;
+    background: #FFF5F5;
+    color: #DC2626;
   }
 
   .dash-input {
@@ -243,8 +265,8 @@ const styles = `
   }
 
   .dash-input:focus {
-    border-color: #111;
-    box-shadow: 0 0 0 4px rgba(0,0,0,0.02);
+    border-color: #DC2626;
+    box-shadow: 0 0 0 4px rgba(220,38,38,0.05);
   }
 
   .dash-mobile-card {
@@ -258,9 +280,9 @@ const styles = `
   }
 
   .dash-mobile-card:hover {
-    border-color: #111;
+    border-color: var(--card-color, #111);
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    box-shadow: 0 8px 24px var(--card-glow, rgba(0,0,0,0.06));
   }
 
   @media (max-width: 768px) {
@@ -480,6 +502,14 @@ export default function Transactions() {
     }
   };
 
+  const isCreditTransaction = (tx) => {
+    if (tx.txType === 'admin_adjustment') return tx.amount > 0;
+    return ['Wallet Top-up', 'Referral Bonus', 'Refund'].includes(tx.type);
+  };
+
+  const [txPage, setTxPage] = useState(1);
+  const TX_LIMIT = 10;
+
   const filteredTransactions = transactions.filter(tx => {
     // Tab filtering
     if (activeTab === 'purchase' && !['Data Purchase', 'Checker Purchase'].includes(tx.type)) return false;
@@ -508,16 +538,11 @@ export default function Transactions() {
     return true;
   });
 
-  const paginatedTransactions = filteredTransactions.slice(0, perPage);
+  const paginatedTransactions = filteredTransactions.slice((txPage - 1) * TX_LIMIT, txPage * TX_LIMIT);
 
-  const getTransactionIcon = (type) => {
-    switch (type) {
-      case 'Data Purchase': return <ArrowDownLeft size={16} />;
-      case 'Checker Purchase': return <ShoppingBag size={16} />;
-      case 'Wallet Top-up': return <ArrowUpRight size={16} />;
-      case 'Referral Bonus': return <Gift size={16} />;
-      default: return <CreditCard size={16} />;
-    }
+  const getTransactionIcon = (type, amount) => {
+    if (type === 'Wallet Top-up' || type === 'Referral Bonus' || (type === 'Transaction' && amount > 0)) return <ArrowUpRight size={16} />;
+    return <ArrowDownLeft size={16} />;
   };
 
   const totalSpent = transactions
@@ -553,10 +578,11 @@ export default function Transactions() {
                   <ReceiptText size={24} />
                 </div>
                 <div>
-                  <h2 className="dash-h2">Transaction History</h2>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="text-xs font-bold text-slate-400 font-mono uppercase">Full Financial Records</span>
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-red-600/80">Full Financial Records</span>
                   </div>
+                  <h2 className="dash-h2">Transaction History</h2>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -577,40 +603,48 @@ export default function Transactions() {
           </div>
 
           <div className="dash-stat-grid">
-            <div className="dash-stat-card">
+            <div className="dash-stat-card" style={{ '--stat-color': getColor(4).main, '--stat-glow': getColor(4).glow }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
-                  <p className="dash-stat-label">Total Spent</p>
+                  <p className="dash-stat-label" style={{ color: getColor(4).main }}>Total Spent</p>
                   <p className="dash-stat-value">{formatCurrencyAbbreviated(totalSpent)}</p>
                 </div>
-                <ArrowDownLeft size={18} style={{ color: '#ef4444' }} />
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: getColor(4).soft, color: getColor(4).main, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ArrowDownLeft size={18} />
+                </div>
               </div>
             </div>
-            <div className="dash-stat-card">
+            <div className="dash-stat-card" style={{ '--stat-color': getColor(1).main, '--stat-glow': getColor(1).glow }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
-                  <p className="dash-stat-label">Total Funding</p>
+                  <p className="dash-stat-label" style={{ color: getColor(1).main }}>Total Funding</p>
                   <p className="dash-stat-value">{formatCurrencyAbbreviated(totalTopUp)}</p>
                 </div>
-                <ArrowUpRight size={18} style={{ color: '#10b981' }} />
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: getColor(1).soft, color: getColor(1).main, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ArrowUpRight size={18} />
+                </div>
               </div>
             </div>
-            <div className="dash-stat-card">
+            <div className="dash-stat-card" style={{ '--stat-color': getColor(2).main, '--stat-glow': getColor(2).glow }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
-                  <p className="dash-stat-label">Record Count</p>
+                  <p className="dash-stat-label" style={{ color: getColor(2).main }}>Record Count</p>
                   <p className="dash-stat-value">{transactions.length}</p>
                 </div>
-                <Activity size={18} style={{ color: '#3b82f6' }} />
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: getColor(2).soft, color: getColor(2).main, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Activity size={18} />
+                </div>
               </div>
             </div>
-            <div className="dash-stat-card">
+            <div className="dash-stat-card" style={{ '--stat-color': getColor(7).main, '--stat-glow': getColor(7).glow }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
-                  <p className="dash-stat-label">System Integrity</p>
+                  <p className="dash-stat-label" style={{ color: getColor(7).main }}>System Integrity</p>
                   <p className="dash-stat-value">Verified</p>
                 </div>
-                <ShieldCheck size={18} style={{ color: '#a855f7' }} />
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: getColor(7).soft, color: getColor(7).main, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ShieldCheck size={18} />
+                </div>
               </div>
             </div>
           </div>
@@ -618,7 +652,7 @@ export default function Transactions() {
           {/* Filters & Transaction List */}
           <div className="dash-card">
             <div className="p-4 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="flex flex-wrap gap-2">
+              <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-2 md:pb-0">
                 {[
                   { id: 'all', label: 'All Activities', icon: ReceiptText },
                   { id: 'top_up', label: 'Funding', icon: ArrowUpRight },
@@ -628,7 +662,7 @@ export default function Transactions() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`dash-tab ${activeTab === tab.id ? 'active' : ''}`}
+                    className={`dash-tab whitespace-nowrap ${activeTab === tab.id ? 'active' : ''}`}
                   >
                     <tab.icon size={14} />
                     <span>{tab.label}</span>
@@ -638,7 +672,7 @@ export default function Transactions() {
 
               <div className="flex flex-col sm:flex-row items-center gap-3">
                 <div className="relative group w-full sm:w-64">
-                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-red-500 transition-colors" />
                   <input
                     type="text"
                     placeholder="Search records..."
@@ -677,9 +711,9 @@ export default function Transactions() {
               {loading ? (
                 <div className="flex flex-col items-center justify-center py-20 bg-white rounded-[2.5rem] border border-slate-200/60 shadow-sm">
                   <div className="relative">
-                    <div className="w-16 h-16 rounded-full border-4 border-slate-100 border-t-blue-600 animate-spin"></div>
+                    <div className="w-16 h-16 rounded-full border-4 border-slate-100 border-t-red-600 animate-spin"></div>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <ReceiptText size={20} className="text-blue-600/50" />
+                      <ReceiptText size={20} className="text-red-600/50" />
                     </div>
                   </div>
                   <p className="mt-6 text-sm font-black text-slate-400 uppercase tracking-widest">Fetching records...</p>
@@ -714,28 +748,28 @@ export default function Transactions() {
                             onClick={() => { setSelectedTx(tx); setShowDetails(true); }}
                             className="dash-table-row"
                           >
-                            <td className="dash-td">
+                            <td className="dash-td whitespace-nowrap">
                               <div className="flex items-center gap-4">
                                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-sm transition-transform group-hover:scale-110 ${tx.amount >= 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
                                   }`}>
-                                  {getTransactionIcon(tx.type)}
+                                  {getTransactionIcon(tx.type, tx.amount)}
                                 </div>
                                 <div>
                                   <p className="text-xs font-black text-[#111] uppercase tracking-tight">{tx.type}</p>
-                                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
-                                    {formatDate(tx.date)} • {formatTime(tx.date)}
+                                  <p className="text-[10px] font-bold text-slate-600 uppercase tracking-tighter">
+                                    {formatDate(tx.date)} &bull; {formatTime(tx.date)}
                                   </p>
                                 </div>
                               </div>
                             </td>
-                            <td className="dash-td text-center">
+                            <td className="dash-td text-center whitespace-nowrap">
                               <span className={`badge-premium ${getStatusStyles(getResolvedPaymentStatus(tx))}`}>
                                 {getResolvedPaymentStatus(tx)}
                               </span>
                             </td>
-                            <td className="dash-td text-center">
+                            <td className="dash-td text-center whitespace-nowrap">
                               {getResolvedOrderStatus(tx) === 'n/a' ? (
-                                <span className="badge-premium bg-slate-50 text-slate-400 border-slate-100">
+                                <span className="badge-premium bg-slate-50 text-slate-600 border-slate-100">
                                   N/A
                                 </span>
                               ) : (
@@ -744,15 +778,15 @@ export default function Transactions() {
                                 </span>
                               )}
                             </td>
-                            <td className="dash-td">
-                              <p className="text-sm font-bold text-slate-600 max-w-xs truncate">{tx.description}</p>
-                              <p className="text-[10px] font-mono text-slate-400 uppercase tracking-tighter mt-0.5">Ref: {tx.reference?.slice(-12) || 'N/A'}</p>
+                            <td className="dash-td min-w-[200px]">
+                              <p className="text-sm font-bold text-slate-600 truncate">{tx.description}</p>
+                              <p className="text-[10px] font-mono text-slate-600 uppercase tracking-tighter mt-0.5">Ref: {tx.reference || 'N/A'}</p>
                             </td>
-                            <td className="dash-td text-center">
-                              <p className={`text-base font-black tracking-tight ${tx.amount >= 0 ? 'text-emerald-600' : 'text-[#111]'}`}>
-                                {tx.amount >= 0 ? '+' : ''}{formatNumberAbbreviated(tx.amount)}
+                            <td className="dash-td text-center whitespace-nowrap">
+                              <p className={`text-base font-black tracking-tight ${tx.amount >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                                {tx.amount >= 0 ? '+' : '-'}{formatNumberAbbreviated(Math.abs(tx.amount))}
                               </p>
-                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mt-0.5">
+                              <p className="text-[10px] font-bold text-slate-600 uppercase tracking-tighter mt-0.5">
                                 Bal: GH₵ {formatCurrencyAbbreviated(tx.balanceAfter)}
                               </p>
                             </td>
@@ -761,7 +795,7 @@ export default function Transactions() {
                                 {getResolvedPaymentStatus(tx) === 'pending' && (tx.txType === 'wallet_topup' || tx.type === 'Data Purchase' || tx.type === 'Checker Purchase') && (
                                   <button
                                     onClick={(e) => openVerificationModal(tx, e)}
-                                    className="p-2 bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white rounded-xl transition-all border border-amber-100"
+                                    className="p-2 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white rounded-xl transition-all border border-red-100"
                                     title="Verify Payment"
                                   >
                                     <RotateCw size={14} strokeWidth={3} />
@@ -779,61 +813,73 @@ export default function Transactions() {
                   </div>
 
                   <div className="md:hidden divide-y divide-slate-100">
-                    {paginatedTransactions.map(tx => (
-                      <div
-                        key={tx.id}
-                        onClick={() => { setSelectedTx(tx); setShowDetails(true); }}
-                        className="dash-mobile-card mb-3"
-                      >
-                        <div className="flex justify-between items-start mb-4">
-                          <div className="flex gap-4">
-                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm ${tx.amount >= 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-400'
-                              }`}>
-                              {getTransactionIcon(tx.type)}
+                    {paginatedTransactions.map(tx => {
+                      const isCredit = isCreditTransaction(tx);
+                      return (
+                        <div
+                          key={tx.id}
+                          onClick={() => { setSelectedTx(tx); setShowDetails(true); }}
+                          className="dash-mobile-card mb-3"
+                        >
+                          <div className="flex justify-between items-start mb-4">
+                            <div className="flex gap-4">
+                              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm ${isCredit ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
+                                }`}>
+                                {getTransactionIcon(tx.type, tx.amount)}
+                              </div>
+                              <div>
+                                <p className="text-sm font-black text-slate-900 tracking-tight">{tx.type}</p>
+                                <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest mt-0.5">
+                                  {formatDate(tx.date)}
+                                </p>
+                                <div className="flex flex-wrap gap-1 mt-2">
+                                  <span className={`inline-block px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${getStatusStyles(getResolvedPaymentStatus(tx))}`}>
+                                    Pay: {getResolvedPaymentStatus(tx)}
+                                  </span>
+                                  <span className={`inline-block px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${getResolvedOrderStatus(tx) === 'n/a' ? 'bg-slate-50 text-slate-500 border-slate-100' : getStatusStyles(getResolvedOrderStatus(tx))}`}>
+                                    Order: {getResolvedOrderStatus(tx) === 'n/a' ? 'N/A' : getResolvedOrderStatus(tx)}
+                                  </span>
+                                </div>
+                              </div>
                             </div>
-                            <div>
-                              <p className="text-sm font-black text-slate-900 tracking-tight">{tx.type}</p>
-                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
-                                {formatDate(tx.date)}
+                            <div className="text-right">
+                              <p className={`text-lg font-black tracking-tighter ${isCredit ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                {isCredit ? '+' : '-'}{formatNumberAbbreviated(Math.abs(tx.amount))}
                               </p>
-                              <div className="flex flex-wrap gap-1 mt-2">
-                                <span className={`inline-block px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${getStatusStyles(getResolvedPaymentStatus(tx))}`}>
-                                  Pay: {getResolvedPaymentStatus(tx)}
-                                </span>
-                                <span className={`inline-block px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${getResolvedOrderStatus(tx) === 'n/a' ? 'bg-slate-50 text-slate-500 border-slate-100' : getStatusStyles(getResolvedOrderStatus(tx))}`}>
-                                  Order: {getResolvedOrderStatus(tx) === 'n/a' ? 'N/A' : getResolvedOrderStatus(tx)}
-                                </span>
+                              <p className="text-[10px] font-bold text-slate-600 uppercase tracking-tighter">
+                                Bal: GH₵ {formatCurrencyAbbreviated(tx.balanceAfter)}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between pt-4 border-t border-slate-50 mt-1">
+                            <p className="text-[11px] font-bold text-slate-600 truncate max-w-[200px]">{tx.description}</p>
+                            <div className="flex gap-2">
+                              {getResolvedPaymentStatus(tx) === 'pending' && (tx.txType === 'wallet_topup' || tx.type === 'Data Purchase' || tx.type === 'Checker Purchase') && (
+                                <button
+                                  onClick={(e) => openVerificationModal(tx, e)}
+                                  className="p-2 bg-red-50 text-red-600 rounded-xl border border-red-100"
+                                >
+                                  <RotateCw size={14} />
+                                </button>
+                              )}
+                              <div className={`w-8 h-8 bg-[#111] text-white rounded-xl flex items-center justify-center`}>
+                                <ChevronRight size={16} strokeWidth={3} />
                               </div>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <p className={`text-lg font-black tracking-tighter ${tx.amount >= 0 ? 'text-emerald-500' : 'text-slate-900'}`}>
-                              {tx.amount >= 0 ? '+' : ''}{formatNumberAbbreviated(tx.amount)}
-                            </p>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
-                              Bal: GH₵ {formatCurrencyAbbreviated(tx.balanceAfter)}
-                            </p>
-                          </div>
                         </div>
-
-                        <div className="flex items-center justify-between pt-4 border-t border-slate-50 mt-1">
-                          <p className="text-[11px] font-bold text-slate-500 truncate max-w-[200px]">{tx.description}</p>
-                          <div className="flex gap-2">
-                            {getResolvedPaymentStatus(tx) === 'pending' && (tx.txType === 'wallet_topup' || tx.type === 'Data Purchase' || tx.type === 'Checker Purchase') && (
-                              <button
-                                onClick={(e) => openVerificationModal(tx, e)}
-                                className="p-2 bg-amber-50 text-amber-600 rounded-xl border border-amber-100"
-                              >
-                                <RotateCw size={14} />
-                              </button>
-                            )}
-                            <div className="w-8 h-8 bg-slate-900 text-white rounded-xl flex items-center justify-center">
-                              <ChevronRight size={16} strokeWidth={3} />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
+                  </div>
+                  
+                  <div className="mt-6 px-4 pb-6">
+                    <Pagination
+                      currentPage={txPage}
+                      totalPages={Math.ceil(filteredTransactions.length / TX_LIMIT)}
+                      onPageChange={(page) => setTxPage(page)}
+                      isLoading={loading}
+                    />
                   </div>
                 </>
               )}
@@ -846,10 +892,15 @@ export default function Transactions() {
             onClose={() => setShowDetails(false)}
             title="Transaction Details"
             icon={ReceiptText}
+            themeColor={getColor(5)}
             footer={
               <button
                 onClick={() => setShowDetails(false)}
-                className="w-full py-4 bg-slate-900 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl hover:bg-blue-600 transition-all active:scale-[0.98] shadow-xl shadow-slate-200"
+                className="w-full py-4 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl transition-all active:scale-[0.98] shadow-xl"
+                style={{
+                  background: getColor(5).main,
+                  boxShadow: `0 8px 25px ${getColor(5).glow}`
+                }}
               >
                 Close Record
               </button>
@@ -857,17 +908,16 @@ export default function Transactions() {
           >
             {selectedTx && (
               <div className="space-y-6">
-                <div className="bg-slate-50 rounded-[2rem] p-6 border border-slate-100 flex flex-col items-center text-center">
-                  <div className={`w-16 h-16 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-4 border border-slate-100 ${selectedTx.amount >= 0 ? 'text-emerald-500' : 'text-slate-400'
-                    }`}>
-                    {React.cloneElement(getTransactionIcon(selectedTx.type), { size: 32, strokeWidth: 1.5 })}
+                <div className="rounded-3xl p-4 border-1.5 flex flex-col items-center text-center transition-all duration-300" style={{ background: getColor(5).soft, borderColor: `${getColor(5).main}20` }}>
+                  <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-2 border border-slate-100" style={{ color: getColor(5).main }}>
+                    {React.cloneElement(getTransactionIcon(selectedTx.type), { size: 24, strokeWidth: 1.5 })}
                   </div>
-                  <p className={`text-2xl font-black tracking-tight ${selectedTx.amount >= 0 ? 'text-emerald-500' : 'text-slate-900'}`}>
-                    {selectedTx.amount >= 0 ? '+' : ''}GH₵ {formatCurrencyAbbreviated(Math.abs(selectedTx.amount))}
+                  <p className={`text-xl font-black tracking-tight ${selectedTx.amount >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                    {selectedTx.amount >= 0 ? '+' : '-'}{formatCurrencyAbbreviated(Math.abs(selectedTx.amount))}
                   </p>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mt-1">{selectedTx.type}</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] mt-0.5" style={{ color: getColor(5).main }}>{selectedTx.type}</p>
 
-                  <div className="mt-6 flex flex-wrap justify-center gap-2">
+                  <div className="mt-3 flex flex-wrap justify-center gap-2">
                     <div className={`px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${getStatusStyles(getResolvedPaymentStatus(selectedTx))}`}>
                       Payment: {getResolvedPaymentStatus(selectedTx)}
                     </div>
@@ -887,18 +937,23 @@ export default function Transactions() {
                     { label: 'Method', value: selectedTx.paymentMethod || 'Wallet', icon: CreditCard }
                   ].map((item, i) => (
                     <div key={i} className="flex items-center justify-between py-3 border-b border-slate-50 last:border-0 group">
-                      <div className="flex items-center gap-2 text-slate-400">
-                        {item.icon && <item.icon size={12} className="group-hover:text-blue-500 transition-colors" />}
+                      <div className="flex items-center gap-2 text-slate-600">
+                        {item.icon && <item.icon size={12} className="group-hover:text-red-500 transition-colors" style={{ color: i === 4 ? getColor(5).main : undefined }} />}
                         <span className="text-[10px] font-black uppercase tracking-widest">{item.label}</span>
                       </div>
-                      <span className={`text-[11px] font-bold text-right max-w-[60%] truncate ${item.mono ? 'font-mono' : ''} ${item.bold ? 'text-blue-600 text-sm font-black' : 'text-slate-700'}`}>
+                      <span className={`text-[11px] font-bold text-right max-w-[60%] truncate ${item.mono ? 'font-mono' : ''} ${item.bold ? 'text-sm font-black' : 'text-slate-700'}`} style={{ color: item.bold ? getColor(5).main : undefined }}>
                         {item.value}
                       </span>
                     </div>
                   ))}
                 </div>
 
-                <button className="flex items-center justify-center gap-2 w-full py-3 bg-white border border-slate-200 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-600 hover:border-blue-400 hover:text-blue-600 transition-all active:scale-[0.98]">
+                <button 
+                  className="flex items-center justify-center gap-2 w-full py-3 bg-white border border-slate-200 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-600 transition-all active:scale-[0.98]"
+                  style={{ '--hover-color': getColor(5).main }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = getColor(5).main; e.currentTarget.style.color = getColor(5).main; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = '#475569'; }}
+                >
                   <Download size={14} strokeWidth={3} />
                   Download Receipt
                 </button>
@@ -924,7 +979,7 @@ export default function Transactions() {
                 <button
                   onClick={handleConfirmVerify}
                   disabled={verifying}
-                  className="flex-[2] py-4 bg-blue-600 text-white font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="flex-[2] py-4 bg-red-600 text-white font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-red-700 transition-all shadow-lg shadow-red-100 flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   {verifying ? (
                     <RotateCw size={14} className="animate-spin" />
@@ -947,14 +1002,14 @@ export default function Transactions() {
                 </div>
 
                 <div className="bg-slate-50 rounded-[2rem] p-6 border border-slate-100">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 text-center">Reference ID</p>
+                  <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] mb-3 text-center">Reference ID</p>
                   <div className="flex flex-col items-center gap-4">
                     <code className="px-4 py-3 bg-white border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-900 break-all w-full text-center shadow-sm">
                       {verificationTx.reference || verificationTx.paystackReference || 'N/A'}
                     </code>
                     <button
                       onClick={handleCopyReference}
-                      className={`flex items-center gap-2 px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${copied ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-100' : 'bg-white text-slate-600 border border-slate-200 hover:border-blue-400'
+                      className={`flex items-center gap-2 px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${copied ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-100' : 'bg-white text-slate-600 border border-slate-200 hover:border-red-400'
                         }`}
                     >
                       {copied ? <Check size={14} strokeWidth={3} /> : <Copy size={14} />}

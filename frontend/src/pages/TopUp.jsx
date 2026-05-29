@@ -14,9 +14,17 @@ import {
   Eye,
   ArrowUpCircle,
   ArrowDownCircle,
+  Activity,
+  Database,
+  ShieldCheck,
+  Zap,
+  X,
+  ArrowUpRight,
+  ArrowDownLeft
 } from 'lucide-react';
 import PaymentModal from '../components/PaymentModal';
 import Modal from '../components/Modal';
+import Pagination from '../components/Pagination';
 import { wallet, publicAPI } from '../services/api';
 import UserLayout from '../components/UserLayout';
 import {
@@ -24,6 +32,191 @@ import {
   getWalletFundingChargeAmount,
   parseTransactionCharges,
 } from '../utils/transactionCharges';
+
+/* ── Homepage multi-colour palette ── */
+const palette = [
+  { main: '#7C3AED', bg: '#EDE9FE', soft: '#F5F3FF', glow: 'rgba(124,58,237,0.15)' },   // purple
+  { main: '#0F6E56', bg: '#D1FAE5', soft: '#ECFDF5', glow: 'rgba(15,110,86,0.15)' },    // teal
+  { main: '#1D4ED8', bg: '#DBEAFE', soft: '#EFF6FF', glow: 'rgba(29,78,216,0.15)' },    // blue
+  { main: '#B45309', bg: '#FEF3C7', soft: '#FFFBEB', glow: 'rgba(180,83,9,0.15)' },     // amber
+  { main: '#BE185D', bg: '#FCE7F3', soft: '#FDF2F8', glow: 'rgba(190,24,93,0.15)' },    // pink
+  { main: '#DC2626', bg: '#FEE2E2', soft: '#FFF5F5', glow: 'rgba(220,38,38,0.15)' },    // coral/red
+  { main: '#0369A1', bg: '#E0F2FE', soft: '#F0F9FF', glow: 'rgba(3,105,161,0.15)' },    // sky
+  { main: '#4D7C0F', bg: '#ECFCCB', soft: '#F7FEE7', glow: 'rgba(77,124,15,0.15)' },    // lime/green
+];
+
+const getColor = (index) => palette[index % palette.length];
+
+const styles = `
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
+
+  .dash-wrapper {
+    font-family: 'DM Sans', sans-serif;
+    background-color: #fafaf7;
+    min-height: 100vh;
+    padding: 20px;
+    color: #1a1a1a;
+  }
+
+  .dash-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .dash-header {
+    background: #fff;
+    border: 1.5px solid #e4e4de;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  }
+
+  .dash-h2 {
+    font-size: 24px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    margin: 0;
+    color: #111;
+  }
+
+  .dash-icon-box {
+    width: 48px;
+    height: 48px;
+    background: #0369A1;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(3,105,161,0.25);
+  }
+
+  .dash-heading-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .dash-btn-outline {
+    background: #fff;
+    border: 1.5px solid #e4e4de;
+    border-radius: 12px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 800;
+    color: #111;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dash-btn-outline:hover {
+    border-color: #0369A1;
+    background: #F0F9FF;
+  }
+
+  .dash-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+  }
+
+  .dash-stat-card {
+    background: #fff;
+    border: 1.5px solid #e4e4de;
+    border-radius: 20px;
+    padding: 20px;
+    transition: all 0.2s;
+  }
+
+  .dash-stat-card:hover {
+    border-color: var(--stat-color, #d4d4ce);
+    box-shadow: 0 8px 40px var(--stat-glow, rgba(0,0,0,0.06));
+  }
+
+  .dash-stat-label {
+    font-size: 11px;
+    font-weight: 800;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+
+  .dash-stat-value {
+    font-size: 22px;
+    font-weight: 900;
+    color: #111;
+    margin: 0;
+  }
+
+  .dash-card {
+    background: #fff;
+    border: 1.5px solid #e4e4de;
+    border-radius: 24px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .dash-card-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: #111;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .dash-premium-banner {
+    background: linear-gradient(135deg, #0369A1 0%, #075985 100%);
+    border-radius: 24px;
+    padding: 32px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .dash-banner-accent {
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    width: 120px;
+    height: 120px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .dash-input {
+    background: #fff;
+    border: 1.5px solid #e4e4de;
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #111;
+    transition: all 0.2s;
+    outline: none;
+  }
+
+  .dash-input:focus {
+    border-color: #0369A1;
+    box-shadow: 0 0 0 4px rgba(3,105,161,0.05);
+  }
+
+  .dash-input:focus::placeholder {
+    color: transparent;
+  }
+`;
 
 export default function TopUp() {
   const { user, refreshUser } = useAuth();
@@ -84,8 +277,10 @@ export default function TopUp() {
     return getResolvedPaymentStatus(tx);
   };
 
-  const isCreditTransaction = (tx) =>
-    ['wallet_topup', 'wallet_funding', 'refund', 'purchase_refund', 'referral_bonus'].includes(tx?.type);
+  const isCreditTransaction = (tx) => {
+    if (tx?.type === 'admin_adjustment') return tx.amount > 0;
+    return ['wallet_topup', 'wallet_funding', 'refund', 'purchase_refund', 'referral_bonus'].includes(tx?.type);
+  };
 
   const fetchTransactions = async (page = 1) => {
     try {
@@ -186,85 +381,117 @@ export default function TopUp() {
 
   return (
     <UserLayout>
-      <div className="min-h-screen bg-[#F8FAFC] overflow-x-hidden">
-        <div className="sticky top-0 z-20 app-pro-header px-4 py-3 sm:px-6 sm:py-4">
-          <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-3">
-            <div>
-              <div className="flex items-center gap-1.5 text-primary-600 mb-1">
-                <Layout size={14} className="sm:w-4 sm:h-4" />
-                <span className="text-xs font-bold uppercase tracking-wider">Wallet Center</span>
+      <style>{styles}</style>
+      <div className="dash-wrapper">
+        <div className="dash-content">
+          {/* Header */}
+          <div className="dash-header">
+            <div className="flex items-center justify-between">
+              <div className="dash-heading-row">
+                <div className="dash-icon-box">
+                  <Wallet size={24} />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-2 h-2 rounded-full bg-sky-500 animate-pulse" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-sky-600/80">Wallet Center</span>
+                  </div>
+                  <h2 className="dash-h2">Wallet Top-up</h2>
+                </div>
               </div>
-              <h1 className="text-lg sm:text-2xl font-bold text-slate-900">Wallet Top-up</h1>
+              <button
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="dash-btn-outline"
+              >
+                <RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''} />
+                <span className="hidden sm:inline">Refresh</span>
+              </button>
             </div>
-            <button
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              className="p-2 text-slate-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors disabled:opacity-60"
-              title="Refresh wallet"
-            >
-              <RefreshCw size={18} className={isRefreshing ? 'animate-spin' : ''} />
-            </button>
           </div>
-        </div>
 
-        <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
-          <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
-            <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-blue-200/70 shadow-sm">
-              <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center mb-2 sm:mb-3">
-                <Wallet size={16} className="sm:w-[18px] sm:h-[18px]" />
+          <div className="dash-stat-grid">
+            <div className="dash-stat-card" style={{ '--stat-color': getColor(6).main, '--stat-glow': getColor(6).glow }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <p className="dash-stat-label" style={{ color: getColor(6).main }}>Current Balance</p>
+                  <p className="dash-stat-value">
+                    {formatCurrencyAbbreviated(Number(user?.balance || 0))}
+                  </p>
+                </div>
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: getColor(6).soft, color: getColor(6).main, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Wallet size={18} strokeWidth={2.5} />
+                </div>
               </div>
-              <p className="text-xs text-slate-600 mb-1">Current Balance</p>
-              <p className="text-base sm:text-2xl font-bold text-slate-900 break-words">
-                {formatCurrencyAbbreviated(Number(user?.balance || 0))}
-              </p>
             </div>
 
-            <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-indigo-200/70 shadow-sm">
-              <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center mb-2 sm:mb-3">
-                <CreditCard size={16} className="sm:w-[18px] sm:h-[18px]" />
+            <div className="dash-stat-card" style={{ '--stat-color': getColor(1).main, '--stat-glow': getColor(1).glow }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <p className="dash-stat-label" style={{ color: getColor(1).main }}>Funding Status</p>
+                  <p className="dash-stat-value">
+                    {businessStatus?.isOpen ? 'Available' : 'Unavailable'}
+                  </p>
+                </div>
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: getColor(1).soft, color: getColor(1).main, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Activity size={18} strokeWidth={2.5} />
+                </div>
               </div>
-              <p className="text-xs text-slate-600 mb-1">Funding Status</p>
-              <p className="text-base sm:text-xl font-bold text-slate-900">
-                {businessStatus?.isOpen ? 'Available' : 'Unavailable'}
-              </p>
+            </div>
+
+            <div className="dash-stat-card" style={{ '--stat-color': getColor(3).main, '--stat-glow': getColor(3).glow }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <p className="dash-stat-label" style={{ color: getColor(3).main }}>Funding Records</p>
+                  <p className="dash-stat-value">{txTotal}</p>
+                </div>
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: getColor(3).soft, color: getColor(3).main, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <History size={18} strokeWidth={2.5} />
+                </div>
+              </div>
             </div>
           </div>
 
           {businessStatus && !businessStatus.isOpen && (
-            <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl flex items-start gap-2.5 sm:gap-3 border border-orange-300 bg-white text-orange-700">
+            <div className="p-4 rounded-2xl flex items-start gap-3 border border-orange-200 bg-orange-50 text-orange-700">
               <Clock size={20} className="flex-shrink-0" />
               <div>
-                <p className="font-bold text-sm">Business Closed</p>
-                <p className="text-sm">{businessStatus.message || 'Business is currently closed.'}</p>
+                <p className="font-black text-sm uppercase tracking-tight">Business Closed</p>
+                <p className="text-sm font-medium opacity-90">{businessStatus.message || 'Business is currently closed.'}</p>
               </div>
             </div>
           )}
 
           {error && (
-            <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl flex items-start gap-2.5 sm:gap-3 border border-rose-300 bg-white text-rose-700">
+            <div className="p-4 rounded-2xl flex items-start gap-3 border border-red-200 bg-red-50 text-red-700">
               <AlertCircle size={20} className="flex-shrink-0" />
               <div>
-                <p className="font-bold text-sm">Error</p>
-                <p className="text-sm">{error}</p>
+                <p className="font-black text-sm uppercase tracking-tight">Error</p>
+                <p className="text-sm font-medium opacity-90">{error}</p>
               </div>
             </div>
           )}
 
           {success && (
-            <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl flex items-start gap-2.5 sm:gap-3 border border-emerald-300 bg-white text-emerald-700">
+            <div className="p-4 rounded-2xl flex items-start gap-3 border border-emerald-200 bg-emerald-50 text-emerald-700">
               <CheckCircle2 size={20} className="flex-shrink-0" />
               <div>
-                <p className="font-bold text-sm">Success</p>
-                <p className="text-sm">{success}</p>
+                <p className="font-black text-sm uppercase tracking-tight">Success</p>
+                <p className="text-sm font-medium opacity-90">{success}</p>
               </div>
             </div>
           )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm">
-                <h2 className="font-bold text-sm mb-3 text-slate-900">Quick Amounts</h2>
-                <div className="grid grid-cols-3 sm:grid-cols-2 gap-2">
+              <div className="dash-card">
+                <h3 className="dash-card-title">
+                  <div className="w-8 h-8 rounded-lg bg-sky-100 text-sky-600 flex items-center justify-center">
+                    <Zap size={16} />
+                  </div>
+                  Quick Amounts
+                </h3>
+                <div className="grid grid-cols-2 gap-3">
                   {quickAmounts.map((quickAmount) => (
                     <button
                       key={quickAmount}
@@ -273,10 +500,12 @@ export default function TopUp() {
                         setError(null);
                       }}
                       disabled={loading || (businessStatus && !businessStatus.isOpen)}
-                      className={`py-2 rounded-lg sm:rounded-xl transition text-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed ${amount === quickAmount.toString()
-                        ? 'bg-primary-600 text-white'
-                        : 'bg-slate-100 text-slate-900 hover:bg-slate-200'
-                        }`}
+                      className="py-3 px-4 rounded-xl font-black text-sm transition-all border-2"
+                      style={{
+                        backgroundColor: amount === quickAmount.toString() ? getColor(6).main : '#fff',
+                        color: amount === quickAmount.toString() ? '#fff' : '#111',
+                        borderColor: amount === quickAmount.toString() ? getColor(6).main : '#e4e4de',
+                      }}
                     >
                       GH₵ {quickAmount}
                     </button>
@@ -286,162 +515,165 @@ export default function TopUp() {
             </div>
 
             <div className="lg:col-span-2">
-              <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-slate-200 shadow-sm">
-                <h2 className="font-bold text-base sm:text-lg mb-4 sm:mb-5 text-slate-900 flex items-center gap-2">
-                  <Wallet size={18} className="text-blue-600 sm:w-5 sm:h-5" />
-                  Fund Wallet
-                </h2>
-
-                <div className="mb-4 sm:mb-6">
-                  <label className="block text-sm font-semibold mb-2 text-slate-900">Amount (GHS)</label>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold whitespace-nowrap text-slate-900">GH₵</span>
-                    <input
-                      type="number"
-                      value={amount}
-                      onChange={(e) => {
-                        setAmount(e.target.value);
-                        setError(null);
-                      }}
-                      placeholder="Enter amount"
-                      disabled={loading}
-                      min="0.01"
-                      step="0.01"
-                      className="flex-1 px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-lg sm:rounded-xl border border-slate-200 text-sm bg-slate-50 text-slate-900 disabled:opacity-50 disabled:cursor-not-allowed"
-                      style={{
-                        appearance: 'textfield',
-                      }}
-                    />
+              <div className="dash-card">
+                <h3 className="dash-card-title">
+                  <div className="w-8 h-8 rounded-lg bg-sky-100 text-sky-600 flex items-center justify-center">
+                    <CreditCard size={16} />
                   </div>
-                </div>
+                  Fund Wallet
+                </h3>
 
-                <div className="mb-4 sm:mb-6 rounded-lg sm:rounded-xl border border-slate-100 bg-slate-50 px-3.5 sm:px-4 py-3">
-                  <div className="flex items-start gap-2.5">
-                    <div className="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-600 flex-shrink-0 flex items-center justify-center mt-0.5">
-                      <CheckCircle2 size={14} />
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-[11px] font-black uppercase tracking-wider text-slate-400 mb-2 ml-1">
+                      Enter Amount (GHS)
+                    </label>
+                    <div className="relative group">
+                      <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-black group-focus-within:text-sky-600 transition-colors pointer-events-none z-10">
+                        GH₵
+                      </div>
+                      <input
+                        type="number"
+                        value={amount}
+                        onChange={(e) => {
+                          setAmount(e.target.value);
+                          setError(null);
+                        }}
+                        placeholder="0.00"
+                        disabled={loading}
+                        className="w-full !pl-16 pr-4 py-4 dash-input text-lg font-black"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-sky-50/50 border border-sky-100 flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-white shadow-sm text-sky-600 flex-shrink-0 flex items-center justify-center">
+                      <ShieldCheck size={18} />
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-slate-700">Instant Processing</p>
-                      <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
-                        Your wallet will be credited immediately after a successful payment via Paystack.
+                      <p className="text-xs font-black text-sky-900 uppercase tracking-tight">Secure Payment</p>
+                      <p className="text-[11px] font-medium text-sky-700/70 mt-0.5 leading-relaxed">
+                        Funds are processed instantly via Paystack encrypted gateway.
                       </p>
                     </div>
                   </div>
-                </div>
 
-                {walletFundingCharge > 0 && parsedAmount > 0 && (
-                  <div className="mb-4 sm:mb-6 rounded-lg sm:rounded-xl border border-slate-100 bg-slate-50 px-3.5 sm:px-4 py-3 space-y-1.5">
-                    <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
-                      <span>Amount to credit</span>
-                      <span>GHS {parsedAmount.toFixed(2)}</span>
+                  {walletFundingCharge > 0 && parsedAmount > 0 && (
+                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                      <div className="flex items-center justify-between text-xs font-bold text-slate-500">
+                        <span>Base Amount</span>
+                        <span className="text-slate-900">GHS {parsedAmount.toFixed(2)}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs font-bold text-amber-600">
+                        <span>Service Fee ({walletChargeDescriptor})</span>
+                        <span>+ GHS {walletFundingCharge.toFixed(2)}</span>
+                      </div>
+                      <div className="h-px bg-slate-200" />
+                      <div className="flex items-center justify-between text-sm font-black text-slate-900">
+                        <span>Total Payable</span>
+                        <span className="text-lg text-sky-600">GHS {totalAmountCharged.toFixed(2)}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center justify-between text-xs font-semibold text-amber-600">
-                      <span>Service charge</span>
-                      <span>+ GHS {walletFundingCharge.toFixed(2)} ({walletChargeDescriptor})</span>
-                    </div>
-                    <div className="h-px bg-slate-200" />
-                    <div className="flex items-center justify-between text-sm font-bold text-slate-900">
-                      <span>Total charged</span>
-                      <span>GHS {totalAmountCharged.toFixed(2)}</span>
-                    </div>
-                  </div>
-                )}
-
-                <button
-                  onClick={handleTopUp}
-                  disabled={loading || !amount || (businessStatus && !businessStatus.isOpen)}
-                  className="w-full text-sm font-bold py-2.5 sm:py-3 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed bg-primary-600 text-white rounded-lg sm:rounded-xl hover:bg-primary-700 transition-all"
-                  title={businessStatus && !businessStatus.isOpen ? 'Business is currently closed' : ''}
-                >
-                  {loading ? (
-                    <>
-                      <Loader size={18} className="animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <CreditCard size={18} />
-                      Proceed to Payment
-                    </>
                   )}
-                </button>
 
-                <p className="text-xs text-center mt-3 sm:mt-4 text-slate-600">
-                  Your transaction is secure and encrypted with Paystack
-                </p>
+                  <button
+                    onClick={handleTopUp}
+                    disabled={loading || !amount || (businessStatus && !businessStatus.isOpen)}
+                    className="w-full py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-3 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:hover:scale-100 shadow-lg shadow-sky-600/20"
+                    style={{
+                      backgroundColor: getColor(6).main,
+                      color: '#fff',
+                    }}
+                  >
+                    {loading ? (
+                      <>
+                        <Loader size={20} className="animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <Zap size={20} fill="currentColor" />
+                        Proceed to Payment
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Transaction History */}
-          <div className="bg-white rounded-xl sm:rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="px-4 sm:px-5 py-3.5 sm:py-4 border-b border-slate-100 flex items-center justify-between gap-3">
-              <h3 className="font-bold text-sm sm:text-base text-slate-900 flex items-center gap-2">
-                <History size={18} className="text-primary-600" />
-                Wallet Transaction History
+          <div className="dash-card">
+            <div className="flex items-center justify-between">
+              <h3 className="dash-card-title mb-0">
+                <div className="w-8 h-8 rounded-lg bg-sky-100 text-sky-600 flex items-center justify-center">
+                  <History size={16} />
+                </div>
+                Transaction History
               </h3>
-              <span className="text-xs font-semibold text-slate-600">Page {txPage} &bull; {txTotal} total</span>
+              <div className="px-3 py-1 rounded-full bg-slate-100 text-[10px] font-black uppercase tracking-wider text-slate-500">
+                {txTotal} Total
+              </div>
             </div>
 
             {txLoading ? (
-              <div className="py-10 flex items-center justify-center text-slate-600">
-                <Loader size={18} className="animate-spin mr-2" />
-                Loading transactions...
+              <div className="py-20 flex flex-col items-center justify-center gap-4 text-slate-400">
+                <Loader size={32} className="animate-spin text-sky-500" />
+                <p className="text-xs font-bold uppercase tracking-widest">Fetching Records...</p>
               </div>
             ) : transactions.length === 0 ? (
-              <div className="py-10 text-center text-slate-500 text-sm">No wallet transactions yet.</div>
+              <div className="py-20 flex flex-col items-center justify-center gap-4 border-2 border-dashed border-slate-100 rounded-3xl">
+                <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-300">
+                  <Database size={24} />
+                </div>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">No Transactions Found</p>
+              </div>
             ) : (
-              <>
-                {/* Desktop table */}
-                <div className="hidden md:block overflow-x-auto">
-                  <table className="w-full min-w-[660px]">
-                    <thead className="bg-slate-50">
-                      <tr>
-                        <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Reference</th>
-                        <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Type</th>
-                        <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Amount</th>
-                        <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Payment Status</th>
-                        <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Transaction Status</th>
-                        <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Date</th>
-                        <th className="px-4 py-3 text-right text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">Actions</th>
+              <div className="space-y-4">
+                <div className="hidden md:block">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-slate-100">
+                        <th className="px-4 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Reference</th>
+                        <th className="px-4 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Type</th>
+                        <th className="px-4 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Amount</th>
+                        <th className="px-4 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
+                        <th className="px-4 py-4 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Action</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-slate-50">
                       {transactions.map((tx) => {
                         const isCredit = isCreditTransaction(tx);
-                        const amountTone = isCredit ? 'text-emerald-600' : 'text-rose-600';
-                        const amountIcon = isCredit ? <ArrowUpCircle size={14} /> : <ArrowDownCircle size={14} />;
                         return (
-                          <tr key={tx._id} className="hover:bg-slate-50 transition-colors">
-                            <td className="px-4 py-3 text-sm font-semibold text-slate-900 whitespace-nowrap">{tx.reference || '-'}</td>
-                            <td className="px-4 py-3 text-sm text-slate-700 whitespace-nowrap">{typeLabelMap[tx.type] || tx.type || '-'}</td>
-                            <td className={`px-4 py-3 text-sm font-bold ${amountTone} whitespace-nowrap`}>
-                              <span className="inline-flex items-center gap-1">
-                                {amountIcon}
-                                {isCredit ? '+' : '-'}{formatCurrency(Math.abs(Number(tx.amount || 0)))}
+                          <tr key={tx._id} className="group hover:bg-slate-50/50 transition-colors">
+                            <td className="px-4 py-4">
+                              <p className="text-xs font-black text-slate-900">{tx.reference || '---'}</p>
+                              <p className="text-[10px] font-bold text-slate-400 mt-1">
+                                {new Date(tx.createdAt).toLocaleDateString()} &bull; {new Date(tx.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </p>
+                            </td>
+                            <td className="px-4 py-4">
+                              <span className="text-[11px] font-bold text-slate-600 bg-slate-100 px-2 py-1 rounded-md">
+                                {typeLabelMap[tx.type] || tx.type}
                               </span>
                             </td>
-                            <td className="px-4 py-3 whitespace-nowrap">
-                              <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${statusBadgeMap[getResolvedPaymentStatus(tx)] || 'bg-slate-100 text-slate-700'}`}>
-                                {getResolvedPaymentStatus(tx)}
-                              </span>
+                            <td className="px-4 py-4">
+                              <div className={`text-xs font-black ${isCredit ? 'text-emerald-600' : 'text-rose-600'} flex items-center gap-1.5`}>
+                                {isCredit ? <ArrowUpRight size={14} /> : <ArrowDownLeft size={14} />}
+                                {isCredit ? '+' : '-'}{formatCurrency(Math.abs(tx.amount))}
+                              </div>
                             </td>
-                            <td className="px-4 py-3 whitespace-nowrap">
-                              <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${statusBadgeMap[getResolvedTransactionStatus(tx)] || 'bg-slate-100 text-slate-700'}`}>
+                            <td className="px-4 py-4">
+                              <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-tight ${statusBadgeMap[getResolvedTransactionStatus(tx)] || 'bg-slate-100 text-slate-600'}`}>
                                 {getResolvedTransactionStatus(tx)}
                               </span>
                             </td>
-                            <td className="px-4 py-3 text-sm text-slate-600 whitespace-nowrap">
-                              {new Date(tx.createdAt).toLocaleDateString()}{' '}
-                              {new Date(tx.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </td>
-                            <td className="px-4 py-3 text-right whitespace-nowrap">
+                            <td className="px-4 py-4 text-right">
                               <button
                                 onClick={() => { setSelectedTx(tx); setShowTxDetails(true); }}
-                                className="p-2 text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all"
-                                title="View Details"
+                                className="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-sky-600 hover:border-sky-200 hover:shadow-sm transition-all flex items-center justify-center ml-auto"
                               >
-                                <Eye size={16} strokeWidth={2.5} />
+                                <Eye size={14} />
                               </button>
                             </td>
                           </tr>
@@ -451,149 +683,118 @@ export default function TopUp() {
                   </table>
                 </div>
 
-                {/* Mobile cards */}
-                <div className="md:hidden divide-y divide-slate-100">
+                <div className="md:hidden space-y-3">
                   {transactions.map((tx) => {
                     const isCredit = isCreditTransaction(tx);
                     return (
-                      <div key={tx._id} className="p-3.5 space-y-2">
-                        <div className="flex items-start justify-between gap-2">
-                          <p className="text-sm font-bold text-slate-900 truncate max-w-[52%]">{tx.reference || '-'}</p>
-                          <div className="flex flex-col gap-1 items-end">
-                            <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${statusBadgeMap[getResolvedPaymentStatus(tx)] || 'bg-slate-100 text-slate-700'}`}>
-                              Pay: {getResolvedPaymentStatus(tx)}
-                            </span>
-                            <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${statusBadgeMap[getResolvedTransactionStatus(tx)] || 'bg-slate-100 text-slate-700'}`}>
-                              Tx: {getResolvedTransactionStatus(tx)}
-                            </span>
+                      <div key={tx._id} className="p-4 rounded-2xl border border-slate-100 bg-slate-50/30">
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <p className="text-xs font-black text-slate-900">{tx.reference || '---'}</p>
+                            <p className="text-[10px] font-bold text-slate-400 mt-0.5">{typeLabelMap[tx.type] || tx.type}</p>
+                          </div>
+                          <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase ${statusBadgeMap[getResolvedTransactionStatus(tx)] || 'bg-slate-100 text-slate-600'}`}>
+                            {getResolvedTransactionStatus(tx)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-end border-t border-slate-100 pt-3 mt-1">
+                          <p className="text-[10px] font-bold text-slate-400">
+                            {new Date(tx.createdAt).toLocaleDateString()}
+                          </p>
+                          <div className={`text-sm font-black ${isCredit ? 'text-emerald-600' : 'text-rose-600'} flex items-center gap-1`}>
+                            {isCredit ? '+' : '-'}{formatCurrency(Math.abs(tx.amount))}
                           </div>
                         </div>
-                        <p className="text-xs text-slate-600">{typeLabelMap[tx.type] || tx.type || '-'}</p>
-                        <p className={`text-sm font-bold ${isCredit ? 'text-emerald-600' : 'text-rose-600'}`}>
-                          {isCredit ? '+' : '-'}{formatCurrency(Math.abs(Number(tx.amount || 0)))}
-                        </p>
-                        <p className="text-xs text-slate-500">
-                          {new Date(tx.createdAt).toLocaleDateString()}{' '}
-                          {new Date(tx.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </p>
-                        <button
-                          onClick={() => { setSelectedTx(tx); setShowTxDetails(true); }}
-                          className="w-full mt-1 px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                        >
-                          View Details
-                        </button>
                       </div>
                     );
                   })}
                 </div>
 
-                {/* Pagination */}
-                <div className="px-4 sm:px-5 py-3.5 sm:py-4 border-t border-slate-100 flex items-center justify-between gap-3">
-                  <button
-                    onClick={() => setTxPage((p) => Math.max(1, p - 1))}
-                    disabled={txPage === 1 || txLoading}
-                    className="flex-1 sm:flex-none px-4 py-2 rounded-lg border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Previous
-                  </button>
-                  <button
-                    onClick={() => setTxPage((p) => p + 1)}
-                    disabled={!txHasMore || txLoading}
-                    className="flex-1 sm:flex-none px-4 py-2 rounded-lg bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Next
-                  </button>
+                <div className="mt-6">
+                  <Pagination
+                    currentPage={txPage}
+                    totalPages={Math.ceil(txTotal / TX_LIMIT)}
+                    onPageChange={(page) => setTxPage(page)}
+                    isLoading={txLoading}
+                  />
                 </div>
-              </>
+              </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* Transaction Detail Modal */}
-      <Modal
-        isOpen={showTxDetails}
-        onClose={() => setShowTxDetails(false)}
-        title="Transaction Details"
-        icon={<History size={20} className="text-primary-600" />}
-        maxWidth="max-w-lg"
-      >
-        {selectedTx && (
-          <div className="space-y-4 sm:space-y-5">
-            <div className="flex justify-between items-start gap-3">
-              <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.16em] mb-1">Reference</p>
-                <p className="font-mono text-xs sm:text-sm font-bold text-slate-900 uppercase break-all">{selectedTx.reference || 'N/A'}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.16em] mb-1">Status</p>
-                <div className="flex flex-col gap-1">
-                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${statusBadgeMap[getResolvedPaymentStatus(selectedTx)] || 'bg-slate-100 text-slate-700'}`}>
-                    Payment: {getResolvedPaymentStatus(selectedTx)}
-                  </span>
-                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${statusBadgeMap[getResolvedTransactionStatus(selectedTx)] || 'bg-slate-100 text-slate-700'}`}>
-                    Transaction: {getResolvedTransactionStatus(selectedTx)}
-                  </span>
-                </div>
-              </div>
-            </div>
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        onSuccess={handlePaymentSuccess}
+        accessCode={paymentData?.access_code}
+        reference={paymentData?.reference}
+        amount={Number.parseFloat(amount)}
+        themeColor={getColor(6)}
+      />
 
-            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100/60">
-              <div className="flex items-center justify-between mb-3 pb-3 border-b border-slate-200/60">
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.16em] leading-none">Transaction Value</p>
-                <div className={`flex items-center gap-1.5 font-bold text-base sm:text-lg ${isCreditTransaction(selectedTx) ? 'text-emerald-600' : 'text-rose-600'}`}>
-                  {isCreditTransaction(selectedTx) ? <ArrowUpCircle size={18} /> : <ArrowDownCircle size={18} />}
-                  {isCreditTransaction(selectedTx) ? '+' : '-'}{formatCurrency(Math.abs(Number(selectedTx.amount || 0)))}
+      {showTxDetails && selectedTx && (
+        <Modal
+          isOpen={showTxDetails}
+          onClose={() => setShowTxDetails(false)}
+          title="Transaction Details"
+          icon={<History size={22} strokeWidth={2.5} />}
+          themeColor={getColor(6)}
+          maxWidth="max-w-lg"
+        >
+          {(() => {
+            const c = getColor(6);
+            return (
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-5 rounded-2xl border-1.5 transition-all duration-300" style={{ background: c.soft, borderColor: `${c.main}20` }}>
+                    <p className="text-[10px] font-black uppercase tracking-widest mb-1" style={{ color: c.main }}>Amount</p>
+                    <p className={`text-xl font-black ${isCreditTransaction(selectedTx) ? 'text-emerald-600' : 'text-rose-600'}`}>
+                      {isCreditTransaction(selectedTx) ? '+' : '-'}{formatCurrency(Math.abs(selectedTx.amount))}
+                    </p>
+                  </div>
+                  <div className="p-5 rounded-2xl border-1.5 transition-all duration-300" style={{ background: c.soft, borderColor: `${c.main}20` }}>
+                    <p className="text-[10px] font-black uppercase tracking-widest mb-1" style={{ color: c.main }}>Status</p>
+                    <span className={`inline-flex px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-tight ${statusBadgeMap[getResolvedTransactionStatus(selectedTx)] || 'bg-slate-100 text-slate-600'}`}>
+                      {getResolvedTransactionStatus(selectedTx)}
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center text-xs gap-3">
-                  <span className="font-semibold text-slate-500 uppercase">Type</span>
-                  <span className="font-semibold text-slate-900 uppercase text-right">{typeLabelMap[selectedTx.type] || selectedTx.type}</span>
-                </div>
-                <div className="flex justify-between items-center text-xs gap-3">
-                  <span className="font-semibold text-slate-500 uppercase">Description</span>
-                  <span className="font-semibold text-slate-900 text-right max-w-[62%] break-words">{selectedTx.description || 'N/A'}</span>
-                </div>
-              </div>
-            </div>
 
-            <div className="space-y-2.5">
-              <div className="flex justify-between items-center py-2 border-b border-slate-50 gap-3">
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.16em]">Date &amp; Time</span>
-                <span className="text-xs font-semibold text-slate-900 text-right">{new Date(selectedTx.createdAt).toLocaleString()}</span>
-              </div>
-              {selectedTx.paymentMethod && (
-                <div className="flex justify-between items-center py-2 border-b border-slate-50 gap-3">
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.16em]">Method</span>
-                  <span className="text-xs font-semibold text-slate-900 uppercase text-right">{selectedTx.paymentMethod}</span>
+                <div className="space-y-4 p-6 rounded-[24px] border-1.5 bg-white transition-all duration-300" style={{ borderColor: `${c.main}10` }}>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="font-bold text-slate-600">Type</span>
+                    <span className="font-black text-[#111] uppercase tracking-tight">{typeLabelMap[selectedTx.type] || selectedTx.type}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="font-bold text-slate-600">Date</span>
+                    <span className="font-black text-[#111]">{new Date(selectedTx.createdAt).toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="font-bold text-slate-600">Payment Ref</span>
+                    <span className="font-black text-[#111] font-mono text-xs">{selectedTx.paymentReference || 'N/A'}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="font-bold text-slate-600">Transaction ID</span>
+                    <span className="font-black text-[#111] font-mono text-xs">{selectedTx.reference || 'N/A'}</span>
+                  </div>
                 </div>
-              )}
-            </div>
 
-            <button
-              onClick={() => setShowTxDetails(false)}
-              className="w-full py-2.5 bg-slate-100 text-slate-700 rounded-xl font-bold uppercase text-[11px] tracking-[0.12em] hover:bg-slate-200 transition-all"
-            >
-              Close Details
-            </button>
-          </div>
-        )}
-      </Modal>
-
-      {paymentData && (
-        <PaymentModal
-          key={paymentData?.reference}
-          isOpen={showPaymentModal}
-          onClose={() => {
-            setShowPaymentModal(false);
-            setPaymentData(null);
-          }}
-          accessCode={paymentData?.accessCode}
-          reference={paymentData?.reference}
-          amount={parseFloat(amount)}
-          onSuccess={handlePaymentSuccess}
-        />
+                <button
+                  onClick={() => setShowTxDetails(false)}
+                  className="w-full py-4 rounded-2xl text-white font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl active:scale-95"
+                  style={{ 
+                    background: c.main,
+                    boxShadow: `0 8px 25px ${c.glow}`
+                  }}
+                >
+                  Close Record
+                </button>
+              </div>
+            );
+          })()}
+        </Modal>
       )}
     </UserLayout>
   );

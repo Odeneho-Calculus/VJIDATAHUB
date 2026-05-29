@@ -196,8 +196,9 @@ export default function PurchaseModal({ bundle, isOpen, onClose, userBalance, us
         isOpen={isOpen}
         onClose={onClose}
         title="Purchase Data Bundle"
-        icon={<Zap size={20} style={{ color: c ? c.main : undefined }} className={c ? '' : ns.accent} />}
+        icon={<Zap size={22} strokeWidth={2.5} />}
         maxWidth="max-w-md"
+        themeColor={c}
       >
         <div className="space-y-5">
           <div className="p-4 rounded-3xl border shadow-sm relative overflow-hidden group" style={c ? { background: c.soft, borderColor: c.main + '33' } : {}}>

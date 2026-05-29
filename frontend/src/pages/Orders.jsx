@@ -7,6 +7,20 @@ import Modal from '../components/Modal';
 import AlertModal from '../components/AlertModal';
 
 
+/* ── Homepage multi-colour palette ── */
+const palette = [
+  { main: '#7C3AED', bg: '#EDE9FE', soft: '#F5F3FF', glow: 'rgba(124,58,237,0.15)' },   // purple
+  { main: '#0F6E56', bg: '#D1FAE5', soft: '#ECFDF5', glow: 'rgba(15,110,86,0.15)' },    // teal
+  { main: '#1D4ED8', bg: '#DBEAFE', soft: '#EFF6FF', glow: 'rgba(29,78,216,0.15)' },    // blue
+  { main: '#B45309', bg: '#FEF3C7', soft: '#FFFBEB', glow: 'rgba(180,83,9,0.15)' },     // amber
+  { main: '#BE185D', bg: '#FCE7F3', soft: '#FDF2F8', glow: 'rgba(190,24,93,0.15)' },    // pink
+  { main: '#DC2626', bg: '#FEE2E2', soft: '#FFF5F5', glow: 'rgba(220,38,38,0.15)' },    // coral/red
+  { main: '#0369A1', bg: '#E0F2FE', soft: '#F0F9FF', glow: 'rgba(3,105,161,0.15)' },    // sky
+  { main: '#4D7C0F', bg: '#ECFCCB', soft: '#F7FEE7', glow: 'rgba(77,124,15,0.15)' },    // lime/green
+];
+
+const getColor = (index) => palette[index % palette.length];
+
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
 
@@ -45,12 +59,13 @@ const styles = `
   .dash-icon-box {
     width: 48px;
     height: 48px;
-    background: #111;
+    background: #BE185D;
     border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #fff;
+    box-shadow: 0 4px 16px rgba(190,24,93,0.25);
   }
 
   .dash-heading-row {
@@ -74,8 +89,8 @@ const styles = `
   }
 
   .dash-btn-outline:hover {
-    border-color: #111;
-    background: #fafaf7;
+    border-color: #BE185D;
+    background: #FDF2F8;
   }
 
   .dash-stat-grid {
@@ -89,6 +104,12 @@ const styles = `
     border: 1.5px solid #e4e4de;
     border-radius: 20px;
     padding: 20px;
+    transition: all 0.2s;
+  }
+
+  .dash-stat-card:hover {
+    border-color: var(--stat-color, #d4d4ce);
+    box-shadow: 0 8px 40px var(--stat-glow, rgba(0,0,0,0.06));
   }
 
   .dash-stat-label {
@@ -130,7 +151,7 @@ const styles = `
   }
 
   .dash-premium-banner {
-    background: linear-gradient(135deg, #111 0%, #333 100%);
+    background: linear-gradient(135deg, #BE185D 0%, #9D174D 100%);
     border-radius: 24px;
     padding: 32px;
     color: #fff;
@@ -144,7 +165,7 @@ const styles = `
     right: -20px;
     width: 120px;
     height: 120px;
-    background: rgba(255,255,255,0.05);
+    background: rgba(255,255,255,0.08);
     border-radius: 50%;
     pointer-events: none;
   }
@@ -215,9 +236,9 @@ const styles = `
   }
 
   .dash-mobile-card:hover {
-    border-color: #111;
+    border-color: var(--card-color, #111);
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    box-shadow: 0 8px 24px var(--card-glow, rgba(0,0,0,0.06));
   }
 
   @media (max-width: 768px) {
@@ -391,31 +412,41 @@ export default function Orders() {
     return order?.network || 'N/A';
   };
 
+  const pageTheme = getColor(4); // Pink
+
+  const statCards = [
+    { label: 'Total Orders', value: orders.length, icon: ShoppingBag, color: getColor(4) },
+    { label: 'Active Orders', value: orders.filter(o => o.status === 'pending').length, icon: Clock, color: getColor(3) },
+    { label: 'Network Sync', value: 'Live', icon: Activity, color: getColor(1) },
+    { label: 'Verified Data', value: 'Secure', icon: ShieldCheck, color: getColor(2) },
+  ];
+
   return (
     <UserLayout>
       <div className="dash-wrapper overflow-x-hidden">
         <style>{styles}</style>
-        
+
         <div className="dash-content">
           {/* Header Card */}
-          <div className="dash-header">
+          <div className="dash-header !p-5">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="dash-heading-row">
-                <div className="dash-icon-box">
-                  <ShoppingBag size={24} />
+                <div className="dash-icon-box !w-11 !h-11" style={{ background: pageTheme.main, boxShadow: `0 8px 20px ${pageTheme.glow}` }}>
+                  <Zap size={22} strokeWidth={2.5} />
                 </div>
-                <div>
-                  <h2 className="dash-h2">Order History</h2>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="text-xs font-bold text-slate-400 font-mono uppercase">Manage Your Purchases</span>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: pageTheme.main }} />
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: pageTheme.main }}>History Center</span>
                   </div>
+                  <h2 className="dash-h2 !text-lg sm:!text-2xl">Purchase Records</h2>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleRefresh}
                   disabled={isRefreshing}
-                  className="dash-btn-outline p-2"
+                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#fafaf7] border-1.5 border-[#e4e4de] text-slate-400 hover:text-[#111] transition-all"
                   title="Refresh Orders"
                 >
                   <RefreshCw size={18} className={isRefreshing ? 'animate-spin' : ''} />
@@ -425,48 +456,44 @@ export default function Orders() {
           </div>
 
           <div className="dash-stat-grid">
-            <div className="dash-stat-card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div>
-                  <p className="dash-stat-label">Total Orders</p>
-                  <p className="dash-stat-value">{orders.length}</p>
+            {statCards.map((stat, i) => (
+              <div
+                key={i}
+                className="dash-stat-card"
+                style={{
+                  '--stat-color': stat.color.main + '66',
+                  '--stat-glow': stat.color.glow,
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div>
+                    <p className="dash-stat-label" style={{ color: stat.color.main }}>{stat.label}</p>
+                    <p className="dash-stat-value">{stat.value}</p>
+                  </div>
+                  <div style={{
+                    width: 32, height: 32, borderRadius: 8,
+                    background: stat.color.soft,
+                    color: stat.color.main,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    boxShadow: `0 2px 8px ${stat.color.glow}`,
+                  }}>
+                    <stat.icon size={16} strokeWidth={2.5} />
+                  </div>
                 </div>
-                <ShoppingBag size={18} style={{ color: '#10b981' }} />
               </div>
-            </div>
-            <div className="dash-stat-card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div>
-                  <p className="dash-stat-label">Active Orders</p>
-                  <p className="dash-stat-value">{orders.filter(o => o.status === 'pending').length}</p>
-                </div>
-                <Clock size={18} style={{ color: '#3b82f6' }} />
-              </div>
-            </div>
-            <div className="dash-stat-card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div>
-                  <p className="dash-stat-label">Network Sync</p>
-                  <p className="dash-stat-value">Live</p>
-                </div>
-                <Activity size={18} style={{ color: '#f0a500' }} />
-              </div>
-            </div>
-            <div className="dash-stat-card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div>
-                  <p className="dash-stat-label">Verified Data</p>
-                  <p className="dash-stat-value">Secure</p>
-                </div>
-                <ShieldCheck size={18} style={{ color: '#a855f7' }} />
-              </div>
-            </div>
+            ))}
           </div>
 
           {/* Filters Card */}
           <div className="dash-card">
             <h3 className="dash-card-title">
-              <Filter size={18} style={{ color: '#3b82f6' }} />
+              <div style={{
+                width: 28, height: 28, borderRadius: 6,
+                background: pageTheme.soft, color: pageTheme.main,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <Filter size={15} strokeWidth={2.5} />
+              </div>
               Filter Records
             </h3>
             <div className="grid grid-cols-2 gap-4">
@@ -475,7 +502,10 @@ export default function Orders() {
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="w-full bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-xl px-4 py-3 text-xs font-black text-slate-700 outline-none focus:border-slate-400 transition-all appearance-none cursor-pointer"
+                  className="w-full bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-xl px-4 py-3 text-xs font-black text-slate-700 outline-none transition-all appearance-none cursor-pointer"
+                  style={{ focusBorderColor: pageTheme.main }}
+                  onFocus={(e) => e.target.style.borderColor = pageTheme.main}
+                  onBlur={(e) => e.target.style.borderColor = '#e4e4de'}
                 >
                   <option value="all">All Status</option>
                   <option value="completed">Completed</option>
@@ -488,7 +518,10 @@ export default function Orders() {
                 <select
                   value={networkFilter}
                   onChange={(e) => setNetworkFilter(e.target.value)}
-                  className="w-full bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-xl px-4 py-3 text-xs font-black text-slate-700 outline-none focus:border-slate-400 transition-all appearance-none cursor-pointer"
+                  className="w-full bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-xl px-4 py-3 text-xs font-black text-slate-700 outline-none transition-all appearance-none cursor-pointer"
+                  style={{ focusBorderColor: pageTheme.main }}
+                  onFocus={(e) => e.target.style.borderColor = pageTheme.main}
+                  onBlur={(e) => e.target.style.borderColor = '#e4e4de'}
                 >
                   <option value="all">All Networks</option>
                   {getUniqueNetworks().map(network => (
@@ -502,13 +535,19 @@ export default function Orders() {
           {/* Orders Table Container */}
           <div className="dash-card">
             <h3 className="dash-card-title">
-              <Zap size={18} style={{ color: '#f0a500' }} />
+              <div style={{
+                width: 28, height: 28, borderRadius: 6,
+                background: pageTheme.soft, color: pageTheme.main,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <Zap size={15} strokeWidth={2.5} />
+              </div>
               Purchase History
             </h3>
 
             {loading ? (
               <div style={{ textAlign: 'center', padding: '60px' }}>
-                <RefreshCw size={40} className="animate-spin" style={{ color: '#e4e4de', margin: '0 auto 16px' }} />
+                <RefreshCw size={40} className="animate-spin" style={{ color: pageTheme.main, margin: '0 auto 16px' }} />
                 <p style={{ fontSize: '14px', fontWeight: '700', color: '#999' }}>Loading your records...</p>
               </div>
             ) : filteredOrders.length === 0 ? (
@@ -532,82 +571,89 @@ export default function Orders() {
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredOrders.map(order => (
-                        <tr key={order.id || order._id} className="dash-table-row" onClick={() => handleViewDetails(order)}>
-                          <td className="dash-td">
-                            <div className="flex flex-col">
-                              <span className="font-black text-[#111]">#{order.orderNumber?.slice(-8).toUpperCase()}</span>
-                              <span className="text-[10px] text-slate-400 font-bold uppercase">{order.orderKind || 'Purchase'}</span>
-                            </div>
-                          </td>
-                          <td className="dash-td">
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-lg bg-[#fafaf7] border border-[#e4e4de] flex items-center justify-center font-black text-[10px]">
-                                {getOrderNetworkDisplay(order)?.charAt(0).toUpperCase()}
-                              </div>
+                      {filteredOrders.map((order, idx) => {
+                        const c = getColor(idx);
+                        return (
+                          <tr key={order.id || order._id} className="dash-table-row" onClick={() => handleViewDetails(order)}>
+                            <td className="dash-td">
                               <div className="flex flex-col">
-                                <span className="font-bold text-[#111]">{getOrderNetworkDisplay(order)}</span>
-                                <span className="text-[10px] text-slate-500">{getOrderPlanDisplay(order)}</span>
+                                <span className="font-black text-[#111]">#{order.orderNumber?.slice(-8).toUpperCase()}</span>
+                                <span className="text-[10px] text-slate-400 font-bold uppercase">{order.orderKind || 'Purchase'}</span>
                               </div>
-                            </div>
-                          </td>
-                          <td className="dash-td">
-                            <span className="font-black text-[#111]">{formatCurrencyAbbreviated(order.amount)}</span>
-                          </td>
-                          <td className="dash-td">
-                            <span className={`badge-premium ${order.status?.toLowerCase() === 'completed' || order.status?.toLowerCase() === 'success' ? 'badge-success' : order.status?.toLowerCase() === 'pending' ? 'badge-pending' : 'badge-failed'}`}>
-                              {order.status || 'Unknown'}
-                            </span>
-                          </td>
-                          <td className="dash-td">
-                            <div className="flex flex-col">
-                              <span className="font-bold text-[#111] text-[11px]">{formatDate(order.date || order.createdAt)}</span>
-                              <span className="text-[10px] text-slate-400">{formatTime(order.date || order.createdAt)}</span>
-                            </div>
-                          </td>
-                          <td className="dash-td text-right">
-                            <button className="p-2 rounded-lg hover:bg-[#fafaf7] text-slate-400 hover:text-[#111] transition-all">
-                              <ChevronRight size={18} />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
+                            </td>
+                            <td className="dash-td">
+                              <div className="flex items-center gap-3">
+                                <div style={{ width: 32, height: 32, borderRadius: 8, background: c.soft, color: c.main, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 10, border: `1.5px solid ${c.main}22`, boxShadow: `0 2px 8px ${c.glow}` }}>
+                                  {getOrderNetworkDisplay(order)?.charAt(0).toUpperCase()}
+                                </div>
+                                <div className="flex flex-col">
+                                  <span className="font-bold text-[#111]">{getOrderNetworkDisplay(order)}</span>
+                                  <span className="text-[10px] text-slate-500">{getOrderPlanDisplay(order)}</span>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="dash-td">
+                              <span className="font-black" style={{ color: c.main }}>{formatCurrencyAbbreviated(order.amount)}</span>
+                            </td>
+                            <td className="dash-td">
+                              <span className={`badge-premium ${order.status?.toLowerCase() === 'completed' || order.status?.toLowerCase() === 'success' ? 'badge-success' : order.status?.toLowerCase() === 'pending' ? 'badge-pending' : 'badge-failed'}`}>
+                                {order.status || 'Unknown'}
+                              </span>
+                            </td>
+                            <td className="dash-td">
+                              <div className="flex flex-col">
+                                <span className="font-bold text-[#111] text-[11px]">{formatDate(order.date || order.createdAt)}</span>
+                                <span className="text-[10px] text-slate-400">{formatTime(order.date || order.createdAt)}</span>
+                              </div>
+                            </td>
+                            <td className="dash-td text-right">
+                              <button className="p-2 rounded-lg hover:bg-[#fafaf7] text-slate-400 transition-all" style={{ '--tw-text-opacity': '1', color: pageTheme.main }}>
+                                <ChevronRight size={18} />
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
 
                 <div className="md:hidden flex flex-col gap-3">
-                  {filteredOrders.map(order => (
-                    <div 
-                      key={order.id || order._id} 
-                      className="dash-mobile-card"
-                      onClick={() => handleViewDetails(order)}
-                    >
-                      <div className="flex justify-between items-start mb-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-[#fafaf7] border border-[#e4e4de] flex items-center justify-center font-black">
-                            {getOrderNetworkDisplay(order)?.charAt(0).toUpperCase()}
+                  {filteredOrders.map((order, idx) => {
+                    const c = getColor(idx);
+                    return (
+                      <div
+                        key={order.id || order._id}
+                        className="dash-mobile-card"
+                        onClick={() => handleViewDetails(order)}
+                        style={{ '--card-color': c.main + '66', '--card-glow': c.glow }}
+                      >
+                        <div className="flex justify-between items-start mb-3">
+                          <div className="flex items-center gap-3">
+                            <div style={{ width: 40, height: 40, borderRadius: 10, background: c.soft, color: c.main, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, border: `1.5px solid ${c.main}22`, boxShadow: `0 2px 8px ${c.glow}` }}>
+                              {getOrderNetworkDisplay(order)?.charAt(0).toUpperCase()}
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{getOrderNetworkDisplay(order)}</span>
+                              <span className="font-black text-[#111]">{getOrderPlanDisplay(order)}</span>
+                            </div>
                           </div>
+                          <span className={`badge-premium ${order.status?.toLowerCase() === 'completed' || order.status?.toLowerCase() === 'success' ? 'badge-success' : order.status?.toLowerCase() === 'pending' ? 'badge-pending' : 'badge-failed'}`}>
+                            {order.status || 'Pending'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-end pt-3 border-t border-[#f0f0f0]">
                           <div className="flex flex-col">
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{getOrderNetworkDisplay(order)}</span>
-                            <span className="font-black text-[#111]">{getOrderPlanDisplay(order)}</span>
+                            <span className="text-[10px] font-bold text-slate-400">{formatDate(order.date || order.createdAt)}</span>
+                            <span className="font-black" style={{ color: c.main }}>{formatCurrencyAbbreviated(order.amount)}</span>
                           </div>
+                          <span className="text-[10px] font-black uppercase tracking-widest flex items-center gap-1" style={{ color: c.main }}>
+                            View Details <ChevronRight size={12} />
+                          </span>
                         </div>
-                        <span className={`badge-premium ${order.status?.toLowerCase() === 'completed' || order.status?.toLowerCase() === 'success' ? 'badge-success' : order.status?.toLowerCase() === 'pending' ? 'badge-pending' : 'badge-failed'}`}>
-                          {order.status || 'Pending'}
-                        </span>
                       </div>
-                      <div className="flex justify-between items-end pt-3 border-t border-[#f0f0f0]">
-                        <div className="flex flex-col">
-                          <span className="text-[10px] font-bold text-slate-400">{formatDate(order.date || order.createdAt)}</span>
-                          <span className="font-black text-[#111]">{formatCurrencyAbbreviated(order.amount)}</span>
-                        </div>
-                        <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-1">
-                          View Details <ChevronRight size={12} />
-                        </span>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </>
             )}
@@ -637,14 +683,14 @@ export default function Orders() {
 
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="p-3 bg-[#fafaf7] rounded-xl border border-[#e4e4de]">
-                    <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Status</p>
+                  <div className="p-3 rounded-xl border" style={{ background: '#ECFDF5', borderColor: '#A7F3D0' }}>
+                    <p className="text-[10px] font-black uppercase mb-1" style={{ color: '#0F6E56' }}>Status</p>
                     <span className={`badge-premium ${selectedOrder.status?.toLowerCase() === 'completed' || selectedOrder.status?.toLowerCase() === 'success' ? 'badge-success' : selectedOrder.status?.toLowerCase() === 'pending' ? 'badge-pending' : 'badge-failed'}`}>
                       {selectedOrder.status}
                     </span>
                   </div>
-                  <div className="p-3 bg-[#fafaf7] rounded-xl border border-[#e4e4de]">
-                    <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Amount</p>
+                  <div className="p-3 rounded-xl border" style={{ background: '#F5F3FF', borderColor: '#DDD6FE' }}>
+                    <p className="text-[10px] font-black uppercase mb-1" style={{ color: '#7C3AED' }}>Amount</p>
                     <p className="font-black text-[#111]">{formatCurrencyAbbreviated(selectedOrder.amount)}</p>
                   </div>
                 </div>
@@ -684,7 +730,7 @@ export default function Orders() {
                   </div>
                 </div>
 
-                <div className="p-4 bg-slate-900 rounded-2xl text-white space-y-3 relative overflow-hidden">
+                <div className="p-4 rounded-2xl text-white space-y-3 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #111 0%, #333 100%)' }}>
                   <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full -mr-12 -mt-12"></div>
                   <p className="text-[10px] font-black text-white/50 uppercase tracking-widest">Provider Response</p>
                   <p className="text-xs font-medium leading-relaxed italic">
@@ -695,7 +741,8 @@ export default function Orders() {
                 <div className="flex gap-3">
                   <button
                     onClick={() => setShowDetails(false)}
-                    className="flex-1 py-4 bg-[#111] text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-[#333] transition-all"
+                    className="flex-1 py-4 rounded-xl font-black text-xs uppercase tracking-widest transition-all"
+                    style={{ background: '#BE185D', color: '#fff', boxShadow: '0 4px 16px rgba(190,24,93,0.25)' }}
                   >
                     Close
                   </button>
@@ -705,7 +752,8 @@ export default function Orders() {
                         setShowDetails(false);
                         openVerificationModal(selectedOrder, e);
                       }}
-                      className="flex-1 py-4 bg-blue-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-blue-700 transition-all"
+                      className="flex-1 py-4 rounded-xl font-black text-xs uppercase tracking-widest transition-all"
+                      style={{ background: '#BE185D', color: '#fff', boxShadow: '0 4px 16px rgba(190,24,93,0.25)' }}
                     >
                       Verify Now
                     </button>
@@ -724,13 +772,13 @@ export default function Orders() {
         >
           {verificationOrder && (
             <div className="space-y-6">
-              <div className="p-6 bg-blue-50 border border-blue-100 rounded-2xl flex items-center gap-4">
-                <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white">
+              <div className="p-6 rounded-2xl flex items-center gap-4" style={{ background: '#FDF2F8', border: '1.5px solid #FCE7F3' }}>
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white" style={{ background: '#BE185D', boxShadow: '0 4px 12px rgba(190,24,93,0.25)' }}>
                   <ShieldCheck size={24} />
                 </div>
                 <div>
-                  <h4 className="font-black text-blue-900 tracking-tight">Payment Verification</h4>
-                  <p className="text-xs font-bold text-blue-700/70 uppercase">Reference Lookup</p>
+                  <h4 className="font-black tracking-tight" style={{ color: '#9D174D' }}>Payment Verification</h4>
+                  <p className="text-xs font-bold uppercase" style={{ color: '#BE185D' }}>Reference Lookup</p>
                 </div>
               </div>
 
@@ -743,9 +791,9 @@ export default function Orders() {
                     </p>
                     <button
                       onClick={handleCopyReference}
-                      className="p-2 bg-white border border-[#e4e4de] rounded-lg text-slate-500 hover:text-[#111] transition-all"
+                      className="p-2 bg-white border border-[#e4e4de] rounded-lg text-slate-500 hover:text-[#BE185D] transition-all"
                     >
-                      {copied ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
+                      {copied ? <Check size={16} style={{ color: '#0F6E56' }} /> : <Copy size={16} />}
                     </button>
                   </div>
                 </div>
@@ -757,7 +805,8 @@ export default function Orders() {
                 <button
                   disabled={verifying}
                   onClick={handleConfirmVerify}
-                  className="w-full py-4 bg-[#111] text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-[#333] transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-4 rounded-xl font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ background: '#BE185D', color: '#fff', boxShadow: '0 4px 16px rgba(190,24,93,0.25)' }}
                 >
                   {verifying ? (
                     <>

@@ -3,10 +3,13 @@ import { CheckCircle, AlertCircle } from 'lucide-react';
 import { purchases } from '../services/api';
 import { formatCurrencyAbbreviated } from '../utils/formatCurrency';
 
-export default function PurchasePaymentModal({ isOpen, onClose, accessCode, reference, amount, onSuccess, verifyPayment }) {
+export default function PurchasePaymentModal({ isOpen, onClose, accessCode, reference, amount, onSuccess, verifyPayment, themeColor }) {
   const [status, setStatus] = useState('pending');
   const [error, setError] = useState(null);
   const paystackRef = useRef(null);
+
+  const defaultTheme = { main: '#7C3AED', bg: '#EDE9FE', soft: '#F5F3FF', glow: 'rgba(124,58,237,0.15)' };
+  const c = themeColor || defaultTheme;
 
   useEffect(() => {
     if (!isOpen || !accessCode) return;
@@ -90,23 +93,24 @@ export default function PurchasePaymentModal({ isOpen, onClose, accessCode, refe
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-300">
-      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]" onClick={onClose} />
+      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-[4px]" onClick={onClose} />
 
       {(status === 'pending' || status === 'verifying') && (
-        <div className="relative w-full max-w-md bg-white rounded-[32px] sm:rounded-[40px] shadow-2xl overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
-          <div className="p-8 sm:p-10 text-center space-y-6">
-            <div className="relative w-20 h-20 mx-auto">
-              <div className="absolute inset-0 border-4 border-primary-50 rounded-full" />
-              <div className="absolute inset-0 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
+        <div className="relative w-full max-w-md bg-white rounded-[40px] shadow-2xl overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
+          <div className="p-10 text-center space-y-6">
+            <div className="relative w-24 h-24 mx-auto">
+              <div className="absolute inset-0 border-[6px] rounded-full" style={{ borderColor: c.soft }} />
+              <div className="absolute inset-0 border-[6px] border-t-transparent rounded-full animate-spin" style={{ borderColor: c.main, borderTopColor: 'transparent' }} />
+              <div className="absolute inset-4 rounded-full animate-pulse" style={{ background: c.glow }} />
             </div>
-            <div className="space-y-2">
-              <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase leading-none">
-                {status === 'pending' ? 'Connecting Gateway' : 'Verifying Payment'}
+            <div className="space-y-3">
+              <h3 className="text-xl font-black text-[#111] tracking-tight uppercase leading-none">
+                {status === 'pending' ? 'Gateway Sync' : 'Finalizing'}
               </h3>
-              <p className="text-slate-500 font-bold text-sm tracking-tight leading-snug">
+              <p className="text-slate-500 font-bold text-sm tracking-tight leading-snug max-w-[240px] mx-auto">
                 {status === 'pending'
-                  ? 'Please wait while we initialize the secure Paystack checkout...'
-                  : 'Transaction authorized! We are confirming your payment status...'}
+                  ? 'Initializing secure Paystack session for your transaction...'
+                  : 'Authorized! We are confirming your payment status with the bank...'}
               </p>
             </div>
           </div>
@@ -114,58 +118,67 @@ export default function PurchasePaymentModal({ isOpen, onClose, accessCode, refe
       )}
 
       {status === 'success' && (
-        <div className="relative w-full max-w-md bg-white rounded-[32px] sm:rounded-[40px] shadow-2xl overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
-          <div className="p-8 sm:p-10 text-center space-y-4">
-            <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto text-emerald-500 mb-2 animate-bounce">
-              <CheckCircle size={48} strokeWidth={2.5} />
+        <div className="relative w-full max-w-md bg-white rounded-[40px] shadow-2xl overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
+          <div className="p-10 text-center space-y-5">
+            <div 
+              className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-2 animate-bounce transition-all duration-500"
+              style={{ background: '#ecfdf5', color: '#10b981', boxShadow: '0 8px 30px rgba(16,185,129,0.2)' }}
+            >
+              <CheckCircle size={56} strokeWidth={2.5} />
             </div>
-            <div className="space-y-2">
-              <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase leading-none">Purchase Successful!</h3>
-              <p className="text-slate-500 font-bold text-sm tracking-tight">Your data bundle has been successfuly purchased for {formatCurrencyAbbreviated(amount)}</p>
+            <div className="space-y-3">
+              <h3 className="text-2xl font-black text-[#111] tracking-tight uppercase leading-none">Payment Success!</h3>
+              <p className="text-slate-500 font-bold text-sm tracking-tight">Your purchase of {formatCurrencyAbbreviated(amount)} has been confirmed and processed.</p>
             </div>
-            <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Transaction Reference</p>
-              <p className="text-xs font-mono font-bold text-slate-600">{reference}</p>
+            <div className="p-4 bg-[#fafaf7] rounded-2xl border-1.5 border-[#e4e4de]">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Transaction Ref</p>
+              <p className="text-xs font-mono font-black text-[#111]">{reference}</p>
             </div>
           </div>
         </div>
       )}
 
       {status === 'cancelled' && (
-        <div className="relative w-full max-w-md bg-white rounded-[32px] sm:rounded-[40px] shadow-2xl overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
-          <div className="p-8 sm:p-10 text-center space-y-6">
-            <div className="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center mx-auto text-amber-500">
-              <AlertCircle size={48} strokeWidth={2.5} />
+        <div className="relative w-full max-w-md bg-white rounded-[40px] shadow-2xl overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
+          <div className="p-10 text-center space-y-7">
+            <div 
+              className="w-24 h-24 rounded-full flex items-center justify-center mx-auto"
+              style={{ background: '#fffbeb', color: '#f59e0b', boxShadow: '0 8px 30px rgba(245,158,11,0.2)' }}
+            >
+              <AlertCircle size={56} strokeWidth={2.5} />
             </div>
-            <div className="space-y-2">
-              <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase leading-none">Payment Cancelled</h3>
-              <p className="text-slate-500 font-bold text-sm tracking-tight">You cancelled the checkout process. No funds were debited.</p>
+            <div className="space-y-3">
+              <h3 className="text-2xl font-black text-[#111] tracking-tight uppercase leading-none">Cancelled</h3>
+              <p className="text-slate-500 font-bold text-sm tracking-tight">Checkout session closed. No funds were debited from your account.</p>
             </div>
             <button
               onClick={onClose}
-              className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-slate-800 transition shadow-lg active:scale-95"
+              className="w-full py-4 bg-[#111] text-white rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-black transition shadow-xl active:scale-95"
             >
-              Back to Store
+              Return to Portal
             </button>
           </div>
         </div>
       )}
 
       {status === 'failed' && (
-        <div className="relative w-full max-w-md bg-white rounded-[32px] sm:rounded-[40px] shadow-2xl overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
-          <div className="p-8 sm:p-10 text-center space-y-6">
-            <div className="w-20 h-20 bg-rose-50 rounded-full flex items-center justify-center mx-auto text-rose-500">
-              <AlertCircle size={48} strokeWidth={2.5} />
+        <div className="relative w-full max-w-md bg-white rounded-[40px] shadow-2xl overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
+          <div className="p-10 text-center space-y-7">
+            <div 
+              className="w-24 h-24 rounded-full flex items-center justify-center mx-auto"
+              style={{ background: '#fef2f2', color: '#ef4444', boxShadow: '0 8px 30px rgba(239,68,68,0.2)' }}
+            >
+              <AlertCircle size={56} strokeWidth={2.5} />
             </div>
-            <div className="space-y-2">
-              <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase leading-none">Payment Failed</h3>
-              <p className="text-rose-500 font-bold text-sm tracking-tight">{error || 'Unable to process your payment'}</p>
+            <div className="space-y-3">
+              <h3 className="text-2xl font-black text-[#111] tracking-tight uppercase leading-none">Payment Error</h3>
+              <p className="text-rose-500 font-bold text-sm tracking-tight leading-snug">{error || 'Unable to finalize your transaction at this time.'}</p>
             </div>
             <button
               onClick={onClose}
-              className="w-full py-4 bg-rose-600 text-white rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-rose-700 transition shadow-lg shadow-rose-200 active:scale-95"
+              className="w-full py-4 bg-rose-600 text-white rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-rose-700 transition shadow-xl shadow-rose-200 active:scale-95"
             >
-              Retry Payment
+              Retry Checkout
             </button>
           </div>
         </div>
