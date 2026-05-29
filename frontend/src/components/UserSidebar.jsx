@@ -19,6 +19,20 @@ import { useSettings } from '../context/SettingsContext';
 import upgradeService from '../services/upgradeService';
 import { toast } from 'react-hot-toast';
 
+/* ── Homepage multi-colour palette ── */
+const palette = [
+  { main: '#7C3AED', bg: '#EDE9FE', soft: '#F5F3FF' },   // purple
+  { main: '#0F6E56', bg: '#D1FAE5', soft: '#ECFDF5' },   // teal
+  { main: '#1D4ED8', bg: '#DBEAFE', soft: '#EFF6FF' },   // blue
+  { main: '#B45309', bg: '#FEF3C7', soft: '#FFFBEB' },   // amber
+  { main: '#BE185D', bg: '#FCE7F3', soft: '#FDF2F8' },   // pink
+  { main: '#DC2626', bg: '#FEE2E2', soft: '#FFF5F5' },   // coral/red
+  { main: '#0369A1', bg: '#E0F2FE', soft: '#F0F9FF' },   // sky
+  { main: '#4D7C0F', bg: '#ECFCCB', soft: '#F7FEE7' },   // lime/green
+];
+
+const getColor = (index) => palette[index % palette.length];
+
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
 
@@ -35,12 +49,21 @@ const styles = `
     font-size: 14px;
     font-weight: 600;
     text-decoration: none;
-    transition: background 0.15s, color 0.15s;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
     margin-bottom: 2px;
+    border: 1.5px solid transparent;
   }
-  .usb-link-active   { background: #111; color: #fff; }
-  .usb-link-inactive { color: #374151; }
-  .usb-link-inactive:hover { background: #f5f5f0; color: #111; }
+  .usb-link-active {
+    background: var(--active-bg, #111);
+    color: #fff;
+  }
+  .usb-link-inactive {
+    color: #374151;
+  }
+  .usb-link-inactive:hover {
+    background: #f5f5f0;
+    color: #111;
+  }
 
   .usb-switch-btn {
     width: 100%;
@@ -103,14 +126,14 @@ export default function UserSidebar({ isOpen, onClose }) {
   const isActive = (path) => location.pathname === path;
 
   const navItems = [
-    { path: '/dashboard',      label: 'Dashboard',           icon: LayoutDashboard },
-    { path: '/buy-data',       label: 'Buy Data',            icon: ShoppingCart },
-    { path: '/results-checker',label: 'Result Checker',      icon: CreditCard },
-    { path: '/afa-registration',label: 'AFA Registration',   icon: ShieldCheck },
-    { path: '/orders',         label: 'My Orders',           icon: Package },
-    { path: '/transactions',   label: 'Transaction History', icon: TrendingUp },
-    { path: '/topup',          label: 'Wallet',              icon: Wallet },
-    { path: '/profile',        label: 'Profile',             icon: User },
+    { path: '/dashboard',       label: 'Dashboard',           icon: LayoutDashboard },
+    { path: '/buy-data',        label: 'Buy Data',            icon: ShoppingCart },
+    { path: '/results-checker', label: 'Result Checker',      icon: CreditCard },
+    { path: '/afa-registration',label: 'AFA Registration',    icon: ShieldCheck },
+    { path: '/orders',          label: 'My Orders',           icon: Package },
+    { path: '/transactions',    label: 'Transaction History', icon: TrendingUp },
+    { path: '/topup',           label: 'Wallet',              icon: Wallet },
+    { path: '/profile',         label: 'Profile',             icon: User },
   ];
 
   const handleLogout = () => {
@@ -162,9 +185,9 @@ export default function UserSidebar({ isOpen, onClose }) {
         <div style={{ padding: '20px', borderBottom: '1.5px solid #e4e4de', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{
-              width: 40, height: 40, background: '#111', borderRadius: 8,
+              width: 40, height: 40, background: '#7C3AED', borderRadius: 8,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: '#f0a500', flexShrink: 0,
+              color: '#fff', flexShrink: 0,
             }}>
               <ShieldCheck size={20} />
             </div>
@@ -191,21 +214,38 @@ export default function UserSidebar({ isOpen, onClose }) {
         <nav className="usb-nav" style={{ flex: 1, overflowY: 'auto', padding: '4px 12px 12px' }}>
           <p className="usb-section-title">Main Menu</p>
 
-          {navItems.map((item) => {
+          {navItems.map((item, idx) => {
             const Icon = item.icon;
             const active = isActive(item.path);
+            const c = getColor(idx);
             return (
               <Link
                 key={item.path}
                 to={item.path}
                 onClick={onClose}
                 className={`usb-link ${active ? 'usb-link-active' : 'usb-link-inactive'}`}
+                style={active ? { '--active-bg': c.main } : { borderColor: 'transparent' }}
+                onMouseEnter={e => {
+                  if (!active) e.currentTarget.style.borderColor = c.main + '44';
+                }}
+                onMouseLeave={e => {
+                  if (!active) e.currentTarget.style.borderColor = 'transparent';
+                }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <Icon size={16} strokeWidth={active ? 2.5 : 2} style={{ color: active ? '#f0a500' : 'inherit', flexShrink: 0 }} />
+                  <div style={{
+                    width: 28, height: 28, borderRadius: 6,
+                    background: active ? c.main : c.soft,
+                    color: active ? '#fff' : c.main,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    flexShrink: 0,
+                    transition: 'background 0.15s, color 0.15s',
+                  }}>
+                    <Icon size={14} strokeWidth={active ? 2.5 : 2} />
+                  </div>
                   <span>{item.label}</span>
                 </div>
-                {active && <ChevronRight size={13} style={{ color: '#f0a500', flexShrink: 0 }} />}
+                {active && <ChevronRight size={13} style={{ color: c.main, flexShrink: 0 }} />}
               </Link>
             );
           })}
@@ -225,10 +265,18 @@ export default function UserSidebar({ isOpen, onClose }) {
               style={{ border: '1.5px dashed #e0e0d8', marginTop: 4 }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <ShieldCheck size={16} style={{ color: isActive('/become-agent') ? '#f0a500' : '#aaa', flexShrink: 0 }} />
+                <div style={{
+                  width: 28, height: 28, borderRadius: 6,
+                  background: isActive('/become-agent') ? '#7C3AED' : '#F5F3FF',
+                  color: isActive('/become-agent') ? '#fff' : '#7C3AED',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0,
+                }}>
+                  <ShieldCheck size={14} />
+                </div>
                 <span>Become an Agent</span>
               </div>
-              <ChevronRight size={13} style={{ color: isActive('/become-agent') ? '#f0a500' : '#ccc', flexShrink: 0 }} />
+              <ChevronRight size={13} style={{ color: isActive('/become-agent') ? '#7C3AED' : '#ccc', flexShrink: 0 }} />
             </Link>
           ) : null}
         </nav>
@@ -244,7 +292,7 @@ export default function UserSidebar({ isOpen, onClose }) {
           }}>
             <div style={{
               width: 34, height: 34, borderRadius: 6,
-              background: '#111', color: '#f0a500',
+              background: '#7C3AED', color: '#fff',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontWeight: 800, fontSize: 12, flexShrink: 0,
             }}>

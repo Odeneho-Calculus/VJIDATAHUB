@@ -17,6 +17,20 @@ import { useAuth } from '../hooks/useAuth';
 import upgradeService from '../services/upgradeService';
 import { toast } from 'react-hot-toast';
 
+/* ── Homepage multi-colour palette ── */
+const palette = [
+  { main: '#7C3AED', bg: '#EDE9FE', soft: '#F5F3FF' },   // purple
+  { main: '#0F6E56', bg: '#D1FAE5', soft: '#ECFDF5' },   // teal
+  { main: '#1D4ED8', bg: '#DBEAFE', soft: '#EFF6FF' },   // blue
+  { main: '#B45309', bg: '#FEF3C7', soft: '#FFFBEB' },   // amber
+  { main: '#BE185D', bg: '#FCE7F3', soft: '#FDF2F8' },   // pink
+  { main: '#DC2626', bg: '#FEE2E2', soft: '#FFF5F5' },   // coral/red
+  { main: '#0369A1', bg: '#E0F2FE', soft: '#F0F9FF' },   // sky
+  { main: '#4D7C0F', bg: '#ECFCCB', soft: '#F7FEE7' },   // lime/green
+];
+
+const getColor = (index) => palette[index % palette.length];
+
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
 
@@ -33,10 +47,11 @@ const styles = `
     font-size: 14px;
     font-weight: 600;
     text-decoration: none;
-    transition: background 0.15s, color 0.15s;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
     margin-bottom: 2px;
+    border: 1.5px solid transparent;
   }
-  .agb-link-active   { background: #111; color: #fff; }
+  .agb-link-active   { background: var(--active-bg, #111); color: #fff; }
   .agb-link-inactive { color: #374151; }
   .agb-link-inactive:hover { background: #f5f5f0; color: #111; }
 
@@ -153,9 +168,9 @@ export default function AgentSidebar({ isOpen, onClose }) {
         <div style={{ padding: '20px', borderBottom: '1.5px solid #e4e4de', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{
-              width: 40, height: 40, background: '#111', borderRadius: 8,
+              width: 40, height: 40, background: '#0F6E56', borderRadius: 8,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: '#f0a500', flexShrink: 0,
+              color: '#fff', flexShrink: 0,
             }}>
               <ShieldCheck size={20} />
             </div>
@@ -182,21 +197,38 @@ export default function AgentSidebar({ isOpen, onClose }) {
         <nav className="agb-nav" style={{ flex: 1, overflowY: 'auto', padding: '4px 12px 12px' }}>
           <p className="agb-section-title">Main Menu</p>
 
-          {menuItems.map((item) => {
+          {menuItems.map((item, idx) => {
             const Icon = item.icon;
             const active = isActive(item.path);
+            const c = getColor(idx);
             return (
               <Link
                 key={item.path}
                 to={item.path}
                 onClick={onClose}
                 className={`agb-link ${active ? 'agb-link-active' : 'agb-link-inactive'}`}
+                style={active ? { '--active-bg': c.main } : {}}
+                onMouseEnter={e => {
+                  if (!active) e.currentTarget.style.borderColor = c.main + '44';
+                }}
+                onMouseLeave={e => {
+                  if (!active) e.currentTarget.style.borderColor = 'transparent';
+                }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <Icon size={16} strokeWidth={active ? 2.5 : 2} style={{ color: active ? '#f0a500' : 'inherit', flexShrink: 0 }} />
+                  <div style={{
+                    width: 28, height: 28, borderRadius: 6,
+                    background: active ? c.main : c.soft,
+                    color: active ? '#fff' : c.main,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    flexShrink: 0,
+                    transition: 'background 0.15s, color 0.15s',
+                  }}>
+                    <Icon size={14} strokeWidth={active ? 2.5 : 2} />
+                  </div>
                   <span>{item.label}</span>
                 </div>
-                {active && <ChevronRight size={13} style={{ color: '#f0a500', flexShrink: 0 }} />}
+                {active && <ChevronRight size={13} style={{ color: c.main, flexShrink: 0 }} />}
               </Link>
             );
           })}
@@ -218,7 +250,7 @@ export default function AgentSidebar({ isOpen, onClose }) {
           }}>
             <div style={{
               width: 34, height: 34, borderRadius: 6,
-              background: '#111', color: '#f0a500',
+              background: '#0F6E56', color: '#fff',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontWeight: 800, fontSize: 12, flexShrink: 0,
             }}>
