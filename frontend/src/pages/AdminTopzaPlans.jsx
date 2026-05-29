@@ -565,6 +565,7 @@ export default function AdminTopzaPlans() {
                         <div style={{ fontSize: '11px', color: '#888' }}>{plan.isp} • {plan.dataAmount || plan.volume}</div>
                       </td>
                       <td className="topza-td" style={{ whiteSpace: 'nowrap' }}>
+                        <div style={{ fontSize: '12px' }}>Cost: <span style={{ fontWeight: '700', color: '#b91c1c' }}>{Number(plan.costPrice || 0).toFixed(2)}</span></div>
                         <div style={{ fontSize: '12px' }}>Admin: <span style={{ fontWeight: '700' }}>{Number(plan.sellingPrice || 0).toFixed(2)}</span></div>
                         <div style={{ fontSize: '11px', color: '#666' }}>Agent: {Number(plan.agentPrice || 0).toFixed(2)}</div>
                       </td>
