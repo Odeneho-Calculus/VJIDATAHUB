@@ -89,7 +89,7 @@ const processStoreOrderRefund = async (order, reason = 'Store order failed') => 
     }
 
     // 2. Only process store orders
-    if (!order.storeId || order.source !== 'store') {
+    if (!order.storeId && order.source !== 'store') {
       return { success: false, message: 'Not a store order' };
     }
 

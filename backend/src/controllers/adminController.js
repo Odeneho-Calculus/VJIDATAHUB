@@ -39,7 +39,7 @@ const Referral = require('../models/Referral');
 // const Guest = require('../models/Guest');
 const { creditCommissionForOrder } = require('../services/commissionService');
 const topzaApi = require('../utils/topzaApi');
-const { processRefund } = require('../utils/refund');
+const { processRefund, processStoreOrderRefund } = require('../utils/refund');
 // const { validatePhoneNumber } = require('../utils/phoneValidation');
 
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
@@ -1886,20 +1886,28 @@ exports.refundOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Order is already refunded' });
     }
 
-    const refundResult = await processRefund(order, reason);
+    const isStoreOrder = order.storeId || order.source === 'store';
+    const refundResult = isStoreOrder 
+      ? await processStoreOrderRefund(order, reason)
+      : await processRefund(order, reason);
 
     if (!refundResult.success) {
       return res.status(400).json({ success: false, message: refundResult.message || 'Refund failed' });
     }
 
-    await Notification.create({
-      userId: order.userId,
-      type: 'refund',
-      title: 'Order Refunded',
-      message: `Your order ${order.orderNumber} has been refunded (GHS ${(order.amount + (order.transactionCharge || 0)).toFixed(2)})`,
-      description: `Reason: ${reason}. The amount has been credited to your wallet.`,
-      severity: 'info',
-    });
+    // Notify the correct user
+    const notifyUserId = isStoreOrder ? refundResult.transaction?.userId || order.userId : order.userId;
+    
+    if (notifyUserId) {
+      await Notification.create({
+        userId: notifyUserId,
+        type: 'refund',
+        title: 'Order Refunded',
+        message: `Your order ${order.orderNumber} has been refunded (GHS ${(refundResult.amountRefunded || order.amount).toFixed(2)})`,
+        description: `Reason: ${reason}. The amount has been credited to your wallet.`,
+        severity: 'info',
+      });
+    }
 
     const updatedOrder = await Order.findById(id).populate('userId').populate('storeId');
 

@@ -776,9 +776,16 @@ export default function AdminOrders() {
                               </span>
                             </td>
                             <td>
-                              <span className="orders-badge" style={getOrderStatusStyle(order.status)}>
-                                {order.providerStatus || order.status}
-                              </span>
+                              <div className="flex flex-col gap-1">
+                                <span className="orders-badge" style={getOrderStatusStyle(order.status)}>
+                                  {order.providerStatus || order.status}
+                                </span>
+                                {order.isRefunded && (
+                                  <span className="orders-badge" style={{ backgroundColor: '#fff7ed', color: '#c2410c', fontSize: '9px' }}>
+                                    REFUNDED
+                                  </span>
+                                )}
+                              </div>
                             </td>
                             <td>
                               <div style={{ fontSize: '12px', fontWeight: 700 }}>{new Date(order.date || order.createdAt).toLocaleDateString()}</div>
