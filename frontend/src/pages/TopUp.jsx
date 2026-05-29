@@ -126,8 +126,8 @@ const styles = `
   }
 
   .dash-stat-card {
-    background: #fff;
-    border: 1.5px solid #e4e4de;
+    background: var(--stat-bg, #fff);
+    border: 1.5px solid var(--stat-border, #e4e4de);
     border-radius: 20px;
     padding: 20px;
     transition: all 0.2s;
@@ -411,7 +411,7 @@ export default function TopUp() {
           </div>
 
           <div className="dash-stat-grid">
-            <div className="dash-stat-card" style={{ '--stat-color': getColor(6).main, '--stat-glow': getColor(6).glow }}>
+            <div className="dash-stat-card" style={{ '--stat-color': getColor(6).main, '--stat-glow': getColor(6).glow, '--stat-bg': getColor(6).soft, '--stat-border': getColor(6).main + '33' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
                   <p className="dash-stat-label" style={{ color: getColor(6).main }}>Current Balance</p>
@@ -425,7 +425,7 @@ export default function TopUp() {
               </div>
             </div>
 
-            <div className="dash-stat-card" style={{ '--stat-color': getColor(1).main, '--stat-glow': getColor(1).glow }}>
+            <div className="dash-stat-card" style={{ '--stat-color': getColor(1).main, '--stat-glow': getColor(1).glow, '--stat-bg': getColor(1).soft, '--stat-border': getColor(1).main + '33' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
                   <p className="dash-stat-label" style={{ color: getColor(1).main }}>Funding Status</p>
@@ -439,7 +439,7 @@ export default function TopUp() {
               </div>
             </div>
 
-            <div className="dash-stat-card" style={{ '--stat-color': getColor(3).main, '--stat-glow': getColor(3).glow }}>
+            <div className="dash-stat-card" style={{ '--stat-color': getColor(3).main, '--stat-glow': getColor(3).glow, '--stat-bg': getColor(3).soft, '--stat-border': getColor(3).main + '33' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
                   <p className="dash-stat-label" style={{ color: getColor(3).main }}>Funding Records</p>

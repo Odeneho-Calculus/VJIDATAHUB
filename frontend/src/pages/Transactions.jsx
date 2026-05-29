@@ -100,8 +100,8 @@ const styles = `
   }
 
   .dash-stat-card {
-    background: #fff;
-    border: 1.5px solid #e4e4de;
+    background: var(--stat-bg, #fff);
+    border: 1.5px solid var(--stat-border, #e4e4de);
     border-radius: 20px;
     padding: 20px;
     transition: all 0.2s;
@@ -603,7 +603,7 @@ export default function Transactions() {
           </div>
 
           <div className="dash-stat-grid">
-            <div className="dash-stat-card" style={{ '--stat-color': getColor(4).main, '--stat-glow': getColor(4).glow }}>
+            <div className="dash-stat-card" style={{ '--stat-color': getColor(4).main, '--stat-glow': getColor(4).glow, '--stat-bg': getColor(4).soft, '--stat-border': getColor(4).main + '33' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
                   <p className="dash-stat-label" style={{ color: getColor(4).main }}>Total Spent</p>
@@ -614,7 +614,7 @@ export default function Transactions() {
                 </div>
               </div>
             </div>
-            <div className="dash-stat-card" style={{ '--stat-color': getColor(1).main, '--stat-glow': getColor(1).glow }}>
+            <div className="dash-stat-card" style={{ '--stat-color': getColor(1).main, '--stat-glow': getColor(1).glow, '--stat-bg': getColor(1).soft, '--stat-border': getColor(1).main + '33' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
                   <p className="dash-stat-label" style={{ color: getColor(1).main }}>Total Funding</p>
@@ -625,7 +625,7 @@ export default function Transactions() {
                 </div>
               </div>
             </div>
-            <div className="dash-stat-card" style={{ '--stat-color': getColor(2).main, '--stat-glow': getColor(2).glow }}>
+            <div className="dash-stat-card" style={{ '--stat-color': getColor(2).main, '--stat-glow': getColor(2).glow, '--stat-bg': getColor(2).soft, '--stat-border': getColor(2).main + '33' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
                   <p className="dash-stat-label" style={{ color: getColor(2).main }}>Record Count</p>
@@ -636,7 +636,7 @@ export default function Transactions() {
                 </div>
               </div>
             </div>
-            <div className="dash-stat-card" style={{ '--stat-color': getColor(7).main, '--stat-glow': getColor(7).glow }}>
+            <div className="dash-stat-card" style={{ '--stat-color': getColor(7).main, '--stat-glow': getColor(7).glow, '--stat-bg': getColor(7).soft, '--stat-border': getColor(7).main + '33' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
                   <p className="dash-stat-label" style={{ color: getColor(7).main }}>System Integrity</p>

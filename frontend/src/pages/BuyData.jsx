@@ -112,8 +112,8 @@ const styles = `
   }
 
   .dash-stat-card {
-    background: #fff;
-    border: 1.5px solid #e4e4de;
+    background: var(--stat-bg, #fff);
+    border: 1.5px solid var(--stat-border, #e4e4de);
     border-radius: 14px;
     padding: 16px;
     display: flex;
@@ -579,6 +579,8 @@ export default function BuyData() {
                 style={{
                   '--stat-color': stat.color.main + '66',
                   '--stat-glow': stat.color.glow,
+                  '--stat-bg': stat.color.soft,
+                  '--stat-border': stat.color.main + '33',
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>

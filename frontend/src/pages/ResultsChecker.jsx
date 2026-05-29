@@ -115,8 +115,8 @@ const styles = `
   }
 
   .dash-stat-card {
-    background: #fff;
-    border: 1.5px solid #e4e4de;
+    background: var(--stat-bg, #fff);
+    border: 1.5px solid var(--stat-border, #e4e4de);
     border-radius: 14px;
     padding: 16px;
     display: flex;
@@ -399,7 +399,7 @@ export default function ResultsChecker() {
           </div>
 
           <div className="dash-stat-grid">
-            <div className="dash-stat-card" style={{ '--stat-color': historyColor.main + '66', '--stat-glow': historyColor.glow }}>
+            <div className="dash-stat-card" style={{ '--stat-color': historyColor.main + '66', '--stat-glow': historyColor.glow, '--stat-bg': historyColor.soft, '--stat-border': historyColor.main + '33' }}>
               <div className="flex items-center justify-between mb-2">
                 <span className="dash-stat-label" style={{ color: historyColor.main }}>Total Checks</span>
                 <div style={{ width: 32, height: 32, borderRadius: 8, background: historyColor.soft, color: historyColor.main, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 2px 8px ${historyColor.glow}` }}>
@@ -412,7 +412,7 @@ export default function ResultsChecker() {
               </div>
             </div>
 
-            <div className="dash-stat-card" style={{ '--stat-color': walletColor.main + '66', '--stat-glow': walletColor.glow }}>
+            <div className="dash-stat-card" style={{ '--stat-color': walletColor.main + '66', '--stat-glow': walletColor.glow, '--stat-bg': walletColor.soft, '--stat-border': walletColor.main + '33' }}>
               <div className="flex items-center justify-between mb-2">
                 <span className="dash-stat-label" style={{ color: walletColor.main }}>Wallet Balance</span>
                 <div style={{ width: 32, height: 32, borderRadius: 8, background: walletColor.soft, color: walletColor.main, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 2px 8px ${walletColor.glow}` }}>

@@ -87,8 +87,8 @@ const styles = `
   }
 
   .dash-stat-card {
-    background: #fff;
-    border: 1.5px solid #e4e4de;
+    background: var(--stat-bg, #fff);
+    border: 1.5px solid var(--stat-border, #e4e4de);
     border-radius: 20px;
     padding: 20px;
     transition: all 0.2s;

@@ -104,6 +104,49 @@ const styles = `
     }
   }
 
+  .dash-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 12px;
+  }
+
+  @media (min-width: 768px) {
+    .dash-stat-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+  }
+
+  .dash-stat-card {
+    background: var(--stat-bg, #fff);
+    border: 1.5px solid var(--stat-border, #e4e4de);
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    transition: all 0.2s;
+  }
+
+  .dash-stat-card:hover {
+    border-color: var(--stat-color, #d4d4ce);
+    box-shadow: 0 8px 40px var(--stat-glow, rgba(0,0,0,0.06));
+  }
+
+  .dash-stat-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .dash-stat-value {
+    font-size: 20px;
+    font-weight: 800;
+    color: #111;
+  }
+
   .dash-card {
     background: #fff;
     border: 1.5px solid #e4e4de;
@@ -319,7 +362,7 @@ export default function AfaRegistration() {
           </div>
 
           <div className="dash-stat-grid">
-            <div className="dash-stat-card" style={{ '--stat-color': historyColor.main + '66', '--stat-glow': historyColor.glow }}>
+            <div className="dash-stat-card" style={{ '--stat-color': historyColor.main + '66', '--stat-glow': historyColor.glow, '--stat-bg': historyColor.soft, '--stat-border': historyColor.main + '33' }}>
               <div className="flex items-center justify-between mb-2">
                 <span className="dash-stat-label" style={{ color: historyColor.main }}>Registrations</span>
                 <div style={{ width: 32, height: 32, borderRadius: 8, background: historyColor.soft, color: historyColor.main, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 2px 8px ${historyColor.glow}` }}>
@@ -332,7 +375,7 @@ export default function AfaRegistration() {
               </div>
             </div>
 
-            <div className="dash-stat-card" style={{ '--stat-color': walletColor.main + '66', '--stat-glow': walletColor.glow }}>
+            <div className="dash-stat-card" style={{ '--stat-color': walletColor.main + '66', '--stat-glow': walletColor.glow, '--stat-bg': walletColor.soft, '--stat-border': walletColor.main + '33' }}>
               <div className="flex items-center justify-between mb-2">
                 <span className="dash-stat-label" style={{ color: walletColor.main }}>Wallet Balance</span>
                 <div style={{ width: 32, height: 32, borderRadius: 8, background: walletColor.soft, color: walletColor.main, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 2px 8px ${walletColor.glow}` }}>
@@ -345,7 +388,7 @@ export default function AfaRegistration() {
               </div>
             </div>
 
-            <div className="dash-stat-card" style={{ '--stat-color': pageTheme.main + '66', '--stat-glow': pageTheme.glow }}>
+            <div className="dash-stat-card" style={{ '--stat-color': pageTheme.main + '66', '--stat-glow': pageTheme.glow, '--stat-bg': pageTheme.soft, '--stat-border': pageTheme.main + '33' }}>
               <div className="flex items-center justify-between mb-2">
                 <span className="dash-stat-label" style={{ color: pageTheme.main }}>Status</span>
                 <div style={{ width: 32, height: 32, borderRadius: 8, background: pageTheme.soft, color: pageTheme.main, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 2px 8px ${pageTheme.glow}` }}>
