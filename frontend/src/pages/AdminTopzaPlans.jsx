@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Edit2, Trash2, RefreshCw, Database, CheckCircle, AlertCircle, Search, Filter, X, Save, Package, RotateCcw } from 'lucide-react';
 import AdminSidebar from '../components/AdminSidebar';
 import ConfirmDialog from '../components/ConfirmDialog';
+import Pagination from '../components/Pagination';
 import { useSidebar } from '../hooks/useSidebar';
 import { topza as topzaAPI, admin as adminAPI } from '../services/api';
 import { useSettings } from '../context/SettingsContext';
@@ -19,6 +20,7 @@ export default function AdminTopzaPlans() {
   const [selectedNetwork, setSelectedNetwork] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState(null);
   const [stats, setStats] = useState({ totalPlans: 0, activePlans: 0, outOfStockPlans: 0 });
 
   const [editingPlan, setEditingPlan] = useState(null);
@@ -45,6 +47,7 @@ export default function AdminTopzaPlans() {
       const response = await topzaAPI.list(selectedNetwork, '', page, 20);
       if (response.success) {
         setPlans(response.plans || []);
+        setPagination(response.pagination || null);
       }
     } catch (err) {
       setError(err.message || 'Failed to fetch Topza plans');
@@ -534,6 +537,7 @@ export default function AdminTopzaPlans() {
             {loading ? (
               <div style={{ padding: '40px', display: 'flex', justifyContent: 'center' }}><div className="topza-spinner"></div></div>
             ) : (
+              <>
               <table className="topza-table">
                 <thead>
                   <tr>
@@ -591,6 +595,15 @@ export default function AdminTopzaPlans() {
                   ))}
                 </tbody>
               </table>
+              {pagination && pagination.pages > 1 && (
+                <Pagination
+                  currentPage={page}
+                  totalPages={pagination.pages}
+                  onPageChange={(newPage) => setPage(newPage)}
+                  isLoading={loading}
+                />
+              )}
+              </>
             )}
           </div>
         </div>
