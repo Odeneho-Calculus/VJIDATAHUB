@@ -145,6 +145,18 @@ exports.getMyStore = async (req, res) => {
       await store.save();
     }
 
+    // Filter out store plans whose underlying TopzaOffer/DataPlan is inactive or out of stock
+    const availablePlans = (store.plans || []).filter((p) => {
+      const basePlan = p.planId;
+      if (!basePlan) return false;
+      if (p.planType === 'TopzaOffer') {
+        return basePlan.status === 'active' && basePlan.inStock === true;
+      }
+      // DataPlan
+      return basePlan.status === 'active' && basePlan.inStock === true;
+    });
+    store.plans = availablePlans;
+
     const accessStatus = computeAccessStatus(user, store);
     const adminContact = await User.findOne({ role: 'admin' })
       .select('name email phone')
@@ -1184,11 +1196,24 @@ exports.getPublicStore = async (req, res) => {
     const { slug } = req.params;
 
     const store = await Store.findOne({ slug })
-      .populate('owner', 'name email agentFeeStatus');
+      .populate('owner', 'name email agentFeeStatus')
+      .populate('plans.planId');
 
     if (!store) {
       return res.status(404).json({ success: false, message: 'Store not found' });
     }
+
+    // Filter out store plans whose underlying TopzaOffer/DataPlan is inactive or out of stock
+    const availablePlans = (store.plans || []).filter((p) => {
+      const basePlan = p.planId;
+      if (!basePlan) return false;
+      if (p.planType === 'TopzaOffer') {
+        return basePlan.status === 'active' && basePlan.inStock === true;
+      }
+      // DataPlan
+      return basePlan.status === 'active' && basePlan.inStock === true;
+    });
+    store.plans = availablePlans;
 
     const accessStatus = computeAccessStatus(null, store);
 
@@ -1225,6 +1250,17 @@ exports.getPublicPlans = async (req, res) => {
     }
 
     let plans = store.plans.filter(p => p.isActive);
+
+    // Filter out plans whose underlying TopzaOffer/DataPlan is inactive or out of stock
+    plans = plans.filter((p) => {
+      const basePlan = p.planId;
+      if (!basePlan) return false;
+      if (p.planType === 'TopzaOffer') {
+        return basePlan.status === 'active' && basePlan.inStock === true;
+      }
+      // DataPlan
+      return basePlan.status === 'active' && basePlan.inStock === true;
+    });
 
     if (network) {
       plans = plans.filter(p => p.network && p.network.toLowerCase() === network.toLowerCase());
@@ -1300,6 +1336,15 @@ exports.purchasePublicBundle = async (req, res) => {
 
     if (!planData) {
       return res.status(404).json({ success: false, message: 'Plan data not found' });
+    }
+
+    // Block purchase if the underlying plan is inactive or out of stock
+    const isUnavailable =
+      planData.status !== 'active' ||
+      planData.inStock === false ||
+      (planData.stockOverriddenByAdmin === true && planData.inStock === false);
+    if (isUnavailable) {
+      return res.status(400).json({ success: false, message: 'This data plan is currently unavailable' });
     }
 
     const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
