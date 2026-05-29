@@ -373,6 +373,20 @@ const toVolume = (plan = {}) => {
   return match ? match[1] : '1';
 };
 
+const buildDisplayName = (offer = {}) => {
+  const planName = String(offer.planName || offer.name || '').trim();
+  const dataAmount = String(offer.dataAmount || offer.volume || offer.size || '').trim();
+  // If planName already contains the data amount (e.g. "MTN 1GB"), use it as-is
+  if (planName && dataAmount && planName.toLowerCase().includes(dataAmount.toLowerCase())) {
+    return planName;
+  }
+  // Otherwise combine them
+  if (planName && dataAmount) {
+    return `${planName} (${dataAmount})`;
+  }
+  return planName || dataAmount || `Data Plan ${offer.id || ''}`;
+};
+
 const buildNetworkLookup = (networks = []) => {
   const map = new Map();
   for (const network of networks) {
@@ -399,6 +413,14 @@ const resolveOfferNetwork = (offer = {}, networkLookup = new Map()) => {
   return candidates[0] || 'Unknown';
 };
 
+const round2 = (value) => Math.round((Number(value) || 0) * 100) / 100;
+
+const applyMarkup = (costPrice, markupPercent) => {
+  if (!costPrice || costPrice <= 0) return 0;
+  if (!markupPercent || markupPercent <= 0) return costPrice;
+  return round2(costPrice * (1 + markupPercent / 100));
+};
+
 exports.syncOffers = async (req, res) => {
   try {
     const [offersResult, networksResult] = await Promise.all([
@@ -415,6 +437,21 @@ exports.syncOffers = async (req, res) => {
 
     const networkLookup = buildNetworkLookup(networksResult.success ? networksResult.networks : []);
 
+    // Load pricing defaults from settings
+    let pricingDefaults = { userMarkupPercent: 15, agentMarkupPercent: 10, vendorMarkupPercent: 5 };
+    try {
+      const settings = await SystemSettings.getSettings();
+      if (settings?.pricingDefaults) {
+        pricingDefaults = {
+          userMarkupPercent: Number(settings.pricingDefaults.userMarkupPercent) || 15,
+          agentMarkupPercent: Number(settings.pricingDefaults.agentMarkupPercent) || 10,
+          vendorMarkupPercent: Number(settings.pricingDefaults.vendorMarkupPercent) || 5,
+        };
+      }
+    } catch {
+      // Use defaults if settings fail to load
+    }
+
     let synced = 0;
     let updated = 0;
     const syncTime = new Date();
@@ -426,11 +463,16 @@ exports.syncOffers = async (req, res) => {
       if (!providerPlanId) continue;
 
       const volume = toVolume(offer);
+      const volumeNum = Number(volume) || 0;
       const isp = resolveOfferNetwork(offer, networkLookup);
       const baseName = offer.planName || offer.name || `Data Plan ${providerPlanId}`;
-      const displayName = `${baseName} (${volume}GB)`;
+      const displayName = buildDisplayName(offer);
       const validity = offer.validity || offer.duration || '30 Days';
-      const costPrice = Number(offer.amount || offer.price || offer.costPrice || 0) || 0;
+      const costPrice = Number(offer.price || offer.finalPrice || offer.amount || offer.costPrice || 0) || 0;
+      const finalPrice = Number(offer.finalPrice || offer.price || 0) || 0;
+      const discount = Number(offer.discount || 0) || 0;
+      const providerIsActive = offer.isActive !== false;
+      const providerInStock = offer.inStock !== false;
 
       const existing = await TopzaOffer.findOne({ providerPlanId });
 
@@ -440,25 +482,47 @@ exports.syncOffers = async (req, res) => {
         existing.offerSlug = offer.slug || offer.offerSlug || existing.offerSlug;
         existing.isp = isp;
         existing.volume = volume;
+        existing.volumeNum = volumeNum;
         existing.validity = validity;
-        existing.inStock = offer.inStock !== false;
+        existing.inStock = providerInStock;
+        existing.providerIsActive = providerIsActive;
+        existing.finalPrice = finalPrice;
+        existing.discount = discount;
         existing.lastSyncedAt = syncTime;
         existing.rawProviderData = offer;
-        if (!existing.isEdited && costPrice > 0) {
+        // Always update costPrice from provider — this is the ground truth
+        if (costPrice > 0) {
           existing.costPrice = costPrice;
         }
-        if (!hasAnyConfiguredPrice(existing)) {
+        // Auto-set any missing prices to prevent selling at 0
+        if (costPrice > 0) {
+          if (!existing.sellingPrice || existing.sellingPrice <= 0) {
+            existing.sellingPrice = applyMarkup(costPrice, pricingDefaults.userMarkupPercent);
+          }
+          if (!existing.agentPrice || existing.agentPrice <= 0) {
+            existing.agentPrice = applyMarkup(costPrice, pricingDefaults.agentMarkupPercent);
+          }
+          if (!existing.vendorPrice || existing.vendorPrice <= 0) {
+            existing.vendorPrice = applyMarkup(costPrice, pricingDefaults.vendorMarkupPercent);
+          }
+          // Activate if prices are now set and provider is active
+          if (hasAnyConfiguredPrice(existing) && providerIsActive && existing.status !== 'active') {
+            existing.status = 'active';
+            existing.isActive = true;
+          }
+        }
+        // Only auto-deactivate if no prices are configured AND provider also deactivated it
+        if (!hasAnyConfiguredPrice(existing) && !providerIsActive) {
           existing.status = 'inactive';
           existing.isActive = false;
         }
         await existing.save();
         updated += 1;
       } else {
-        const hasConfiguredPrice = hasAnyConfiguredPrice({
-          sellingPrice: 0,
-          agentPrice: 0,
-          vendorPrice: 0,
-        });
+        const sellingPrice = applyMarkup(costPrice, pricingDefaults.userMarkupPercent);
+        const agentPrice = applyMarkup(costPrice, pricingDefaults.agentMarkupPercent);
+        const vendorPrice = applyMarkup(costPrice, pricingDefaults.vendorMarkupPercent);
+        const hasPrices = sellingPrice > 0 || agentPrice > 0 || vendorPrice > 0;
 
         await TopzaOffer.create({
           name: displayName,
@@ -467,14 +531,18 @@ exports.syncOffers = async (req, res) => {
           offerSlug: offer.slug || offer.offerSlug || null,
           isp,
           volume,
+          volumeNum,
           validity,
           costPrice,
-          sellingPrice: 0,
-          agentPrice: 0,
-          vendorPrice: 0,
-          status: hasConfiguredPrice ? 'active' : 'inactive',
-          isActive: hasConfiguredPrice,
-          inStock: offer.inStock !== false,
+          finalPrice,
+          discount,
+          sellingPrice,
+          agentPrice,
+          vendorPrice,
+          status: hasPrices ? 'active' : 'inactive',
+          isActive: hasPrices,
+          inStock: providerInStock,
+          providerIsActive,
           lastSyncedAt: syncTime,
           rawProviderData: offer,
         });
@@ -509,7 +577,7 @@ exports.getOffers = async (req, res) => {
 
     const total = await TopzaOffer.countDocuments(query);
     const offers = await TopzaOffer.find(query)
-      .sort({ isp: 1, volume: 1 })
+      .sort({ isp: 1, volumeNum: 1 })
       .limit(parseInt(limit, 10))
       .skip(skip);
 
@@ -534,10 +602,11 @@ exports.getStats = async (req, res) => {
     const query = {};
     if (network && network !== 'all') query.isp = { $regex: new RegExp(network, 'i') };
 
-    const [totalPlans, activePlans, outOfStockPlans] = await Promise.all([
+    const [totalPlans, activePlans, outOfStockPlans, providerInactive] = await Promise.all([
       TopzaOffer.countDocuments(query),
       TopzaOffer.countDocuments({ ...query, status: 'active', inStock: true }),
       TopzaOffer.countDocuments({ ...query, inStock: false }),
+      TopzaOffer.countDocuments({ ...query, providerIsActive: false }),
     ]);
 
     const allOffers = await TopzaOffer.find(query);
@@ -550,7 +619,7 @@ exports.getStats = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      stats: { totalPlans, activePlans, outOfStockPlans, avgMargin },
+      stats: { totalPlans, activePlans, outOfStockPlans, providerInactive, avgMargin },
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });

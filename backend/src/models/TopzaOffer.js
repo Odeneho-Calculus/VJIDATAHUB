@@ -27,11 +27,23 @@ const topzaOfferSchema = new mongoose.Schema(
       type: String,
       default: '1',
     },
+    volumeNum: {
+      type: Number,
+      default: 1,
+    },
     validity: {
       type: String,
       default: '30 Days',
     },
     costPrice: {
+      type: Number,
+      default: 0,
+    },
+    finalPrice: {
+      type: Number,
+      default: 0,
+    },
+    discount: {
       type: Number,
       default: 0,
     },
@@ -63,6 +75,10 @@ const topzaOfferSchema = new mongoose.Schema(
     stockOverriddenByAdmin: {
       type: Boolean,
       default: false,
+    },
+    providerIsActive: {
+      type: Boolean,
+      default: true,
     },
     isEdited: {
       type: Boolean,

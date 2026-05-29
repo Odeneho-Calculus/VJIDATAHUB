@@ -79,6 +79,23 @@ const systemSettingsSchema = new mongoose.Schema(
       whatsappGroup: { type: String, default: '' },
       email: { type: String, default: '' },
     },
+    pricingDefaults: {
+      userMarkupPercent: {
+        type: Number,
+        default: 15,
+        min: 0,
+      },
+      agentMarkupPercent: {
+        type: Number,
+        default: 10,
+        min: 0,
+      },
+      vendorMarkupPercent: {
+        type: Number,
+        default: 5,
+        min: 0,
+      },
+    },
     orderSettings: {
       duplicateOrderCooldownMinutes: {
         type: Number,

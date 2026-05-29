@@ -21,7 +21,7 @@ export default function AdminTopzaPlans() {
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState(null);
-  const [stats, setStats] = useState({ totalPlans: 0, activePlans: 0, outOfStockPlans: 0 });
+  const [stats, setStats] = useState({ totalPlans: 0, activePlans: 0, outOfStockPlans: 0, providerInactive: 0 });
 
   const [editingPlan, setEditingPlan] = useState(null);
   const [editPrices, setEditPrices] = useState({});
@@ -270,7 +270,7 @@ export default function AdminTopzaPlans() {
 
         @media (min-width: 768px) {
           .topza-stats-grid {
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 16px;
           }
         }
@@ -490,6 +490,10 @@ export default function AdminTopzaPlans() {
               <span className="topza-stat-label">Out of Stock</span>
               <span className="topza-stat-value" style={{ color: '#b91c1c' }}>{stats.outOfStockPlans}</span>
             </div>
+            <div className="topza-stat-card">
+              <span className="topza-stat-label">Provider Off</span>
+              <span className="topza-stat-value" style={{ color: '#f0a500' }}>{stats.providerInactive || 0}</span>
+            </div>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '20px' }}>
@@ -569,20 +573,24 @@ export default function AdminTopzaPlans() {
                         <div style={{ fontSize: '11px', color: '#888' }}>{plan.isp} • {plan.dataAmount || plan.volume}</div>
                       </td>
                       <td className="topza-td" style={{ whiteSpace: 'nowrap' }}>
-                        <div style={{ fontSize: '12px' }}>Cost: <span style={{ fontWeight: '700', color: '#b91c1c' }}>{Number(plan.costPrice || 0).toFixed(2)}</span></div>
-                        <div style={{ fontSize: '12px' }}>Admin: <span style={{ fontWeight: '700' }}>{Number(plan.sellingPrice || 0).toFixed(2)}</span></div>
+                        <div style={{ fontSize: '12px' }}>Topza: <span style={{ fontWeight: '700', color: '#b91c1c' }}>{Number(plan.costPrice || 0).toFixed(2)}</span></div>
+                        <div style={{ fontSize: '12px' }}>User: <span style={{ fontWeight: '700' }}>{Number(plan.sellingPrice || 0).toFixed(2)}</span></div>
                         <div style={{ fontSize: '11px', color: '#666' }}>Agent: {Number(plan.agentPrice || 0).toFixed(2)}</div>
+                        <div style={{ fontSize: '11px', color: '#666' }}>Vendor: {Number(plan.vendorPrice || 0).toFixed(2)}</div>
+                        {plan.discount > 0 && <div style={{ fontSize: '10px', color: '#059669' }}>Disc: {plan.discount.toFixed(2)}</div>}
                       </td>
                       <td className="topza-td" style={{ whiteSpace: 'nowrap' }}>
                         <span style={{ fontSize: '12px', fontWeight: '700', color: plan.inStock ? '#059669' : '#b91c1c' }}>
                           {plan.inStock ? 'In Stock' : 'Out of Stock'}
                         </span>
                         {plan.stockOverriddenByAdmin && <div style={{ fontSize: '10px', color: '#f0a500' }}>Admin Override</div>}
+                        {plan.providerIsActive === false && <div style={{ fontSize: '10px', color: '#b91c1c' }}>Provider Off</div>}
                       </td>
                       <td className="topza-td" style={{ whiteSpace: 'nowrap' }}>
                         <span style={{ fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', color: plan.status === 'active' ? '#059669' : '#666' }}>
                           {plan.status}
                         </span>
+                        {plan.isEdited && <div style={{ fontSize: '10px', color: '#f0a500' }}>Edited</div>}
                       </td>
                       <td className="topza-td">
                         <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
@@ -621,6 +629,10 @@ export default function AdminTopzaPlans() {
               <div>
                 <label style={{ fontSize: '12px', fontWeight: '700', color: '#333', display: 'block', marginBottom: '6px' }}>Agent Price</label>
                 <input className="topza-input" style={{ paddingLeft: '14px' }} type="number" value={editPrices.agentPrice} onChange={(e) => setEditPrices({ ...editPrices, agentPrice: e.target.value })} />
+              </div>
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: '700', color: '#333', display: 'block', marginBottom: '6px' }}>Vendor Price</label>
+                <input className="topza-input" style={{ paddingLeft: '14px' }} type="number" value={editPrices.vendorPrice} onChange={(e) => setEditPrices({ ...editPrices, vendorPrice: e.target.value })} />
               </div>
               <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
                 <button className="topza-btn-primary" style={{ flex: '1' }} onClick={handleSavePrices} disabled={savingPrices}>{savingPrices ? 'Saving...' : 'Save Prices'}</button>
