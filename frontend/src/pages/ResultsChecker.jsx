@@ -44,11 +44,11 @@ const styles = `
   }
 
   .dash-header {
-    background: #fff;
-    border: 1.5px solid #e4e4de;
+    background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+    border: 1.5px solid #BFDBFE;
     border-radius: 14px;
     padding: 16px;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.06);
+    box-shadow: 0 8px 40px rgba(29,78,216,0.08);
     display: flex;
     flex-direction: column;
     gap: 16px;

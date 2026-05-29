@@ -13,45 +13,49 @@ const styles = `
 
   .dash-wrapper {
     font-family: 'DM Sans', sans-serif;
-    background-color: #fafaf7;
+    background-color: #f5f5f0;
     min-height: 100vh;
-    padding: 20px;
     color: #1a1a1a;
   }
 
   .dash-content {
     max-width: 1200px;
     margin: 0 auto;
+    padding: 24px 16px;
     display: flex;
     flex-direction: column;
     gap: 24px;
   }
 
   .dash-header {
-    background: #fff;
-    border: 1.5px solid #e4e4de;
-    border-radius: 20px;
+    background: linear-gradient(135deg, #F7FEE7 0%, #ECFCCB 100%);
+    border: 1.5px solid #D9F99D;
+    border-radius: 14px;
     padding: 24px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    box-shadow: 0 8px 40px rgba(77,124,15,0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
   }
 
   .dash-h2 {
-    font-size: 24px;
-    font-weight: 900;
-    letter-spacing: -0.5px;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
     margin: 0;
     color: #111;
   }
 
   .dash-icon-box {
-    width: 48px;
-    height: 48px;
+    width: 46px;
+    height: 46px;
     background: #4D7C0F;
-    border-radius: 14px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #fff;
+    flex-shrink: 0;
     box-shadow: 0 4px 16px rgba(77,124,15,0.25);
   }
 
@@ -64,15 +68,16 @@ const styles = `
   .dash-btn-outline {
     background: #fff;
     border: 1.5px solid #e4e4de;
-    border-radius: 12px;
-    padding: 10px 20px;
+    border-radius: 8px;
+    padding: 8px 16px;
     font-size: 13px;
-    font-weight: 800;
+    font-weight: 700;
     color: #111;
     transition: all 0.2s;
     display: flex;
     align-items: center;
     gap: 8px;
+    cursor: pointer;
   }
 
   .dash-btn-outline:hover {
@@ -82,15 +87,25 @@ const styles = `
 
   .dash-stat-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  @media (min-width: 768px) {
+    .dash-stat-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
   }
 
   .dash-stat-card {
     background: var(--stat-bg, #fff);
     border: 1.5px solid var(--stat-border, #e4e4de);
-    border-radius: 20px;
-    padding: 20px;
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
     transition: all 0.2s;
   }
 
@@ -101,46 +116,43 @@ const styles = `
 
   .dash-stat-label {
     font-size: 11px;
-    font-weight: 800;
+    font-weight: 700;
     color: #999;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 4px;
+    letter-spacing: 0.05em;
   }
 
   .dash-stat-value {
-    font-size: 22px;
-    font-weight: 900;
+    font-size: 20px;
+    font-weight: 800;
     color: #111;
-    margin: 0;
   }
 
   .dash-card {
     background: #fff;
     border: 1.5px solid #e4e4de;
-    border-radius: 24px;
+    border-radius: 14px;
     padding: 24px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.06);
     display: flex;
     flex-direction: column;
     gap: 20px;
   }
 
   .dash-card-title {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 800;
     color: #111;
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 8px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    gap: 8px;
+    margin: 0 0 20px 0;
   }
 
   .dash-input {
     background: #fff;
     border: 1.5px solid #e4e4de;
-    border-radius: 12px;
+    border-radius: 8px;
     padding: 10px 16px;
     font-size: 13px;
     font-weight: 700;
@@ -157,12 +169,18 @@ const styles = `
   .dash-btn-primary {
     background: #4D7C0F;
     color: #fff;
-    padding: 12px 24px;
-    border-radius: 12px;
-    font-weight: 800;
-    font-size: 14px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
     transition: all 0.2s;
     box-shadow: 0 4px 12px rgba(77,124,15,0.2);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
   }
 
   .dash-btn-primary:hover:not(:disabled) {
