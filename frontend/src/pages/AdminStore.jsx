@@ -15,9 +15,23 @@ import AgentLayout from '../components/AgentLayout';
 import AlertModal from '../components/AlertModal';
 // import { useSettings } from '../context/SettingsContext';
 
+/* ── Multi-colour palette ── */
+const palette = [
+  { main: '#7C3AED', bg: '#EDE9FE', soft: '#F5F3FF', glow: 'rgba(124,58,237,0.15)' },   // purple
+  { main: '#0F6E56', bg: '#D1FAE5', soft: '#ECFDF5', glow: 'rgba(15,110,86,0.15)' },    // teal
+  { main: '#1D4ED8', bg: '#DBEAFE', soft: '#EFF6FF', glow: 'rgba(29,78,216,0.15)' },    // blue
+  { main: '#B45309', bg: '#FEF3C7', soft: '#FFFBEB', glow: 'rgba(180,83,9,0.15)' },     // amber
+  { main: '#BE185D', bg: '#FCE7F3', soft: '#FDF2F8', glow: 'rgba(190,24,93,0.15)' },    // pink
+  { main: '#DC2626', bg: '#FEE2E2', soft: '#FFF5F5', glow: 'rgba(220,38,38,0.15)' },    // coral/red
+  { main: '#0369A1', bg: '#E0F2FE', soft: '#F0F9FF', glow: 'rgba(3,105,161,0.15)' },    // sky
+  { main: '#4D7C0F', bg: '#ECFCCB', soft: '#F7FEE7', glow: 'rgba(77,124,15,0.15)' },    // lime/green
+];
+
+const getColor = (index) => palette[index % palette.length];
+
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
-  
+
   .dash-wrapper {
     font-family: 'DM Sans', sans-serif;
     background-color: #f5f5f0;
@@ -34,11 +48,11 @@ const styles = `
   }
 
   .dash-header {
-    background: #fff;
-    border: 1.5px solid #e4e4de;
+    background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+    border: 1.5px solid #A7F3D0;
     border-radius: 14px;
     padding: 16px;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.06);
+    box-shadow: 0 8px 40px rgba(15,110,86,0.08);
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -60,13 +74,14 @@ const styles = `
   .dash-icon-box {
     width: 40px;
     height: 40px;
-    background: #111;
+    background: #0F6E56;
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #f0a500;
+    color: #fff;
     flex-shrink: 0;
+    box-shadow: 0 4px 16px rgba(15,110,86,0.25);
   }
 
   .dash-h2 {
@@ -110,8 +125,8 @@ const styles = `
   }
 
   .dash-stat-card {
-    background: #fff;
-    border: 1.5px solid #e4e4de;
+    background: var(--stat-bg, #fff);
+    border: 1.5px solid var(--stat-border, #e4e4de);
     border-radius: 14px;
     padding: 16px;
     display: flex;
@@ -121,8 +136,8 @@ const styles = `
   }
 
   .dash-stat-card:hover {
-    border-color: #d4d4ce;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.06);
+    border-color: var(--stat-color, #d4d4ce);
+    box-shadow: 0 8px 40px var(--stat-glow, rgba(0,0,0,0.06));
   }
 
   .dash-stat-label {
@@ -262,14 +277,16 @@ const styles = `
   }
 
   .tab-button.active {
-    background: #111;
-    border-color: #111;
+    background: #0F6E56;
+    border-color: #0F6E56;
     color: #fff;
+    box-shadow: 0 4px 12px rgba(15,110,86,0.2);
   }
 
   .tab-button:not(.active):hover {
-    background: #fafaf7;
-    border-color: #d4d4ce;
+    background: #ECFDF5;
+    border-color: #A7F3D0;
+    color: #0F6E56;
   }
 `;
 
@@ -312,7 +329,7 @@ export default function AdminStore() {
     return (
       <AgentLayout>
         <div className="flex h-[80vh] items-center justify-center bg-[#f5f5f0]">
-          <Loader2 className="w-10 h-10 text-[#f0a500] animate-spin" />
+          <Loader2 className="w-10 h-10 text-[#0F6E56] animate-spin" />
         </div>
       </AgentLayout>
     );
@@ -353,7 +370,7 @@ export default function AdminStore() {
                 </a>
                 <button
                   onClick={fetchStore}
-                  className="p-1.5 text-slate-400 hover:text-[#f0a500] transition-colors"
+                  className="p-1.5 text-slate-400 hover:text-[#0F6E56] transition-colors"
                   title="Refresh Data"
                 >
                   <RefreshCw size={16} />
@@ -492,6 +509,7 @@ export default function AdminStore() {
                     <button
                       onClick={() => setActiveTab('billing')}
                       className="dash-btn-primary mx-auto"
+                      style={{ background: '#0F6E56', boxShadow: '0 4px 16px rgba(15,110,86,0.3)' }}
                     >
                       Go to Activation
                     </button>
@@ -781,7 +799,7 @@ function OverviewTab({ data, onRefresh, showAlert }) {
                           next[idx].icon = e.target.value;
                           setFormData({ ...formData, content: { ...formData.content, features: next } });
                         }}
-                        className="w-full px-4 py-2.5 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-lg focus:outline-none focus:border-[#111] transition-all text-sm"
+                        className="w-full px-4 py-2.5 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-lg focus:outline-none focus:border-[#0F6E56] transition-all text-sm"
                       >
                         <option value="">Default</option>
                         {featureIconOptions.map((option) => (
@@ -853,6 +871,7 @@ function OverviewTab({ data, onRefresh, showAlert }) {
               onClick={handleSave}
               disabled={isSaving}
               className="dash-btn-primary w-full py-3"
+              style={{ background: '#0F6E56', boxShadow: '0 4px 16px rgba(15,110,86,0.3)' }}
             >
               {isSaving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
               Save Changes
@@ -925,6 +944,7 @@ function InventoryTab({ plans, onRefresh, showAlert }) {
         <button
           onClick={() => setShowAdd(true)}
           className="dash-btn-primary"
+          style={{ background: '#0F6E56', boxShadow: '0 4px 16px rgba(15,110,86,0.3)' }}
         >
           <Plus size={18} />
           Append Plan
@@ -959,6 +979,7 @@ function InventoryTab({ plans, onRefresh, showAlert }) {
           isOpen={showAdd}
           onClose={() => setShowAdd(false)}
           title="Add New Plan"
+          icon={Plus}
         >
           <div className="flex flex-col gap-6">
             <div className="flex flex-col sm:flex-row gap-3">
@@ -969,13 +990,13 @@ function InventoryTab({ plans, onRefresh, showAlert }) {
                   placeholder="Search plans..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-lg focus:outline-none focus:border-[#111] transition-all text-sm"
+                  className="w-full pl-10 pr-4 py-2.5 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-lg focus:outline-none focus:border-[#0F6E56] transition-all text-sm"
                 />
               </div>
               <select
                 value={networkFilter}
                 onChange={(e) => setNetworkFilter(e.target.value)}
-                className="px-4 py-2.5 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-lg focus:outline-none focus:border-[#111] transition-all text-sm font-bold uppercase"
+                className="px-4 py-2.5 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-lg focus:outline-none focus:border-[#0F6E56] transition-all text-sm font-bold uppercase"
               >
                 <option value="all">Networks</option>
                 {networks.map(n => <option key={n} value={n}>{n}</option>)}
@@ -983,7 +1004,7 @@ function InventoryTab({ plans, onRefresh, showAlert }) {
             </div>
 
             {loadingGlobal ? (
-              <div className="py-20 text-center"><Loader2 className="animate-spin mx-auto text-[#f0a500]" size={32} /></div>
+              <div className="py-20 text-center"><Loader2 className="animate-spin mx-auto text-[#0F6E56]" size={32} /></div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
                 {filteredPlans.map((p) => {
@@ -992,7 +1013,7 @@ function InventoryTab({ plans, onRefresh, showAlert }) {
                     <div
                       key={p._id}
                       className={`flex items-center justify-between p-4 border-1.5 rounded-xl transition-all ${
-                        isAlreadyAdded ? 'bg-slate-50 border-slate-200 opacity-60' : 'bg-white border-[#e4e4de] hover:border-[#111]'
+                        isAlreadyAdded ? 'bg-slate-50 border-slate-200 opacity-60' : 'bg-white border-[#e4e4de] hover:border-[#0F6E56]'
                       }`}
                     >
                       <div className="min-w-0">
@@ -1006,7 +1027,7 @@ function InventoryTab({ plans, onRefresh, showAlert }) {
                         onClick={() => !isAlreadyAdded && setSelectedPlanForPrice(p)}
                         disabled={isAlreadyAdded}
                         className={`p-2 rounded-lg transition-colors ${
-                          isAlreadyAdded ? 'text-slate-300' : 'text-[#111] hover:bg-[#111] hover:text-white'
+                          isAlreadyAdded ? 'text-slate-300' : 'text-[#0F6E56] hover:bg-[#0F6E56] hover:text-white'
                         }`}
                       >
                         {isAlreadyAdded ? <CheckCircle2 size={20} /> : <Plus size={20} />}
@@ -1134,7 +1155,7 @@ function CheckerInventoryTab({ onRefresh, showAlert }) {
   if (loading) {
     return (
       <div className="dash-card py-20 text-center">
-        <Loader2 className="animate-spin mx-auto text-[#f0a500]" size={32} />
+        <Loader2 className="animate-spin mx-auto text-[#0F6E56]" size={32} />
         <p className="mt-4 text-slate-500 font-medium">Loading checkers...</p>
       </div>
     );
@@ -1154,7 +1175,7 @@ function CheckerInventoryTab({ onRefresh, showAlert }) {
                 const ch = availableCheckers.find(r => r._id === id);
                 setCustomPrice(ch ? String(ch.basePrice || 0) : '');
               }}
-              className="w-full px-4 py-2.5 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-lg focus:outline-none focus:border-[#111] transition-all text-sm"
+              className="w-full px-4 py-2.5 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-lg focus:outline-none focus:border-[#0F6E56] transition-all text-sm"
             >
               <option value="">Select a checker</option>
               {availableCheckers.map(ch => (
@@ -1167,6 +1188,7 @@ function CheckerInventoryTab({ onRefresh, showAlert }) {
             onClick={addChecker}
             disabled={saving || !selectedCheckerId}
             className="dash-btn-primary h-[45px]"
+            style={{ background: '#0F6E56', boxShadow: '0 4px 16px rgba(15,110,86,0.3)' }}
           >
             {saving ? <Loader2 className="animate-spin" size={18} /> : <Plus size={18} />}
             Append to Store
@@ -1204,7 +1226,7 @@ function CheckerInventoryTab({ onRefresh, showAlert }) {
                         const p = window.prompt('New price:', String(row.customPrice));
                         if (p) updateChecker(row, { customPrice: Number(p) });
                       }}
-                      className="p-2 text-slate-400 hover:text-[#f0a500] hover:bg-slate-50 rounded-lg transition-all"
+                      className="p-2 text-slate-400 hover:text-[#0F6E56] hover:bg-[#ECFDF5] rounded-lg transition-all"
                     >
                       <Edit2 size={16} />
                     </button>
@@ -1311,7 +1333,7 @@ function AfaInventoryTab({ onRefresh, showAlert }) {
   if (loading) {
     return (
       <div className="dash-card py-20 text-center">
-        <Loader2 className="animate-spin mx-auto text-[#f0a500]" size={32} />
+        <Loader2 className="animate-spin mx-auto text-[#0F6E56]" size={32} />
         <p className="mt-4 text-slate-500 font-medium">Loading AFA...</p>
       </div>
     );
@@ -1331,7 +1353,7 @@ function AfaInventoryTab({ onRefresh, showAlert }) {
                 const item = availableAfa.find(r => r._id === id);
                 setCustomPrice(item ? String(item.agentPrice || 0) : '');
               }}
-              className="w-full px-4 py-2.5 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-lg focus:outline-none focus:border-[#111] transition-all text-sm"
+              className="w-full px-4 py-2.5 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-lg focus:outline-none focus:border-[#0F6E56] transition-all text-sm"
             >
               <option value="">Select AFA Service</option>
               {availableAfa.map(item => (
@@ -1344,6 +1366,7 @@ function AfaInventoryTab({ onRefresh, showAlert }) {
             onClick={addAfa}
             disabled={saving || !selectedAfaId}
             className="dash-btn-primary h-[45px]"
+            style={{ background: '#0F6E56', boxShadow: '0 4px 16px rgba(15,110,86,0.3)' }}
           >
             {saving ? <Loader2 className="animate-spin" size={18} /> : <Plus size={18} />}
             Append to Store
@@ -1380,7 +1403,7 @@ function AfaInventoryTab({ onRefresh, showAlert }) {
                         const p = window.prompt('New price:', String(row.customPrice));
                         if (p) updateAfa(row, { customPrice: Number(p) });
                       }}
-                      className="p-2 text-slate-400 hover:text-[#f0a500] hover:bg-slate-50 rounded-lg transition-all"
+                      className="p-2 text-slate-400 hover:text-[#0F6E56] hover:bg-[#ECFDF5] rounded-lg transition-all"
                     >
                       <Edit2 size={16} />
                     </button>
@@ -1414,17 +1437,21 @@ function AfaInventoryTab({ onRefresh, showAlert }) {
   );
 }
 
-function SectionCard({ title, icon: Icon, children }) {
+function SectionCard({ title, icon: Icon, color = '#0F6E56', iconBg = '#ECFDF5', children }) {
   return (
     <div className="dash-card flex flex-col gap-5">
       <div className="flex items-center justify-between border-b border-[#e4e4de] pb-4 -mx-6 px-6">
         <h3 className="dash-card-title !mb-0">
-          {Icon && <Icon size={18} className="text-[#f0a500]" />}
+          {Icon && (
+            <div style={{ width: 28, height: 28, borderRadius: 6, background: iconBg, color: color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Icon size={15} strokeWidth={2.5} />
+            </div>
+          )}
           {title}
         </h3>
         <div className="flex gap-1">
-          <div className="w-1.5 h-1.5 rounded-full bg-slate-200"></div>
-          <div className="w-1.5 h-1.5 rounded-full bg-slate-200"></div>
+          <div className="w-1.5 h-1.5 rounded-full" style={{ background: color + '40' }}></div>
+          <div className="w-1.5 h-1.5 rounded-full" style={{ background: color + '20' }}></div>
         </div>
       </div>
       <div>{children}</div>
@@ -1442,7 +1469,7 @@ function InputGroup({ label, value = '', onChange, placeholder = '', isTextArea 
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           rows={3}
-          className="w-full px-4 py-2.5 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-lg focus:outline-none focus:border-[#111] transition-all resize-none text-sm"
+          className="w-full px-4 py-2.5 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-lg focus:outline-none focus:border-[#0F6E56] transition-all resize-none text-sm"
         />
       ) : (
         <input
@@ -1450,7 +1477,7 @@ function InputGroup({ label, value = '', onChange, placeholder = '', isTextArea 
           value={value || ''}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full px-4 py-2.5 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-lg focus:outline-none focus:border-[#111] transition-all text-sm"
+          className="w-full px-4 py-2.5 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-lg focus:outline-none focus:border-[#0F6E56] transition-all text-sm"
         />
       )}
     </div>
@@ -1476,7 +1503,7 @@ function IconInput({ icon: Icon, label, value = '', onChange, prefix = '' }) {
           type="text"
           value={value || ''}
           onChange={(e) => onChange(e.target.value)}
-          className={`w-full ${Icon ? 'pl-8' : 'pl-4'} ${prefix ? 'pl-16' : ''} pr-4 py-2.5 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-lg focus:outline-none focus:border-[#111] transition-all text-sm`}
+          className={`w-full ${Icon ? 'pl-8' : 'pl-4'} ${prefix ? 'pl-16' : ''} pr-4 py-2.5 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-lg focus:outline-none focus:border-[#0F6E56] transition-all text-sm`}
         />
       </div>
     </div>
@@ -1512,12 +1539,12 @@ function InventoryCard({ plan, onEdit, onRemove }) {
   return (
     <div className="dash-card flex flex-col gap-6 !p-5 group transition-all hover:translate-y-[-2px]">
       <div className="flex items-center gap-4">
-        <div className="w-12 h-12 rounded-xl bg-[#fafaf7] border-1.5 border-[#e4e4de] flex items-center justify-center text-[#111] group-hover:bg-[#111] group-hover:text-white group-hover:border-[#111] transition-all">
+        <div className="w-12 h-12 rounded-xl bg-[#ECFDF5] border-1.5 border-[#A7F3D0] flex items-center justify-center text-[#0F6E56] group-hover:bg-[#0F6E56] group-hover:text-white group-hover:border-[#0F6E56] transition-all">
           <Smartphone size={24} />
         </div>
         <div className="min-w-0">
           <h4 className="font-bold text-slate-900 truncate uppercase tracking-tight">{plan.planId?.name || plan.planName}</h4>
-          <p className="text-[10px] font-bold text-[#f0a500] uppercase tracking-widest">{plan.network}</p>
+          <p className="text-[10px] font-bold text-[#0F6E56] uppercase tracking-widest">{plan.network}</p>
         </div>
       </div>
 
@@ -1529,7 +1556,7 @@ function InventoryCard({ plan, onEdit, onRemove }) {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={onEdit} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Edit">
+          <button onClick={onEdit} className="p-2 text-slate-400 hover:text-[#0F6E56] hover:bg-[#ECFDF5] rounded-lg transition-all" title="Edit">
             <Edit2 size={16} />
           </button>
           <button onClick={onRemove} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Remove">
@@ -1587,7 +1614,7 @@ function OrdersTab() {
       </div>
 
       {loading ? (
-        <div className="dash-card py-20 text-center"><Loader2 className="animate-spin mx-auto text-[#f0a500]" size={32} /></div>
+        <div className="dash-card py-20 text-center"><Loader2 className="animate-spin mx-auto text-[#0F6E56]" size={32} /></div>
       ) : (
         <div className="dash-table-container">
           <table className="dash-table">
@@ -1609,7 +1636,7 @@ function OrdersTab() {
                   </td>
                   <td className="dash-td">
                     <p className="font-bold text-slate-700 text-sm truncate max-w-[150px]">{order.planName}</p>
-                    <p className="text-[10px] font-black text-[#f0a500] uppercase">{order.network}</p>
+                    <p className="text-[10px] font-black text-[#0F6E56] uppercase">{order.network}</p>
                   </td>
                   <td className="dash-td font-black text-slate-900">{formatCurrencyAbbreviated(order.amount)}</td>
                   <td className="dash-td">
@@ -1623,7 +1650,7 @@ function OrdersTab() {
                         setSelectedOrder(order);
                         setShowOrderDetails(true);
                       }}
-                      className="p-2 text-slate-400 hover:text-[#111] hover:bg-slate-50 rounded-lg transition-all"
+                      className="p-2 text-slate-400 hover:text-[#0F6E56] hover:bg-[#ECFDF5] rounded-lg transition-all"
                     >
                       <Eye size={18} />
                     </button>
@@ -1645,6 +1672,7 @@ function OrdersTab() {
           isOpen={showOrderDetails}
           onClose={() => setShowOrderDetails(false)}
           title="Order Details"
+          icon={ShoppingBag}
         >
           <div className="flex flex-col gap-6">
             <div className="flex justify-between items-start border-b border-[#f0f0f0] pb-4">
@@ -1661,13 +1689,13 @@ function OrdersTab() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 bg-[#fafaf7] rounded-xl border border-[#e4e4de]">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Product</p>
+              <div className="p-4 bg-[#ECFDF5] rounded-xl border border-[#A7F3D0]">
+                <p className="text-[10px] font-bold text-[#0F6E56] uppercase tracking-widest mb-1">Product</p>
                 <p className="font-bold text-slate-900 text-sm truncate">{selectedOrder.planName}</p>
-                <p className="text-[10px] font-black text-[#f0a500] uppercase mt-1">{selectedOrder.network}</p>
+                <p className="text-[10px] font-black text-[#0F6E56] uppercase mt-1">{selectedOrder.network}</p>
               </div>
-              <div className="p-4 bg-[#fafaf7] rounded-xl border border-[#e4e4de]">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Amount Paid</p>
+              <div className="p-4 bg-[#F5F3FF] rounded-xl border border-[#DDD6FE]">
+                <p className="text-[10px] font-bold text-[#7C3AED] uppercase tracking-widest mb-1">Amount Paid</p>
                 <p className="font-black text-slate-900 text-lg">{formatCurrencyAbbreviated(selectedOrder.amount)}</p>
               </div>
             </div>
@@ -1686,6 +1714,7 @@ function OrdersTab() {
             <button
               onClick={() => setShowOrderDetails(false)}
               className="dash-btn-primary w-full py-4 mt-2"
+              style={{ background: '#0F6E56', boxShadow: '0 4px 16px rgba(15,110,86,0.3)' }}
             >
               Close Details
             </button>
@@ -1724,33 +1753,37 @@ function CommissionsTab() {
           title="Total Earned"
           value={data?.totalEarned || 0}
           icon={TrendingUp}
+          color={getColor(0)}
         />
         <StatsCard
           title="Withdrawable"
           value={data?.availableForWithdrawal || 0}
           icon={Wallet}
+          color={getColor(1)}
         />
         <StatsCard
           title="Pending"
           value={data?.pendingWithdrawal || 0}
           icon={Clock}
+          color={getColor(2)}
         />
         <StatsCard
           title="Total Paid Out"
           value={data?.totalWithdrawn || 0}
           icon={CheckCircle}
+          color={getColor(3)}
         />
       </div>
 
       <SectionCard title="Payout Details" icon={CreditCard}>
         <div className="flex flex-col gap-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-xl p-5">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Available Balance</p>
+            <div className="bg-[#ECFDF5] border-1.5 border-[#A7F3D0] rounded-xl p-5">
+              <p className="text-[10px] font-bold text-[#0F6E56] uppercase tracking-widest mb-2">Available Balance</p>
               <p className="text-2xl font-black text-[#111]">{formatCurrencyAbbreviated(data?.availableForWithdrawal || 0)}</p>
             </div>
-            <div className="bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-xl p-5">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Aggregate Payouts</p>
+            <div className="bg-[#F5F3FF] border-1.5 border-[#DDD6FE] rounded-xl p-5">
+              <p className="text-[10px] font-bold text-[#7C3AED] uppercase tracking-widest mb-2">Aggregate Payouts</p>
               <p className="text-2xl font-black text-[#111]">{formatCurrencyAbbreviated(data?.totalWithdrawn || 0)}</p>
             </div>
           </div>
@@ -1761,6 +1794,7 @@ function CommissionsTab() {
             onClick={() => navigate('/agent/commissions')}
             disabled={loading}
             className="dash-btn-primary !w-max !px-8"
+            style={{ background: '#0F6E56', boxShadow: '0 4px 16px rgba(15,110,86,0.3)' }}
           >
             Manage Settlements
             <ChevronRight size={16} />
@@ -1869,7 +1903,7 @@ function BillingTab({ storeData, onRefresh, showAlert }) {
     <SectionCard title="Agent Activation" icon={ShieldCheck}>
       <div className="flex flex-col items-center text-center gap-6 max-w-xl mx-auto py-4">
         <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all ${
-          isActive ? 'bg-green-100 text-green-600' : 'bg-[#111] text-[#f0a500]'
+          isActive ? 'bg-[#ECFDF5] text-[#0F6E56]' : 'bg-[#0F6E56] text-white'
         }`}>
           {isActive ? <CheckCircle size={32} /> : <Zap size={32} />}
         </div>
@@ -1889,11 +1923,11 @@ function BillingTab({ storeData, onRefresh, showAlert }) {
           <div className="w-full flex flex-col gap-6 mt-4">
             <div className="space-y-2">
               <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Select Payment Method</label>
-              <div className="grid grid-cols-2 gap-3 p-1.5 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-xl">
+              <div className="grid grid-cols-2 gap-3 p-1.5 bg-[#ECFDF5] border-1.5 border-[#A7F3D0] rounded-xl">
                 <button
                   onClick={() => setPaymentMethod('wallet')}
                   className={`py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
-                    paymentMethod === 'wallet' ? 'bg-[#111] text-white shadow-md' : 'text-slate-500 hover:text-slate-800'
+                    paymentMethod === 'wallet' ? 'bg-[#0F6E56] text-white shadow-md' : 'text-[#0F6E56] hover:text-[#065F46]'
                   }`}
                 >
                   Wallet {paymentMethod === 'wallet' && `(${formatCurrencyAbbreviated(walletBalance)})`}
@@ -1901,7 +1935,7 @@ function BillingTab({ storeData, onRefresh, showAlert }) {
                 <button
                   onClick={() => setPaymentMethod('paystack')}
                   className={`py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
-                    paymentMethod === 'paystack' ? 'bg-[#111] text-white shadow-md' : 'text-slate-500 hover:text-slate-800'
+                    paymentMethod === 'paystack' ? 'bg-[#0F6E56] text-white shadow-md' : 'text-[#0F6E56] hover:text-[#065F46]'
                   }`}
                 >
                   Online Card
@@ -1913,6 +1947,7 @@ function BillingTab({ storeData, onRefresh, showAlert }) {
               onClick={handlePay}
               disabled={isInitializing || (paymentMethod === 'wallet' && walletBalance < registrationFee)}
               className="dash-btn-primary !py-4 !rounded-xl !text-sm"
+              style={{ background: '#0F6E56', boxShadow: '0 4px 16px rgba(15,110,86,0.3)' }}
             >
               {isInitializing ? <Loader2 className="animate-spin" size={20} /> : <CreditCard size={20} />}
               {paymentMethod === 'wallet' ? 'Confirm Wallet Payment' : 'Pay with Paystack'}
@@ -1930,26 +1965,42 @@ function BillingTab({ storeData, onRefresh, showAlert }) {
 
 // --- MICRO UTILS ---
 
-function StatsCard({ title, value, icon: Icon }) {
+function StatsCard({ title, value, icon: Icon, color = getColor(1) }) {
   return (
-    <div className="dash-stat-card">
+    <div className="dash-stat-card" style={{
+      '--stat-color': color.main + '66',
+      '--stat-glow': color.glow,
+      '--stat-bg': color.soft,
+      '--stat-border': color.main + '33',
+    }}>
       <div className="flex items-center justify-between mb-1">
-        <span className="dash-stat-label">{title}</span>
-        {Icon && <Icon size={14} className="text-slate-300" />}
+        <span className="dash-stat-label" style={{ color: color.main }}>{title}</span>
+        {Icon && (
+          <div style={{ width: 28, height: 28, borderRadius: 6, background: color.soft, color: color.main, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Icon size={14} strokeWidth={2.5} />
+          </div>
+        )}
       </div>
       <div className="dash-stat-value">{formatCurrencyAbbreviated(Number(value || 0))}</div>
     </div>
   );
 }
 
-function Modal({ title, onClose, children }) {
+function Modal({ title, onClose, children, icon: HeaderIcon }) {
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-[#111]/40 backdrop-blur-[2px] animate-in fade-in duration-300" onClick={onClose} />
       <div className="relative w-full max-w-2xl bg-[#fff] border-1.5 border-[#e4e4de] rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 flex flex-col max-h-[90vh]">
-        <div className="px-6 py-4 border-b border-[#e4e4de] flex items-center justify-between bg-white flex-shrink-0">
-          <h3 className="text-base font-bold text-slate-900 uppercase tracking-wider">{title}</h3>
-          <button onClick={onClose} className="p-2 text-slate-300 hover:text-[#111] transition-colors"><X size={20} /></button>
+        <div className="px-6 py-4 border-b border-[#e4e4de] flex items-center justify-between bg-[#fafaf7] flex-shrink-0">
+          <div className="flex items-center gap-3">
+            {HeaderIcon && (
+              <div style={{ width: 32, height: 32, borderRadius: 8, background: '#ECFDF5', color: '#0F6E56', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <HeaderIcon size={16} strokeWidth={2.5} />
+              </div>
+            )}
+            <h3 className="text-base font-bold text-slate-900 uppercase tracking-wider">{title}</h3>
+          </div>
+          <button onClick={onClose} className="p-2 text-slate-300 hover:text-[#0F6E56] hover:bg-[#ECFDF5] rounded-lg transition-colors"><X size={20} /></button>
         </div>
         <div className="p-6 flex-1 overflow-y-auto custom-scrollbar">
           {children}
@@ -1994,7 +2045,7 @@ function PriceModal({ plan, onClose, onConfirm, initialPrice, submitLabel = 'Add
       <div className="relative w-full max-w-md bg-white border-1.5 border-[#e4e4de] rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
         <div className="p-8 flex flex-col gap-6">
           <div className="text-center">
-            <div className="w-14 h-14 bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-xl flex items-center justify-center mx-auto text-[#111] mb-4">
+            <div className="w-14 h-14 bg-[#ECFDF5] border-1.5 border-[#A7F3D0] rounded-xl flex items-center justify-center mx-auto text-[#0F6E56] mb-4">
               <CreditCard size={28} />
             </div>
             <h3 className="text-lg font-bold text-slate-900 uppercase tracking-tight">Configure Price</h3>
@@ -2015,7 +2066,7 @@ function PriceModal({ plan, onClose, onConfirm, initialPrice, submitLabel = 'Add
                   step="0.01"
                   value={price}
                   onChange={(e) => { setPrice(e.target.value); setError(''); }}
-                  className="w-full pl-14 pr-4 py-4 bg-[#fafaf7] border-2 border-[#e4e4de] rounded-xl text-[#111] font-black text-xl focus:outline-none focus:border-[#111] transition-all"
+                  className="w-full pl-14 pr-4 py-4 bg-[#fafaf7] border-2 border-[#e4e4de] rounded-xl text-[#111] font-black text-xl focus:outline-none focus:border-[#0F6E56] transition-all"
                   placeholder="0.00"
                 />
               </div>
@@ -2024,7 +2075,7 @@ function PriceModal({ plan, onClose, onConfirm, initialPrice, submitLabel = 'Add
 
             <div className="grid grid-cols-2 gap-3">
               <button type="button" onClick={onClose} className="dash-btn-outline !py-3">Cancel</button>
-              <button type="submit" disabled={isSubmitting} className="dash-btn-primary !py-3">
+              <button type="submit" disabled={isSubmitting} className="dash-btn-primary !py-3" style={{ background: '#0F6E56', boxShadow: '0 4px 16px rgba(15,110,86,0.3)' }}>
                 {isSubmitting ? <Loader2 className="animate-spin" size={18} /> : submitLabel}
               </button>
             </div>
