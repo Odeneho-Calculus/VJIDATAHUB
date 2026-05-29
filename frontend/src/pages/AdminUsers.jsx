@@ -619,8 +619,8 @@ export default function AdminUsers() {
         onDelete={() => { setShowViewModal(false); setShowDeleteModal(true); }}
       />
       <UserEditModal isOpen={showEditModal} onClose={() => setShowEditModal(false)} user={selectedUser} onUpdate={handleUpdateUser} loading={updatingUser} />
-      <UserBanModal isOpen={showBanModal} onClose={() => setShowBanModal(false)} user={selectedUser} reason={banReason} setReason={setBanReason} onConfirm={handleBanUser} loading={banningUser} />
-      <UserSuspendModal isOpen={showSuspendModal} onClose={() => setShowSuspendModal(false)} user={selectedUser} days={suspendDays} setDays={setSuspendDays} onConfirm={handleSuspendUser} loading={suspendingUser} />
+      <UserBanModal isOpen={showBanModal} onClose={() => setShowBanModal(false)} user={selectedUser} banReason={banReason} setBanReason={setBanReason} onBan={handleBanUser} loading={banningUser} />
+      <UserSuspendModal isOpen={showSuspendModal} onClose={() => setShowSuspendModal(false)} user={selectedUser} suspendDays={suspendDays} setSuspendDays={setSuspendDays} onSuspend={handleSuspendUser} loading={suspendingUser} />
       <UserDeleteModal isOpen={showDeleteModal} onClose={() => setShowDeleteModal(false)} user={selectedUser} onDelete={handleDeleteUser} loading={deletingUser} />
       <PasswordResetModal isOpen={showResetModal} onClose={() => setShowResetModal(false)} resetLink={resetLink} />
       

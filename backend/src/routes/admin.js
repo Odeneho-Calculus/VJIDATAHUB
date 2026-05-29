@@ -5,6 +5,14 @@ const {
   getDashboardStats,
   getAllUsers,
   getUserById,
+  updateUser,
+  banUser,
+  unbanUser,
+  suspendUser,
+  unsuspendUser,
+  temporaryDeleteUser,
+  permanentDeleteUser,
+  restoreUser,
   updateUserRole,
   toggleUserStatus,
   getTransactions,
@@ -46,6 +54,15 @@ router.use(protect, adminOnly);
 router.get('/stats', getDashboardStats);
 router.get('/users', getAllUsers);
 router.get('/users/:id', getUserById);
+router.patch('/users/:id', updateUser);
+router.patch('/users/:id/ban', banUser);
+router.patch('/users/:id/unban', unbanUser);
+router.patch('/users/:id/suspend', suspendUser);
+router.patch('/users/:id/unsuspend', unsuspendUser);
+router.delete('/users/:id/temporary', temporaryDeleteUser);
+router.delete('/users/:id/permanent', permanentDeleteUser);
+router.delete('/users/:id', temporaryDeleteUser);
+router.patch('/users/:id/restore', restoreUser);
 router.patch('/users/:id/role', updateUserRole);
 router.patch('/users/:id/toggle-status', toggleUserStatus);
 router.post('/users/:id/generate-reset-link', generatePasswordResetLink);

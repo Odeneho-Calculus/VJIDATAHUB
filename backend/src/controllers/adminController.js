@@ -1,26 +1,3 @@
-/**
- * Generate password reset link for a user (admin only)
- */
-exports.generatePasswordResetLink = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const user = await User.findById(id);
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-    // Generate a JWT token for password reset
-    const resetToken = require('jsonwebtoken').sign(
-      { id: user._id, email: user.email, type: 'password-reset' },
-      process.env.JWT_SECRET,
-      { expiresIn: '1h' }
-    );
-    // Construct reset link using SITE_URL from .env
-    const resetLink = `${process.env.SITE_URL}/reset-password?token=${resetToken}`;
-    res.json({ success: true, resetLink });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
 const axios = require('axios');
 const User = require('../models/User');
 const Transaction = require('../models/Transaction');
@@ -322,6 +299,244 @@ exports.getUserById = async (req, res) => {
       success: false,
       message: error.message,
     });
+  }
+};
+
+/**
+ * Update user details (admin only)
+ */
+exports.updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, email, phone, role, isEmailVerified, walletOperation, walletAmount } = req.body;
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    // Update basic fields
+    if (name) user.name = name;
+    if (email) user.email = email;
+    if (phone !== undefined) user.phone = phone || null;
+    if (role) user.role = role;
+    if (isEmailVerified !== undefined) user.isEmailVerified = isEmailVerified;
+
+    // Handle wallet adjustment
+    if (walletOperation && walletAmount !== undefined) {
+      const amount = parseFloat(walletAmount) || 0;
+      const oldBalance = user.balance;
+      let newBalance = oldBalance;
+      let adjustmentType = 'none';
+
+      if (walletOperation === 'credit') {
+        newBalance = oldBalance + amount;
+        adjustmentType = 'credit';
+      } else if (walletOperation === 'deduct') {
+        newBalance = oldBalance - amount;
+        adjustmentType = 'deduct';
+      } else if (walletOperation === 'set') {
+        newBalance = amount;
+        adjustmentType = 'set';
+      }
+
+      if (newBalance < 0) {
+        return res.status(400).json({ success: false, message: 'Balance cannot be negative' });
+      }
+
+      if (adjustmentType !== 'none') {
+        user.balance = newBalance;
+
+        // Record the transaction
+        await Transaction.create({
+          userId: user._id,
+          type: 'admin_adjustment',
+          amount: Math.abs(newBalance - oldBalance),
+          status: 'completed',
+          paymentStatus: 'completed',
+          reference: `ADJ-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+          description: `Admin balance adjustment (${walletOperation}): ${oldBalance} -> ${newBalance}`
+        });
+      }
+    }
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'User updated successfully',
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        balance: user.balance,
+        role: user.role,
+        isEmailVerified: user.isEmailVerified
+      }
+    });
+  } catch (error) {
+    console.error('updateUser error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * Ban a user
+ */
+exports.banUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { banReason } = req.body;
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    user.status = 'banned';
+    user.banReason = banReason || 'No reason provided';
+    await user.save();
+
+    res.json({ success: true, message: 'User banned successfully', user });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * Unban a user
+ */
+exports.unbanUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    user.status = 'active';
+    user.banReason = null;
+    await user.save();
+
+    res.json({ success: true, message: 'User unbanned successfully', user });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * Suspend a user
+ */
+exports.suspendUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { days } = req.body;
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    user.status = 'suspended';
+    user.suspendedUntil = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+    await user.save();
+
+    res.json({ success: true, message: 'User suspended successfully', user });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * Unsuspend a user
+ */
+exports.unsuspendUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    user.status = 'active';
+    user.suspendedUntil = null;
+    await user.save();
+
+    res.json({ success: true, message: 'User unsuspended successfully', user });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * Temporarily delete a user (access restricted)
+ */
+exports.temporaryDeleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    user.status = 'temporarily_deleted';
+    user.deletedAt = new Date();
+    await user.save();
+
+    res.json({ success: true, message: 'User account temporarily deleted', user });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * Permanently delete a user and all related records
+ */
+exports.permanentDeleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    // Delete associated data
+    await Transaction.deleteMany({ userId: user._id });
+    await Order.deleteMany({ userId: user._id });
+    await Store.deleteMany({ owner: user._id });
+    await Referral.deleteMany({ $or: [{ referrer: user._id }, { referred: user._id }] });
+
+    await user.deleteOne();
+
+    res.json({ success: true, message: 'User and all related records permanently deleted' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * Restore a temporarily deleted user
+ */
+exports.restoreUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    user.status = 'active';
+    user.deletedAt = null;
+    await user.save();
+
+    res.json({ success: true, message: 'User account restored successfully', user });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -1918,7 +2133,30 @@ exports.refundOrder = async (req, res) => {
       order: updatedOrder
     });
   } catch (error) {
-    console.error('[Admin Refund] Error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * Generate password reset link for a user (admin only)
+ */
+exports.generatePasswordResetLink = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    // Generate a JWT token for password reset
+    const resetToken = require('jsonwebtoken').sign(
+      { id: user._id, email: user.email, type: 'password-reset' },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+    // Construct reset link using SITE_URL from .env
+    const resetLink = `${process.env.SITE_URL}/reset-password?token=${resetToken}`;
+    res.json({ success: true, link: resetLink });
+  } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };

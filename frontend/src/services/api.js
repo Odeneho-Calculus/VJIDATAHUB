@@ -111,6 +111,7 @@ export const admin = {
   deleteAllTransactions: () => api.delete('/admin/transactions'),
   bulkDeleteTransactionsByIds: (ids) => api.delete('/admin/transactions/bulk', { data: { ids } }),
     generatePasswordResetLink: (id) => api.post(`/admin/users/${id}/generate-reset-link`),
+    generateResetLink: (id) => api.post(`/admin/users/${id}/generate-reset-link`),
   bulkDeleteTransactionsByStatus: (status) =>
     api.post('/admin/transactions/bulk-delete', { status }),
   getOrders: (page = 1, limit = 10, status = '', network = '', scope = '') =>
