@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { AlertCircle, RefreshCw, CheckCircle, DollarSign, X, Settings, Activity, Globe, Clock, Phone, Wifi, Eye, Wallet } from 'lucide-react';
+import Pagination from '../components/Pagination';
 import { toast } from 'react-hot-toast';
 import { formatCurrencyAbbreviated } from '../utils/formatCurrency';
 import AdminSidebar from '../components/AdminSidebar';
@@ -263,6 +264,8 @@ export default function AdminVtuSettings() {
   const [transactions, setTransactions] = useState([]);
   const [transactionsLoading, setTransactionsLoading] = useState(false);
   const [transactionsError, setTransactionsError] = useState('');
+  const [transactionPage, setTransactionPage] = useState(1);
+  const TRANSACTIONS_PER_PAGE = 10;
   const [pollingTopza, setPollingTopza] = useState(false);
   const [showOrderDetailsModal, setShowOrderDetailsModal] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
@@ -357,7 +360,7 @@ export default function AdminVtuSettings() {
     try {
       if (!silent) setTransactionsLoading(true);
       setTransactionsError('');
-      const response = await adminAPI.getTopzaWalletTransactions(1, 25);
+      const response = await adminAPI.getTopzaWalletTransactions(1, 500);
       if (response.success) {
         setTransactions(Array.isArray(response.transactions) ? response.transactions : []);
       } else {
@@ -407,11 +410,12 @@ export default function AdminVtuSettings() {
       clearInterval(intervalId);
       setPollingTopza(false);
     };
-  }, [fetchWalletSettings]);
+  }, [fetchWalletSettings, transactionPage]);
 
   const handleTopzaRefresh = async () => {
     try {
       setSyncing(true);
+      setTransactionPage(1);
       await Promise.all([
         fetchWalletSettings({ silent: false }),
         fetchTopzaTransactions({ silent: false }),
@@ -691,6 +695,7 @@ export default function AdminVtuSettings() {
                   <p style={{ fontSize: '13px', color: '#999' }}>Fetching networks...</p>
                 </div>
               ) : (
+                <>
                 <div className="vtu-table-container">
                   <table className="vtu-table">
                     <thead>
@@ -730,6 +735,7 @@ export default function AdminVtuSettings() {
                     </tbody>
                   </table>
                 </div>
+                </>
               )}
             </div>
 
@@ -762,77 +768,92 @@ export default function AdminVtuSettings() {
                   No recent transactions found
                 </div>
               ) : (
-                <div className="vtu-table-container">
-                  <table className="vtu-table">
-                    <thead>
-                      <tr>
-                        <th className="vtu-th">ID</th>
-                        <th className="vtu-th">Recipient</th>
-                        <th className="vtu-th">Details</th>
-                        <th className="vtu-th">Amount</th>
-                        <th className="vtu-th">Status</th>
-                        <th className="vtu-th">Date</th>
-                        <th className="vtu-th">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {transactions.map((txn, i) => {
-                        const item = txn.order_items?.[0] || {};
-                        const providerOrder = txn.order || txn.data?.order || {};
-                        const txnId = txn.orderNumber || txn.orderId || txn.transaction_code || txn.transaction_id || txn.trx_ref || txn.id || txn.reference || providerOrder.orderNumber || providerOrder.orderId || '-';
-                        const recipient = item.beneficiary_number || txn.phoneNumber || txn.recipient_msisdn || txn.phone || txn.recipient || providerOrder.phoneNumber || '-';
-                        const network = item.network || txn.network || txn.network_name || providerOrder.network || (txn.network_id ? `Network ${txn.network_id}` : '-');
-                        const bundle = item.volume || txn.planName || providerOrder.planName || providerOrder.dataAmount || txn.dataAmount || (txn.shared_bundle ? `${(txn.shared_bundle / 1000).toFixed(1)}GB` : '-');
-                        const amount = Number.isFinite(Number(txn.amount)) ? `GHS ${formatPrice2dpNoRound(txn.amount)}` : '-';
-                        const status = item.status || txn.status || txn.transaction_status || '-';
-                        const date = txn.createdAt || txn.created_at || txn.lastUpdated || txn.date || txn.timestamp;
-                        
-                        const statusLower = String(status).toLowerCase();
-                        let badgeStyles = { background: '#f3f4f6', color: '#6b7280' };
-                        if (statusLower.includes('success') || statusLower.includes('complete')) {
-                          badgeStyles = { background: '#ecfdf5', color: '#059669', border: '1px solid #d1fae5' };
-                        } else if (statusLower.includes('fail') || statusLower.includes('error')) {
-                          badgeStyles = { background: '#fff5f5', color: '#b91c1c', border: '1px solid #fecaca' };
-                        } else if (statusLower.includes('pending') || statusLower.includes('processing')) {
-                          badgeStyles = { background: '#fffbeb', color: '#d97706', border: '1px solid #fef3c7' };
-                        }
+                <>
+                  <div className="vtu-table-container">
+                    <table className="vtu-table">
+                      <thead>
+                        <tr>
+                          <th className="vtu-th">ID</th>
+                          <th className="vtu-th">Recipient</th>
+                          <th className="vtu-th">Details</th>
+                          <th className="vtu-th">Amount</th>
+                          <th className="vtu-th">Status</th>
+                          <th className="vtu-th">Date</th>
+                          <th className="vtu-th">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {transactions
+                          .slice((transactionPage - 1) * TRANSACTIONS_PER_PAGE, transactionPage * TRANSACTIONS_PER_PAGE)
+                          .map((txn, i) => {
+                          const item = txn.order_items?.[0] || {};
+                          const providerOrder = txn.order || txn.data?.order || {};
+                          const txnId = txn.orderNumber || txn.orderId || txn.transaction_code || txn.transaction_id || txn.trx_ref || txn.id || txn.reference || providerOrder.orderNumber || providerOrder.orderId || '-';
+                          const recipient = item.beneficiary_number || txn.phoneNumber || txn.recipient_msisdn || txn.phone || txn.recipient || providerOrder.phoneNumber || '-';
+                          const network = item.network || txn.network || txn.network_name || providerOrder.network || (txn.network_id ? `Network ${txn.network_id}` : '-');
+                          const bundle = item.volume || txn.planName || providerOrder.planName || providerOrder.dataAmount || txn.dataAmount || (txn.shared_bundle ? `${(txn.shared_bundle / 1000).toFixed(1)}GB` : '-');
+                          const amount = Number.isFinite(Number(txn.amount)) ? `GHS ${formatPrice2dpNoRound(txn.amount)}` : '-';
+                          const status = item.status || txn.status || txn.transaction_status || '-';
+                          const date = txn.createdAt || txn.created_at || txn.lastUpdated || txn.date || txn.timestamp;
+                          
+                          const statusLower = String(status).toLowerCase();
+                          let badgeStyles = { background: '#f3f4f6', color: '#6b7280' };
+                          if (statusLower.includes('success') || statusLower.includes('complete')) {
+                            badgeStyles = { background: '#ecfdf5', color: '#059669', border: '1px solid #d1fae5' };
+                          } else if (statusLower.includes('fail') || statusLower.includes('error')) {
+                            badgeStyles = { background: '#fff5f5', color: '#b91c1c', border: '1px solid #fecaca' };
+                          } else if (statusLower.includes('pending') || statusLower.includes('processing')) {
+                            badgeStyles = { background: '#fffbeb', color: '#d97706', border: '1px solid #fef3c7' };
+                          }
 
-                        return (
-                          <tr key={txnId + i}>
-                            <td className="vtu-td font-mono" style={{ fontSize: '11px', color: '#999' }}>{String(txnId).slice(-8)}</td>
-                            <td className="vtu-td">
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <Phone size={12} style={{ color: '#999' }} />
-                                <span style={{ fontWeight: '700' }}>{recipient}</span>
-                              </div>
-                            </td>
-                            <td className="vtu-td">
-                              <div style={{ fontSize: '12px' }}>
-                                <div style={{ fontWeight: '600' }}>{network}</div>
-                                <div style={{ color: '#666' }}>{bundle}</div>
-                              </div>
-                            </td>
-                            <td className="vtu-td font-bold" style={{ color: '#059669' }}>{amount}</td>
-                            <td className="vtu-td">
-                              <span className="vtu-badge" style={badgeStyles}>{status}</span>
-                            </td>
-                            <td className="vtu-td" style={{ fontSize: '11px', color: '#999' }}>
-                              {date ? (isNaN(Date.parse(date)) ? date : new Date(date).toLocaleString()) : '-'}
-                            </td>
-                            <td className="vtu-td">
-                              <button
-                                onClick={() => openTransactionDetails(txn)}
-                                style={{ padding: '6px', borderRadius: '6px', border: '1px solid #e4e4de', background: '#fff', cursor: 'pointer' }}
-                              >
-                                <Eye size={14} style={{ color: '#666' }} />
-                              </button>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                          return (
+                            <tr key={txnId + i}>
+                              <td className="vtu-td font-mono" style={{ fontSize: '11px', color: '#999' }}>{String(txnId).slice(-8)}</td>
+                              <td className="vtu-td">
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  <Phone size={12} style={{ color: '#999' }} />
+                                  <span style={{ fontWeight: '700' }}>{recipient}</span>
+                                </div>
+                              </td>
+                              <td className="vtu-td">
+                                <div style={{ fontSize: '12px' }}>
+                                  <div style={{ fontWeight: '600' }}>{network}</div>
+                                  <div style={{ color: '#666' }}>{bundle}</div>
+                                </div>
+                              </td>
+                              <td className="vtu-td font-bold" style={{ color: '#059669' }}>{amount}</td>
+                              <td className="vtu-td">
+                                <span className="vtu-badge" style={badgeStyles}>{status}</span>
+                              </td>
+                              <td className="vtu-td" style={{ fontSize: '11px', color: '#999' }}>
+                                {date ? (isNaN(Date.parse(date)) ? date : new Date(date).toLocaleString()) : '-'}
+                              </td>
+                              <td className="vtu-td">
+                                <button
+                                  onClick={() => openTransactionDetails(txn)}
+                                  style={{ padding: '6px', borderRadius: '6px', border: '1px solid #e4e4de', background: '#fff', cursor: 'pointer' }}
+                                >
+                                  <Eye size={14} style={{ color: '#666' }} />
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                  {transactions.length > TRANSACTIONS_PER_PAGE && (
+                    <Pagination
+                      currentPage={transactionPage}
+                      totalPages={Math.max(1, Math.ceil(transactions.length / TRANSACTIONS_PER_PAGE))}
+                      onPageChange={(page) => {
+                        setTransactionPage(page);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      isLoading={transactionsLoading}
+                    />
+                  )}
+                </>
               )}
             </div>
           </>
