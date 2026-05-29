@@ -4,6 +4,7 @@ import { RotateCcw, Trash2, AlertCircle, Eye, Database, TrendingUp, CheckCircle,
 import { formatNumberAbbreviated } from '../utils/formatCurrency';
 import AdminSidebar from '../components/AdminSidebar';
 import ConfirmDialog from '../components/ConfirmDialog';
+import Pagination from '../components/Pagination';
 import { TransactionDetailsModal } from '../components/AdminTransactionModals';
 import { VerifyingPaymentModal, VerifiedPaymentModal } from '../components/AdminVerifyPaymentFeedbackModal';
 import { useSidebar } from '../hooks/useSidebar';
@@ -170,11 +171,7 @@ export default function AdminTransactions() {
     return matchesSearch && matchesPendingVerification;
   });
 
-  const handlePageChange = (newPage) => {
-    if (newPage >= 1 && newPage <= pagination.pages) {
-      setPage(newPage);
-    }
-  };
+
 
   const statusColors = {
     successful: 'bg-emerald-100 text-emerald-700',
@@ -574,27 +571,12 @@ export default function AdminTransactions() {
 
           {/* Pagination */}
           {!loading && pagination.pages > 1 && (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '24px' }}>
-              <button
-                className="tx-btn-primary"
-                style={{ padding: '8px 14px', fontSize: '13px', opacity: page <= 1 ? 0.5 : 1, cursor: page <= 1 ? 'not-allowed' : 'pointer' }}
-                onClick={() => handlePageChange(page - 1)}
-                disabled={page <= 1}
-              >
-                Previous
-              </button>
-              <span style={{ fontSize: '13px', fontWeight: '700', color: '#333', minWidth: '80px', textAlign: 'center' }}>
-                Page {page} of {pagination.pages}
-              </span>
-              <button
-                className="tx-btn-primary"
-                style={{ padding: '8px 14px', fontSize: '13px', opacity: page >= pagination.pages ? 0.5 : 1, cursor: page >= pagination.pages ? 'not-allowed' : 'pointer' }}
-                onClick={() => handlePageChange(page + 1)}
-                disabled={page >= pagination.pages}
-              >
-                Next
-              </button>
-            </div>
+            <Pagination
+              currentPage={page}
+              totalPages={pagination.pages}
+              onPageChange={(newPage) => setPage(newPage)}
+              isLoading={loading}
+            />
           )}
         </div>
       </div>

@@ -5,6 +5,7 @@ import { toast } from 'react-hot-toast';
 import { formatNumberAbbreviated } from '../utils/formatCurrency';
 import AdminSidebar from '../components/AdminSidebar';
 import ConfirmDialog from '../components/ConfirmDialog';
+import Pagination from '../components/Pagination';
 import { OrderDetailsModal, OrderStatusModal } from '../components/AdminOrderModals';
 import { VerifyingPaymentModal, VerifiedPaymentModal } from '../components/AdminVerifyPaymentFeedbackModal';
 import { useSidebar } from '../hooks/useSidebar';
@@ -811,23 +812,12 @@ export default function AdminOrders() {
 
               {/* Pagination */}
               {!loading && totalPages > 1 && (
-                <div style={{ padding: '16px 24px', borderTop: '1.5px solid #e4e4de', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <p style={{ fontSize: '12px', color: '#666', fontWeight: 600 }}>Page {page} of {totalPages}</p>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <button 
-                      className="orders-chip" 
-                      style={{ padding: '6px 12px' }} 
-                      disabled={page === 1}
-                      onClick={() => setPage(p => Math.max(1, p - 1))}
-                    >Prev</button>
-                    <button 
-                      className="orders-chip" 
-                      style={{ padding: '6px 12px' }} 
-                      disabled={page === totalPages}
-                      onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                    >Next</button>
-                  </div>
-                </div>
+                <Pagination
+                  currentPage={page}
+                  totalPages={totalPages}
+                  onPageChange={(newPage) => setPage(newPage)}
+                  isLoading={loading}
+                />
               )}
             </div>
 
