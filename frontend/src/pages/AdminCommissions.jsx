@@ -147,14 +147,14 @@ export default function AdminCommissions() {
     });
   };
 
-  const requestMarkAsPaid = () => {
-    if (!selectedPayout) return;
+  const requestMarkAsPaid = (payout = selectedPayout) => {
+    if (!payout) return;
     openConfirm({
       title: 'Mark as Paid',
-      message: `Mark this payout of ${formatCurrencyAbbreviated(Number(selectedPayout.netAmount || 0))} as paid for ${selectedPayout.agentId?.name || 'this agent'}?`,
+      message: `Mark this payout of ${formatCurrencyAbbreviated(Number(payout.netAmount || 0))} as paid for ${payout.agentId?.name || 'this agent'}?`,
       isDangerous: false,
       confirmText: 'Yes, Mark Paid',
-      onConfirm: handleMarkAsPaid,
+      onConfirm: () => handleMarkAsPaid(payout),
     });
   };
 
@@ -187,11 +187,11 @@ export default function AdminCommissions() {
     }
   };
 
-  const handleMarkAsPaid = async () => {
-    if (!selectedPayout) return;
+  const handleMarkAsPaid = async (payout = selectedPayout) => {
+    if (!payout) return;
     try {
       setSubmitting(true);
-      await adminStore.markPayoutAsPaid(selectedPayout._id, {
+      await adminStore.markPayoutAsPaid(payout._id, {
         adminNote: formData.adminNote || '',
       });
       closeModal();
@@ -363,12 +363,12 @@ export default function AdminCommissions() {
                                     <XCircle size={15} />
                                   </button>
                                 )}
-                                {(payout.status === 'pending' || payout.status === 'processing') && (
+                                {payout.status === 'processing' && (
                                   <button
-                                    onClick={() => openModal(payout, 'markPaid')}
-                                    title="Mark paid"
+                                    onClick={() => requestMarkAsPaid(payout)}
+                                    title="Mark as paid"
                                     aria-label="Mark payout as paid"
-                                    className="w-8 h-8 inline-flex items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50"
+                                    className="w-8 h-8 inline-flex items-center justify-center rounded-lg border border-emerald-200 text-emerald-600 hover:bg-emerald-50"
                                   >
                                     <CircleDollarSign size={15} />
                                   </button>
@@ -428,12 +428,12 @@ export default function AdminCommissions() {
                               <XCircle size={15} />
                             </button>
                           )}
-                          {(payout.status === 'pending' || payout.status === 'processing') && (
+                          {payout.status === 'processing' && (
                             <button
-                              onClick={() => openModal(payout, 'markPaid')}
-                              title="Mark paid"
+                              onClick={() => requestMarkAsPaid(payout)}
+                              title="Mark as paid"
                               aria-label="Mark payout as paid"
-                              className="w-8 h-8 inline-flex items-center justify-center rounded-lg border border-slate-200 text-slate-600"
+                              className="w-8 h-8 inline-flex items-center justify-center rounded-lg border border-emerald-200 text-emerald-600"
                             >
                               <CircleDollarSign size={15} />
                             </button>

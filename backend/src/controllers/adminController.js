@@ -1912,10 +1912,10 @@ exports.approveMobileMoneyPayout = async (req, res) => {
       });
     }
 
-    payout.status = 'approved';
+    payout.status = 'processing';
     payout.transactionReference = transactionReference;
-    payout.approvedAt = new Date();
-    payout.approvedBy = req.userId;
+    payout.processedAt = new Date();
+    payout.processedBy = req.userId;
 
     await payout.save();
 
@@ -1947,10 +1947,10 @@ exports.markPayoutAsPaid = async (req, res) => {
       });
     }
 
-    if (payout.status !== 'approved') {
+    if (payout.status !== 'processing') {
       return res.status(400).json({
         success: false,
-        message: 'Payout must be approved before marking as paid',
+        message: 'Payout must be processing before marking as paid',
       });
     }
 
