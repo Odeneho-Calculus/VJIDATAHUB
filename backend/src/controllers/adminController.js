@@ -1677,7 +1677,7 @@ exports.getAgentStores = async (req, res) => {
     }
 
     const stores = await Store.find(query)
-      .populate('owner', 'name email phone')
+      .populate('owner', 'name email phone agentFeeStatus')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
@@ -1708,7 +1708,7 @@ exports.getAgentStoreDetails = async (req, res) => {
     const { storeId } = req.params;
 
     const store = await Store.findById(storeId)
-      .populate('owner', 'name email phone');
+      .populate('owner', 'name email phone agentFeeStatus');
 
     if (!store) {
       return res.status(404).json({
