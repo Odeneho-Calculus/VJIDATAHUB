@@ -34,9 +34,23 @@ import AgentLayout from '../components/AgentLayout';
 import Modal from '../components/Modal';
 import { useAuth } from '../hooks/useAuth';
 
+/* ── Homepage multi-colour palette ── */
+const palette = [
+  { main: '#7C3AED', bg: '#EDE9FE', soft: '#F5F3FF', glow: 'rgba(124,58,237,0.15)' },   // purple
+  { main: '#0F6E56', bg: '#D1FAE5', soft: '#ECFDF5', glow: 'rgba(15,110,86,0.15)' },    // teal
+  { main: '#1D4ED8', bg: '#DBEAFE', soft: '#EFF6FF', glow: 'rgba(29,78,216,0.15)' },    // blue
+  { main: '#B45309', bg: '#FEF3C7', soft: '#FFFBEB', glow: 'rgba(180,83,9,0.15)' },     // amber
+  { main: '#BE185D', bg: '#FCE7F3', soft: '#FDF2F8', glow: 'rgba(190,24,93,0.15)' },    // pink
+  { main: '#DC2626', bg: '#FEE2E2', soft: '#FFF5F5', glow: 'rgba(220,38,38,0.15)' },    // coral/red
+  { main: '#0369A1', bg: '#E0F2FE', soft: '#F0F9FF', glow: 'rgba(3,105,161,0.15)' },    // sky
+  { main: '#4D7C0F', bg: '#ECFCCB', soft: '#F7FEE7', glow: 'rgba(77,124,15,0.15)' },    // lime/green
+];
+
+const getColor = (index) => palette[index % palette.length];
+
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
-  
+
   .dash-wrapper {
     font-family: 'DM Sans', sans-serif;
     background-color: #f5f5f0;
@@ -53,11 +67,11 @@ const styles = `
   }
 
   .dash-header {
-    background: #fff;
-    border: 1.5px solid #e4e4de;
+    background: linear-gradient(135deg, #F5F3FF 0%, #EDE9FE 100%);
+    border: 1.5px solid #DDD6FE;
     border-radius: 14px;
     padding: 24px;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.06);
+    box-shadow: 0 8px 40px rgba(124,58,237,0.08);
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -72,13 +86,14 @@ const styles = `
   .dash-icon-box {
     width: 46px;
     height: 46px;
-    background: #111;
+    background: #7C3AED;
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #f0a500;
+    color: #fff;
     flex-shrink: 0;
+    box-shadow: 0 4px 16px rgba(124,58,237,0.25);
   }
 
   .dash-h2 {
@@ -109,8 +124,8 @@ const styles = `
   }
 
   .dash-stat-card {
-    background: #fff;
-    border: 1.5px solid #e4e4de;
+    background: var(--stat-bg, #fff);
+    border: 1.5px solid var(--stat-border, #e4e4de);
     border-radius: 14px;
     padding: 16px;
     display: flex;
@@ -120,8 +135,8 @@ const styles = `
   }
 
   .dash-stat-card:hover {
-    border-color: #d4d4ce;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.06);
+    border-color: var(--stat-color, #d4d4ce);
+    box-shadow: 0 8px 40px var(--stat-glow, rgba(0,0,0,0.06));
   }
 
   .dash-stat-label {
@@ -221,7 +236,7 @@ const styles = `
     right: -20px;
     width: 100px;
     height: 100px;
-    background: rgba(240, 165, 0, 0.05);
+    background: rgba(124, 58, 237, 0.08);
     border-radius: 50%;
     filter: blur(40px);
   }
@@ -272,6 +287,21 @@ const styles = `
     display: inline-flex;
     align-items: center;
     gap: 4px;
+  }
+
+  .dash-bundle-card {
+    background: #fff;
+    border: 1.5px solid #e4e4de;
+    border-radius: 14px;
+    padding: 14px;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+  }
+  .dash-bundle-card:hover {
+    border-color: var(--bundle-color, #d4d4ce);
+    box-shadow: 0 8px 30px var(--bundle-glow, rgba(0,0,0,0.06));
+    transform: translateY(-2px);
   }
 `;
 
@@ -358,7 +388,7 @@ export default function AgentDashboard() {
     return (
       <AgentLayout>
         <div className="flex h-[80vh] items-center justify-center bg-[#f5f5f0]">
-          <Loader2 className="w-10 h-10 text-[#f0a500] animate-spin" />
+          <Loader2 className="w-10 h-10 text-[#7C3AED] animate-spin" />
         </div>
       </AgentLayout>
     );
@@ -423,11 +453,11 @@ export default function AgentDashboard() {
                 Sales History
               </Link>
               <Link to="/agent/wallet" className="dash-btn-outline flex-1 sm:flex-none">
-                <CreditCard size={14} style={{ color: '#059669' }} />
+                <CreditCard size={14} style={{ color: '#0F6E56' }} />
                 Add Funds
               </Link>
-              <Link to="/agent/store" className="dash-btn-primary w-full sm:w-auto">
-                <Zap size={14} style={{ color: '#f0a500' }} />
+              <Link to="/agent/store" className="dash-btn-primary w-full sm:w-auto" style={{ background: '#7C3AED', boxShadow: '0 4px 16px rgba(124,58,237,0.3)' }}>
+                <Zap size={14} style={{ color: '#fff' }} />
                 Edit Store
               </Link>
             </div>
@@ -489,18 +519,36 @@ export default function AgentDashboard() {
           {/* Stats Grid */}
           <div className="dash-stat-grid">
             {[
-              { label: 'Total Sales', value: orderStats?.totalOrders || 0, icon: Target, color: '#3b82f6' },
-              { label: 'Delivered', value: orderStats?.completedOrders || 0, icon: CheckCircle, color: '#10b981' },
-              { label: 'Processing', value: orderStats?.processingOrders || 0, icon: Layers, color: '#6366f1' },
-              { label: 'Revenue', value: formatCurrency(orderStats?.totalRevenue), icon: TrendingUp, color: '#a855f7' }
+              { label: 'Total Sales', value: orderStats?.totalOrders || 0, icon: Target, color: getColor(0) },
+              { label: 'Delivered', value: orderStats?.completedOrders || 0, icon: CheckCircle, color: getColor(1) },
+              { label: 'Processing', value: orderStats?.processingOrders || 0, icon: Layers, color: getColor(2) },
+              { label: 'Revenue', value: formatCurrency(orderStats?.totalRevenue), icon: TrendingUp, color: getColor(3) }
             ].map((stat, i) => (
-              <div key={i} className="dash-stat-card">
+              <div
+                key={i}
+                className="dash-stat-card"
+                style={{
+                  '--stat-color': stat.color.main + '66',
+                  '--stat-glow': stat.color.glow,
+                  '--stat-bg': stat.color.soft,
+                  '--stat-border': stat.color.main + '33',
+                }}
+              >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div>
-                    <p className="dash-stat-label">{stat.label}</p>
+                    <p className="dash-stat-label" style={{ color: stat.color.main }}>{stat.label}</p>
                     <p className="dash-stat-value">{stat.value}</p>
                   </div>
-                  <stat.icon size={18} style={{ color: stat.color }} />
+                  <div style={{
+                    width: 32, height: 32, borderRadius: 8,
+                    background: stat.color.soft,
+                    color: stat.color.main,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    flexShrink: 0,
+                    boxShadow: `0 2px 8px ${stat.color.glow}`,
+                  }}>
+                    <stat.icon size={16} strokeWidth={2.5} />
+                  </div>
                 </div>
               </div>
             ))}
@@ -510,22 +558,28 @@ export default function AgentDashboard() {
             {/* Store Information */}
             <div className="lg:col-span-2 dash-card">
               <h3 className="dash-card-title">
-                <Store size={18} style={{ color: '#f0a500' }} />
+                <div style={{
+                  width: 28, height: 28, borderRadius: 6,
+                  background: '#DBEAFE', color: '#1D4ED8',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <Store size={15} strokeWidth={2.5} />
+                </div>
                 Store Overview
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div style={{ background: '#fafaf7', padding: '16px', borderRadius: '12px', border: '1.5px solid #e4e4de' }}>
-                  <p className="dash-stat-label" style={{ marginBottom: '4px' }}>Live Catalog</p>
+                <div style={{ background: '#F5F3FF', padding: '16px', borderRadius: '12px', border: '1.5px solid #DDD6FE' }}>
+                  <p className="dash-stat-label" style={{ marginBottom: '4px', color: '#7C3AED' }}>Live Catalog</p>
                   <p style={{ fontSize: '18px', fontWeight: '800', color: '#111' }}>{plansCount} Packages</p>
                   <p style={{ fontSize: '12px', color: '#666' }}>Currently visible to customers</p>
                 </div>
-                <div style={{ background: '#fafaf7', padding: '16px', borderRadius: '12px', border: '1.5px solid #e4e4de' }}>
-                  <p className="dash-stat-label" style={{ marginBottom: '4px' }}>Store URL</p>
+                <div style={{ background: '#ECFDF5', padding: '16px', borderRadius: '12px', border: '1.5px solid #A7F3D0' }}>
+                  <p className="dash-stat-label" style={{ marginBottom: '4px', color: '#0F6E56' }}>Store URL</p>
                   <p style={{ fontSize: '15px', fontWeight: '800', color: '#111', fontFamily: 'monospace' }}>/{storeData?.slug}</p>
-                  <button onClick={handleCopyLink} className="text-xs font-bold text-indigo-600 mt-1">Copy Public Link</button>
+                  <button onClick={handleCopyLink} className="text-xs font-bold mt-1" style={{ color: '#0F6E56' }}>Copy Public Link</button>
                 </div>
               </div>
-              <Link to="/agent/store" className="dash-btn-primary" style={{ width: 'fit-content' }}>
+              <Link to="/agent/store" className="dash-btn-primary" style={{ width: 'fit-content', background: '#7C3AED', boxShadow: '0 4px 16px rgba(124,58,237,0.3)' }}>
                 Manage Catalog
                 <ChevronRight size={14} />
               </Link>
@@ -534,21 +588,27 @@ export default function AgentDashboard() {
             {/* System Health */}
             <div className="dash-card">
               <h3 className="dash-card-title">
-                <Activity size={18} style={{ color: '#059669' }} />
+                <div style={{
+                  width: 28, height: 28, borderRadius: 6,
+                  background: '#ECFCCB', color: '#4D7C0F',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <Activity size={15} strokeWidth={2.5} />
+                </div>
                 Network Health
               </h3>
               <div className="space-y-4">
                 {[
-                  { net: 'MTN Ghana', load: '12%', color: '#fbbf24' },
-                  { net: 'Telecel', load: '24%', color: '#ef4444' },
-                  { net: 'AirtelTigo', load: '18%', color: '#22c55e' }
+                  { net: 'MTN Ghana', load: '12%', color: '#fbbf24', barBg: '#FEF3C7' },
+                  { net: 'Telecel', load: '24%', color: '#ef4444', barBg: '#FEE2E2' },
+                  { net: 'AirtelTigo', load: '18%', color: '#22c55e', barBg: '#ECFDF5' }
                 ].map((n, i) => (
                   <div key={i} style={{ marginBottom: '12px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                       <span style={{ fontSize: '12px', fontWeight: '700', color: '#333' }}>{n.net}</span>
                       <span style={{ fontSize: '10px', fontWeight: '800', color: '#059669', textTransform: 'uppercase' }}>Available</span>
                     </div>
-                    <div style={{ height: '6px', width: '100%', background: '#f0f0f0', borderRadius: '10px', overflow: 'hidden' }}>
+                    <div style={{ height: '6px', width: '100%', background: n.barBg, borderRadius: '10px', overflow: 'hidden' }}>
                       <div style={{ height: '100%', width: n.load, background: n.color, borderRadius: '10px' }}></div>
                     </div>
                   </div>
@@ -566,10 +626,16 @@ export default function AgentDashboard() {
           <div className="dash-card">
             <div className="flex items-center justify-between mb-6">
               <h3 className="dash-card-title" style={{ margin: 0 }}>
-                <ShoppingBag size={18} style={{ color: '#3b82f6' }} />
+                <div style={{
+                  width: 28, height: 28, borderRadius: 6,
+                  background: '#FCE7F3', color: '#BE185D',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <ShoppingBag size={15} strokeWidth={2.5} />
+                </div>
                 Recent Sales
               </h3>
-              <Link to="/agent/orders" style={{ fontSize: '11px', fontWeight: '800', color: '#3b82f6', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <Link to="/agent/orders" style={{ fontSize: '11px', fontWeight: '800', color: '#BE185D', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 View All History
               </Link>
             </div>
@@ -647,7 +713,7 @@ export default function AgentDashboard() {
         isOpen={showDetails}
         onClose={() => setShowDetails(false)}
         title="Order Details"
-        icon={<ShoppingBag size={20} style={{ color: '#3b82f6' }} />}
+        icon={<div style={{ width: 32, height: 32, borderRadius: 8, background: '#FCE7F3', color: '#BE185D', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ShoppingBag size={16} strokeWidth={2.5} /></div>}
         maxWidth="max-w-lg"
       >
         {selectedOrder && (
@@ -669,13 +735,13 @@ export default function AgentDashboard() {
             </div>
 
             <div className="grid grid-cols-2 gap-4 mb-6">
-              <div style={{ background: '#fafaf7', padding: '16px', borderRadius: '12px', border: '1.5px solid #e4e4de' }}>
-                <p className="dash-stat-label">Customer</p>
+              <div style={{ background: '#F5F3FF', padding: '16px', borderRadius: '12px', border: '1.5px solid #DDD6FE' }}>
+                <p className="dash-stat-label" style={{ color: '#7C3AED' }}>Customer</p>
                 <p style={{ fontSize: '14px', fontWeight: '800', color: '#111' }}>{selectedOrder.phoneNumber}</p>
                 <p style={{ fontSize: '11px', color: '#666', marginTop: '2px' }}>{selectedOrder.network}</p>
               </div>
-              <div style={{ background: '#fafaf7', padding: '16px', borderRadius: '12px', border: '1.5px solid #e4e4de' }}>
-                <p className="dash-stat-label">Package</p>
+              <div style={{ background: '#ECFDF5', padding: '16px', borderRadius: '12px', border: '1.5px solid #A7F3D0' }}>
+                <p className="dash-stat-label" style={{ color: '#0F6E56' }}>Package</p>
                 <p style={{ fontSize: '14px', fontWeight: '800', color: '#111' }}>{getOrderPlanDisplay(selectedOrder)}</p>
                 <p style={{ fontSize: '11px', color: '#666', marginTop: '2px' }}>{formatCurrency(selectedOrder.amount)}</p>
               </div>
@@ -701,7 +767,7 @@ export default function AgentDashboard() {
             <button
               onClick={() => setShowDetails(false)}
               className="dash-btn-primary"
-              style={{ width: '100%', padding: '12px', marginTop: '24px' }}
+              style={{ width: '100%', padding: '12px', marginTop: '24px', background: '#7C3AED', boxShadow: '0 4px 16px rgba(124,58,237,0.3)' }}
             >
               Close Details
             </button>
