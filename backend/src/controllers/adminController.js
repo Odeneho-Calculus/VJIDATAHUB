@@ -172,21 +172,20 @@ exports.getDashboardStats = async (req, res) => {
       {
         $group: {
           _id: null,
-          totalAgentEarnings: { $sum: '$totalEarned' },
-          totalAgentWithdrawn: { $sum: '$totalWithdrawn' },
-          totalAgentPending: { $sum: '$totalPending' },
-          totalAgentCommissions: { $sum: '$totalCommissions' }
+          availableBalance: { $sum: '$totalEarned' },
+          totalWithdrawn: { $sum: '$totalWithdrawn' },
+          totalPending: { $sum: '$totalPending' },
+          totalCommissions: { $sum: '$totalCommissions' }
         }
       }
     ]);
-    const agentEarningsStats = agentEarningsResult[0] || {
-      totalAgentEarnings: 0,
-      totalAgentWithdrawn: 0,
-      totalAgentPending: 0,
-      totalAgentCommissions: 0
+
+    const agentStats = agentEarningsResult[0] || {
+      availableBalance: 0,
+      totalWithdrawn: 0,
+      totalPending: 0,
+      totalCommissions: 0
     };
-    // Calculate remaining balance (earned - withdrawn - pending)
-    agentEarningsStats.totalAgentRemaining = agentEarningsStats.totalAgentEarnings - agentEarningsStats.totalAgentWithdrawn - agentEarningsStats.totalAgentPending;
 
     res.status(200).json({
       success: true,
@@ -202,11 +201,11 @@ exports.getDashboardStats = async (req, res) => {
         completedOrders,
         totalBalance: userStats.totalBalance,
         totalReferralEarnings: userStats.totalReferralEarnings,
-        totalAgentEarnings: agentEarningsStats.totalAgentEarnings,
-        totalAgentWithdrawn: agentEarningsStats.totalAgentWithdrawn,
-        totalAgentPending: agentEarningsStats.totalAgentPending,
-        totalAgentRemaining: agentEarningsStats.totalAgentRemaining,
-        totalAgentCommissions: agentEarningsStats.totalAgentCommissions,
+        totalAgentEarnings: agentStats.totalCommissions,
+        totalAgentWithdrawn: agentStats.totalWithdrawn,
+        totalAgentPending: agentStats.totalPending,
+        totalAgentRemaining: agentStats.availableBalance,
+        totalAgentCommissions: agentStats.totalCommissions,
       },
     });
   } catch (error) {
@@ -661,9 +660,31 @@ exports.verifyPendingPayment = async (req, res) => {
 
       const verifyResponse = await paystackAPI.get(`/transaction/verify/${reference}`);
       const paystackData = verifyResponse?.data?.data;
+      const paystackMsg = verifyResponse?.data?.message || '';
 
       if (!verifyResponse?.data?.status || !paystackData) {
-        return res.status(400).json({ success: false, message: 'Payment verification failed' });
+        if (isPaystackReferenceNotFound(paystackMsg)) {
+          transaction.status = 'failed';
+          transaction.paymentStatus = 'failed';
+          await transaction.save();
+
+          const linkedOrder = await Order.findOne({
+            $or: [
+              { transactionId: transaction._id },
+              { transactionReference: transaction.reference },
+            ],
+          });
+
+          if (linkedOrder) {
+            linkedOrder.status = 'failed';
+            linkedOrder.paymentStatus = 'failed';
+            linkedOrder.errorMessage = 'Paystack verification failed: Transaction reference not found.';
+            await linkedOrder.save();
+          }
+
+          return res.status(400).json({ success: false, message: 'Transaction reference not found.' });
+        }
+        return res.status(400).json({ success: false, message: paystackMsg || 'Payment verification failed' });
       }
 
       const paystackStatus = normalizePaystackStatus(paystackData.status);
@@ -850,9 +871,25 @@ exports.verifyPendingPayment = async (req, res) => {
 
     const verifyResponse = await paystackAPI.get(`/transaction/verify/${reference}`);
     const paystackData = verifyResponse?.data?.data;
+    const paystackMsg = verifyResponse?.data?.message || '';
 
     if (!verifyResponse?.data?.status || !paystackData) {
-      return res.status(400).json({ success: false, message: 'Payment verification failed' });
+      if (isPaystackReferenceNotFound(paystackMsg)) {
+        order.paymentStatus = 'failed';
+        order.status = 'failed';
+        order.errorMessage = 'Paystack verification failed: Transaction reference not found.';
+        await order.save();
+
+        if (order.transactionId) {
+          await Transaction.findByIdAndUpdate(order.transactionId, {
+            status: 'failed',
+            paymentStatus: 'failed',
+          });
+        }
+
+        return res.status(400).json({ success: false, message: 'Transaction reference not found.' });
+      }
+      return res.status(400).json({ success: false, message: paystackMsg || 'Payment verification failed' });
     }
 
     const paystackStatus = normalizePaystackStatus(paystackData.status);

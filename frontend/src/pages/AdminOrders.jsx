@@ -38,9 +38,9 @@ export default function AdminOrders() {
   const [newStatus, setNewStatus] = useState('pending');
   const [adminNotes, setAdminNotes] = useState('');
   const [updateLoading, setUpdateLoading] = useState(false);
-  const [showVerifyingModal] = useState(false);
+  const [showVerifyingModal, setShowVerifyingModal] = useState(false);
   const [showVerifiedModal, setShowVerifiedModal] = useState(false);
-  const [verifiedMessage] = useState('Payment verified successfully.');
+  const [verifiedMessage, setVerifiedMessage] = useState('Payment verified successfully.');
 
   const normalizeNetwork = (val = '') => val.toString().trim().toLowerCase().replace(/\s+/g, '');
   const getNetworkFamily = (n = '') => {
@@ -243,6 +243,36 @@ export default function AdminOrders() {
   const handleOpenDelete = (order) => {
     setSelectedOrder(order);
     setShowDeleteConfirm(true);
+  };
+
+  const canVerifyPendingPayment = (order) => {
+    if (order?.paymentMethod !== 'paystack') return false;
+    return order?.paymentStatus === 'pending';
+  };
+
+  const handleVerifyPendingPayment = async (order) => {
+    if (!order?._id && !order?.id) return;
+    const orderId = order._id || order.id;
+    try {
+      setShowVerifyingModal(true);
+      const response = await adminAPI.verifyPendingPayment(orderId);
+      if (response.success) {
+        const successText = response.message || 'Pending payment verified successfully';
+        showMessage(successText);
+        setVerifiedMessage(successText);
+        setShowVerifiedModal(true);
+      } else {
+        showMessage(response.message || 'Failed to verify pending payment', true);
+      }
+      // Always refresh to show any status changes (e.g. if it moved to "failed")
+      await fetchOrders({ silent: true });
+    } catch (err) {
+      showMessage(err?.message || 'Failed to verify pending payment', true);
+      // Refresh even on error because backend might have updated status to failed
+      await fetchOrders({ silent: true });
+    } finally {
+      setShowVerifyingModal(false);
+    }
   };
 
   const confirmDelete = async () => {
@@ -757,6 +787,9 @@ export default function AdminOrders() {
                             <td>
                               <div style={{ display: 'flex', gap: '4px' }}>
                                 <button className="orders-btn-icon" onClick={() => handleViewDetails(order)}><Eye size={14} /></button>
+                                {canVerifyPendingPayment(order) && (
+                                  <button className="orders-btn-icon" style={{ borderColor: '#f0a500', color: '#f0a500' }} onClick={() => handleVerifyPendingPayment(order)} title="Verify Payment"><CheckCircle size={14} /></button>
+                                )}
                                 <button className="orders-btn-icon" onClick={() => handleEditStatus(order)}><Edit2 size={14} /></button>
                                 <button className="orders-btn-icon" onClick={() => handleOpenDelete(order)} style={{ color: '#b91c1c' }}><Trash2 size={14} /></button>
                               </div>

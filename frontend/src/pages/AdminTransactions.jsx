@@ -113,12 +113,15 @@ export default function AdminTransactions() {
         showMessage(successText);
         setVerifiedMessage(successText);
         setShowVerifiedModal(true);
-        await fetchTransactions({ silent: true });
       } else {
         showMessage(response.message || 'Failed to verify pending payment', true);
       }
+      // Always refresh to show any status changes (e.g. if it moved to "failed")
+      await fetchTransactions({ silent: true });
     } catch (err) {
       showMessage(err?.message || 'Failed to verify pending payment', true);
+      // Refresh even on error because backend might have updated status to failed
+      await fetchTransactions({ silent: true });
     } finally {
       setShowVerifyingModal(false);
     }

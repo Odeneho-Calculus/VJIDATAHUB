@@ -19,7 +19,7 @@ export const OrderDetailsModal = ({ isOpen, onClose, order, onRefund }) => {
     : (isAfaOrder ? 'AFA Registration' : (order?.dataAmount || 'N/A'));
 
   const isFailedOrder = order.status === 'failed' || order.paymentStatus === 'failed';
-  const canRefund = order.paymentStatus === 'completed' && !order.isRefunded;
+  const canRefund = order.paymentStatus === 'completed' && !order.isRefunded && order.status !== 'completed';
   const failedContext = [
     order.errorMessage,
     order.providerMessage,
