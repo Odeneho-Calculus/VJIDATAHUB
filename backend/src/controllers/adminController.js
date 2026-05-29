@@ -9,12 +9,12 @@ const Notification = require('../models/Notification');
 const Store = require('../models/Store');
 const AgentFeePayment = require('../models/AgentFeePayment');
 const AgentCommissionPayout = require('../models/AgentCommissionPayout');
-// const SellerCommission = require('../models/SellerCommission');
+const SellerCommission = require('../models/SellerCommission');
 const AgentCommissionAdjustment = require('../models/AgentCommissionAdjustment');
 const CommissionLedger = require('../models/CommissionLedger');
 const Referral = require('../models/Referral');
 // const Guest = require('../models/Guest');
-const { creditCommissionForOrder } = require('../services/commissionService');
+const { creditCommissionForOrder, markAsWithdrawn, returnPendingToEarned } = require('../services/commissionService');
 const topzaApi = require('../utils/topzaApi');
 const { processRefund, processStoreOrderRefund } = require('../utils/refund');
 // const { validatePhoneNumber } = require('../utils/phoneValidation');
@@ -1664,16 +1664,32 @@ exports.getAgentStores = async (req, res) => {
     const skip = (page - 1) * limit;
 
     let query = {};
+    let ownerIds = [];
 
     if (search) {
+      // Find users matching name or phone
+      const matchingUsers = await User.find({
+        $or: [
+          { name: { $regex: search, $options: 'i' } },
+          { phone: { $regex: search, $options: 'i' } },
+        ],
+      }).select('_id').lean();
+
+      ownerIds = matchingUsers.map((u) => u._id.toString());
+
       query.$or = [
         { name: { $regex: search, $options: 'i' } },
         { slug: { $regex: search, $options: 'i' } },
+        { owner: { $in: ownerIds } },
       ];
     }
 
     if (status) {
-      query.status = status;
+      if (status === 'banned') {
+        query.isTemporarilyBanned = true;
+      } else if (status === 'active') {
+        query.isTemporarilyBanned = false;
+      }
     }
 
     const stores = await Store.find(query)
@@ -1717,14 +1733,91 @@ exports.getAgentStoreDetails = async (req, res) => {
       });
     }
 
-    const orders = await Order.find({ storeId: store._id })
-      .sort({ createdAt: -1 })
-      .limit(50);
+    const ownerId = store.owner?._id;
+
+    const [
+      orders,
+      transactions,
+      commissions,
+      payouts,
+      feePayments,
+      adjustments,
+      ledger,
+    ] = await Promise.all([
+      Order.find({ storeId: store._id })
+        .sort({ createdAt: -1 })
+        .limit(50)
+        .lean(),
+      Transaction.find({ userId: ownerId })
+        .sort({ createdAt: -1 })
+        .limit(50)
+        .lean(),
+      SellerCommission.find({ storeId: store._id })
+        .sort({ createdAt: -1 })
+        .limit(50)
+        .populate('orderId', 'orderNumber')
+        .lean(),
+      AgentCommissionPayout.find({ storeId: store._id })
+        .sort({ createdAt: -1 })
+        .limit(50)
+        .lean(),
+      AgentFeePayment.find({ storeId: store._id })
+        .sort({ createdAt: -1 })
+        .limit(50)
+        .lean(),
+      AgentCommissionAdjustment.find({ storeId: store._id })
+        .sort({ createdAt: -1 })
+        .limit(50)
+        .populate('performedBy', 'name')
+        .lean(),
+      CommissionLedger.findOne({ storeId: store._id }).lean(),
+    ]);
+
+    const totalOrders = await Order.countDocuments({ storeId: store._id });
+    const paidOrders = await Order.countDocuments({ storeId: store._id, paymentStatus: 'completed' });
+    const failedOrders = await Order.countDocuments({ storeId: store._id, status: 'failed' });
+    const paidPayouts = await AgentCommissionPayout.countDocuments({ storeId: store._id, status: 'paid' });
+    const pendingPayouts = await AgentCommissionPayout.countDocuments({ storeId: store._id, status: { $in: ['pending', 'processing'] } });
+    const commissionRecords = await SellerCommission.countDocuments({ storeId: store._id });
+
+    const details = {
+      agent: {
+        name: store.owner?.name || 'N/A',
+        email: store.owner?.email || 'N/A',
+        phone: store.owner?.phone || 'N/A',
+      },
+      ledger: ledger
+        ? {
+            totalEarned: ledger.totalEarned || 0,
+            totalPending: ledger.totalPending || 0,
+            totalWithdrawn: ledger.totalWithdrawn || 0,
+            totalCommissions: ledger.totalCommissions || 0,
+          }
+        : {
+            totalEarned: 0,
+            totalPending: 0,
+            totalWithdrawn: 0,
+            totalCommissions: 0,
+          },
+      stats: {
+        totalOrders,
+        paidOrders,
+        failedOrders,
+        paidPayouts,
+        pendingPayouts,
+        commissionRecords,
+      },
+      orders,
+      transactions,
+      commissions,
+      payouts,
+      feePayments,
+      adjustments,
+    };
 
     res.status(200).json({
       success: true,
-      store,
-      orders,
+      details,
     });
   } catch (error) {
     console.error('getAgentStoreDetails error:', error);
@@ -1738,12 +1831,19 @@ exports.getAgentStoreDetails = async (req, res) => {
 exports.adjustCommission = async (req, res) => {
   try {
     const { storeId } = req.params;
-    const { amount, reason } = req.body;
+    const { type, amount, reason, note } = req.body;
 
-    if (!amount || !reason) {
+    if (!type || !amount || !reason) {
       return res.status(400).json({
         success: false,
-        message: 'Amount and reason are required',
+        message: 'Type, amount, and reason are required',
+      });
+    }
+
+    if (!['credit', 'debit'].includes(type)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Type must be credit or debit',
       });
     }
 
@@ -1756,17 +1856,57 @@ exports.adjustCommission = async (req, res) => {
       });
     }
 
+    // Get or create ledger
+    let ledger = await CommissionLedger.findOne({ storeId });
+    if (!ledger) {
+      ledger = await CommissionLedger.create({
+        storeId,
+        storeOwnerId: store.owner,
+        totalEarned: 0,
+        totalPending: 0,
+        totalWithdrawn: 0,
+        totalCommissions: 0,
+      });
+    }
+
+    const beforeBalance = ledger.totalEarned || 0;
+    const adjustmentAmount = Math.abs(Number(amount));
+
+    if (type === 'debit' && beforeBalance < adjustmentAmount) {
+      return res.status(400).json({
+        success: false,
+        message: 'Insufficient balance for debit',
+      });
+    }
+
+    const afterBalance = type === 'credit'
+      ? beforeBalance + adjustmentAmount
+      : beforeBalance - adjustmentAmount;
+
+    // Update ledger
+    ledger.totalEarned = afterBalance;
+    await ledger.save();
+
+    // Record adjustment
     const adjustment = await AgentCommissionAdjustment.create({
       storeId,
-      amount,
+      agentId: store.owner,
+      type,
+      amount: adjustmentAmount,
       reason,
-      adjustedBy: req.userId,
+      performedBy: req.userId,
+      beforeBalance,
+      afterBalance,
+      note: note || null,
     });
 
     res.status(200).json({
       success: true,
-      message: 'Commission adjustment recorded',
+      message: `Commission ${type} applied successfully`,
       adjustment,
+      ledger: {
+        totalEarned: afterBalance,
+      },
     });
   } catch (error) {
     console.error('adjustCommission error:', error);
@@ -1780,16 +1920,9 @@ exports.adjustCommission = async (req, res) => {
 exports.applyTemporaryBan = async (req, res) => {
   try {
     const { storeId } = req.params;
-    const { reason, days } = req.body;
+    const { isApplying, durationDays, reason } = req.body;
 
-    if (!reason || !days) {
-      return res.status(400).json({
-        success: false,
-        message: 'Reason and days are required',
-      });
-    }
-
-    const store = await Store.findById(storeId);
+    const store = await Store.findById(storeId).populate('owner');
 
     if (!store) {
       return res.status(404).json({
@@ -1798,20 +1931,120 @@ exports.applyTemporaryBan = async (req, res) => {
       });
     }
 
+    if (isApplying === false) {
+      // Remove ban
+      store.isTemporarilyBanned = false;
+      store.temporaryBanReason = null;
+      store.temporaryBanUntil = null;
+      store.temporaryBanBy = null;
+      await store.save();
+      return res.status(200).json({
+        success: true,
+        message: 'Store ban removed successfully',
+        store,
+      });
+    }
+
+    // Apply ban
+    if (!reason || !durationDays) {
+      return res.status(400).json({
+        success: false,
+        message: 'Reason and durationDays are required',
+      });
+    }
+
     store.isTemporarilyBanned = true;
     store.temporaryBanReason = reason;
-    store.temporaryBanUntil = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+    store.temporaryBanUntil = new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000);
     store.temporaryBanBy = req.userId;
 
     await store.save();
 
     res.status(200).json({
       success: true,
-      message: `Store temporarily banned for ${days} days`,
+      message: `Store temporarily banned for ${durationDays} days`,
       store,
     });
   } catch (error) {
     console.error('applyTemporaryBan error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+exports.activateProtocol = async (req, res) => {
+  try {
+    const { storeId } = req.params;
+
+    const store = await Store.findById(storeId).populate('owner');
+    if (!store) {
+      return res.status(404).json({
+        success: false,
+        message: 'Store not found',
+      });
+    }
+
+    const user = store.owner;
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Store owner not found',
+      });
+    }
+
+    user.agentFeeStatus = 'protocol';
+    user.protocolActivatedAt = new Date();
+    user.protocolActivatedBy = req.userId;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Protocol activated and agent marked as paid',
+      store,
+    });
+  } catch (error) {
+    console.error('activateProtocol error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+exports.deactivateProtocol = async (req, res) => {
+  try {
+    const { storeId } = req.params;
+
+    const store = await Store.findById(storeId).populate('owner');
+    if (!store) {
+      return res.status(404).json({
+        success: false,
+        message: 'Store not found',
+      });
+    }
+
+    const user = store.owner;
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Store owner not found',
+      });
+    }
+
+    user.agentFeeStatus = 'pending';
+    user.protocolActivatedAt = null;
+    user.protocolActivatedBy = null;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Protocol deactivated and store locked',
+      store,
+    });
+  } catch (error) {
+    console.error('deactivateProtocol error:', error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -1936,7 +2169,7 @@ exports.approveMobileMoneyPayout = async (req, res) => {
 exports.markPayoutAsPaid = async (req, res) => {
   try {
     const { payoutId } = req.params;
-    const { transactionReference } = req.body;
+    const { transactionReference, adminNote } = req.body;
 
     const payout = await AgentCommissionPayout.findById(payoutId);
 
@@ -1954,11 +2187,23 @@ exports.markPayoutAsPaid = async (req, res) => {
       });
     }
 
+    // Move from pending to withdrawn in ledger
+    await markAsWithdrawn({ storeId: payout.storeId, amount: payout.amount });
+
+    // Mark linked commission rows as withdrawn
+    await SellerCommission.updateMany(
+      { withdrawalRequestId: payout._id, status: 'pending_withdrawal' },
+      { status: 'withdrawn' }
+    );
+
     payout.status = 'paid';
     payout.paidAt = new Date();
     payout.paidBy = req.userId;
     if (transactionReference) {
       payout.transactionReference = transactionReference;
+    }
+    if (adminNote !== undefined) {
+      payout.adminNote = adminNote;
     }
 
     await payout.save();
@@ -1980,7 +2225,7 @@ exports.markPayoutAsPaid = async (req, res) => {
 exports.rejectCommissionPayout = async (req, res) => {
   try {
     const { payoutId } = req.params;
-    const { reason } = req.body;
+    const { adminNote } = req.body;
 
     const payout = await AgentCommissionPayout.findById(payoutId);
 
@@ -1991,23 +2236,34 @@ exports.rejectCommissionPayout = async (req, res) => {
       });
     }
 
-    if (payout.status !== 'pending') {
+    if (payout.status !== 'pending' && payout.status !== 'processing') {
       return res.status(400).json({
         success: false,
-        message: 'Only pending payouts can be rejected',
+        message: 'Only pending or processing payouts can be rejected',
       });
     }
+
+    // Return amount from pending back to earned in ledger
+    await returnPendingToEarned({ storeId: payout.storeId, amount: payout.amount });
+
+    // Restore linked commission rows back to earned
+    await SellerCommission.updateMany(
+      { withdrawalRequestId: payout._id, status: 'pending_withdrawal' },
+      { status: 'earned', withdrawalRequestId: null }
+    );
 
     payout.status = 'rejected';
     payout.rejectedAt = new Date();
     payout.rejectedBy = req.userId;
-    payout.rejectionReason = reason;
+    if (adminNote !== undefined) {
+      payout.adminNote = adminNote;
+    }
 
     await payout.save();
 
     res.status(200).json({
       success: true,
-      message: 'Payout rejected',
+      message: 'Payout rejected and commission restored',
       payout,
     });
   } catch (error) {

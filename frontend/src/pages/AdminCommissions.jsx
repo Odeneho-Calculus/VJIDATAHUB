@@ -137,7 +137,10 @@ export default function AdminCommissions() {
   };
 
   const requestApprovePayout = () => {
-    if (!selectedPayout) return;
+    if (!selectedPayout || !selectedPayout._id) {
+      showMessage('Invalid payout selected', true);
+      return;
+    }
     openConfirm({
       title: 'Approve Payout',
       message: `Approve this ${selectedPayout.method === 'mobile_money' ? 'mobile money' : 'bank'} payout request for ${selectedPayout.agentId?.name || 'this agent'}?`,
@@ -148,7 +151,10 @@ export default function AdminCommissions() {
   };
 
   const requestMarkAsPaid = (payout = selectedPayout) => {
-    if (!payout) return;
+    if (!payout || !payout._id) {
+      showMessage('Invalid payout selected', true);
+      return;
+    }
     openConfirm({
       title: 'Mark as Paid',
       message: `Mark this payout of ${formatCurrencyAbbreviated(Number(payout.netAmount || 0))} as paid for ${payout.agentId?.name || 'this agent'}?`,
@@ -159,7 +165,10 @@ export default function AdminCommissions() {
   };
 
   const requestRejectPayout = () => {
-    if (!selectedPayout) return;
+    if (!selectedPayout || !selectedPayout._id) {
+      showMessage('Invalid payout selected', true);
+      return;
+    }
     openConfirm({
       title: 'Reject Payout',
       message: `Reject this request and return ${formatCurrencyAbbreviated(Number(selectedPayout.amount || 0))} to ${selectedPayout.agentId?.name || 'this agent'}'s available commission balance?`,
@@ -170,7 +179,10 @@ export default function AdminCommissions() {
   };
 
   const handleApprovePayout = async () => {
-    if (!selectedPayout) return;
+    if (!selectedPayout || !selectedPayout._id) {
+      showMessage('Invalid payout selected', true);
+      return;
+    }
     try {
       setSubmitting(true);
       await adminStore.approveMobileMoneyPayout(selectedPayout._id, {
@@ -188,7 +200,10 @@ export default function AdminCommissions() {
   };
 
   const handleMarkAsPaid = async (payout = selectedPayout) => {
-    if (!payout) return;
+    if (!payout || !payout._id) {
+      showMessage('Invalid payout selected', true);
+      return;
+    }
     try {
       setSubmitting(true);
       await adminStore.markPayoutAsPaid(payout._id, {
@@ -205,7 +220,10 @@ export default function AdminCommissions() {
   };
 
   const handleRejectPayout = async () => {
-    if (!selectedPayout) return;
+    if (!selectedPayout || !selectedPayout._id) {
+      showMessage('Invalid payout selected', true);
+      return;
+    }
 
     try {
       setSubmitting(true);
@@ -622,7 +640,7 @@ export default function AdminCommissions() {
                     Back
                   </button>
                   <button
-                    onClick={modalAction === 'approve' ? requestApprovePayout : modalAction === 'markPaid' ? requestMarkAsPaid : requestRejectPayout}
+                    onClick={modalAction === 'approve' ? requestApprovePayout : modalAction === 'markPaid' ? () => requestMarkAsPaid(selectedPayout) : () => requestRejectPayout()}
                     disabled={submitting}
                     className={`flex-1 px-4 py-2.5 rounded-xl font-semibold disabled:opacity-60 flex items-center justify-center gap-2 ${modalAction === 'reject' ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-slate-900 text-white hover:bg-slate-800'}`}
                   >

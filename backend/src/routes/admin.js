@@ -42,6 +42,9 @@ const {
   getAgentStores,
   getAgentStoreDetails,
   applyTemporaryBan,
+  adjustCommission,
+  activateProtocol,
+  deactivateProtocol,
   getAgentFeePayments,
   getCommissionPayouts,
   approveMobileMoneyPayout,
@@ -95,8 +98,9 @@ router.patch('/settings', updateSystemSettings);
 router.get('/agent-stores', getAgentStores);
 router.get('/agent-stores/:storeId/details', getAgentStoreDetails);
 router.patch('/agent-stores/:storeId/temporary-ban', applyTemporaryBan);
-// router.patch('/agent-stores/:storeId/protocol-activate', activateProtocol);
-// router.patch('/agent-stores/:storeId/protocol-deactivate', deactivateProtocol);
+router.post('/agent-stores/:storeId/commission-adjustment', adjustCommission);
+router.patch('/agent-stores/:storeId/protocol-activate', activateProtocol);
+router.patch('/agent-stores/:storeId/protocol-deactivate', deactivateProtocol);
 
 // Agent fees
 router.get('/agent-fee-payments', getAgentFeePayments);
