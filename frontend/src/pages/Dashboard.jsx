@@ -32,9 +32,23 @@ import {
 import { wallet, purchases, publicAPI } from '../services/api';
 import UserLayout from '../components/UserLayout';
 
+/* ── Homepage multi-colour palette ── */
+const palette = [
+  { main: '#7C3AED', bg: '#EDE9FE', soft: '#F5F3FF', glow: 'rgba(124,58,237,0.15)' },   // purple
+  { main: '#0F6E56', bg: '#D1FAE5', soft: '#ECFDF5', glow: 'rgba(15,110,86,0.15)' },    // teal
+  { main: '#1D4ED8', bg: '#DBEAFE', soft: '#EFF6FF', glow: 'rgba(29,78,216,0.15)' },    // blue
+  { main: '#B45309', bg: '#FEF3C7', soft: '#FFFBEB', glow: 'rgba(180,83,9,0.15)' },     // amber
+  { main: '#BE185D', bg: '#FCE7F3', soft: '#FDF2F8', glow: 'rgba(190,24,93,0.15)' },    // pink
+  { main: '#DC2626', bg: '#FEE2E2', soft: '#FFF5F5', glow: 'rgba(220,38,38,0.15)' },    // coral/red
+  { main: '#0369A1', bg: '#E0F2FE', soft: '#F0F9FF', glow: 'rgba(3,105,161,0.15)' },    // sky
+  { main: '#4D7C0F', bg: '#ECFCCB', soft: '#F7FEE7', glow: 'rgba(77,124,15,0.15)' },    // lime/green
+];
+
+const getColor = (index) => palette[index % palette.length];
+
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
-  
+
   .dash-wrapper {
     font-family: 'DM Sans', sans-serif;
     background-color: #f5f5f0;
@@ -70,13 +84,14 @@ const styles = `
   .dash-icon-box {
     width: 46px;
     height: 46px;
-    background: #111;
+    background: #7C3AED;
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #f0a500;
+    color: #fff;
     flex-shrink: 0;
+    box-shadow: 0 4px 16px rgba(124,58,237,0.25);
   }
 
   .dash-h2 {
@@ -118,8 +133,8 @@ const styles = `
   }
 
   .dash-stat-card:hover {
-    border-color: #d4d4ce;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.06);
+    border-color: var(--stat-color, #d4d4ce);
+    box-shadow: 0 8px 40px var(--stat-glow, rgba(0,0,0,0.06));
   }
 
   .dash-stat-label {
@@ -219,7 +234,7 @@ const styles = `
     right: -20px;
     width: 100px;
     height: 100px;
-    background: rgba(240, 165, 0, 0.05);
+    background: rgba(124, 58, 237, 0.08);
     border-radius: 50%;
     filter: blur(40px);
   }
@@ -270,6 +285,21 @@ const styles = `
     display: inline-flex;
     align-items: center;
     gap: 4px;
+  }
+
+  .dash-bundle-card {
+    background: #fff;
+    border: 1.5px solid #e4e4de;
+    border-radius: 14px;
+    padding: 14px;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+  }
+  .dash-bundle-card:hover {
+    border-color: var(--bundle-color, #d4d4ce);
+    box-shadow: 0 8px 30px var(--bundle-glow, rgba(0,0,0,0.06));
+    transform: translateY(-2px);
   }
 `;
 
@@ -351,14 +381,14 @@ export default function Dashboard() {
 
       setRecentTransactions(combined);
 
-      const newStats = [
-        { label: 'Total Spent', value: formatCurrencyAbbreviated(user?.totalSpent || 0), icon: Target, color: 'blue' },
-        { label: 'Data Used', value: `${user?.dataUsed || 0}GB`, icon: Layers, color: 'indigo' },
-        { label: 'Referral Earnings', value: formatCurrencyAbbreviated(user?.referralEarnings || 0), icon: TrendingUp, color: 'emerald' },
-        { label: 'Wallet Balance', value: formatCurrencyAbbreviated(user?.balance || 0), icon: CreditCard, color: 'purple' },
+      const statColors = [
+        { label: 'Total Spent', value: formatCurrencyAbbreviated(user?.totalSpent || 0), icon: Target, color: getColor(0) },
+        { label: 'Data Used', value: `${user?.dataUsed || 0}GB`, icon: Layers, color: getColor(1) },
+        { label: 'Referral Earnings', value: formatCurrencyAbbreviated(user?.referralEarnings || 0), icon: TrendingUp, color: getColor(2) },
+        { label: 'Wallet Balance', value: formatCurrencyAbbreviated(user?.balance || 0), icon: CreditCard, color: getColor(3) },
       ];
 
-      setStats(newStats);
+      setStats(statColors);
     } catch (err) {
       console.error('Failed to fetch transactions and stats:', err);
       setRecentTransactions([]);
@@ -465,11 +495,11 @@ export default function Dashboard() {
                 Order History
               </Link>
               <Link to="/topup" className="dash-btn-outline flex-1 sm:flex-none">
-                <CreditCard size={14} style={{ color: '#059669' }} />
+                <CreditCard size={14} style={{ color: '#0F6E56' }} />
                 Fund Wallet
               </Link>
-              <Link to="/buy-data" className="dash-btn-primary w-full sm:w-auto">
-                <Zap size={14} style={{ color: '#f0a500' }} />
+              <Link to="/buy-data" className="dash-btn-primary w-full sm:w-auto" style={{ background: '#7C3AED', boxShadow: '0 4px 16px rgba(124,58,237,0.3)' }}>
+                <Zap size={14} style={{ color: '#fff' }} />
                 Buy Data
               </Link>
             </div>
@@ -478,13 +508,29 @@ export default function Dashboard() {
           {/* Stats Grid */}
           <div className="dash-stat-grid">
             {stats.map((stat, i) => (
-              <div key={i} className="dash-stat-card">
+              <div
+                key={i}
+                className="dash-stat-card"
+                style={{
+                  '--stat-color': stat.color.main + '66',
+                  '--stat-glow': stat.color.glow,
+                }}
+              >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div>
-                    <p className="dash-stat-label">{stat.label}</p>
+                    <p className="dash-stat-label" style={{ color: stat.color.main }}>{stat.label}</p>
                     <p className="dash-stat-value">{stat.value}</p>
                   </div>
-                  <stat.icon size={18} style={{ color: stat.color === 'blue' ? '#3b82f6' : stat.color === 'emerald' ? '#10b981' : stat.color === 'indigo' ? '#6366f1' : '#a855f7' }} />
+                  <div style={{
+                    width: 32, height: 32, borderRadius: 8,
+                    background: stat.color.soft,
+                    color: stat.color.main,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    flexShrink: 0,
+                    boxShadow: `0 2px 8px ${stat.color.glow}`,
+                  }}>
+                    <stat.icon size={16} strokeWidth={2.5} />
+                  </div>
                 </div>
               </div>
             ))}
@@ -494,25 +540,31 @@ export default function Dashboard() {
             {/* Account Details */}
             <div className="lg:col-span-2 dash-card">
               <h3 className="dash-card-title">
-                <User size={18} style={{ color: '#3b82f6' }} />
+                <div style={{
+                  width: 28, height: 28, borderRadius: 6,
+                  background: '#DBEAFE', color: '#1D4ED8',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <User size={15} strokeWidth={2.5} />
+                </div>
                 Account Details
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div style={{ background: '#fafaf7', padding: '16px', borderRadius: '12px', border: '1.5px solid #e4e4de' }}>
-                  <p className="dash-stat-label" style={{ marginBottom: '4px' }}>Email Address</p>
+                <div style={{ background: '#F5F3FF', padding: '16px', borderRadius: '12px', border: '1.5px solid #DDD6FE' }}>
+                  <p className="dash-stat-label" style={{ marginBottom: '4px', color: '#7C3AED' }}>Email Address</p>
                   <p style={{ fontSize: '14px', fontWeight: '800', color: '#111' }} className="truncate">{user?.email}</p>
                   <div className="flex items-center gap-2 mt-1">
-                    <Phone size={10} style={{ color: '#999' }} />
+                    <Phone size={10} style={{ color: '#7C3AED' }} />
                     <span style={{ fontSize: '12px', color: '#666' }}>{user?.phone || 'No phone set'}</span>
                   </div>
                 </div>
-                <div style={{ background: '#fafaf7', padding: '16px', borderRadius: '12px', border: '1.5px solid #e4e4de' }}>
-                  <p className="dash-stat-label" style={{ marginBottom: '4px' }}>Referral Program</p>
+                <div style={{ background: '#ECFDF5', padding: '16px', borderRadius: '12px', border: '1.5px solid #A7F3D0' }}>
+                  <p className="dash-stat-label" style={{ marginBottom: '4px', color: '#0F6E56' }}>Referral Program</p>
                   <div className="flex items-center justify-between">
                     <p style={{ fontSize: '15px', fontWeight: '800', color: '#111', fontFamily: 'monospace' }}>{user?.referralCode}</p>
-                    <button onClick={copyReferralCode} className="text-xs font-bold text-indigo-600">{copied ? 'Copied!' : 'Copy Code'}</button>
+                    <button onClick={copyReferralCode} className="text-xs font-bold" style={{ color: '#0F6E56' }}>{copied ? 'Copied!' : 'Copy Code'}</button>
                   </div>
-                  <p style={{ fontSize: '11px', color: '#059669', fontWeight: '700', marginTop: '4px' }}>
+                  <p style={{ fontSize: '11px', color: '#0F6E56', fontWeight: '700', marginTop: '4px' }}>
                     Earn GH₵ {referralSettings?.amountPerReferral || '0.00'} per invite
                   </p>
                 </div>
@@ -522,20 +574,26 @@ export default function Dashboard() {
             {/* Wallet Status */}
             <div className="dash-card">
               <h3 className="dash-card-title">
-                <Wallet size={18} style={{ color: '#f0a500' }} />
+                <div style={{
+                  width: 28, height: 28, borderRadius: 6,
+                  background: '#FEF3C7', color: '#B45309',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <Wallet size={15} strokeWidth={2.5} />
+                </div>
                 Wallet Status
               </h3>
               <div className="space-y-4">
-                <div style={{ background: '#111', padding: '20px', borderRadius: '14px', color: '#fff', position: 'relative', overflow: 'hidden' }}>
-                  <div style={{ position: 'absolute', top: '-10px', right: '-10px', width: '60px', height: '60px', background: 'rgba(240, 165, 0, 0.1)', borderRadius: '50%', filter: 'blur(20px)' }}></div>
-                  <p className="dash-stat-label" style={{ color: 'rgba(255,255,255,0.5)', marginBottom: '4px' }}>Available Balance</p>
+                <div style={{ background: '#7C3AED', padding: '20px', borderRadius: '14px', color: '#fff', position: 'relative', overflow: 'hidden', boxShadow: '0 8px 30px rgba(124,58,237,0.3)' }}>
+                  <div style={{ position: 'absolute', top: '-10px', right: '-10px', width: '80px', height: '80px', background: 'rgba(255,255,255,0.1)', borderRadius: '50%', filter: 'blur(25px)' }}></div>
+                  <p className="dash-stat-label" style={{ color: 'rgba(255,255,255,0.6)', marginBottom: '4px' }}>Available Balance</p>
                   <p style={{ fontSize: '24px', fontWeight: '800' }}>{formatCurrencyAbbreviated(user?.balance || 0)}</p>
-                  <Link to="/topup" className="flex items-center gap-1 text-[10px] font-bold text-[#f0a500] mt-3 uppercase tracking-widest">
+                  <Link to="/topup" className="flex items-center gap-1 text-[10px] font-bold mt-3 uppercase tracking-widest" style={{ color: '#EDE9FE' }}>
                     Quick Topup <ChevronRight size={12} />
                   </Link>
                 </div>
-                <div className="flex items-center justify-between p-3 rounded-xl border border-[#e4e4de]">
-                   <span className="text-xs font-bold text-slate-500">Total Spent</span>
+                <div className="flex items-center justify-between p-3 rounded-xl border border-[#e4e4de]" style={{ background: '#FFFBEB' }}>
+                   <span className="text-xs font-bold" style={{ color: '#B45309' }}>Total Spent</span>
                    <span className="text-sm font-black text-slate-900">{formatCurrencyAbbreviated(user?.totalSpent || 0)}</span>
                 </div>
               </div>
@@ -546,35 +604,48 @@ export default function Dashboard() {
           <div className="dash-card">
             <div className="flex items-center justify-between mb-6">
               <h3 className="dash-card-title" style={{ margin: 0 }}>
-                <Zap size={18} style={{ color: '#f0a500' }} />
+                <div style={{
+                  width: 28, height: 28, borderRadius: 6,
+                  background: '#FCE7F3', color: '#BE185D',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <Zap size={15} strokeWidth={2.5} />
+                </div>
                 Featured Bundles
               </h3>
-              <Link to="/buy-data" style={{ fontSize: '11px', fontWeight: '800', color: '#3b82f6', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <Link to="/buy-data" style={{ fontSize: '11px', fontWeight: '800', color: '#7C3AED', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 View All
               </Link>
             </div>
-            
+
             {loadingBundles ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 text-[#f0a500] animate-spin" />
+                <Loader2 className="w-8 h-8 text-[#7C3AED] animate-spin" />
               </div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                {dataBundles.map(bundle => (
-                  <Link
-                    key={bundle._id}
-                    to={`/buy-data?planId=${bundle._id}&planName=${encodeURIComponent(bundle.planName)}&dataSize=${encodeURIComponent(bundle.dataSize)}&price=${bundle.sellingPrice}&network=${bundle.network}`}
-                    className="flex flex-col p-3 rounded-xl border border-[#e4e4de] hover:border-[#d4d4ce] hover:shadow-md transition-all bg-white"
-                  >
-                    <span className="text-[9px] font-black uppercase text-slate-400 mb-1">{bundle.network}</span>
-                    <span className="text-lg font-black text-[#111]">{bundle.dataSize}</span>
-                    <span className="text-[10px] font-bold text-slate-500 mb-3">{bundle.validity}</span>
-                    <div className="mt-auto pt-2 border-t border-[#f0f0f0] flex items-center justify-between">
-                      <span className="text-sm font-black text-[#059669]">{formatCurrencyAbbreviated(bundle.sellingPrice)}</span>
-                      <ChevronRight size={14} className="text-slate-300" />
-                    </div>
-                  </Link>
-                ))}
+                {dataBundles.map((bundle, idx) => {
+                  const c = getColor(idx);
+                  return (
+                    <Link
+                      key={bundle._id}
+                      to={`/buy-data?planId=${bundle._id}&planName=${encodeURIComponent(bundle.planName)}&dataSize=${encodeURIComponent(bundle.dataSize)}&price=${bundle.sellingPrice}&network=${bundle.network}`}
+                      className="dash-bundle-card"
+                      style={{
+                        '--bundle-color': c.main + '66',
+                        '--bundle-glow': c.glow,
+                      }}
+                    >
+                      <span className="text-[9px] font-black uppercase mb-1" style={{ color: c.main }}>{bundle.network}</span>
+                      <span className="text-lg font-black text-[#111]">{bundle.dataSize}</span>
+                      <span className="text-[10px] font-bold text-slate-500 mb-3">{bundle.validity}</span>
+                      <div className="mt-auto pt-2 border-t border-[#f0f0f0] flex items-center justify-between">
+                        <span className="text-sm font-black" style={{ color: c.main }}>{formatCurrencyAbbreviated(bundle.sellingPrice)}</span>
+                        <ChevronRight size={14} style={{ color: c.main }} />
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -583,10 +654,16 @@ export default function Dashboard() {
           <div className="dash-card">
             <div className="flex items-center justify-between mb-6">
               <h3 className="dash-card-title" style={{ margin: 0 }}>
-                <Activity size={18} style={{ color: '#3b82f6' }} />
+                <div style={{
+                  width: 28, height: 28, borderRadius: 6,
+                  background: '#DBEAFE', color: '#1D4ED8',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <Activity size={15} strokeWidth={2.5} />
+                </div>
                 Recent Transactions
               </h3>
-              <Link to="/transactions" style={{ fontSize: '11px', fontWeight: '800', color: '#3b82f6', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <Link to="/transactions" style={{ fontSize: '11px', fontWeight: '800', color: '#1D4ED8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 View All History
               </Link>
             </div>
@@ -663,7 +740,7 @@ export default function Dashboard() {
           <div className="relative bg-white rounded-[24px] shadow-2xl max-w-lg w-full overflow-hidden border border-[#e4e4de] animate-in fade-in zoom-in duration-300" style={{ fontFamily: 'DM Sans, sans-serif' }}>
             <div className="px-8 py-6 border-b border-[#f0f0f0] flex items-center justify-between bg-[#fafaf7]">
               <div className="flex items-center gap-3">
-                <div className="dash-icon-box" style={{ width: '40px', height: '40px' }}>
+                <div className="dash-icon-box" style={{ width: '40px', height: '40px', background: '#1D4ED8', boxShadow: '0 4px 12px rgba(29,78,216,0.25)' }}>
                   <Clock size={20} />
                 </div>
                 <h3 className="text-lg font-black text-[#111] tracking-tight">Transaction Details</h3>
@@ -716,6 +793,7 @@ export default function Dashboard() {
               <button
                 onClick={() => setShowDetails(false)}
                 className="dash-btn-primary w-full py-4 text-xs uppercase tracking-widest"
+                style={{ background: '#7C3AED', boxShadow: '0 4px 16px rgba(124,58,237,0.3)' }}
               >
                 Close Details
               </button>

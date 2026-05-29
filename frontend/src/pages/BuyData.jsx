@@ -28,9 +28,23 @@ import PurchaseVerificationModal from '../components/PurchaseVerificationModal';
 import UserLayout from '../components/UserLayout';
 
 
+/* ── Homepage multi-colour palette ── */
+const palette = [
+  { main: '#7C3AED', bg: '#EDE9FE', soft: '#F5F3FF', glow: 'rgba(124,58,237,0.15)' },   // purple
+  { main: '#0F6E56', bg: '#D1FAE5', soft: '#ECFDF5', glow: 'rgba(15,110,86,0.15)' },    // teal
+  { main: '#1D4ED8', bg: '#DBEAFE', soft: '#EFF6FF', glow: 'rgba(29,78,216,0.15)' },    // blue
+  { main: '#B45309', bg: '#FEF3C7', soft: '#FFFBEB', glow: 'rgba(180,83,9,0.15)' },     // amber
+  { main: '#BE185D', bg: '#FCE7F3', soft: '#FDF2F8', glow: 'rgba(190,24,93,0.15)' },    // pink
+  { main: '#DC2626', bg: '#FEE2E2', soft: '#FFF5F5', glow: 'rgba(220,38,38,0.15)' },    // coral/red
+  { main: '#0369A1', bg: '#E0F2FE', soft: '#F0F9FF', glow: 'rgba(3,105,161,0.15)' },    // sky
+  { main: '#4D7C0F', bg: '#ECFCCB', soft: '#F7FEE7', glow: 'rgba(77,124,15,0.15)' },    // lime/green
+];
+
+const getColor = (index) => palette[index % palette.length];
+
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
-  
+
   .dash-wrapper {
     font-family: 'DM Sans', sans-serif;
     background-color: #f5f5f0;
@@ -66,13 +80,14 @@ const styles = `
   .dash-icon-box {
     width: 46px;
     height: 46px;
-    background: #111;
+    background: #0F6E56;
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #f0a500;
+    color: #fff;
     flex-shrink: 0;
+    box-shadow: 0 4px 16px rgba(15,110,86,0.25);
   }
 
   .dash-h2 {
@@ -108,8 +123,8 @@ const styles = `
   }
 
   .dash-stat-card:hover {
-    border-color: #d4d4ce;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.06);
+    border-color: var(--stat-color, #d4d4ce);
+    box-shadow: 0 8px 40px var(--stat-glow, rgba(0,0,0,0.06));
   }
 
   .dash-stat-label {
@@ -202,7 +217,7 @@ const styles = `
     right: -20px;
     width: 100px;
     height: 100px;
-    background: rgba(240, 165, 0, 0.05);
+    background: rgba(15, 110, 86, 0.08);
     border-radius: 50%;
     filter: blur(40px);
   }
@@ -222,8 +237,8 @@ const styles = `
 
   .dash-plan-card:hover {
     transform: translateY(-4px);
-    border-color: #111;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+    border-color: var(--plan-color, #111);
+    box-shadow: 0 12px 30px var(--plan-glow, rgba(0,0,0,0.08));
   }
 
   .dash-plan-card.out-of-stock {
@@ -249,14 +264,14 @@ const styles = `
   }
 
   .dash-network-btn.active {
-    background: #111;
-    border-color: #111;
+    background: #0F6E56;
+    border-color: #0F6E56;
     color: #fff;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 20px rgba(15,110,86,0.2);
   }
 
   .dash-network-btn:not(.active):hover {
-    border-color: #111;
+    border-color: #0F6E56;
     background: #fff;
   }
 
@@ -272,9 +287,9 @@ const styles = `
   }
 
   .dash-filter-btn.active {
-    background: #111;
+    background: #0F6E56;
     color: #fff;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(15,110,86,0.2);
   }
 
   .dash-filter-btn:not(.active) {
@@ -517,11 +532,18 @@ export default function BuyData() {
     ? ['All', ...Object.keys(selectedNetworkEntry || {})]
     : [];
 
+  const statCards = [
+    { label: 'Available Balance', value: formatCurrencyAbbreviated(user?.balance || 0), icon: CreditCard, color: getColor(0) },
+    { label: 'System Status', value: 'Active', icon: Activity, color: getColor(1) },
+    { label: 'Network Health', value: '100%', icon: ShieldCheck, color: getColor(2) },
+    { label: 'Secure Access', value: 'Verified', icon: CheckCircle2, color: getColor(3) },
+  ];
+
   return (
     <UserLayout>
       <div className="dash-wrapper overflow-x-hidden">
         <style>{styles}</style>
-        
+
         <div className="dash-content">
           {/* Header Card */}
           <div className="dash-header">
@@ -550,47 +572,38 @@ export default function BuyData() {
           </div>
 
           <div className="dash-stat-grid">
-            <div className="dash-stat-card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div>
-                  <p className="dash-stat-label">Available Balance</p>
-                  <p className="dash-stat-value">{formatCurrencyAbbreviated(user?.balance || 0)}</p>
+            {statCards.map((stat, i) => (
+              <div
+                key={i}
+                className="dash-stat-card"
+                style={{
+                  '--stat-color': stat.color.main + '66',
+                  '--stat-glow': stat.color.glow,
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div>
+                    <p className="dash-stat-label" style={{ color: stat.color.main }}>{stat.label}</p>
+                    <p className="dash-stat-value">{stat.value}</p>
+                  </div>
+                  <div style={{
+                    width: 32, height: 32, borderRadius: 8,
+                    background: stat.color.soft,
+                    color: stat.color.main,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    flexShrink: 0,
+                    boxShadow: `0 2px 8px ${stat.color.glow}`,
+                  }}>
+                    <stat.icon size={16} strokeWidth={2.5} />
+                  </div>
                 </div>
-                <CreditCard size={18} style={{ color: '#10b981' }} />
               </div>
-            </div>
-            <div className="dash-stat-card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div>
-                  <p className="dash-stat-label">System Status</p>
-                  <p className="dash-stat-value">Active</p>
-                </div>
-                <Activity size={18} style={{ color: '#3b82f6' }} />
-              </div>
-            </div>
-            <div className="dash-stat-card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div>
-                  <p className="dash-stat-label">Network Health</p>
-                  <p className="dash-stat-value">100%</p>
-                </div>
-                <ShieldCheck size={18} style={{ color: '#f0a500' }} />
-              </div>
-            </div>
-            <div className="dash-stat-card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div>
-                  <p className="dash-stat-label">Secure Access</p>
-                  <p className="dash-stat-value">Verified</p>
-                </div>
-                <CheckCircle2 size={18} style={{ color: '#a855f7' }} />
-              </div>
-            </div>
+            ))}
           </div>
 
           {/* Success Message */}
           {successMessage && (
-            <div className="dash-premium-banner" style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}>
+            <div className="dash-premium-banner" style={{ background: 'linear-gradient(135deg, #0F6E56 0%, #065F46 100%)' }}>
               <div className="dash-banner-accent"></div>
               <div className="flex flex-col md:flex-row items-center gap-6 relative z-10">
                 <div className="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center backdrop-blur-md">
@@ -608,7 +621,7 @@ export default function BuyData() {
 
           {/* Error Message */}
           {error && (
-            <div className="dash-premium-banner" style={{ background: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)' }}>
+            <div className="dash-premium-banner" style={{ background: 'linear-gradient(135deg, #DC2626 0%, #991B1B 100%)' }}>
               <div className="dash-banner-accent"></div>
               <div className="flex flex-col md:flex-row items-center gap-6 relative z-10">
                 <div className="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center backdrop-blur-md">
@@ -625,7 +638,13 @@ export default function BuyData() {
           {/* Network Selection */}
           <div className="dash-card">
             <h3 className="dash-card-title">
-              <Layout size={18} style={{ color: '#3b82f6' }} />
+              <div style={{
+                width: 28, height: 28, borderRadius: 6,
+                background: '#DBEAFE', color: '#1D4ED8',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <Layout size={15} strokeWidth={2.5} />
+              </div>
               Select Network
             </h3>
             <div className="grid grid-cols-3 gap-3">
@@ -637,7 +656,7 @@ export default function BuyData() {
                     onClick={() => setSelectedNetwork(network)}
                     className={`dash-network-btn group ${isSelected ? 'active' : ''}`}
                   >
-                    <Wifi size={24} className={isSelected ? 'text-[#f0a500]' : 'text-slate-400 group-hover:text-blue-400'} />
+                    <Wifi size={24} className={isSelected ? 'text-white' : 'text-slate-400 group-hover:text-[#0F6E56]'} />
                     <span className="font-black text-[10px] uppercase tracking-widest">{network}</span>
                   </button>
                 );
@@ -667,7 +686,13 @@ export default function BuyData() {
           <div className="dash-card">
             <div className="flex items-center justify-between mb-6">
               <h3 className="dash-card-title" style={{ margin: 0 }}>
-                <Zap size={18} style={{ color: '#f0a500' }} />
+                <div style={{
+                  width: 28, height: 28, borderRadius: 6,
+                  background: '#FCE7F3', color: '#BE185D',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <Zap size={15} strokeWidth={2.5} />
+                </div>
                 {selectedNetwork} Bundles
               </h3>
             </div>
@@ -679,26 +704,31 @@ export default function BuyData() {
               </div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                {sortedCurrentBundles.map(bundle => {
+                {sortedCurrentBundles.map((bundle, idx) => {
                   const displayDataSize = bundle?.dataSize
                     || bundle?.dataAmount
                     || (bundle?.dataSizeMB ? `${bundle.dataSizeMB}GB` : '')
                     || (bundle?.name?.match(/\d+(?:\.\d+)?\s*GB/i)?.[0] ?? '')
                     || 'Data';
-                  
+                  const c = getColor(idx);
+
                   return (
                     <div
                       key={bundle._id}
                       onClick={() => bundle.inStock && handlePurchaseClick(bundle)}
                       className={`dash-plan-card group ${!bundle.inStock ? 'out-of-stock' : ''}`}
+                      style={{
+                        '--plan-color': c.main + '66',
+                        '--plan-glow': c.glow,
+                      }}
                     >
                       <div className="flex justify-between items-start mb-3">
-                        <span className="px-2 py-0.5 rounded-md bg-slate-50 text-[9px] font-black uppercase text-slate-400 border border-slate-100">{bundle.network}</span>
+                        <span className="px-2 py-0.5 rounded-md text-[9px] font-black uppercase border" style={{ background: c.soft, color: c.main, borderColor: c.main + '22' }}>{bundle.network}</span>
                         {!bundle.inStock && (
                            <span className="text-[9px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-2 py-0.5 rounded-md border border-rose-100">OUT OF STOCK</span>
                         )}
                       </div>
-                      
+
                       <div className="mb-4">
                         <h4 className="text-xl font-black text-[#111] leading-tight mb-1">{displayDataSize}</h4>
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
@@ -706,26 +736,27 @@ export default function BuyData() {
                           {bundle.validity || 'Instantly Active'}
                         </p>
                       </div>
-                      
+
                       <div className="mt-auto pt-4 border-t border-[#f5f5f0]">
                         <div className="flex items-center justify-between mb-4">
                           <div className="flex flex-col">
-                            <span className="text-xs font-black text-[#059669]">{formatCurrencyAbbreviated(getDisplayPrice(bundle))}</span>
+                            <span className="text-xs font-black" style={{ color: c.main }}>{formatCurrencyAbbreviated(getDisplayPrice(bundle))}</span>
                             {isQualifiedAgent() && bundle.agentPrice && (
-                              <span className="text-[8px] font-bold text-blue-600 uppercase tracking-widest mt-0.5">Agent Rate</span>
+                              <span className="text-[8px] font-bold uppercase tracking-widest mt-0.5" style={{ color: c.main }}>Agent Rate</span>
                             )}
                           </div>
-                          <div className="w-6 h-6 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-[#111] group-hover:text-white transition-all">
+                          <div className="w-6 h-6 rounded-full flex items-center justify-center transition-all" style={{ background: c.soft, color: c.main }}>
                             <ChevronRight size={12} strokeWidth={3} />
                           </div>
                         </div>
-                        
+
                         <button
                           disabled={!bundle.inStock}
-                          className={`w-full py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${bundle.inStock
-                            ? 'bg-[#111] text-white group-hover:bg-[#333]'
-                            : 'bg-slate-100 text-slate-400'
-                          }`}
+                          className="w-full py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all"
+                          style={bundle.inStock
+                            ? { background: c.main, color: '#fff', boxShadow: `0 4px 12px ${c.glow}` }
+                            : { background: '#f1f5f9', color: '#94a3b8' }
+                          }
                         >
                           Buy Bundle
                         </button>
@@ -746,6 +777,7 @@ export default function BuyData() {
           userBalance={user?.balance || 0}
           user={user}
           onPurchaseSuccess={handlePurchaseSuccess}
+          planColor={selectedBundle ? getColor(sortedCurrentBundles.findIndex(b => b._id === selectedBundle._id)) : null}
         />
 
         {/* Verification Modal */}

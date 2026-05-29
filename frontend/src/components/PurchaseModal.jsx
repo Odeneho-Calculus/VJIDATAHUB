@@ -13,7 +13,7 @@ import {
 
 import { validatePhoneNumber } from '../utils/phoneValidation';
 
-export default function PurchaseModal({ bundle, isOpen, onClose, userBalance, user, onPurchaseSuccess }) {
+export default function PurchaseModal({ bundle, isOpen, onClose, userBalance, user, onPurchaseSuccess, planColor }) {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('wallet');
   const [loading, setLoading] = useState(false);
@@ -83,7 +83,23 @@ export default function PurchaseModal({ bundle, isOpen, onClose, userBalance, us
 
   if (!isOpen || !bundle) return null;
 
-  const ns = getNetworkStyles(bundle.network);
+  const ns = planColor ? {
+    accent: '',
+    cardGradient: '',
+    cardBorder: '',
+    blobBg: '',
+    selectedOption: '',
+    selectedIcon: '',
+    unselectedText: '',
+    focusBorder: '',
+    focusGroupText: '',
+    buttonBg: '',
+    buttonText: '',
+    buttonHover: '',
+    buttonShadow: '',
+  } : getNetworkStyles(bundle.network);
+
+  const c = planColor || null;
 
   const handleWalletPurchase = async () => {
     if (!phoneNumber.trim()) {
@@ -180,23 +196,23 @@ export default function PurchaseModal({ bundle, isOpen, onClose, userBalance, us
         isOpen={isOpen}
         onClose={onClose}
         title="Purchase Data Bundle"
-        icon={<Zap size={20} className={ns.accent} />}
+        icon={<Zap size={20} style={{ color: c ? c.main : undefined }} className={c ? '' : ns.accent} />}
         maxWidth="max-w-md"
       >
         <div className="space-y-5">
-          <div className={`bg-gradient-to-br ${ns.cardGradient} p-4 rounded-3xl border ${ns.cardBorder} shadow-sm relative overflow-hidden group`}>
-            <div className={`absolute -right-4 -top-4 w-24 h-24 ${ns.blobBg} rounded-full blur-2xl transition-transform group-hover:scale-150 duration-700`} />
+          <div className="p-4 rounded-3xl border shadow-sm relative overflow-hidden group" style={c ? { background: c.soft, borderColor: c.main + '33' } : {}}>
+            <div className="absolute -right-4 -top-4 w-24 h-24 rounded-full blur-2xl transition-transform group-hover:scale-150 duration-700" style={c ? { background: c.main + '18' } : {}} />
             <div className="flex justify-between items-start gap-4 sticky z-10">
               <div className="space-y-1">
                 <p className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none">{bundle.dataSize}</p>
                 <div className="flex items-center gap-2">
-                  <span className={`text-[10px] font-black ${ns.accent} uppercase tracking-widest`}>{bundle.network}</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest" style={c ? { color: c.main } : {}}>{bundle.network}</span>
                   <span className="w-1 h-1 bg-slate-300 rounded-full" />
                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest truncate max-w-[120px]">{bundle.planName}</span>
                 </div>
               </div>
               <div className="text-right">
-                <p className={`text-2xl font-black ${ns.accent} leading-none`}>{formatCurrencyAbbreviated(displayPrice)}</p>
+                <p className="text-2xl font-black leading-none" style={c ? { color: c.main } : {}}>{formatCurrencyAbbreviated(displayPrice)}</p>
                 {isQualifiedAgent() && bundle?.agentPrice && (
                   <p className="text-[8px] font-bold text-emerald-600 uppercase tracking-widest mt-1">Agent Rate (Fee Paid)</p>
                 )}
@@ -245,11 +261,11 @@ export default function PurchaseModal({ bundle, isOpen, onClose, userBalance, us
                   }
                 }}
                 placeholder="Enter 10-digit number"
-                className={`w-full pl-4 pr-12 py-4 bg-slate-50 border-2 rounded-2xl focus:outline-none ${ns.focusBorder} focus:bg-white transition-all text-sm font-bold placeholder:text-slate-300 ${
+                className={`w-full pl-4 pr-12 py-4 bg-slate-50 border-2 rounded-2xl focus:outline-none focus:bg-white transition-all text-sm font-bold placeholder:text-slate-300 ${
                   phoneError ? 'border-red-400' : 'border-slate-100'
                 }`}
               />
-              <div className={`absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-white rounded-xl border border-slate-100 text-slate-400 ${ns.focusGroupText} transition-colors`}>
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-white rounded-xl border border-slate-100 text-slate-400 transition-colors" style={c ? { color: c.main } : {}}>
                 <Smartphone size={16} />
               </div>
             </div>
@@ -269,17 +285,18 @@ export default function PurchaseModal({ bundle, isOpen, onClose, userBalance, us
                   setError('');
                 }}
                 className={`relative p-4 rounded-2xl border-2 transition-all flex items-center gap-4 group ${paymentMethod === 'wallet'
-                  ? ns.selectedOption
+                  ? ''
                   : 'border-slate-100 bg-white hover:border-slate-200'
                   }`}
+                style={paymentMethod === 'wallet' && c ? { borderColor: c.main, background: c.soft + '44' } : {}}
                 disabled={loading || paystackLoading || (businessStatus && !businessStatus.isOpen)}
               >
-                <div className={`p-3 rounded-xl transition-colors ${paymentMethod === 'wallet' ? ns.selectedIcon : 'bg-slate-50 text-slate-400 group-hover:bg-slate-100'}`}>
+                <div className="p-3 rounded-xl transition-colors" style={paymentMethod === 'wallet' && c ? { background: c.main, color: '#fff' } : {}}>
                   <Wallet size={20} strokeWidth={2.5} />
                 </div>
                 <div className="text-left flex-1">
                   <p className="text-xs font-black text-slate-900 uppercase tracking-tight">Agent Wallet</p>
-                  <p className={`text-[11px] font-bold ${paymentMethod === 'wallet' ? ns.accent : 'text-slate-400'}`}>
+                  <p className="text-[11px] font-bold" style={paymentMethod === 'wallet' && c ? { color: c.main } : {}}>
                     Balance: {formatCurrencyAbbreviated(userBalance)} • Cost: {formatCurrencyAbbreviated(displayPrice)}
                   </p>
                 </div>
@@ -304,12 +321,13 @@ export default function PurchaseModal({ bundle, isOpen, onClose, userBalance, us
                   setError('');
                 }}
                 className={`p-4 rounded-2xl border-2 transition-all flex items-center gap-4 group ${paymentMethod === 'paystack'
-                  ? ns.selectedOption
+                  ? ''
                   : 'border-slate-100 bg-white hover:border-slate-200'
                   }`}
+                style={paymentMethod === 'paystack' && c ? { borderColor: c.main, background: c.soft + '44' } : {}}
                 disabled={loading || paystackLoading || (businessStatus && !businessStatus.isOpen)}
               >
-                <div className={`p-3 rounded-xl transition-colors ${paymentMethod === 'paystack' ? ns.selectedIcon : 'bg-slate-50 text-slate-400 group-hover:bg-slate-100'}`}>
+                <div className="p-3 rounded-xl transition-colors" style={paymentMethod === 'paystack' && c ? { background: c.main, color: '#fff' } : {}}>
                   <CreditCard size={20} strokeWidth={2.5} />
                 </div>
                 <div className="text-left flex-1">
@@ -349,7 +367,8 @@ export default function PurchaseModal({ bundle, isOpen, onClose, userBalance, us
                 (businessStatus && !businessStatus.isOpen) ||
                 checkingBusinessStatus
               }
-              className={`flex-[2] py-4 ${ns.buttonBg} ${ns.buttonText} rounded-2xl font-black uppercase text-xs tracking-widest ${ns.buttonHover} shadow-xl ${ns.buttonShadow} disabled:opacity-50 disabled:shadow-none transition-all active:scale-[0.98] flex items-center justify-center gap-3`}
+              className="flex-[2] py-4 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl disabled:opacity-50 disabled:shadow-none transition-all active:scale-[0.98] flex items-center justify-center gap-3"
+              style={c ? { background: c.main, color: '#fff', boxShadow: `0 8px 30px ${c.glow}` } : {}}
             >
               {loading || paystackLoading ? (
                 <>
