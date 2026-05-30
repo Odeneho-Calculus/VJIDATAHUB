@@ -53,7 +53,7 @@ const styles = `
 
   .dash-wrapper {
     font-family: 'DM Sans', sans-serif;
-    background-color: #f5f5f0;
+    background-color: #ffffff;
     min-height: 100vh;
   }
 
@@ -387,7 +387,7 @@ export default function AgentDashboard() {
   if (loading) {
     return (
       <AgentLayout>
-        <div className="flex h-[80vh] items-center justify-center bg-[#f5f5f0]">
+        <div className="flex h-[80vh] items-center justify-center bg-white">
           <Loader2 className="w-10 h-10 text-[#7C3AED] animate-spin" />
         </div>
       </AgentLayout>

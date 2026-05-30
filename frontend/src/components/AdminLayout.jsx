@@ -6,7 +6,7 @@ export default function AdminLayout({ children }) {
   const { sidebarOpen, closeSidebar } = useSidebar();
 
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: '#f5f5f0' }}>
+    <div className="flex min-h-screen" style={{ backgroundColor: '#ffffff' }}>
       <AdminSidebar isOpen={sidebarOpen} onClose={closeSidebar} />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <main className="flex-1 overflow-auto">

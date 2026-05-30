@@ -27,7 +27,7 @@ const styles = `
 
   .dash-wrapper {
     font-family: 'DM Sans', sans-serif;
-    background-color: #f5f5f0;
+    background-color: #ffffff;
     min-height: 100vh;
   }
 
@@ -130,7 +130,7 @@ const styles = `
   }
 
   .dash-input:disabled {
-    background: #f5f5f0;
+    background: #ffffff;
     color: #999;
     cursor: not-allowed;
   }

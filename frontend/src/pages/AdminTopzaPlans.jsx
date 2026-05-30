@@ -219,13 +219,13 @@ export default function AdminTopzaPlans() {
   const filteredPlans = plans.filter((p) => (p.name || `${p.isp} ${p.volume}GB`).toLowerCase().includes(searchTerm.toLowerCase()));
 
   return (
-    <div className="topza-page-container" style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f5f5f0' }}>
+    <div className="topza-page-container" style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#ffffff' }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
         
         .topza-page-container {
           font-family: 'DM Sans', sans-serif;
-          background-color: #f5f5f0;
+          background-color: #ffffff;
         }
 
         .topza-content {

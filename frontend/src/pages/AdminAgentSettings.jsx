@@ -28,7 +28,7 @@ const styles = `
   }
 
   .agent-container {
-    background-color: #f5f5f0;
+    background-color: #ffffff;
     min-height: 100vh;
   }
 
@@ -420,7 +420,7 @@ export default function AdminAgentSettings() {
     return (
       <div style={{ display: 'flex', height: '100vh' }}>
         <AdminSidebar isOpen={sidebarOpen} onClose={closeSidebar} />
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f5f5f0' }}>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffff' }}>
           <div style={{ textAlign: 'center' }}>
             <div style={{ width: '48px', height: '48px', border: `2.5px solid ${pageTheme.soft}`, borderTopColor: pageTheme.main, borderRadius: '50%', margin: '0 auto 16px', animation: 'spin 0.8s linear infinite' }} />
             <p style={{ color: '#666', fontSize: '14px' }}>Loading agent settings...</p>

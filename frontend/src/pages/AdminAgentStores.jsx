@@ -26,13 +26,13 @@ const styles = `
 
   .store-wrapper {
     font-family: 'DM Sans', sans-serif;
-    background-color: #f5f5f0;
+    background-color: #ffffff;
     min-height: 100vh;
     color: #1a1a1a;
   }
 
   .store-container {
-    background-color: #f5f5f0;
+    background-color: #ffffff;
     min-height: 100vh;
   }
 

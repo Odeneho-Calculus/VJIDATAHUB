@@ -34,7 +34,7 @@ const styles = `
 
   .dash-wrapper {
     font-family: 'DM Sans', sans-serif;
-    background-color: #f5f5f0;
+    background-color: #ffffff;
     min-height: 100vh;
   }
 
@@ -328,7 +328,7 @@ export default function AdminStore() {
   if (loading) {
     return (
       <AgentLayout>
-        <div className="flex h-[80vh] items-center justify-center bg-[#f5f5f0]">
+        <div className="flex h-[80vh] items-center justify-center bg-white">
           <Loader2 className="w-10 h-10 text-[#0F6E56] animate-spin" />
         </div>
       </AgentLayout>
@@ -494,7 +494,7 @@ export default function AdminStore() {
             )}
 
             {shouldLockSettings && (
-              <div className="absolute inset-0 z-20 rounded-2xl bg-[#f5f5f0]/60 backdrop-blur-[2px] border-2 border-dashed border-[#e4e4de] flex items-center justify-center p-4">
+              <div className="absolute inset-0 z-20 rounded-2xl bg-white/60 backdrop-blur-[2px] border-2 border-dashed border-[#e4e4de] flex items-center justify-center p-4">
                 <div className="max-w-md w-full dash-card text-center">
                   <div className="w-12 h-12 mx-auto mb-4 rounded-lg bg-red-50 text-red-600 flex items-center justify-center">
                     <Lock size={24} />

@@ -26,7 +26,7 @@ const styles = `
   .vtu-page-container {
     font-family: 'DM Sans', sans-serif;
     min-height: 100vh;
-    background-color: #f5f5f0;
+    background-color: #ffffff;
     padding: 24px 16px;
     color: #1a1a1a;
   }

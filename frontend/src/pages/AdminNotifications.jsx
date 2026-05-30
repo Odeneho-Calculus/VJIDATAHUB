@@ -212,7 +212,7 @@ export default function AdminNotifications() {
 
   const styles = `
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
-    .notif-wrapper { font-family: 'DM Sans', sans-serif; background-color: #f5f5f0; min-height: 100vh; color: #333; }
+    .notif-wrapper { font-family: 'DM Sans', sans-serif; background-color: #ffffff; min-height: 100vh; color: #333; }
     .notif-content { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
     .notif-heading-section { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; }
     .notif-icon-box { width: 46px; height: 46px; background: ${pageTheme.main}; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0; box-shadow: 0 8px 20px ${pageTheme.glow}; }

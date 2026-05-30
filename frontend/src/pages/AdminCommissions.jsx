@@ -26,7 +26,7 @@ const styles = `
 
   .comm-wrapper {
     font-family: 'DM Sans', sans-serif;
-    background-color: #f5f5f0;
+    background-color: #ffffff;
     min-height: 100vh;
     color: #1a1a1a;
   }
@@ -496,7 +496,7 @@ export default function AdminCommissions() {
       <div className="flex h-screen overflow-hidden">
         <AdminSidebar isOpen={sidebarOpen} onClose={closeSidebar} />
 
-        <main className="flex-1 overflow-y-auto bg-gray-50/50">
+        <main className="flex-1 overflow-y-auto bg-white">
           <div className="comm-content">
             {/* ── Header Section ── */}
             <div className="comm-header">

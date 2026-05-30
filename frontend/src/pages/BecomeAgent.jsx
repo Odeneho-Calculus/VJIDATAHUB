@@ -27,7 +27,7 @@ const styles = `
   .agent-page-container {
     font-family: 'DM Sans', sans-serif;
     min-height: 100vh;
-    background-color: #f5f5f0;
+    background-color: #ffffff;
     padding: 24px 16px;
   }
 
@@ -275,7 +275,7 @@ export default function BecomeAgent() {
 
     if (loading) {
         return (
-            <div className="flex h-[80vh] items-center justify-center bg-[#f5f5f0]">
+            <div className="flex h-[80vh] items-center justify-center bg-white">
                 <Loader2 className="w-10 h-10 text-[#f0a500] animate-spin" />
             </div>
         );

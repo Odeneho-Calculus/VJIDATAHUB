@@ -246,13 +246,13 @@ export default function AdminUsers() {
   };
 
   return (
-    <div className="usr-page-container" style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f5f5f0' }}>
+    <div className="usr-page-container" style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#ffffff' }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
         
         .usr-page-container {
           font-family: 'DM Sans', sans-serif;
-          background-color: #f5f5f0;
+          background-color: #ffffff;
         }
 
         .usr-content {

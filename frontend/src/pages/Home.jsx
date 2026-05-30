@@ -216,7 +216,7 @@ export default function Home() {
   ];
 
   return (
-    <div style={{ fontFamily: "'DM Sans', 'Nunito', sans-serif", background: '#f5f5f0', minHeight: '100vh' }}>
+    <div style={{ fontFamily: "'DM Sans', 'Nunito', sans-serif", background: '#ffffff', minHeight: '100vh' }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@500&display=swap');
 

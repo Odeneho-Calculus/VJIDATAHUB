@@ -352,7 +352,7 @@ export default function AdminOrders() {
   };
 
   return (
-    <div style={{ display: 'flex', height: '100vh', backgroundColor: '#f5f5f0', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ display: 'flex', height: '100vh', backgroundColor: '#ffffff', fontFamily: "'DM Sans', sans-serif" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
         

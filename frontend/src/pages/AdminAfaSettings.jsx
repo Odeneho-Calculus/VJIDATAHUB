@@ -130,7 +130,7 @@ export default function AdminAfaSettings() {
     
     .afa-page-container {
       font-family: 'DM Sans', sans-serif;
-      background-color: #f5f5f0;
+      background-color: #ffffff;
       min-height: calc(100vh - 64px);
     }
 

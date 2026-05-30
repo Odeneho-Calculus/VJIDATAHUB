@@ -204,7 +204,7 @@ export default function AdminTransactions() {
         
         .tx-page-container {
           font-family: 'DM Sans', sans-serif;
-          background-color: #f5f5f0;
+          background-color: #ffffff;
           min-height: 100vh;
           display: flex;
           width: 100%;

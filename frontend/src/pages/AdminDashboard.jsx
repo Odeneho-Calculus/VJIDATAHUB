@@ -30,7 +30,7 @@ import { admin as adminAPI } from '../services/api';
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
   .dash-wrapper { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-  .dash-container { background-color: #f5f5f0; }
+  .dash-container { background-color: #ffffff; }
   .dash-content { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
   
   .dash-header { 
@@ -186,7 +186,7 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', height: '100vh', backgroundColor: '#f5f5f0', fontFamily: "'DM Sans', sans-serif" }}>
+      <div style={{ display: 'flex', height: '100vh', backgroundColor: '#ffffff', fontFamily: "'DM Sans', sans-serif" }}>
         <AdminSidebar isOpen={sidebarOpen} onClose={closeSidebar} />
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ textAlign: 'center' }}>
@@ -309,7 +309,7 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f5f5f0' }} className="dash-wrapper">
+    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#ffffff' }} className="dash-wrapper">
       <style>{styles}</style>
       <AdminSidebar isOpen={sidebarOpen} onClose={closeSidebar} />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">

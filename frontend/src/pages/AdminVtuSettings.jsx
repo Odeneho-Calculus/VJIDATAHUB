@@ -31,7 +31,7 @@ const styles = `
     font-family: 'DM Sans', sans-serif;
     display: flex;
     min-height: 100vh;
-    background-color: #f5f5f0;
+    background-color: #ffffff;
   }
 
   .vtu-content {
@@ -904,7 +904,7 @@ export default function AdminVtuSettings() {
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
               <button
                 onClick={() => setShowRefundConfirm(false)}
-                style={{ padding: '10px 16px', borderRadius: '8px', border: '1.5px solid #e4e4de', background: '#f5f5f0', color: '#111', fontWeight: 700, cursor: 'pointer', fontSize: '13px' }}
+                style={{ padding: '10px 16px', borderRadius: '8px', border: '1.5px solid #e4e4de', background: '#ffffff', color: '#111', fontWeight: 700, cursor: 'pointer', fontSize: '13px' }}
               >
                 Cancel
               </button>

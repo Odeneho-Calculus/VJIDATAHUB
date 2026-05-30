@@ -125,7 +125,7 @@ export default function AdminResultCheckers() {
   const searchColor = getColor(0); // Purple
 
   return (
-    <div className="chk-page-container" style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f5f5f0' }}>
+    <div className="chk-page-container" style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#ffffff' }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
         

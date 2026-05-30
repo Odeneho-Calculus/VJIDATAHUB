@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { AlertCircle, Send, TrendingUp, Wallet, CheckCircle, RefreshCw, Landmark, History, PlusCircle, Smartphone, Eye, Clock, Layout, X, ArrowUpRight, ArrowDownLeft, Activity, Info } from 'lucide-react';
+import { AlertCircle, Send, TrendingUp, Wallet, CheckCircle, RefreshCw, Landmark, History, PlusCircle, Smartphone, Eye, Clock, Layout, X, ArrowUpRight, ArrowDownLeft, Activity, Info, Loader2 } from 'lucide-react';
 import { store as storeAPI } from '../services/api';
 import { formatCurrency, formatCurrencyAbbreviated } from '../utils/formatCurrency';
 import AgentLayout from '../components/AgentLayout';
@@ -25,7 +25,7 @@ const styles = `
   .vtu-page-container {
     font-family: 'DM Sans', sans-serif;
     min-height: 100vh;
-    background-color: #f5f5f0;
+    background-color: #ffffff;
     padding: 24px 16px;
     color: #1a1a1a;
   }

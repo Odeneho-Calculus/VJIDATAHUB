@@ -12,7 +12,7 @@ import { useSettings } from '../context/SettingsContext';
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
   .plan-wrapper { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-  .plan-container { background-color: #f5f5f0; }
+  .plan-container { background-color: #ffffff; }
   .plan-content { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
   .plan-header { background-color: #fff; border: 1.5px solid #e4e4de; border-radius: 14px; padding: 20px; box-shadow: 0 8px 40px rgba(0,0,0,0.10); margin-bottom: 24px; }
   .plan-title { font-size: 26px; font-weight: 800; color: #111; margin: 0; }
@@ -231,7 +231,7 @@ export default function AdminDataPlans() {
   const filteredPlans = getFilteredPlans();
 
   return (
-    <div className="flex h-screen bg-slate-100 plan-wrapper">
+    <div className="flex h-screen bg-white plan-wrapper">
       <style>{styles}</style>
       <AdminSidebar isOpen={sidebarOpen} onClose={closeSidebar} />
       <div className="flex-1 flex flex-col overflow-hidden">
