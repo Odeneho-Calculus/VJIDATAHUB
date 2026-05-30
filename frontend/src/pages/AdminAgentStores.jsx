@@ -6,11 +6,28 @@ import AdminSidebar from '../components/AdminSidebar';
 import { useSidebar } from '../hooks/useSidebar';
 import { adminStore } from '../services/api';
 
+/* ── Homepage multi-colour palette ── */
+const palette = [
+  { main: '#7C3AED', bg: '#EDE9FE', soft: '#F5F3FF', glow: 'rgba(124,58,237,0.15)' },   // purple
+  { main: '#0F6E56', bg: '#D1FAE5', soft: '#ECFDF5', glow: 'rgba(15,110,86,0.15)' },    // teal
+  { main: '#1D4ED8', bg: '#DBEAFE', soft: '#EFF6FF', glow: 'rgba(29,78,216,0.15)' },    // blue
+  { main: '#B45309', bg: '#FEF3C7', soft: '#FFFBEB', glow: 'rgba(180,83,9,0.15)' },     // amber
+  { main: '#BE185D', bg: '#FCE7F3', soft: '#FDF2F8', glow: 'rgba(190,24,93,0.15)' },    // pink
+  { main: '#DC2626', bg: '#FEE2E2', soft: '#FFF5F5', glow: 'rgba(220,38,38,0.15)' },    // coral/red
+  { main: '#0369A1', bg: '#E0F2FE', soft: '#F0F9FF', glow: 'rgba(3,105,161,0.15)' },    // sky
+  { main: '#4D7C0F', bg: '#ECFCCB', soft: '#F7FEE7', glow: 'rgba(77,124,15,0.15)' },    // lime/green
+];
+
+const getColor = (index) => palette[index % palette.length];
+
 const styles = `
-  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
 
   .store-wrapper {
-    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: 'DM Sans', sans-serif;
+    background-color: #f5f5f0;
+    min-height: 100vh;
+    color: #1a1a1a;
   }
 
   .store-container {
@@ -22,22 +39,28 @@ const styles = `
     max-width: 1200px;
     margin: 0 auto;
     padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
   }
 
   .store-header-card {
-    background-color: #fff;
-    border: 1.5px solid #e4e4de;
+    background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+    border: 1.5px solid #A7F3D0;
     border-radius: 14px;
-    padding: 20px;
-    margin-bottom: 24px;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.10);
+    padding: 24px;
+    box-shadow: 0 8px 40px rgba(15,110,86,0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
   }
 
   .store-header-card h1 {
-    font-size: 22px;
-    font-weight: 700;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0;
     color: #111;
-    margin: 0 0 4px 0;
   }
 
   .store-header-card p {
@@ -46,104 +69,116 @@ const styles = `
     margin: 0;
   }
 
-  .store-error-box {
-    background-color: #fff5f5;
-    border: 1.5px solid #fecaca;
-    border-radius: 7px;
-    color: #b91c1c;
-    padding: 14px 16px;
-    font-size: 14px;
+  .store-header-icon-box {
+    width: 46px;
+    height: 46px;
+    background: #0F6E56;
+    border-radius: 8px;
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 24px;
+    justify-content: center;
+    color: #fff;
+    flex-shrink: 0;
+    box-shadow: 0 4px 16px rgba(15,110,86,0.25);
   }
 
-  .store-success-box {
-    background-color: #f0fdf4;
-    border: 1.5px solid #86efac;
-    border-radius: 7px;
-    color: #166534;
-    padding: 14px 16px;
-    font-size: 14px;
+  .store-heading-row {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 24px;
+    gap: 16px;
   }
 
   .store-stat-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
-    margin-bottom: 24px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  @media (min-width: 768px) {
+    .store-stat-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
   }
 
   .store-stat-card {
-    background-color: #fff;
-    border: 1.5px solid #e4e4de;
+    background: var(--stat-bg, #fff);
+    border: 1.5px solid var(--stat-border, #e4e4de);
     border-radius: 14px;
-    padding: 20px;
-    transition: all 0.2s ease;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    transition: all 0.2s;
   }
 
   .store-stat-card:hover {
-    border-color: #d4d4ce;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.10);
+    border-color: var(--stat-color, #d4d4ce);
+    box-shadow: 0 8px 40px var(--stat-glow, rgba(0,0,0,0.06));
   }
 
   .store-stat-icon-box {
-    width: 36px;
-    height: 36px;
-    background-color: rgba(240,165,0,0.15);
-    border-radius: 6px;
+    width: 34px;
+    height: 34px;
+    background-color: var(--stat-color, #0F6E56);
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 12px;
-    color: #f0a500;
+    color: #fff;
+    box-shadow: 0 4px 12px var(--stat-glow, rgba(0,0,0,0.1));
+    flex-shrink: 0;
   }
 
   .store-stat-label {
-    font-size: 12px;
-    color: #999;
-    margin-bottom: 4px;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--stat-color, #666);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.8;
   }
 
   .store-stat-value {
-    font-size: 20px;
-    font-weight: 700;
+    font-size: 24px;
+    font-weight: 800;
     color: #111;
+    margin-top: 2px;
   }
 
   .store-controls-card {
-    background-color: #fff;
+    background: #fff;
     border: 1.5px solid #e4e4de;
     border-radius: 14px;
     padding: 20px;
-    margin-bottom: 24px;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.10);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.06);
   }
 
   .store-controls-flex {
     display: flex;
-    flex-direction: column;
-    gap: 16px;
+    align-items: center;
+    gap: 12px;
   }
 
   .store-search-box {
     position: relative;
     flex: 1;
+    display: flex;
+    align-items: center;
+  }
+
+  .store-search-icon {
+    position: absolute;
+    left: 14px;
+    color: #999;
+    pointer-events: none;
   }
 
   .store-search-input {
     width: 100%;
-    padding-left: 36px;
-    padding-right: 14px;
-    padding-top: 11px;
-    padding-bottom: 11px;
-    border: 1.5px solid #e0e0d8;
-    border-radius: 7px;
+    padding: 12px 14px 12px 42px;
+    border: 1.5px solid #e4e4de;
+    border-radius: 10px;
     background-color: #fafaf7;
     font-size: 14px;
     font-family: 'DM Sans', sans-serif;
@@ -153,371 +188,150 @@ const styles = `
 
   .store-search-input:focus {
     outline: none;
-    border-color: #111;
+    border-color: #0F6E56;
     background-color: #fff;
-    box-shadow: 0 0 0 3px rgba(17,17,17,0.07);
+    box-shadow: 0 8px 24px rgba(15,110,86,0.08);
   }
 
-  .store-search-icon {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 16px;
-    height: 16px;
-    color: #999;
-  }
-
-  .store-select,
-  .store-button-refresh {
-    padding: 11px 14px;
-    border: 1.5px solid #e0e0d8;
-    border-radius: 7px;
+  .store-select {
+    padding: 12px 36px 12px 14px;
+    border: 1.5px solid #e4e4de;
+    border-radius: 10px;
     background-color: #fafaf7;
     font-size: 14px;
+    font-weight: 700;
     font-family: 'DM Sans', sans-serif;
     color: #111;
     cursor: pointer;
     transition: all 0.2s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+  }
+
+  .store-select:focus {
+    outline: none;
+    border-color: #0F6E56;
+    background-color: #fff;
   }
 
   .store-button-refresh {
-    background-color: #111;
+    background-color: #0F6E56;
     color: #fff;
-    border-color: #111;
-    font-weight: 700;
+    border: none;
+    height: 46px;
+    padding: 0 20px;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 8px;
-    white-space: nowrap;
+    gap: 10px;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(15,110,86,0.2);
+    cursor: pointer;
   }
 
   .store-button-refresh:hover {
-    background-color: #222;
+    background-color: #0d5e4a;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(15,110,86,0.25);
+  }
+
+  .store-button-refresh:active {
+    transform: translateY(0);
   }
 
   .store-table-card {
-    background-color: #fff;
+    background: #fff;
     border: 1.5px solid #e4e4de;
     border-radius: 14px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.06);
     overflow: hidden;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.10);
-    margin-bottom: 24px;
   }
 
   .store-table-header {
-    background-color: #fafaf7;
-    border-bottom: 1.5px solid #e4e4de;
-    padding: 16px 20px;
-  }
-
-  .store-table-header h2 {
-    font-size: 14px;
-    font-weight: 700;
-    color: #111;
-    margin: 0 0 4px 0;
-  }
-
-  .store-table-header p {
-    font-size: 12px;
-    color: #999;
-    margin: 0;
-  }
-
-  .store-table-loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 60px 20px;
-  }
-
-  .store-spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid rgba(0,0,0,0.1);
-    border-top-color: #111;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-
-  .store-table-empty {
-    text-align: center;
-    padding: 56px 20px;
-    color: #999;
-  }
-
-  table.store-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  .store-table thead tr {
-    background-color: #fafaf7;
+    background: #fafaf7;
+    padding: 20px 24px;
     border-bottom: 1.5px solid #e4e4de;
   }
 
   .store-table th {
+    background: #fafaf7;
     text-align: left;
-    padding: 12px 20px;
-    font-size: 13px;
-    font-weight: 700;
-    color: #333;
+    padding: 14px 16px;
+    font-weight: 800;
+    color: #999;
+    border-bottom: 1.5px solid #e4e4de;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
 
   .store-table td {
-    padding: 12px 20px;
-    border-bottom: 1px solid #eee;
-    font-size: 14px;
+    padding: 16px;
+    border-bottom: 1px solid #f0f0f0;
     color: #111;
-  }
-
-  .store-table tbody tr:hover {
-    background-color: #f9f9f7;
-  }
-
-  .store-table-actions {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .store-button-icon {
-    width: 32px;
-    height: 32px;
-    padding: 0;
-    border: 1.5px solid #e0e0d8;
-    border-radius: 6px;
-    background-color: #fff;
-    color: #666;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-  }
-
-  .store-button-icon:hover {
-    background-color: #fafaf7;
-    border-color: #d0d0c8;
-  }
-
-  .store-button-action {
-    padding: 8px 12px;
-    border: none;
-    border-radius: 6px;
-    background-color: #111;
-    color: #fff;
     font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .store-button-action:hover {
-    background-color: #222;
   }
 
   .store-mobile-card {
+    background: #fff;
     border: 1.5px solid #e4e4de;
-    border-radius: 7px;
-    padding: 12px;
-    background-color: #fff;
+    border-radius: 20px;
+    padding: 16px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.02);
     margin-bottom: 12px;
   }
 
-  .store-pagination {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
+  .store-mobile-card:hover {
+    border-color: var(--card-color, #0F6E56);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px var(--card-glow, rgba(0,0,0,0.06));
   }
 
-  .store-pagination-button {
-    padding: 11px 14px;
-    border: 1.5px solid #e0e0d8;
-    border-radius: 7px;
-    background-color: #fafaf7;
-    font-size: 14px;
+  .store-button-action {
+    background-color: #0F6E56;
+    color: #fff;
+    border-radius: 8px;
     font-weight: 700;
-    color: #111;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    padding: 8px 16px;
+    transition: all 0.2s;
   }
 
-  .store-pagination-button:hover:not(:disabled) {
-    background-color: #f0f0ed;
-    border-color: #d0d0c8;
-  }
-
-  .store-pagination-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+  .store-button-action:hover {
+    background-color: #0d5e4a;
+    box-shadow: 0 4px 12px rgba(15,110,86,0.2);
   }
 
   .store-pagination-button.next {
-    background-color: #111;
-    color: #fff;
-    border-color: #111;
+    background-color: #0F6E56;
+    border-color: #0F6E56;
   }
 
   .store-pagination-button.next:hover:not(:disabled) {
-    background-color: #222;
-  }
-
-  .store-modal-overlay {
-    position: fixed;
-    inset: 0;
-    background-color: rgba(0,0,0,0.5);
-    z-index: 50;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 16px;
-  }
-
-  .store-modal-content {
-    background-color: #fff;
-    border-radius: 14px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-    max-width: 500px;
-    width: 100%;
-    padding: 20px;
-    max-height: 90vh;
-    overflow-y: auto;
-  }
-
-  .store-modal-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 20px;
-  }
-
-  .store-modal-title {
-    font-size: 18px;
-    font-weight: 700;
-    color: #111;
-    margin: 0;
-  }
-
-  .store-modal-subtitle {
-    font-size: 13px;
-    color: #666;
-    margin: 4px 0 0 0;
-  }
-
-  .store-modal-close {
-    padding: 8px;
-    border-radius: 6px;
-    background-color: transparent;
-    border: none;
-    color: #999;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .store-modal-close:hover {
-    background-color: #f5f5f0;
-    color: #666;
-  }
-
-  .store-modal-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 20px;
-  }
-
-  .store-modal-item {
-    padding: 12px;
-    border-radius: 7px;
-    background-color: #fafaf7;
-    border: 1.5px solid #e4e4de;
-  }
-
-  .store-modal-label {
-    font-size: 11px;
-    color: #999;
-    margin-bottom: 4px;
+    background-color: #0d5e4a;
   }
 
   .store-modal-button {
-    width: 100%;
-    padding: 13px 20px;
-    border: none;
-    border-radius: 7px;
-    background-color: #111;
-    color: #fff;
-    font-size: 14px;
+    background-color: #0F6E56;
+    border-radius: 8px;
     font-weight: 700;
-    cursor: pointer;
-    margin-bottom: 16px;
-    transition: all 0.2s ease;
-    font-family: 'DM Sans', sans-serif;
   }
 
   .store-modal-button:hover:not(:disabled) {
-    background-color: #222;
-  }
-
-  .store-modal-button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-
-  .store-modal-button.danger {
-    background-color: #dc2626;
-  }
-
-  .store-modal-button.danger:hover:not(:disabled) {
-    background-color: #b91c1c;
-  }
-
-  .store-modal-button.success {
-    background-color: #16a34a;
-  }
-
-  .store-modal-button.success:hover:not(:disabled) {
-    background-color: #15803d;
-  }
-
-  .store-modal-button.warning {
-    background-color: #d97706;
-  }
-
-  .store-modal-button.warning:hover:not(:disabled) {
-    background-color: #b45309;
-  }
-
-  .store-form-group {
-    margin-bottom: 12px;
-  }
-
-  .store-form-input,
-  .store-form-textarea {
-    width: 100%;
-    padding: 11px 14px;
-    border: 1.5px solid #e0e0d8;
-    border-radius: 7px;
-    background-color: #fafaf7;
-    font-size: 14px;
-    font-family: 'DM Sans', sans-serif;
-    color: #111;
-    transition: all 0.2s ease;
+    background-color: #0d5e4a;
   }
 
   .store-form-input:focus,
   .store-form-textarea:focus {
-    outline: none;
-    border-color: #111;
-    background-color: #fff;
-    box-shadow: 0 0 0 3px rgba(17,17,17,0.07);
+    border-color: #0F6E56;
+    box-shadow: 0 0 0 3px rgba(15,110,86,0.07);
   }
 
   .store-badge {
@@ -554,17 +368,22 @@ const styles = `
     color: #991b1b;
   }
 
-  @media (max-width: 1024px) {
+  @media (max-width: 768px) {
     .store-controls-flex {
       flex-direction: column;
+      align-items: stretch;
+    }
+    .store-search-box {
+      width: 100%;
+    }
+    .store-button-refresh {
+      justify-content: center;
     }
 
     .store-modal-grid {
       grid-template-columns: 1fr;
     }
-  }
 
-  @media (max-width: 768px) {
     .store-content {
       padding: 16px 12px;
     }
@@ -793,8 +612,15 @@ export default function AdminAgentStores() {
         <div style={{ flex: 1, overflow: 'auto' }} className="store-container">
           <div className="store-content">
             <div className="store-header-card">
-              <h1>Agent Stores</h1>
-              <p>Manage store activation, protocol access, and temporary bans</p>
+              <div className="store-heading-row">
+                <div className="store-header-icon-box">
+                  <Store size={22} />
+                </div>
+                <div>
+                  <h1>Agent Stores</h1>
+                  <p>Manage store activation, protocol access, and temporary bans</p>
+                </div>
+              </div>
             </div>
 
             {error && (
@@ -812,19 +638,19 @@ export default function AdminAgentStores() {
             )}
 
             <div className="store-stat-grid">
-              <StatCard title="Stores On Page" value={stores.length} icon={Store} />
-              <StatCard title="Operational" value={activeCount} icon={CheckCircle} />
-              <StatCard title="Banned" value={bannedCount} icon={Ban} />
-              <StatCard title="Current Page" value={page} icon={Shield} />
+              <StatCard title="Stores On Page" value={stores.length} icon={Store} colorIdx={0} />
+              <StatCard title="Operational" value={activeCount} icon={CheckCircle} colorIdx={1} />
+              <StatCard title="Banned" value={bannedCount} icon={Ban} colorIdx={5} />
+              <StatCard title="Current Page" value={page} icon={Shield} colorIdx={2} />
             </div>
 
             <div className="store-controls-card">
               <div className="store-controls-flex">
                 <div className="store-search-box">
-                  <Search className="store-search-icon" size={16} />
+                  <Search className="store-search-icon" size={18} />
                   <input
                     type="text"
-                    placeholder="Search by store name, slug, or agent email"
+                    placeholder="Search by store name, slug, or email..."
                     value={searchTerm}
                     onChange={(e) => {
                       setSearchTerm(e.target.value);
@@ -834,28 +660,26 @@ export default function AdminAgentStores() {
                   />
                 </div>
 
-                <div style={{ display: 'flex', gap: '12px' }}>
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => {
-                      setStatusFilter(e.target.value);
-                      setPage(1);
-                    }}
-                    className="store-select"
-                  >
-                    <option value="">All Status</option>
-                    <option value="active">Active</option>
-                    <option value="banned">Banned</option>
-                  </select>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => {
+                    setStatusFilter(e.target.value);
+                    setPage(1);
+                  }}
+                  className="store-select"
+                >
+                  <option value="">All Status</option>
+                  <option value="active">Active</option>
+                  <option value="banned">Banned</option>
+                </select>
 
-                  <button
-                    onClick={fetchStores}
-                    className="store-button-refresh"
-                  >
-                    <RefreshCw size={16} />
-                    Refresh
-                  </button>
-                </div>
+                <button
+                  onClick={fetchStores}
+                  className="store-button-refresh"
+                >
+                  <RefreshCw size={16} />
+                  <span>Refresh</span>
+                </button>
               </div>
             </div>
 
@@ -884,74 +708,91 @@ export default function AdminAgentStores() {
                         </tr>
                       </thead>
                       <tbody>
-                        {stores.map((store) => (
-                          <tr key={store._id}>
-                            <td>
-                              <p style={{ fontWeight: 700, margin: '0 0 4px 0' }}>{store.name}</p>
-                              <p style={{ fontSize: '12px', color: '#999', margin: 0 }}>/{store.slug}</p>
-                            </td>
-                            <td>
-                              <p style={{ fontWeight: 600, margin: '0 0 4px 0' }}>{store.owner?.name || 'N/A'}</p>
-                              <p style={{ fontSize: '12px', color: '#999', margin: 0 }}>{store.owner?.email || 'N/A'}</p>
-                            </td>
-                            <td>
-                              <StatusBadge status={store.owner?.agentFeeStatus} type="fee" />
-                            </td>
-                            <td>
-                              <StatusBadge status={store.isTemporarilyBanned ? 'banned' : 'active'} type="store" />
-                            </td>
-                            <td style={{ textAlign: 'right' }}>
-                              <div className="store-table-actions">
-                                <button
-                                  onClick={() => openDetailsModal(store)}
-                                  className="store-button-icon"
-                                  title="View Store Details"
-                                >
-                                  <Eye size={16} />
-                                </button>
-                                <button
-                                  onClick={() => openModal(store)}
-                                  className="store-button-action"
-                                >
-                                  Manage
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
+                        {stores.map((store, idx) => {
+                          const c = getColor(idx);
+                          return (
+                            <tr key={store._id} className="store-table-row">
+                              <td>
+                                <p style={{ fontWeight: 700, margin: '0 0 4px 0', color: c.main }}>{store.name}</p>
+                                <p style={{ fontSize: '12px', color: '#999', margin: 0 }}>/{store.slug}</p>
+                              </td>
+                              <td>
+                                <p style={{ fontWeight: 600, margin: '0 0 4px 0' }}>{store.owner?.name || 'N/A'}</p>
+                                <p style={{ fontSize: '12px', color: '#999', margin: 0 }}>{store.owner?.email || 'N/A'}</p>
+                              </td>
+                              <td>
+                                <StatusBadge status={store.owner?.agentFeeStatus} type="fee" />
+                              </td>
+                              <td>
+                                <StatusBadge status={store.isTemporarilyBanned ? 'banned' : 'active'} type="store" />
+                              </td>
+                              <td style={{ textAlign: 'right' }}>
+                                <div className="store-table-actions">
+                                  <button
+                                    onClick={() => openDetailsModal(store)}
+                                    className="store-button-icon"
+                                    title="View Store Details"
+                                    style={{ color: c.main, borderColor: c.bg }}
+                                  >
+                                    <Eye size={16} />
+                                  </button>
+                                  <button
+                                    onClick={() => openModal(store)}
+                                    className="store-button-action"
+                                    style={{ background: c.main, boxShadow: `0 4px 12px ${c.glow}` }}
+                                  >
+                                    Manage
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
 
                   <div className="lg:hidden" style={{ padding: '12px' }}>
-                    {stores.map((store) => (
-                      <div key={store._id} className="store-mobile-card">
-                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px', marginBottom: '8px' }}>
-                          <div>
-                            <p style={{ fontWeight: 700, fontSize: '14px', margin: '0 0 4px 0' }}>{store.name}</p>
-                            <p style={{ fontSize: '12px', color: '#999', margin: 0 }}>/{store.slug}</p>
+                    {stores.map((store, idx) => (
+                      <div key={store._id} className="store-mobile-card" style={{ '--card-color': getColor(idx).main, '--card-glow': getColor(idx).glow }}>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px', marginBottom: '12px' }}>
+                          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                            <div style={{ width: 40, height: 40, borderRadius: 10, background: getColor(idx).soft, color: getColor(idx).main, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, border: `1.5px solid ${getColor(idx).main}22`, boxShadow: `0 2px 8px ${getColor(idx).glow}` }}>
+                              {store.name?.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                              <p style={{ fontWeight: 700, fontSize: '15px', margin: '0 0 2px 0', color: getColor(idx).main }}>{store.name}</p>
+                              <p style={{ fontSize: '11px', color: '#999', margin: 0, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>/{store.slug}</p>
+                            </div>
                           </div>
                           <div style={{ display: 'flex', gap: '8px' }}>
                             <button
                               onClick={() => openModal(store)}
                               className="store-button-action"
-                              style={{ padding: '6px 10px', fontSize: '12px' }}
+                              style={{ padding: '8px 12px', fontSize: '12px', background: getColor(idx).main, boxShadow: `0 4px 12px ${getColor(idx).glow}` }}
                             >
                               Manage
                             </button>
                             <button
                               onClick={() => openDetailsModal(store)}
                               className="store-button-icon"
-                              style={{ width: '28px', height: '28px' }}
+                              style={{ width: '32px', height: '32px', color: getColor(idx).main, borderColor: getColor(idx).bg }}
                             >
                               <Eye size={14} />
                             </button>
                           </div>
                         </div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#666', marginBottom: '8px' }}>
-                          <User size={14} />
-                          <span>{store.owner?.name || 'N/A'}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px', background: '#fafaf7', borderRadius: '10px', marginBottom: '12px' }}>
+                          <div style={{ width: 24, height: 24, borderRadius: '50%', background: getColor(idx).main, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 800 }}>
+                            {store.owner?.name?.charAt(0).toUpperCase() || 'U'}
+                          </div>
+                          <div style={{ minWidth: 0 }}>
+                            <p style={{ fontSize: '12.5px', fontWeight: 700, color: '#111', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {store.owner?.name || 'N/A'}
+                            </p>
+                            <p style={{ fontSize: '10px', color: '#999', margin: 0 }}>{store.owner?.email || 'N/A'}</p>
+                          </div>
                         </div>
 
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -1102,13 +943,16 @@ export default function AdminAgentStores() {
 }
 
 // eslint-disable-next-line no-unused-vars
-function StatCard({ title, value, icon: Icon }) {
+function StatCard({ title, value, icon: Icon, colorIdx }) {
+  const c = getColor(colorIdx);
   return (
-    <div className="store-stat-card">
-      <div className="store-stat-icon-box">
-        <Icon size={18} />
+    <div className="store-stat-card" style={{ '--stat-color': c.main, '--stat-bg': c.soft, '--stat-border': c.bg, '--stat-glow': c.glow }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+        <p className="store-stat-label">{title}</p>
+        <div className="store-stat-icon-box">
+          <Icon size={18} />
+        </div>
       </div>
-      <p className="store-stat-label">{title}</p>
       <p className="store-stat-value">{value}</p>
     </div>
   );
@@ -1117,18 +961,29 @@ function StatCard({ title, value, icon: Icon }) {
 function StatusBadge({ status, type }) {
   const normalized = String(status || '').toLowerCase();
 
+  let className = "store-badge ";
+  let text = status || 'Unknown';
+
   if (type === 'store') {
     if (normalized === 'banned') {
-      return <span className="store-badge store-badge-banned">Banned</span>;
+      className += "store-badge-banned";
+      text = "Banned";
+    } else {
+      className += "store-badge-active";
+      text = "Active";
     }
-    return <span className="store-badge store-badge-active">Active</span>;
+  } else {
+    if (normalized === 'paid') {
+      className += "store-badge-paid";
+      text = "Paid";
+    } else if (normalized === 'protocol') {
+      className += "store-badge-protocol";
+      text = "Protocol";
+    } else {
+      className += "store-badge-pending";
+      text = "Pending";
+    }
   }
 
-  if (normalized === 'paid') {
-    return <span className="store-badge store-badge-paid">Paid</span>;
-  }
-  if (normalized === 'protocol') {
-    return <span className="store-badge store-badge-protocol">Protocol</span>;
-  }
-  return <span className="store-badge store-badge-pending">Pending</span>;
+  return <span className={className} style={{ fontSize: '10px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.5px', borderRadius: '8px' }}>{text}</span>;
 }
