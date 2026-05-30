@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Eye, Edit2, Trash2, Search, ShoppingCart, CheckCircle, Clock, TrendingUp, Database, CheckCircle2, ChevronRight } from 'lucide-react';
+import { Eye, Edit2, Trash2, Search, ShoppingCart, CheckCircle, Clock, TrendingUp, Database, CheckCircle2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { formatNumberAbbreviated } from '../utils/formatCurrency';
 import AdminSidebar from '../components/AdminSidebar';
@@ -540,31 +540,38 @@ export default function AdminOrders() {
         }
         
         .orders-table-container {
+          width: 100%;
           overflow-x: auto;
+          border-radius: 8px;
+          border: 1.5px solid #e4e4de;
         }
         
         .orders-table {
           width: 100%;
           border-collapse: collapse;
           text-align: left;
+          font-size: 13px;
         }
         
         .orders-table th {
-          padding: 14px 16px;
+          padding: 12px 16px;
           background: #fafaf7;
           border-bottom: 1.5px solid #e4e4de;
-          font-size: 10px;
-          font-weight: 800;
-          color: #000;
+          font-size: 11px;
+          font-weight: 700;
+          color: #333;
           text-transform: uppercase;
           letter-spacing: 0.05em;
+          white-space: nowrap;
         }
         
         .orders-table td {
-          padding: 16px;
+          padding: 14px 16px;
           border-bottom: 1px solid #f0f0f0;
           font-size: 13px;
-          color: #111;
+          color: #444;
+          white-space: nowrap;
+          vertical-align: middle;
         }
         
         .orders-table tr {
@@ -576,13 +583,14 @@ export default function AdminOrders() {
         }
         
         .orders-badge {
-          padding: 4px 10px;
-          border-radius: 8px;
+          padding: 4px 8px;
+          border-radius: 6px;
           font-size: 10px;
-          font-weight: 900;
+          font-weight: 700;
           text-transform: uppercase;
-          letter-spacing: 0.5px;
-          display: inline-block;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
         }
         
         .orders-btn-primary {
@@ -607,22 +615,24 @@ export default function AdminOrders() {
         }
         
         .orders-btn-icon {
-          width: 34px;
-          height: 34px;
-          border-radius: 8px;
+          width: 32px;
+          height: 32px;
+          border-radius: 6px;
           display: flex;
           align-items: center;
           justify-content: center;
-          border: 1.5px solid #e4e4de;
+          border: 1px solid #e4e4de;
           background: #fff;
-          color: ${pageTheme.main};
+          color: #444;
           cursor: pointer;
           transition: all 0.2s;
         }
         
         .orders-btn-icon:hover {
-          border-color: ${pageTheme.main};
-          background: ${pageTheme.soft};
+          background: #0F6E56;
+          color: #fff;
+          border-color: #0F6E56;
+          transform: translateY(-1px);
         }
         
         .orders-spinner {
@@ -802,13 +812,13 @@ export default function AdminOrders() {
                           <input type="checkbox" checked={allSelected} onChange={toggleSelectAll} />
                         </th>
                         <th>Order</th>
-                        <th>Store / Customer</th>
+                        <th>Customer</th>
                         <th>Plan / Phone</th>
                         <th>Amount</th>
-                        <th>Payment Status</th>
-                        <th>Order Status</th>
+                        <th>Payment</th>
+                        <th>Status</th>
                         <th>Date</th>
-                        <th className="text-right">Actions</th>
+                        <th style={{ textAlign: 'right' }}>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -823,97 +833,85 @@ export default function AdminOrders() {
                               <input type="checkbox" checked={isSelected} onChange={() => toggleSelectOne(orderId)} />
                             </td>
                             <td>
-                              <div className="flex items-center gap-3">
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                 <div style={{ 
-                                  width: 32, height: 32, borderRadius: 8, 
+                                  width: 28, height: 28, borderRadius: 6, 
                                   background: c.soft, color: c.main, 
                                   display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                                  fontWeight: 800, fontSize: 10, 
-                                  border: `1.5px solid ${c.main}22`, 
-                                  boxShadow: `0 2px 8px ${c.glow}` 
+                                  fontWeight: 700, fontSize: 10, 
+                                  border: `1px solid ${c.main}33`, 
+                                  flexShrink: 0
                                 }}>
                                   {order.network?.charAt(0).toUpperCase() || 'O'}
                                 </div>
-                                <div className="flex flex-col">
-                                  <span className="font-black text-[#111]">#{order.orderNumber?.slice(-8).toUpperCase() || order._id?.slice(-8).toUpperCase()}</span>
-                                  <span className="text-[10px] text-black font-bold uppercase">{order.network || 'Generic'}</span>
+                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                  <span style={{ fontWeight: 700, color: '#333' }}>#{order.orderNumber?.slice(-8).toUpperCase() || order._id?.slice(-8).toUpperCase()}</span>
+                                  <span style={{ fontSize: '11px', color: '#666' }}>{order.network || 'Generic'}</span>
                                 </div>
                               </div>
                             </td>
                             <td>
-                              {order.storeId?.name ? (
-                                <div className="flex flex-col">
-                                  <div className="flex items-center gap-1.5">
-                                    <span className="font-bold text-[#111]">{order.storeId.owner?.name || 'Agent'}</span>
-                                    <ChevronRight size={10} className="text-black" />
-                                    <span className="text-[11px] font-black uppercase tracking-tight" style={{ color: pageTheme.main }}>{order.storeId.name}</span>
-                                  </div>
-                                  <span className="text-[10px] text-black font-bold uppercase">Buyer: {order.guestInfo?.name || order.userId?.name || order.phoneNumber || 'N/A'}</span>
-                                </div>
-                              ) : (
-                                <div className="flex flex-col">
-                                  <span className="font-bold text-[#111]">{order.isGuest ? (order.guestInfo?.name || 'Guest User') : (order.userId?.name || 'Direct User')}</span>
-                                  <span className="text-[10px] text-black font-bold uppercase">{order.isGuest ? order.guestInfo?.email : order.userId?.email || 'No Email'}</span>
-                                </div>
-                              )}
-                            </td>
-                            <td>
-                              <div className="flex flex-col">
-                                <span className="font-bold text-[#111]">{getPlanDisplayValue(order)}</span>
-                                <span className="text-[10px] text-black font-bold">{order.phoneNumber}</span>
+                              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                <span style={{ fontWeight: 600, color: '#333' }}>
+                                  {order.storeId?.name 
+                                    ? (order.storeId.owner?.name || 'Agent')
+                                    : (order.isGuest ? (order.guestInfo?.name || 'Guest') : (order.userId?.name || 'Direct'))
+                                  }
+                                </span>
+                                {order.storeId?.name && (
+                                  <span style={{ fontSize: '11px', color: '#666' }}>{order.storeId.name}</span>
+                                )}
                               </div>
                             </td>
                             <td>
-                              <span className="font-black" style={{ color: c.main }}>GHS {formatNumberAbbreviated(order.amount)}</span>
+                              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                <span style={{ fontWeight: 600, color: '#333' }}>{getPlanDisplayValue(order)}</span>
+                                <span style={{ fontSize: '11px', color: '#666' }}>{order.phoneNumber}</span>
+                              </div>
                             </td>
                             <td>
-                              <span className={`orders-badge ${order.paymentStatus === 'completed' ? 'badge-success' : order.paymentStatus === 'pending' ? 'badge-pending' : 'badge-failed'}`}
-                                    style={{
-                                      background: order.paymentStatus === 'completed' ? '#ecfdf5' : order.paymentStatus === 'pending' ? '#fffbeb' : '#fef2f2',
-                                      color: order.paymentStatus === 'completed' ? '#059669' : order.paymentStatus === 'pending' ? '#d97706' : '#dc2626',
-                                      border: `1px solid ${order.paymentStatus === 'completed' ? '#d1fae5' : order.paymentStatus === 'pending' ? '#fef3c7' : '#fee2e2'}`
-                                    }}>
+                              <span style={{ fontWeight: 700, color: '#333' }}>GHS {formatNumberAbbreviated(order.amount)}</span>
+                            </td>
+                            <td>
+                              <span className="orders-badge"
+                                    style={getPaymentStatusStyle(order.paymentStatus)}>
                                 {order.paymentStatus || 'pending'}
                               </span>
                             </td>
                             <td>
-                              <div className="flex flex-col gap-1">
-                                <span className={`orders-badge ${order.status === 'completed' ? 'badge-success' : (order.status === 'pending' || order.status === 'processing') ? 'badge-pending' : 'badge-failed'}`}
-                                      style={{
-                                        background: order.status === 'completed' ? '#ecfdf5' : (order.status === 'pending' || order.status === 'processing') ? '#fffbeb' : '#fef2f2',
-                                        color: order.status === 'completed' ? '#059669' : (order.status === 'pending' || order.status === 'processing') ? '#d97706' : '#dc2626',
-                                        border: `1px solid ${order.status === 'completed' ? '#d1fae5' : (order.status === 'pending' || order.status === 'processing') ? '#fef3c7' : '#fee2e2'}`
-                                      }}>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                <span className="orders-badge"
+                                      style={getOrderStatusStyle(order.status)}>
                                   {order.providerStatus || order.status}
                                 </span>
                                 {order.isRefunded && (
-                                  <span className="orders-badge" style={{ backgroundColor: '#fff7ed', color: '#c2410c', fontSize: '8px', border: '1px solid #ffedd5' }}>
+                                  <span className="orders-badge" style={{ backgroundColor: '#fff7ed', color: '#c2410c', fontSize: '9px', border: '1px solid #ffedd5' }}>
                                     REFUNDED
                                   </span>
                                 )}
                               </div>
                             </td>
                             <td>
-                              <div className="flex flex-col">
-                                <span className="font-bold text-[#111] text-[11px]">{new Date(order.date || order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                                <span className="text-[10px] text-black font-bold">{new Date(order.date || order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                <span style={{ fontWeight: 600, color: '#333', fontSize: '12px' }}>{new Date(order.date || order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                <span style={{ fontSize: '11px', color: '#666' }}>{new Date(order.date || order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                               </div>
                             </td>
-                            <td className="text-right">
+                            <td>
                               <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
                                 <button className="orders-btn-icon" onClick={() => handleViewDetails(order)} title="View Details">
-                                  <Eye size={15} strokeWidth={2.5} />
+                                  <Eye size={14} />
                                 </button>
                                 {canVerifyPendingPayment(order) && (
-                                  <button className="orders-btn-icon" style={{ borderColor: '#d97706', color: '#d97706', background: '#fffbeb' }} onClick={() => handleVerifyPendingPayment(order)} title="Verify Payment">
-                                    <CheckCircle size={15} strokeWidth={2.5} />
+                                  <button className="orders-btn-icon" style={{ color: '#d97706' }} onClick={() => handleVerifyPendingPayment(order)} title="Verify Payment">
+                                    <CheckCircle size={14} />
                                   </button>
                                 )}
                                 <button className="orders-btn-icon" onClick={() => handleEditStatus(order)} title="Edit Status">
-                                  <Edit2 size={15} strokeWidth={2.5} />
+                                  <Edit2 size={14} />
                                 </button>
-                                <button className="orders-btn-icon" onClick={() => handleOpenDelete(order)} style={{ color: '#dc2626', borderColor: '#fec2c2', background: '#fff5f5' }} title="Delete Order">
-                                  <Trash2 size={15} strokeWidth={2.5} />
+                                <button className="orders-btn-icon" onClick={() => handleOpenDelete(order)} style={{ color: '#dc2626' }} title="Delete Order">
+                                  <Trash2 size={14} />
                                 </button>
                               </div>
                             </td>
