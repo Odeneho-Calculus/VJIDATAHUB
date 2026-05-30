@@ -43,14 +43,14 @@ export default function ConfirmDialog({
 
         {/* Body */}
         <div className="px-5 py-4">
-          <p className="text-[14px] text-slate-600 font-bold leading-relaxed">{message}</p>
+          <p className="text-[14px] text-black font-bold leading-relaxed">{message}</p>
         </div>
 
         {/* Actions */}
         <div className="flex items-center gap-3 px-5 pb-5">
           <button
             onClick={onCancel}
-            className="flex-1 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest text-slate-400 bg-[#fafaf7] border-1.5 border-[#e4e4de] hover:text-[#111] hover:border-slate-200 transition-all active:scale-95"
+            className="flex-1 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest text-black bg-[#fafaf7] border-1.5 border-[#e4e4de] hover:text-[#111] hover:border-slate-200 transition-all active:scale-95"
           >
             {cancelText}
           </button>

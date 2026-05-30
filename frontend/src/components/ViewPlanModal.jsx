@@ -23,7 +23,7 @@ export default function ViewPlanModal({ plan, isOpen, onClose }) {
         <div className="bg-gradient-to-br from-primary-50 to-blue-50/50 p-5 rounded-[24px] border border-primary-100/50 shadow-sm relative overflow-hidden group">
           <div className="absolute -right-4 -top-4 w-20 h-20 bg-primary-100/20 rounded-full blur-xl transition-transform group-hover:scale-150 duration-700" />
           <p className="text-[10px] font-black text-primary-600 uppercase tracking-widest mb-1 relative z-10">Plan Name</p>
-          <p className="text-xl font-black text-slate-900 leading-tight relative z-10">{plan?.planName}</p>
+          <p className="text-xl font-black text-black leading-tight relative z-10">{plan?.planName}</p>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
@@ -53,8 +53,8 @@ export default function ViewPlanModal({ plan, isOpen, onClose }) {
         <div className="p-5 bg-slate-50/50 rounded-[28px] border border-slate-100/60 shadow-inner space-y-4">
           <div className="flex justify-between items-end border-b border-slate-100 pb-4">
             <div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Cost Price</p>
-              <p className="text-lg font-black text-slate-600 leading-none">{formatCurrencyAbbreviated(plan?.costPrice)}</p>
+              <p className="text-[10px] font-black text-black uppercase tracking-widest mb-1">Cost Price</p>
+              <p className="text-lg font-black text-black leading-none">{formatCurrencyAbbreviated(plan?.costPrice)}</p>
             </div>
             <div className="text-right">
               <p className="text-[10px] font-black text-primary-400 uppercase tracking-widest mb-1">Selling Price</p>
@@ -113,16 +113,16 @@ export default function ViewPlanModal({ plan, isOpen, onClose }) {
 
 const DetailItem = ({ label, value, subValue, variant = 'default' }) => {
   const colors = {
-    default: 'text-slate-900',
+    default: 'text-black',
     success: 'text-emerald-600',
     danger: 'text-rose-600',
   };
 
   return (
     <div className="p-3 bg-white border border-slate-100 rounded-xl">
-      <p className="text-[9px] font-black text-slate-400 uppercase tracking-tight mb-0.5">{label}</p>
+      <p className="text-[9px] font-black text-black uppercase tracking-tight mb-0.5">{label}</p>
       <p className={`text-xs font-black ${colors[variant]}`}>{value}</p>
-      <p className="text-[8px] font-bold text-slate-300 uppercase tracking-tighter mt-0.5">{subValue}</p>
+      <p className="text-[8px] font-bold text-black uppercase tracking-tighter mt-0.5">{subValue}</p>
     </div>
   );
 };

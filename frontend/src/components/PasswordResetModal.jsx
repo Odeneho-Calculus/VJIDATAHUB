@@ -24,7 +24,7 @@ export default function PasswordResetModal({ isOpen, onClose, user, resetLink, l
         <>
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2.5 border border-slate-200 text-slate-900 font-bold rounded-xl hover:bg-slate-50 transition text-sm"
+            className="flex-1 px-4 py-2.5 border border-slate-200 text-black font-bold rounded-xl hover:bg-slate-50 transition text-sm"
           >
             Close
           </button>
@@ -40,14 +40,14 @@ export default function PasswordResetModal({ isOpen, onClose, user, resetLink, l
     >
       <div className="space-y-3">
         <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-          <p className="text-[10px] font-bold text-slate-500 uppercase mb-2">Target User</p>
+          <p className="text-[10px] font-bold text-black uppercase mb-2">Target User</p>
           <div className="flex justify-between items-center">
-            <span className="text-xs font-bold text-slate-500">Name:</span>
-            <span className="text-xs font-black text-slate-900">{user?.name}</span>
+            <span className="text-xs font-bold text-black">Name:</span>
+            <span className="text-xs font-black text-black">{user?.name}</span>
           </div>
           <div className="flex justify-between items-center mt-1">
-            <span className="text-xs font-bold text-slate-500">Email:</span>
-            <span className="text-xs font-black text-slate-900 break-all ml-2">{user?.email}</span>
+            <span className="text-xs font-bold text-black">Email:</span>
+            <span className="text-xs font-black text-black break-all ml-2">{user?.email}</span>
           </div>
         </div>
         {resetLink && (

@@ -28,7 +28,7 @@ export default function Navbar() {
                 className="lg:hidden p-2.5 hover:bg-slate-100/90 rounded-xl border border-slate-200/70 shadow-sm transition"
                 aria-label="Toggle sidebar"
               >
-                <Menu size={24} className="text-slate-900" />
+                <Menu size={24} className="text-black" />
               </button>
             )}
             <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition flex-shrink-0 min-w-0">
@@ -55,7 +55,7 @@ export default function Navbar() {
             ) : (
               <>
                 <div className="hidden sm:flex gap-2">
-                  <Link to="/login" className="px-4 py-2 text-slate-700 font-semibold rounded-xl hover:bg-slate-100 transition border border-slate-200/80 shadow-sm">
+                  <Link to="/login" className="px-4 py-2 text-black font-semibold rounded-xl hover:bg-slate-100 transition border border-slate-200/80 shadow-sm">
                     Login
                   </Link>
                   <Link to="/register" className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-blue-100 transition">
@@ -68,7 +68,7 @@ export default function Navbar() {
                   className="sm:hidden p-2.5 hover:bg-slate-100 rounded-xl border border-slate-200/70 shadow-sm transition"
                   aria-label="Toggle menu"
                 >
-                  {isMenuOpen ? <X size={20} className="text-slate-900" /> : <Menu size={20} className="text-slate-900" />}
+                  {isMenuOpen ? <X size={20} className="text-black" /> : <Menu size={20} className="text-black" />}
                 </button>
               </>
             )}
@@ -80,14 +80,14 @@ export default function Navbar() {
             <div className="px-2 pt-2 pb-3 space-y-1">
               <Link
                 to="/login"
-                className="block px-3 py-2 rounded-md text-sm text-slate-900 hover:bg-slate-100"
+                className="block px-3 py-2 rounded-md text-sm text-black hover:bg-slate-100"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Login
               </Link>
               <Link
                 to="/register"
-                className="block px-3 py-2 rounded-md text-sm text-slate-900 hover:bg-slate-100"
+                className="block px-3 py-2 rounded-md text-sm text-black hover:bg-slate-100"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Sign up

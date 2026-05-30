@@ -69,7 +69,7 @@ export default function GuestTrackOrder() {
       case 'failed':
         return <XCircle className="w-6 h-6 text-red-600" />;
       default:
-        return <AlertCircle className="w-6 h-6 text-slate-400" />;
+        return <AlertCircle className="w-6 h-6 text-black" />;
     }
   };
 
@@ -84,7 +84,7 @@ export default function GuestTrackOrder() {
       case 'failed':
         return 'bg-red-100 text-red-700 border-red-300';
       default:
-        return 'bg-slate-100 text-slate-700 border-slate-300';
+        return 'bg-slate-100 text-black border-slate-300';
     }
   };
 
@@ -97,7 +97,7 @@ export default function GuestTrackOrder() {
       case 'failed':
         return 'bg-red-100 text-red-700 border-red-300';
       default:
-        return 'bg-slate-100 text-slate-700 border-slate-300';
+        return 'bg-slate-100 text-black border-slate-300';
     }
   };
 
@@ -138,21 +138,21 @@ export default function GuestTrackOrder() {
             <div className="flex items-center gap-2">
               <Link
                 to="/guest/purchase"
-                className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                className="p-2 text-black hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                 title="Buy Data"
               >
                 <ShoppingCart size={20} />
               </Link>
               <Link
                 to="/"
-                className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                className="p-2 text-black hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                 title="Home"
               >
                 <Home size={20} />
               </Link>
             </div>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">Track Your Orders</h1>
+          <h1 className="text-2xl font-bold text-black">Track Your Orders</h1>
         </div>
       </div>
 
@@ -160,15 +160,15 @@ export default function GuestTrackOrder() {
         {/* Search Form */}
         <div className="bg-white rounded-3xl border border-slate-200/60 shadow-sm overflow-hidden">
           <div className="px-6 py-4 bg-slate-50/50 border-b border-slate-100">
-            <h3 className="text-lg font-black text-slate-900 tracking-tight">Enter Phone Number</h3>
-            <p className="text-xs text-slate-600 mt-1">Use the number you used to purchase data</p>
+            <h3 className="text-lg font-black text-black tracking-tight">Enter Phone Number</h3>
+            <p className="text-xs text-black mt-1">Use the number you used to purchase data</p>
           </div>
 
           <div className="p-6">
             <form onSubmit={handleSearch} className="space-y-4">
               <div className="flex flex-col sm:flex-row gap-2">
                 <div className="relative flex-1">
-                  <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400" size={16} />
+                  <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 text-black" size={16} />
                   <input
                     type="tel"
                     value={phoneNumber}
@@ -208,24 +208,24 @@ export default function GuestTrackOrder() {
         {/* Guest Info */}
         {guestInfo && (
           <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-3xl p-6">
-            <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest mb-4">Account Information</h3>
+            <h3 className="text-sm font-black text-black uppercase tracking-widest mb-4">Account Information</h3>
             <div className="grid grid-cols-2 gap-4 text-sm">
               {guestInfo.name && (
                 <div>
-                  <span className="text-xs text-slate-500 uppercase tracking-wider block mb-1">Name</span>
-                  <span className="font-bold text-slate-900">{guestInfo.name}</span>
+                  <span className="text-xs text-black uppercase tracking-wider block mb-1">Name</span>
+                  <span className="font-bold text-black">{guestInfo.name}</span>
                 </div>
               )}
               <div>
-                <span className="text-xs text-slate-500 uppercase tracking-wider block mb-1">Email</span>
-                <span className="font-bold text-slate-900 text-xs break-all">{guestInfo.email}</span>
+                <span className="text-xs text-black uppercase tracking-wider block mb-1">Email</span>
+                <span className="font-bold text-black text-xs break-all">{guestInfo.email}</span>
               </div>
               <div>
-                <span className="text-xs text-slate-500 uppercase tracking-wider block mb-1">Phone</span>
-                <span className="font-bold text-slate-900">{guestInfo.phone}</span>
+                <span className="text-xs text-black uppercase tracking-wider block mb-1">Phone</span>
+                <span className="font-bold text-black">{guestInfo.phone}</span>
               </div>
               <div>
-                <span className="text-xs text-slate-500 uppercase tracking-wider block mb-1">Total Orders</span>
+                <span className="text-xs text-black uppercase tracking-wider block mb-1">Total Orders</span>
                 <span className="font-bold text-blue-600 text-lg">{guestInfo.totalPurchases}</span>
               </div>
             </div>
@@ -235,7 +235,7 @@ export default function GuestTrackOrder() {
         {/* Orders List */}
         {searched && orders.length > 0 && (
           <div className="space-y-4">
-            <h2 className="text-lg font-black text-slate-900 tracking-tight">Your Orders</h2>
+            <h2 className="text-lg font-black text-black tracking-tight">Your Orders</h2>
             {orders.map((order) => (
               <div
                 key={order.orderNumber}
@@ -247,8 +247,8 @@ export default function GuestTrackOrder() {
                       {getStatusIcon(order.status)}
                     </div>
                     <div className="min-w-0">
-                      <h3 className="font-black text-slate-900 text-sm">{order.orderNumber}</h3>
-                      <p className="text-xs text-slate-500">{formatDate(order.createdAt)}</p>
+                      <h3 className="font-black text-black text-sm">{order.orderNumber}</h3>
+                      <p className="text-xs text-black">{formatDate(order.createdAt)}</p>
                     </div>
                   </div>
                   <div className="flex flex-col sm:flex-row gap-2 items-center">
@@ -276,23 +276,23 @@ export default function GuestTrackOrder() {
                 <div className="p-6">
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
-                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Plan</p>
-                      <p className="font-bold text-slate-900 text-sm leading-tight">{getOrderPlanDisplay(order)}</p>
-                      <p className="text-xs text-slate-600 leading-tight">{isCheckerOrder(order) ? 'CHECKER' : order.network}</p>
+                      <p className="text-[10px] font-bold text-black uppercase tracking-widest mb-1">Plan</p>
+                      <p className="font-bold text-black text-sm leading-tight">{getOrderPlanDisplay(order)}</p>
+                      <p className="text-xs text-black leading-tight">{isCheckerOrder(order) ? 'CHECKER' : order.network}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Phone</p>
-                      <p className="font-bold text-slate-900 text-sm">{order.phoneNumber}</p>
+                      <p className="text-[10px] font-bold text-black uppercase tracking-widest mb-1">Phone</p>
+                      <p className="font-bold text-black text-sm">{order.phoneNumber}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Amount</p>
+                      <p className="text-[10px] font-bold text-black uppercase tracking-widest mb-1">Amount</p>
                       <p className="font-black text-blue-600 text-lg">
                         GH₵ {formatCurrencyAbbreviated(order.amount)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Payment</p>
-                      <p className="font-bold text-slate-900 text-sm capitalize">
+                      <p className="text-[10px] font-bold text-black uppercase tracking-widest mb-1">Payment</p>
+                      <p className="font-bold text-black text-sm capitalize">
                         {order.paymentMethod}
                       </p>
                       <span
@@ -326,7 +326,7 @@ export default function GuestTrackOrder() {
                   )}
 
                   {order.completedAt && (
-                    <div className="mt-3 text-xs text-slate-500">
+                    <div className="mt-3 text-xs text-black">
                       Completed {formatDate(order.completedAt)}
                     </div>
                   )}
@@ -340,10 +340,10 @@ export default function GuestTrackOrder() {
         {searched && orders.length === 0 && !loading && !error && (
           <div className="bg-white rounded-3xl border border-slate-200/60 shadow-sm p-12 text-center">
             <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Package size={40} className="text-slate-300" />
+              <Package size={40} className="text-black" />
             </div>
-            <p className="text-lg font-bold text-slate-900 mb-2">No orders found</p>
-            <p className="text-sm text-slate-600 mb-6">
+            <p className="text-lg font-bold text-black mb-2">No orders found</p>
+            <p className="text-sm text-black mb-6">
               We couldn't find any orders for this phone number
             </p>
             <Link

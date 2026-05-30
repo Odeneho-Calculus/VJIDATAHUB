@@ -188,11 +188,11 @@ export default function PurchaseModal({ bundle, isOpen, onClose, userBalance, us
             <div className="absolute -right-4 -top-4 w-24 h-24 rounded-full blur-2xl transition-transform group-hover:scale-150 duration-700" style={c ? { background: c.main + '18' } : {}} />
             <div className="flex justify-between items-start gap-4 sticky z-10">
               <div className="space-y-1">
-                <p className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none">{bundle.dataSize}</p>
+                <p className="text-xl sm:text-2xl font-black text-black tracking-tight leading-none">{bundle.dataSize}</p>
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] font-black uppercase tracking-widest" style={c ? { color: c.main } : {}}>{bundle.network}</span>
                   <span className="w-1 h-1 bg-slate-300 rounded-full" />
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest truncate max-w-[120px]">{bundle.planName}</span>
+                  <span className="text-[10px] font-black text-black uppercase tracking-widest truncate max-w-[120px]">{bundle.planName}</span>
                 </div>
               </div>
               <div className="text-right">
@@ -203,7 +203,7 @@ export default function PurchaseModal({ bundle, isOpen, onClose, userBalance, us
                 {isQualifiedVendor() && bundle?.vendorPrice && (
                   <p className="text-[8px] font-bold text-purple-600 uppercase tracking-widest mt-1">Vendor Rate</p>
                 )}
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">Validity: {bundle.validity}</p>
+                <p className="text-[9px] font-black text-black uppercase tracking-widest mt-1">Validity: {bundle.validity}</p>
               </div>
             </div>
           </div>
@@ -227,7 +227,7 @@ export default function PurchaseModal({ bundle, isOpen, onClose, userBalance, us
           )}
 
           <div className="space-y-2">
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Recipient Phone Number</label>
+            <label className="block text-[10px] font-black text-black uppercase tracking-widest ml-1">Recipient Phone Number</label>
             <div className="relative group">
               <input
                 type="tel"
@@ -245,11 +245,11 @@ export default function PurchaseModal({ bundle, isOpen, onClose, userBalance, us
                   }
                 }}
                 placeholder="Enter 10-digit number"
-                className={`w-full pl-4 pr-12 py-4 bg-slate-50 border-2 rounded-2xl focus:outline-none focus:bg-white transition-all text-sm font-bold placeholder:text-slate-300 ${
+                className={`w-full pl-4 pr-12 py-4 bg-slate-50 border-2 rounded-2xl focus:outline-none focus:bg-white transition-all text-sm font-bold placeholder:text-black ${
                   phoneError ? 'border-red-400' : 'border-slate-100'
                 }`}
               />
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-white rounded-xl border border-slate-100 text-slate-400 transition-colors" style={c ? { color: c.main } : {}}>
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-white rounded-xl border border-slate-100 text-black transition-colors" style={c ? { color: c.main } : {}}>
                 <Smartphone size={16} />
               </div>
             </div>
@@ -261,7 +261,7 @@ export default function PurchaseModal({ bundle, isOpen, onClose, userBalance, us
           </div>
 
           <div className="space-y-3">
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Payment Method</label>
+            <label className="block text-[10px] font-black text-black uppercase tracking-widest ml-1">Payment Method</label>
             <div className="grid grid-cols-1 gap-3">
               <button
                 onClick={() => {
@@ -279,7 +279,7 @@ export default function PurchaseModal({ bundle, isOpen, onClose, userBalance, us
                   <Wallet size={20} strokeWidth={2.5} />
                 </div>
                 <div className="text-left flex-1">
-                  <p className="text-xs font-black text-slate-900 uppercase tracking-tight">Agent Wallet</p>
+                  <p className="text-xs font-black text-black uppercase tracking-tight">Agent Wallet</p>
                   <p className="text-[11px] font-bold" style={paymentMethod === 'wallet' && c ? { color: c.main } : {}}>
                     Balance: {formatCurrencyAbbreviated(userBalance)} • Cost: {formatCurrencyAbbreviated(displayPrice)}
                   </p>
@@ -315,8 +315,8 @@ export default function PurchaseModal({ bundle, isOpen, onClose, userBalance, us
                   <CreditCard size={20} strokeWidth={2.5} />
                 </div>
                 <div className="text-left flex-1">
-                  <p className="text-xs font-black text-slate-900 uppercase tracking-tight">Paystack Online</p>
-                  <p className="text-[11px] font-bold text-slate-400">Card, Bank, or Momo</p>
+                  <p className="text-xs font-black text-black uppercase tracking-tight">Paystack Online</p>
+                  <p className="text-[11px] font-bold text-black">Card, Bank, or Momo</p>
                 </div>
               </button>
             </div>
@@ -324,7 +324,7 @@ export default function PurchaseModal({ bundle, isOpen, onClose, userBalance, us
 
           {paymentMethod === 'paystack' && dataPurchaseCharge > 0 && (
             <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 space-y-1.5">
-              <div className="flex items-center justify-between text-[11px] font-bold text-slate-500">
+              <div className="flex items-center justify-between text-[11px] font-bold text-black">
                 <span>Plan price</span>
                 <span>{formatCurrencyAbbreviated(displayPrice)}</span>
               </div>
@@ -333,7 +333,7 @@ export default function PurchaseModal({ bundle, isOpen, onClose, userBalance, us
                 <span>+ {formatCurrencyAbbreviated(dataPurchaseCharge)} ({chargeDescriptor})</span>
               </div>
               <div className="h-px bg-slate-200" />
-              <div className="flex items-center justify-between text-xs font-black text-slate-900">
+              <div className="flex items-center justify-between text-xs font-black text-black">
                 <span>Total charged</span>
                 <span>{formatCurrencyAbbreviated(totalPaystackAmount)}</span>
               </div>

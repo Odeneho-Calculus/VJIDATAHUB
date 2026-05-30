@@ -107,7 +107,7 @@ export default function PurchasePaymentModal({ isOpen, onClose, accessCode, refe
               <h3 className="text-xl font-black text-[#111] tracking-tight uppercase leading-none">
                 {status === 'pending' ? 'Gateway Sync' : 'Finalizing'}
               </h3>
-              <p className="text-slate-500 font-bold text-sm tracking-tight leading-snug max-w-[240px] mx-auto">
+              <p className="text-black font-bold text-sm tracking-tight leading-snug max-w-[240px] mx-auto">
                 {status === 'pending'
                   ? 'Initializing secure Paystack session for your transaction...'
                   : 'Authorized! We are confirming your payment status with the bank...'}
@@ -128,10 +128,10 @@ export default function PurchasePaymentModal({ isOpen, onClose, accessCode, refe
             </div>
             <div className="space-y-3">
               <h3 className="text-2xl font-black text-[#111] tracking-tight uppercase leading-none">Payment Success!</h3>
-              <p className="text-slate-500 font-bold text-sm tracking-tight">Your purchase of {formatCurrencyAbbreviated(amount)} has been confirmed and processed.</p>
+              <p className="text-black font-bold text-sm tracking-tight">Your purchase of {formatCurrencyAbbreviated(amount)} has been confirmed and processed.</p>
             </div>
             <div className="p-4 bg-[#fafaf7] rounded-2xl border-1.5 border-[#e4e4de]">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Transaction Ref</p>
+              <p className="text-[10px] font-black text-black uppercase tracking-widest mb-1">Transaction Ref</p>
               <p className="text-xs font-mono font-black text-[#111]">{reference}</p>
             </div>
           </div>
@@ -149,7 +149,7 @@ export default function PurchasePaymentModal({ isOpen, onClose, accessCode, refe
             </div>
             <div className="space-y-3">
               <h3 className="text-2xl font-black text-[#111] tracking-tight uppercase leading-none">Cancelled</h3>
-              <p className="text-slate-500 font-bold text-sm tracking-tight">Checkout session closed. No funds were debited from your account.</p>
+              <p className="text-black font-bold text-sm tracking-tight">Checkout session closed. No funds were debited from your account.</p>
             </div>
             <button
               onClick={onClose}

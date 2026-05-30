@@ -117,7 +117,7 @@ const styles = `
   .dash-stat-label {
     font-size: 11px;
     font-weight: 700;
-    color: #999;
+    color: #000;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
@@ -360,7 +360,7 @@ export default function Profile() {
                   </div>
                 </div>
                 <div className="mt-4">
-                  <h3 className="text-xl font-black text-slate-900 leading-tight">{user?.name}</h3>
+                  <h3 className="text-xl font-black text-black leading-tight">{user?.name}</h3>
                   <p className="text-[11px] font-black text-lime-600 uppercase tracking-widest mt-1">
                     {user?.role || 'Valued Member'}
                   </p>
@@ -368,10 +368,10 @@ export default function Profile() {
 
                 <div className="w-full mt-6 p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between">
                   <div className="text-left">
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Account ID</p>
-                    <p className="text-sm font-mono font-bold text-slate-700">#{accountIdSuffix}</p>
+                    <p className="text-[9px] font-black text-black uppercase tracking-widest mb-0.5">Account ID</p>
+                    <p className="text-sm font-mono font-bold text-black">#{accountIdSuffix}</p>
                   </div>
-                  <div className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center text-slate-300">
+                  <div className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center text-black">
                     <Smartphone size={16} />
                   </div>
                 </div>
@@ -382,13 +382,13 @@ export default function Profile() {
                   <div className="w-10 h-10 rounded-xl bg-lime-50 text-lime-600 flex items-center justify-center">
                     <Wallet size={20} />
                   </div>
-                  <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-widest">Financial Summary</h3>
+                  <h3 className="text-[11px] font-black text-black uppercase tracking-widest">Financial Summary</h3>
                 </div>
 
                 <div className="space-y-6">
                   <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Current Balance</p>
-                    <p className="text-3xl font-black text-slate-900 tracking-tighter">
+                    <p className="text-[10px] font-black text-black uppercase tracking-widest mb-1 ml-1">Current Balance</p>
+                    <p className="text-3xl font-black text-black tracking-tighter">
                       {formatCurrencyAbbreviated(user?.balance) || '0'}
                     </p>
                   </div>
@@ -403,11 +403,11 @@ export default function Profile() {
 
                   <div className="pt-6 border-t border-slate-100 space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Account Status</span>
+                      <span className="text-[10px] font-black text-black uppercase tracking-widest">Account Status</span>
                       <span className="dash-badge bg-emerald-50 text-emerald-600 border border-emerald-100">Verified</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Plan Type</span>
+                      <span className="text-[10px] font-black text-black uppercase tracking-widest">Plan Type</span>
                       <span className="dash-badge bg-indigo-50 text-indigo-600 border border-indigo-100">Premium</span>
                     </div>
                   </div>
@@ -420,12 +420,12 @@ export default function Profile() {
               <div className="dash-card">
                 <div className="flex items-center justify-between mb-8 pb-6 border-b border-slate-100">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400">
+                    <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-black">
                       <Settings size={24} />
                     </div>
                     <div>
-                      <h3 className="text-lg font-black text-slate-900">Personal Information</h3>
-                      <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Update your profile details</p>
+                      <h3 className="text-lg font-black text-black">Personal Information</h3>
+                      <p className="text-[11px] font-bold text-black uppercase tracking-wider">Update your profile details</p>
                     </div>
                   </div>
                   <button
@@ -438,9 +438,9 @@ export default function Profile() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Full Name</label>
+                    <label className="text-[10px] font-black text-black uppercase tracking-widest ml-1">Full Name</label>
                     <div className="relative group">
-                      <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-lime-600 transition-colors" />
+                      <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-black group-focus-within:text-lime-600 transition-colors" />
                       <input
                         type="text"
                         value={formData.name}
@@ -453,9 +453,9 @@ export default function Profile() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Email Address</label>
+                    <label className="text-[10px] font-black text-black uppercase tracking-widest ml-1">Email Address</label>
                     <div className="relative">
-                      <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
+                      <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-black" />
                       <input
                         type="email"
                         value={formData.email}
@@ -467,9 +467,9 @@ export default function Profile() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Phone Number</label>
+                    <label className="text-[10px] font-black text-black uppercase tracking-widest ml-1">Phone Number</label>
                     <div className="relative group">
-                      <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-lime-600 transition-colors" />
+                      <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-black group-focus-within:text-lime-600 transition-colors" />
                       <input
                         type="tel"
                         value={formData.phone}
@@ -486,16 +486,16 @@ export default function Profile() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Security Access</label>
+                    <label className="text-[10px] font-black text-black uppercase tracking-widest ml-1">Security Access</label>
                     <button
                       onClick={() => setShowPasswordModal(true)}
                       className="w-full py-3.5 px-4 rounded-2xl border-2 border-slate-100 flex items-center justify-between hover:border-lime-200 hover:bg-lime-50/30 transition-all group"
                     >
                       <div className="flex items-center gap-3">
-                        <Lock size={18} className="text-slate-300 group-hover:text-lime-600 transition-colors" />
-                        <span className="text-sm font-bold text-slate-600 group-hover:text-slate-900">Change Password</span>
+                        <Lock size={18} className="text-black group-hover:text-lime-600 transition-colors" />
+                        <span className="text-sm font-bold text-black group-hover:text-black">Change Password</span>
                       </div>
-                      <ChevronRight size={18} className="text-slate-300 group-hover:text-lime-600" />
+                      <ChevronRight size={18} className="text-black group-hover:text-lime-600" />
                     </button>
                   </div>
                 </div>
@@ -531,8 +531,8 @@ export default function Profile() {
                       <Gift size={24} />
                     </div>
                     <div>
-                      <h3 className="text-lg font-black text-slate-900">Refer & Earn</h3>
-                      <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Invite friends to join Topza</p>
+                      <h3 className="text-lg font-black text-black">Refer & Earn</h3>
+                      <p className="text-[11px] font-bold text-black uppercase tracking-wider">Invite friends to join Topza</p>
                     </div>
                   </div>
                 </div>
@@ -570,14 +570,14 @@ export default function Profile() {
                     <Lock size={24} />
                   </div>
                   <div>
-                    <h3 className="text-xl font-black text-slate-900">Security Update</h3>
-                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Change your account password</p>
+                    <h3 className="text-xl font-black text-black">Security Update</h3>
+                    <p className="text-[11px] font-bold text-black uppercase tracking-wider">Change your account password</p>
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowPasswordModal(false)}
-                  className="w-10 h-10 rounded-full bg-slate-50 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-colors"
+                  className="w-10 h-10 rounded-full bg-slate-50 text-black hover:text-black flex items-center justify-center transition-colors"
                 >
                   <X size={20} />
                 </button>
@@ -585,9 +585,9 @@ export default function Profile() {
 
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Current Password</label>
+                  <label className="text-[10px] font-black text-black uppercase tracking-widest ml-1">Current Password</label>
                   <div className="relative">
-                    <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
+                    <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-black" />
                     <input
                       type={showCurrentPassword ? "text" : "password"}
                       required
@@ -599,7 +599,7 @@ export default function Profile() {
                     <button
                       type="button"
                       onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-600"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-black hover:text-black"
                     >
                       {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
@@ -609,9 +609,9 @@ export default function Profile() {
                 <div className="h-px bg-slate-100 mx-1" />
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">New Password</label>
+                  <label className="text-[10px] font-black text-black uppercase tracking-widest ml-1">New Password</label>
                   <div className="relative">
-                    <ShieldCheck size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
+                    <ShieldCheck size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-black" />
                     <input
                       type={showNewPassword ? "text" : "password"}
                       required
@@ -623,7 +623,7 @@ export default function Profile() {
                     <button
                       type="button"
                       onClick={() => setShowNewPassword(!showNewPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-600"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-black hover:text-black"
                     >
                       {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
@@ -631,9 +631,9 @@ export default function Profile() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Confirm New Password</label>
+                  <label className="text-[10px] font-black text-black uppercase tracking-widest ml-1">Confirm New Password</label>
                   <div className="relative">
-                    <ShieldCheck size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
+                    <ShieldCheck size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-black" />
                     <input
                       type={showNewPassword ? "text" : "password"}
                       required
@@ -662,7 +662,7 @@ export default function Profile() {
                 <button
                   type="button"
                   onClick={() => setShowPasswordModal(false)}
-                  className="w-full py-4 rounded-2xl bg-slate-50 text-slate-500 font-bold text-sm hover:bg-slate-100 transition-all"
+                  className="w-full py-4 rounded-2xl bg-slate-50 text-black font-bold text-sm hover:bg-slate-100 transition-all"
                 >
                   Cancel
                 </button>

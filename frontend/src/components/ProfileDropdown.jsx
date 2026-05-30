@@ -108,7 +108,7 @@ export default function ProfileDropdown() {
           <span className="text-[13px] font-black text-[#111]">
             {firstName}
           </span>
-          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Account</span>
+          <span className="text-[9px] font-bold text-black uppercase tracking-widest mt-0.5">Account</span>
         </div>
       </button>
 
@@ -121,7 +121,7 @@ export default function ProfileDropdown() {
         >
           <div className="px-6 py-5 border-b border-[#f5f5f0] bg-[#fafaf7]">
             <p className="text-sm font-black text-[#111] tracking-tight">{user.name}</p>
-            <p className="text-[11px] font-bold text-slate-400 truncate">{user.email}</p>
+            <p className="text-[11px] font-bold text-black truncate">{user.email}</p>
             <div className="flex flex-wrap gap-2 mt-3">
               {isAdmin && (
                 <span className="px-2 py-0.5 text-[9px] font-black rounded-md bg-blue-50 text-blue-600 border border-blue-100 uppercase">👑 Admin</span>
@@ -137,7 +137,7 @@ export default function ProfileDropdown() {
               <>
                 <Link
                   to="/admin"
-                  className="flex items-center gap-3 px-4 py-3 text-xs font-black text-slate-600 hover:text-[#111] hover:bg-[#fafaf7] rounded-xl transition-all group"
+                  className="flex items-center gap-3 px-4 py-3 text-xs font-black text-black hover:text-[#111] hover:bg-[#fafaf7] rounded-xl transition-all group"
                   onClick={() => setIsOpen(false)}
                 >
                   <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-white border border-transparent group-hover:border-[#e4e4de] transition-all">
@@ -150,7 +150,7 @@ export default function ProfileDropdown() {
               <>
                 <Link
                   to="/agent/dashboard"
-                  className="flex items-center gap-3 px-4 py-3 text-xs font-black text-slate-600 hover:text-[#111] hover:bg-[#fafaf7] rounded-xl transition-all group"
+                  className="flex items-center gap-3 px-4 py-3 text-xs font-black text-black hover:text-[#111] hover:bg-[#fafaf7] rounded-xl transition-all group"
                   onClick={() => setIsOpen(false)}
                 >
                   <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-white border border-transparent group-hover:border-[#e4e4de] transition-all">
@@ -160,7 +160,7 @@ export default function ProfileDropdown() {
                 </Link>
                 <Link
                   to="/agent/store"
-                  className="flex items-center gap-3 px-4 py-3 text-xs font-black text-slate-600 hover:text-[#111] hover:bg-[#fafaf7] rounded-xl transition-all group"
+                  className="flex items-center gap-3 px-4 py-3 text-xs font-black text-black hover:text-[#111] hover:bg-[#fafaf7] rounded-xl transition-all group"
                   onClick={() => setIsOpen(false)}
                 >
                   <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-white border border-transparent group-hover:border-[#e4e4de] transition-all">
@@ -170,7 +170,7 @@ export default function ProfileDropdown() {
                 </Link>
                 <Link
                   to="/agent/commissions"
-                  className="flex items-center gap-3 px-4 py-3 text-xs font-black text-slate-600 hover:text-[#111] hover:bg-[#fafaf7] rounded-xl transition-all group"
+                  className="flex items-center gap-3 px-4 py-3 text-xs font-black text-black hover:text-[#111] hover:bg-[#fafaf7] rounded-xl transition-all group"
                   onClick={() => setIsOpen(false)}
                 >
                   <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-white border border-transparent group-hover:border-[#e4e4de] transition-all">
@@ -180,7 +180,7 @@ export default function ProfileDropdown() {
                 </Link>
                 <Link
                   to="/profile"
-                  className="flex items-center gap-3 px-4 py-3 text-xs font-black text-slate-600 hover:text-[#111] hover:bg-[#fafaf7] rounded-xl transition-all group"
+                  className="flex items-center gap-3 px-4 py-3 text-xs font-black text-black hover:text-[#111] hover:bg-[#fafaf7] rounded-xl transition-all group"
                   onClick={() => setIsOpen(false)}
                 >
                   <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-white border border-transparent group-hover:border-[#e4e4de] transition-all">
@@ -193,7 +193,7 @@ export default function ProfileDropdown() {
               <>
                 <Link
                   to="/profile"
-                  className="flex items-center gap-3 px-4 py-3 text-xs font-black text-slate-600 hover:text-[#111] hover:bg-[#fafaf7] rounded-xl transition-all group"
+                  className="flex items-center gap-3 px-4 py-3 text-xs font-black text-black hover:text-[#111] hover:bg-[#fafaf7] rounded-xl transition-all group"
                   onClick={() => setIsOpen(false)}
                 >
                   <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-white border border-transparent group-hover:border-[#e4e4de] transition-all">
@@ -203,7 +203,7 @@ export default function ProfileDropdown() {
                 </Link>
                 <Link
                   to="/dashboard"
-                  className="flex items-center gap-3 px-4 py-3 text-xs font-black text-slate-600 hover:text-[#111] hover:bg-[#fafaf7] rounded-xl transition-all group"
+                  className="flex items-center gap-3 px-4 py-3 text-xs font-black text-black hover:text-[#111] hover:bg-[#fafaf7] rounded-xl transition-all group"
                   onClick={() => setIsOpen(false)}
                 >
                   <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-white border border-transparent group-hover:border-[#e4e4de] transition-all">

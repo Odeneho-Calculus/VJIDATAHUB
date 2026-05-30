@@ -44,16 +44,16 @@ export default function Pagination({ currentPage, totalPages, onPageChange, isLo
 
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-5 bg-[#fafaf7] border-t border-slate-100 rounded-b-2xl mt-0">
-      <div className="text-[11px] font-black text-slate-400 uppercase tracking-[0.1em]">
+      <div className="text-[11px] font-black text-black uppercase tracking-[0.1em]">
         Page <span style={{ color: c.main }}>{currentPage}</span> of{' '}
-        <span className="text-slate-600">{totalPages}</span>
+        <span className="text-black">{totalPages}</span>
       </div>
 
       <div className="flex items-center gap-1.5">
         <button
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1 || isLoading}
-          className="p-2 rounded-lg border-1.5 border-slate-200 text-slate-400 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+          className="p-2 rounded-lg border-1.5 border-slate-200 text-black transition-all disabled:opacity-30 disabled:cursor-not-allowed"
           style={{ 
             borderColor: currentPage === 1 || isLoading ? '#e4e4de' : '#e4e4de',
             background: '#fff'
@@ -67,7 +67,7 @@ export default function Pagination({ currentPage, totalPages, onPageChange, isLo
 
         {pageNumbers.map((page, index) => (
           page === '...' ? (
-            <span key={`ellipsis-${index}`} className="px-2 text-slate-400 font-black">
+            <span key={`ellipsis-${index}`} className="px-2 text-black font-black">
               ...
             </span>
           ) : (
@@ -78,7 +78,7 @@ export default function Pagination({ currentPage, totalPages, onPageChange, isLo
               className={`px-3.5 py-2 rounded-lg font-black text-xs transition-all ${
                 page === currentPage
                   ? 'text-white scale-105'
-                  : 'border-1.5 border-slate-200 text-slate-500 bg-white hover:border-slate-300 disabled:opacity-50'
+                  : 'border-1.5 border-slate-200 text-black bg-white hover:border-slate-300 disabled:opacity-50'
               }`}
               style={page === currentPage ? { 
                 background: c.main,
@@ -95,7 +95,7 @@ export default function Pagination({ currentPage, totalPages, onPageChange, isLo
         <button
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages || isLoading}
-          className="p-2 rounded-lg border-1.5 border-slate-200 text-slate-400 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+          className="p-2 rounded-lg border-1.5 border-slate-200 text-black transition-all disabled:opacity-30 disabled:cursor-not-allowed"
           style={{ 
             borderColor: currentPage === totalPages || isLoading ? '#e4e4de' : '#e4e4de',
             background: '#fff'

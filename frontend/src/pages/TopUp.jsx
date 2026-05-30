@@ -156,7 +156,7 @@ const styles = `
   .dash-stat-label {
     font-size: 11px;
     font-weight: 700;
-    color: #999;
+    color: #000;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
@@ -267,7 +267,7 @@ export default function TopUp() {
     processing: 'bg-blue-100 text-blue-700',
     pending: 'bg-amber-100 text-amber-700',
     failed: 'bg-rose-100 text-rose-700',
-    cancelled: 'bg-slate-100 text-slate-700',
+    cancelled: 'bg-slate-100 text-black',
   };
 
   const normalizeStatus = (value) => String(value || '').trim().toLowerCase();
@@ -404,7 +404,7 @@ export default function TopUp() {
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <div className="w-2 h-2 rounded-full bg-sky-500 animate-pulse" />
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-sky-600/80">Wallet Center</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-sky-600">Wallet Center</span>
                   </div>
                   <h2 className="dash-h2">Wallet Top-up</h2>
                 </div>
@@ -535,11 +535,11 @@ export default function TopUp() {
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-[11px] font-black uppercase tracking-wider text-slate-400 mb-2 ml-1">
+                    <label className="block text-[11px] font-black uppercase tracking-wider text-black mb-2 ml-1">
                       Enter Amount (GHS)
                     </label>
                     <div className="relative group">
-                      <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-black group-focus-within:text-sky-600 transition-colors pointer-events-none z-10">
+                      <div className="absolute left-5 top-1/2 -translate-y-1/2 text-black font-black group-focus-within:text-sky-600 transition-colors pointer-events-none z-10">
                         GH₵
                       </div>
                       <input
@@ -562,7 +562,7 @@ export default function TopUp() {
                     </div>
                     <div>
                       <p className="text-xs font-black text-sky-900 uppercase tracking-tight">Secure Payment</p>
-                      <p className="text-[11px] font-medium text-sky-700/70 mt-0.5 leading-relaxed">
+                      <p className="text-[11px] font-medium text-sky-700 mt-0.5 leading-relaxed">
                         Funds are processed instantly via Paystack encrypted gateway.
                       </p>
                     </div>
@@ -570,16 +570,16 @@ export default function TopUp() {
 
                   {walletFundingCharge > 0 && parsedAmount > 0 && (
                     <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
-                      <div className="flex items-center justify-between text-xs font-bold text-slate-500">
+                      <div className="flex items-center justify-between text-xs font-bold text-black">
                         <span>Base Amount</span>
-                        <span className="text-slate-900">GHS {parsedAmount.toFixed(2)}</span>
+                        <span className="text-black">GHS {parsedAmount.toFixed(2)}</span>
                       </div>
                       <div className="flex items-center justify-between text-xs font-bold text-amber-600">
                         <span>Service Fee ({walletChargeDescriptor})</span>
                         <span>+ GHS {walletFundingCharge.toFixed(2)}</span>
                       </div>
                       <div className="h-px bg-slate-200" />
-                      <div className="flex items-center justify-between text-sm font-black text-slate-900">
+                      <div className="flex items-center justify-between text-sm font-black text-black">
                         <span>Total Payable</span>
                         <span className="text-lg text-sky-600">GHS {totalAmountCharged.toFixed(2)}</span>
                       </div>
@@ -621,22 +621,22 @@ export default function TopUp() {
                 </div>
                 Transaction History
               </h3>
-              <div className="px-3 py-1 rounded-full bg-slate-100 text-[10px] font-black uppercase tracking-wider text-slate-500">
+              <div className="px-3 py-1 rounded-full bg-slate-100 text-[10px] font-black uppercase tracking-wider text-black">
                 {txTotal} Total
               </div>
             </div>
 
             {txLoading ? (
-              <div className="py-20 flex flex-col items-center justify-center gap-4 text-slate-400">
+              <div className="py-20 flex flex-col items-center justify-center gap-4 text-black">
                 <Loader size={32} className="animate-spin text-sky-500" />
                 <p className="text-xs font-bold uppercase tracking-widest">Fetching Records...</p>
               </div>
             ) : transactions.length === 0 ? (
               <div className="py-20 flex flex-col items-center justify-center gap-4 border-2 border-dashed border-slate-100 rounded-3xl">
-                <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-300">
+                <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-black">
                   <Database size={24} />
                 </div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">No Transactions Found</p>
+                <p className="text-xs font-bold text-black uppercase tracking-widest">No Transactions Found</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -644,11 +644,11 @@ export default function TopUp() {
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-slate-100">
-                        <th className="px-4 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Reference</th>
-                        <th className="px-4 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Type</th>
-                        <th className="px-4 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Amount</th>
-                        <th className="px-4 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
-                        <th className="px-4 py-4 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Action</th>
+                        <th className="px-4 py-4 text-left text-[10px] font-black text-black uppercase tracking-widest">Reference</th>
+                        <th className="px-4 py-4 text-left text-[10px] font-black text-black uppercase tracking-widest">Type</th>
+                        <th className="px-4 py-4 text-left text-[10px] font-black text-black uppercase tracking-widest">Amount</th>
+                        <th className="px-4 py-4 text-left text-[10px] font-black text-black uppercase tracking-widest">Status</th>
+                        <th className="px-4 py-4 text-right text-[10px] font-black text-black uppercase tracking-widest">Action</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50">
@@ -657,13 +657,13 @@ export default function TopUp() {
                         return (
                           <tr key={tx._id} className="group hover:bg-slate-50/50 transition-colors">
                             <td className="px-4 py-4">
-                              <p className="text-xs font-black text-slate-900">{tx.reference || '---'}</p>
-                              <p className="text-[10px] font-bold text-slate-400 mt-1">
+                              <p className="text-xs font-black text-black">{tx.reference || '---'}</p>
+                              <p className="text-[10px] font-bold text-black mt-1">
                                 {new Date(tx.createdAt).toLocaleDateString()} &bull; {new Date(tx.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                               </p>
                             </td>
                             <td className="px-4 py-4">
-                              <span className="text-[11px] font-bold text-slate-600 bg-slate-100 px-2 py-1 rounded-md">
+                              <span className="text-[11px] font-bold text-black bg-slate-100 px-2 py-1 rounded-md">
                                 {typeLabelMap[tx.type] || tx.type}
                               </span>
                             </td>
@@ -674,14 +674,14 @@ export default function TopUp() {
                               </div>
                             </td>
                             <td className="px-4 py-4">
-                              <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-tight ${statusBadgeMap[getResolvedTransactionStatus(tx)] || 'bg-slate-100 text-slate-600'}`}>
+                              <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-tight ${statusBadgeMap[getResolvedTransactionStatus(tx)] || 'bg-slate-100 text-black'}`}>
                                 {getResolvedTransactionStatus(tx)}
                               </span>
                             </td>
                             <td className="px-4 py-4 text-right">
                               <button
                                 onClick={() => { setSelectedTx(tx); setShowTxDetails(true); }}
-                                className="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-sky-600 hover:border-sky-200 hover:shadow-sm transition-all flex items-center justify-center ml-auto"
+                                className="w-8 h-8 rounded-lg bg-white border border-slate-200 text-black hover:text-sky-600 hover:border-sky-200 hover:shadow-sm transition-all flex items-center justify-center ml-auto"
                               >
                                 <Eye size={14} />
                               </button>
@@ -700,15 +700,15 @@ export default function TopUp() {
                       <div key={tx._id} className="p-4 rounded-2xl border border-slate-100 bg-slate-50/30">
                         <div className="flex justify-between items-start mb-3">
                           <div>
-                            <p className="text-xs font-black text-slate-900">{tx.reference || '---'}</p>
-                            <p className="text-[10px] font-bold text-slate-400 mt-0.5">{typeLabelMap[tx.type] || tx.type}</p>
+                            <p className="text-xs font-black text-black">{tx.reference || '---'}</p>
+                            <p className="text-[10px] font-bold text-black mt-0.5">{typeLabelMap[tx.type] || tx.type}</p>
                           </div>
-                          <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase ${statusBadgeMap[getResolvedTransactionStatus(tx)] || 'bg-slate-100 text-slate-600'}`}>
+                          <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase ${statusBadgeMap[getResolvedTransactionStatus(tx)] || 'bg-slate-100 text-black'}`}>
                             {getResolvedTransactionStatus(tx)}
                           </span>
                         </div>
                         <div className="flex justify-between items-end border-t border-slate-100 pt-3 mt-1">
-                          <p className="text-[10px] font-bold text-slate-400">
+                          <p className="text-[10px] font-bold text-black">
                             {new Date(tx.createdAt).toLocaleDateString()}
                           </p>
                           <div className={`text-sm font-black ${isCredit ? 'text-emerald-600' : 'text-rose-600'} flex items-center gap-1`}>
@@ -766,7 +766,7 @@ export default function TopUp() {
                   </div>
                   <div className="p-5 rounded-2xl border-1.5 transition-all duration-300" style={{ background: c.soft, borderColor: `${c.main}20` }}>
                     <p className="text-[10px] font-black uppercase tracking-widest mb-1" style={{ color: c.main }}>Status</p>
-                    <span className={`inline-flex px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-tight ${statusBadgeMap[getResolvedTransactionStatus(selectedTx)] || 'bg-slate-100 text-slate-600'}`}>
+                    <span className={`inline-flex px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-tight ${statusBadgeMap[getResolvedTransactionStatus(selectedTx)] || 'bg-slate-100 text-black'}`}>
                       {getResolvedTransactionStatus(selectedTx)}
                     </span>
                   </div>
@@ -774,19 +774,19 @@ export default function TopUp() {
 
                 <div className="space-y-4 p-6 rounded-[24px] border-1.5 bg-white transition-all duration-300" style={{ borderColor: `${c.main}10` }}>
                   <div className="flex justify-between items-center text-sm">
-                    <span className="font-bold text-slate-600">Type</span>
+                    <span className="font-bold text-black">Type</span>
                     <span className="font-black text-[#111] uppercase tracking-tight">{typeLabelMap[selectedTx.type] || selectedTx.type}</span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
-                    <span className="font-bold text-slate-600">Date</span>
+                    <span className="font-bold text-black">Date</span>
                     <span className="font-black text-[#111]">{new Date(selectedTx.createdAt).toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
-                    <span className="font-bold text-slate-600">Payment Ref</span>
+                    <span className="font-bold text-black">Payment Ref</span>
                     <span className="font-black text-[#111] font-mono text-xs">{selectedTx.paymentReference || 'N/A'}</span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
-                    <span className="font-bold text-slate-600">Transaction ID</span>
+                    <span className="font-bold text-black">Transaction ID</span>
                     <span className="font-black text-[#111] font-mono text-xs">{selectedTx.reference || 'N/A'}</span>
                   </div>
                 </div>

@@ -59,9 +59,9 @@ export default function PurchaseVerificationModal({ isOpen, reference, onClose, 
           <div className="rounded-2xl shadow-xl max-w-lg w-full p-8 bg-white border-2 border-slate-200">
             <div className="flex flex-col items-center justify-center text-center">
               <Loader size={64} className="text-blue-600 mb-4 animate-spin" />
-              <h3 className="text-xl font-bold mb-2 text-slate-900">Verifying Payment</h3>
-              <p className="mb-4 text-slate-600">Please wait while we verify your payment...</p>
-              <p className="text-sm text-slate-600">Reference: {reference}</p>
+              <h3 className="text-xl font-bold mb-2 text-black">Verifying Payment</h3>
+              <p className="mb-4 text-black">Please wait while we verify your payment...</p>
+              <p className="text-sm text-black">Reference: {reference}</p>
             </div>
           </div>
         </div>
@@ -72,24 +72,24 @@ export default function PurchaseVerificationModal({ isOpen, reference, onClose, 
           <div className="rounded-2xl shadow-xl max-w-lg w-full p-8 bg-white border-2 border-slate-200">
             <div className="flex flex-col items-center justify-center text-center">
               <CheckCircle size={64} className="text-green-500 mb-4" />
-              <h3 className="text-xl font-bold mb-2 text-slate-900">Data Bundle Purchased!</h3>
+              <h3 className="text-xl font-bold mb-2 text-black">Data Bundle Purchased!</h3>
               {orderDetails?.order && (
                 <div className="mb-4 text-left w-full">
-                  <p className="mb-2 text-slate-600">
+                  <p className="mb-2 text-black">
                     <strong>Order Number:</strong> {orderDetails.order.orderNumber}
                   </p>
-                  <p className="mb-2 text-slate-600">
+                  <p className="mb-2 text-black">
                     <strong>Data:</strong> {orderDetails.order.dataAmount} {orderDetails.order.network}
                   </p>
-                  <p className="mb-2 text-slate-600">
+                  <p className="mb-2 text-black">
                     <strong>Phone:</strong> {orderDetails.order.phoneNumber}
                   </p>
-                  <p className="mb-2 text-slate-600">
+                  <p className="mb-2 text-black">
                     <strong>Amount:</strong> {formatCurrencyAbbreviated(orderDetails.order.amount)}
                   </p>
                 </div>
               )}
-              <p className="text-sm text-slate-600">Reference: {reference}</p>
+              <p className="text-sm text-black">Reference: {reference}</p>
             </div>
           </div>
         </div>
@@ -100,10 +100,10 @@ export default function PurchaseVerificationModal({ isOpen, reference, onClose, 
           <div className="rounded-2xl shadow-xl max-w-lg w-full p-8 bg-white border-2 border-slate-200">
             <div className="flex flex-col items-center justify-center text-center">
               <AlertCircle size={64} className="text-red-500 mb-4" />
-              <h3 className="text-xl font-bold mb-2 text-slate-900">
+              <h3 className="text-xl font-bold mb-2 text-black">
                 {refunded ? 'Order Failed — Refunded' : 'Payment Failed'}
               </h3>
-              <p className="mb-4 text-slate-600 text-sm leading-relaxed">
+              <p className="mb-4 text-black text-sm leading-relaxed">
                 {error || 'Unable to verify your payment'}
               </p>
               {refunded && refundMessage && (

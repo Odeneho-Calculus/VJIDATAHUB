@@ -111,7 +111,7 @@ export default function PublicTrackOrder() {
     }
 
     return (
-        <div className="min-h-screen bg-slate-100 selection:bg-slate-200 text-slate-900">
+        <div className="min-h-screen bg-slate-100 selection:bg-slate-200 text-black">
             <style>{`
         @keyframes mesh {
           0% { transform: translate(0, 0) scale(1); }
@@ -155,8 +155,8 @@ export default function PublicTrackOrder() {
                                 </div>
                             )}
                             <div className="min-w-0">
-                                <h1 className="text-sm sm:text-base font-semibold text-slate-900 truncate">{store?.name}</h1>
-                                <p className="text-xs text-slate-500">Order Tracking</p>
+                                <h1 className="text-sm sm:text-base font-semibold text-black truncate">{store?.name}</h1>
+                                <p className="text-xs text-black">Order Tracking</p>
                             </div>
                         </Link>
                     </div>
@@ -174,14 +174,14 @@ export default function PublicTrackOrder() {
                         )}
                         <Link
                             to={`/store/${slug}/catalog`}
-                            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-300 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition"
+                            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-300 text-black text-xs font-semibold hover:bg-slate-50 transition"
                         >
                             <Search size={13} />
                             <span className="hidden sm:inline">Catalog</span>
                         </Link>
                         <Link
                             to={`/store/${slug}`}
-                            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-300 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition"
+                            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-300 text-black text-xs font-semibold hover:bg-slate-50 transition"
                         >
                             <ArrowLeft size={13} />
                             <span className="hidden sm:inline">Store</span>
@@ -200,14 +200,14 @@ export default function PublicTrackOrder() {
                             <div className="w-12 h-12 bg-slate-900 text-white rounded-xl flex items-center justify-center mx-auto shadow-md" style={{ backgroundColor: primaryColor }}>
                                 <Search size={22} />
                             </div>
-                            <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Track Your Orders</h2>
-                            <p className="text-slate-600 text-sm">Enter the phone number used during checkout to retrieve your order records.</p>
+                            <h2 className="text-2xl font-bold text-black tracking-tight">Track Your Orders</h2>
+                            <p className="text-black text-sm">Enter the phone number used during checkout to retrieve your order records.</p>
                         </div>
 
                         <form onSubmit={handleSearch} className="space-y-4">
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <Phone size={18} className="text-slate-600" />
+                                    <Phone size={18} className="text-black" />
                                 </div>
                                 <input
                                     type="tel"
@@ -219,7 +219,7 @@ export default function PublicTrackOrder() {
                                             setPhoneNumber(value);
                                         }
                                     }}
-                                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-200 focus:border-slate-400 transition-all text-base font-semibold text-slate-900 placeholder:text-slate-400"
+                                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-200 focus:border-slate-400 transition-all text-base font-semibold text-black placeholder:text-black"
                                     style={{ focusBorderColor: primaryColor }}
                                 />
                             </div>
@@ -245,18 +245,18 @@ export default function PublicTrackOrder() {
                 {searched && (
                     <div className="space-y-4">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-1">
-                            <h3 className="text-sm font-semibold text-slate-700">Purchase History ({orders.length})</h3>
-                            {orders.length > 0 && <span className="text-xs text-slate-500">Showing records for {phoneNumber}</span>}
+                            <h3 className="text-sm font-semibold text-black">Purchase History ({orders.length})</h3>
+                            {orders.length > 0 && <span className="text-xs text-black">Showing records for {phoneNumber}</span>}
                         </div>
 
                         {orders.length === 0 ? (
                             <div className="bg-white rounded-2xl p-12 text-center border border-slate-200 space-y-3">
-                                <div className="w-14 h-14 bg-slate-50 rounded-xl flex items-center justify-center mx-auto text-slate-600">
+                                <div className="w-14 h-14 bg-slate-50 rounded-xl flex items-center justify-center mx-auto text-black">
                                     <Database size={32} />
                                 </div>
                                 <div className="space-y-1">
-                                    <p className="text-lg font-bold text-slate-900">No Orders Found</p>
-                                    <p className="text-slate-600 text-sm">We could not find any orders matching this phone number.</p>
+                                    <p className="text-lg font-bold text-black">No Orders Found</p>
+                                    <p className="text-black text-sm">We could not find any orders matching this phone number.</p>
                                 </div>
                             </div>
                         ) : (
@@ -268,17 +268,17 @@ export default function PublicTrackOrder() {
                                             key={order._id}
                                             className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all group flex flex-col sm:flex-row items-center gap-4"
                                         >
-                                            <div className="w-11 h-11 rounded-xl flex items-center justify-center text-slate-900 font-bold text-sm uppercase flex-shrink-0" style={{ color: primaryColor, backgroundColor: hexToRgba(primaryColor, 0.12) }}>
+                                            <div className="w-11 h-11 rounded-xl flex items-center justify-center text-black font-bold text-sm uppercase flex-shrink-0" style={{ color: primaryColor, backgroundColor: hexToRgba(primaryColor, 0.12) }}>
                                                 {order.network?.charAt(0)}
                                             </div>
 
                                             <div className="flex-1 text-center sm:text-left space-y-1.5">
                                                 <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2">
-                                                    <h4 className="font-bold text-slate-900 text-base">{order.planName}</h4>
-                                                    <span className="text-xs text-slate-500 hidden sm:inline">•</span>
-                                                    <span className="text-xs font-medium text-slate-500">{order.phoneNumber}</span>
+                                                    <h4 className="font-bold text-black text-base">{order.planName}</h4>
+                                                    <span className="text-xs text-black hidden sm:inline">•</span>
+                                                    <span className="text-xs font-medium text-black">{order.phoneNumber}</span>
                                                 </div>
-                                                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 text-[11px] text-slate-500">
+                                                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 text-[11px] text-black">
                                                     <div className="flex items-center gap-1.5">
                                                         <Calendar size={12} />
                                                         {new Date(order.createdAt).toLocaleDateString()}
@@ -295,14 +295,14 @@ export default function PublicTrackOrder() {
                                             </div>
 
                                             <div className="flex items-center gap-2 w-full sm:w-auto">
-                                                <div className={`flex-1 sm:flex-none px-3.5 py-2 rounded-lg border text-[11px] font-semibold capitalize flex items-center justify-center gap-1.5 ${paymentStatusColors[order.paymentStatus] || 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+                                                <div className={`flex-1 sm:flex-none px-3.5 py-2 rounded-lg border text-[11px] font-semibold capitalize flex items-center justify-center gap-1.5 ${paymentStatusColors[order.paymentStatus] || 'bg-slate-100 text-black border-slate-200'}`}>
                                                     Pay: {order.paymentStatus || 'pending'}
                                                 </div>
-                                                <div className={`flex-1 sm:flex-none px-3.5 py-2 rounded-lg border text-[11px] font-semibold capitalize flex items-center justify-center gap-1.5 ${statusColors[order.status] || 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+                                                <div className={`flex-1 sm:flex-none px-3.5 py-2 rounded-lg border text-[11px] font-semibold capitalize flex items-center justify-center gap-1.5 ${statusColors[order.status] || 'bg-slate-100 text-black border-slate-200'}`}>
                                                     <StatusIcon size={14} />
                                                     {order.status}
                                                 </div>
-                                                <div className="hidden sm:flex w-8 h-8 rounded-full border border-slate-200 items-center justify-center text-slate-500 group-hover:text-slate-900 group-hover:bg-slate-50 transition-all">
+                                                <div className="hidden sm:flex w-8 h-8 rounded-full border border-slate-200 items-center justify-center text-black group-hover:text-black group-hover:bg-slate-50 transition-all">
                                                     <ChevronRight size={14} />
                                                 </div>
                                             </div>

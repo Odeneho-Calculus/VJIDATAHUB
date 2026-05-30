@@ -130,7 +130,7 @@ const styles = `
   .dash-stat-label {
     font-size: 11px;
     font-weight: 700;
-    color: #999;
+    color: #000;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
@@ -201,7 +201,7 @@ const styles = `
     text-align: left;
     padding: 14px 16px;
     font-weight: 800;
-    color: #999;
+    color: #000;
     border-bottom: 1.5px solid #e4e4de;
     font-size: 10px;
     text-transform: uppercase;
@@ -458,7 +458,7 @@ export default function Orders() {
                 <button
                   onClick={handleRefresh}
                   disabled={isRefreshing}
-                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#fafaf7] border-1.5 border-[#e4e4de] text-slate-400 hover:text-[#111] transition-all"
+                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#fafaf7] border-1.5 border-[#e4e4de] text-black hover:text-[#111] transition-all"
                   title="Refresh Orders"
                 >
                   <RefreshCw size={18} className={isRefreshing ? 'animate-spin' : ''} />
@@ -512,11 +512,11 @@ export default function Orders() {
             </h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</label>
+                <label className="text-[10px] font-black text-black uppercase tracking-widest">Status</label>
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="w-full bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-xl px-4 py-3 text-xs font-black text-slate-700 outline-none transition-all appearance-none cursor-pointer"
+                  className="w-full bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-xl px-4 py-3 text-xs font-black text-black outline-none transition-all appearance-none cursor-pointer"
                   style={{ focusBorderColor: pageTheme.main }}
                   onFocus={(e) => e.target.style.borderColor = pageTheme.main}
                   onBlur={(e) => e.target.style.borderColor = '#e4e4de'}
@@ -528,11 +528,11 @@ export default function Orders() {
                 </select>
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Network</label>
+                <label className="text-[10px] font-black text-black uppercase tracking-widest">Network</label>
                 <select
                   value={networkFilter}
                   onChange={(e) => setNetworkFilter(e.target.value)}
-                  className="w-full bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-xl px-4 py-3 text-xs font-black text-slate-700 outline-none transition-all appearance-none cursor-pointer"
+                  className="w-full bg-[#fafaf7] border-1.5 border-[#e4e4de] rounded-xl px-4 py-3 text-xs font-black text-black outline-none transition-all appearance-none cursor-pointer"
                   style={{ focusBorderColor: pageTheme.main }}
                   onFocus={(e) => e.target.style.borderColor = pageTheme.main}
                   onBlur={(e) => e.target.style.borderColor = '#e4e4de'}
@@ -562,12 +562,12 @@ export default function Orders() {
             {loading ? (
               <div style={{ textAlign: 'center', padding: '60px' }}>
                 <RefreshCw size={40} className="animate-spin" style={{ color: pageTheme.main, margin: '0 auto 16px' }} />
-                <p style={{ fontSize: '14px', fontWeight: '700', color: '#999' }}>Loading your records...</p>
+                <p style={{ fontSize: '14px', fontWeight: '700', color: '#000' }}>Loading your records...</p>
               </div>
             ) : filteredOrders.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '60px', border: '1.5px dashed #e4e4de', borderRadius: '14px' }}>
                 <ShoppingBag size={40} style={{ color: '#e4e4de', margin: '0 auto 16px' }} />
-                <p style={{ fontSize: '14px', fontWeight: '700', color: '#999' }}>No orders matching your criteria.</p>
+                <p style={{ fontSize: '14px', fontWeight: '700', color: '#000' }}>No orders matching your criteria.</p>
               </div>
             ) : (
               <>
@@ -592,7 +592,7 @@ export default function Orders() {
                             <td className="dash-td">
                               <div className="flex flex-col">
                                 <span className="font-black text-[#111]">#{order.orderNumber?.slice(-8).toUpperCase()}</span>
-                                <span className="text-[10px] text-slate-400 font-bold uppercase">{order.orderKind || 'Purchase'}</span>
+                                <span className="text-[10px] text-black font-bold uppercase">{order.orderKind || 'Purchase'}</span>
                               </div>
                             </td>
                             <td className="dash-td">
@@ -602,7 +602,7 @@ export default function Orders() {
                                 </div>
                                 <div className="flex flex-col">
                                   <span className="font-bold text-[#111]">{getOrderNetworkDisplay(order)}</span>
-                                  <span className="text-[10px] text-slate-500">{getOrderPlanDisplay(order)}</span>
+                                  <span className="text-[10px] text-black">{getOrderPlanDisplay(order)}</span>
                                 </div>
                               </div>
                             </td>
@@ -617,11 +617,11 @@ export default function Orders() {
                             <td className="dash-td">
                               <div className="flex flex-col">
                                 <span className="font-bold text-[#111] text-[11px]">{formatDate(order.date || order.createdAt)}</span>
-                                <span className="text-[10px] text-slate-400">{formatTime(order.date || order.createdAt)}</span>
+                                <span className="text-[10px] text-black">{formatTime(order.date || order.createdAt)}</span>
                               </div>
                             </td>
                             <td className="dash-td text-right">
-                              <button className="p-2 rounded-lg hover:bg-[#fafaf7] text-slate-400 transition-all" style={{ '--tw-text-opacity': '1', color: pageTheme.main }}>
+                              <button className="p-2 rounded-lg hover:bg-[#fafaf7] text-black transition-all" style={{ '--tw-text-opacity': '1', color: pageTheme.main }}>
                                 <ChevronRight size={18} />
                               </button>
                             </td>
@@ -648,7 +648,7 @@ export default function Orders() {
                               {getOrderNetworkDisplay(order)?.charAt(0).toUpperCase()}
                             </div>
                             <div className="flex flex-col">
-                              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{getOrderNetworkDisplay(order)}</span>
+                              <span className="text-[10px] font-black text-black uppercase tracking-widest">{getOrderNetworkDisplay(order)}</span>
                               <span className="font-black text-[#111]">{getOrderPlanDisplay(order)}</span>
                             </div>
                           </div>
@@ -658,7 +658,7 @@ export default function Orders() {
                         </div>
                         <div className="flex justify-between items-end pt-3 border-t border-[#f0f0f0]">
                           <div className="flex flex-col">
-                            <span className="text-[10px] font-bold text-slate-400">{formatDate(order.date || order.createdAt)}</span>
+                            <span className="text-[10px] font-bold text-black">{formatDate(order.date || order.createdAt)}</span>
                             <span className="font-black" style={{ color: c.main }}>{formatCurrencyAbbreviated(order.amount)}</span>
                           </div>
                           <span className="text-[10px] font-black uppercase tracking-widest flex items-center gap-1" style={{ color: c.main }}>
@@ -711,35 +711,35 @@ export default function Orders() {
 
                 <div className="p-4 bg-[#fafaf7] rounded-2xl border border-[#e4e4de] space-y-3">
                   <div className="flex justify-between items-center">
-                    <span className="text-xs font-bold text-slate-500">{isAfaOrder(selectedOrder) ? 'Applicant' : 'Beneficiary'}</span>
+                    <span className="text-xs font-bold text-black">{isAfaOrder(selectedOrder) ? 'Applicant' : 'Beneficiary'}</span>
                     <span className="text-sm font-black text-[#111]">{isAfaOrder(selectedOrder) ? selectedOrder.afaRegistration?.name : (selectedOrder.beneficiary || 'N/A')}</span>
                   </div>
                   {isAfaOrder(selectedOrder) && selectedOrder.afaRegistration && (
                     <>
                       <div className="flex justify-between items-center">
-                        <span className="text-xs font-bold text-slate-500">ID Number</span>
+                        <span className="text-xs font-bold text-black">ID Number</span>
                         <span className="text-sm font-black text-[#111]">{selectedOrder.afaRegistration.idNumber}</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-xs font-bold text-slate-500">Occupation</span>
+                        <span className="text-xs font-bold text-black">Occupation</span>
                         <span className="text-sm font-black text-[#111]">{selectedOrder.afaRegistration.occupation}</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-xs font-bold text-slate-500">Location</span>
+                        <span className="text-xs font-bold text-black">Location</span>
                         <span className="text-sm font-black text-[#111]">{selectedOrder.afaRegistration.location}</span>
                       </div>
                     </>
                   )}
                   <div className="flex justify-between items-center">
-                    <span className="text-xs font-bold text-slate-500">Network</span>
+                    <span className="text-xs font-bold text-black">Network</span>
                     <span className="text-sm font-black text-[#111]">{getOrderNetworkDisplay(selectedOrder)}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-xs font-bold text-slate-500">Date</span>
+                    <span className="text-xs font-bold text-black">Date</span>
                     <span className="text-sm font-black text-[#111]">{formatDate(selectedOrder.date || selectedOrder.createdAt)}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-xs font-bold text-slate-500">Time</span>
+                    <span className="text-xs font-bold text-black">Time</span>
                     <span className="text-sm font-black text-[#111]">{formatTime(selectedOrder.date || selectedOrder.createdAt)}</span>
                   </div>
                 </div>
@@ -798,21 +798,21 @@ export default function Orders() {
 
               <div className="space-y-4">
                 <div className="p-4 bg-[#fafaf7] border border-[#e4e4de] rounded-2xl space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Transaction Reference</label>
+                  <label className="text-[10px] font-black text-black uppercase tracking-widest">Transaction Reference</label>
                   <div className="flex items-center justify-between gap-3">
-                    <p className="font-mono text-xs font-bold text-slate-700 break-all">
+                    <p className="font-mono text-xs font-bold text-black break-all">
                       {verificationOrder.transactionReference || verificationOrder.paystackReference || 'N/A'}
                     </p>
                     <button
                       onClick={handleCopyReference}
-                      className="p-2 bg-white border border-[#e4e4de] rounded-lg text-slate-500 hover:text-[#BE185D] transition-all"
+                      className="p-2 bg-white border border-[#e4e4de] rounded-lg text-black hover:text-[#BE185D] transition-all"
                     >
                       {copied ? <Check size={16} style={{ color: '#0F6E56' }} /> : <Copy size={16} />}
                     </button>
                   </div>
                 </div>
 
-                <p className="text-[11px] font-medium text-slate-500 text-center px-4 leading-relaxed">
+                <p className="text-[11px] font-medium text-black text-center px-4 leading-relaxed">
                   Click the button below to synchronize this payment with the network providers. This process usually takes less than 5 seconds.
                 </p>
 

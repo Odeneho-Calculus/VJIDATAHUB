@@ -239,7 +239,7 @@ export default function GuestPurchase() {
               <ArrowLeft size={16} />
               Back to Plans
             </button>
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 flex items-center gap-2">
+            <h1 className="text-xl sm:text-2xl font-bold text-black flex items-center gap-2">
               <ShoppingCart size={20} />
               Complete Purchase
             </h1>
@@ -254,11 +254,11 @@ export default function GuestPurchase() {
                 <span className={`inline-block px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${styles.accent} ${styles.lightBg} ${styles.border} mb-2`}>
                   {selectedPlan.network}
                 </span>
-                <h3 className="text-xl sm:text-2xl font-black text-slate-900 leading-tight tracking-tight">{selectedPlanDataSize}</h3>
-                <p className="text-xs text-slate-600 mt-1">{selectedPlan.name}</p>
+                <h3 className="text-xl sm:text-2xl font-black text-black leading-tight tracking-tight">{selectedPlanDataSize}</h3>
+                <p className="text-xs text-black mt-1">{selectedPlan.name}</p>
               </div>
               <div className="text-right flex-shrink-0">
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Price</span>
+                <span className="text-[10px] font-bold text-black uppercase tracking-widest block">Price</span>
                 <p className={`text-2xl font-black ${styles.accent} tracking-tighter`}>GHS {selectedPlan.price.toFixed(2)}</p>
               </div>
             </div>
@@ -267,7 +267,7 @@ export default function GuestPurchase() {
           {/* Checkout Form */}
           <div className="bg-white rounded-3xl border border-slate-200/60 shadow-sm overflow-hidden">
             <div className="px-6 py-4 bg-slate-50/50 border-b border-slate-100">
-              <h3 className="text-lg font-black text-slate-900 tracking-tight">Your Information</h3>
+              <h3 className="text-lg font-black text-black tracking-tight">Your Information</h3>
             </div>
 
             <div className="p-6">
@@ -296,7 +296,7 @@ export default function GuestPurchase() {
 
                 {dataPurchaseCharge > 0 && (
                   <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 space-y-1.5">
-                    <div className="flex items-center justify-between text-[11px] font-bold text-slate-500">
+                    <div className="flex items-center justify-between text-[11px] font-bold text-black">
                       <span>Plan price</span>
                       <span>GHS {selectedPlanPrice.toFixed(2)}</span>
                     </div>
@@ -305,18 +305,18 @@ export default function GuestPurchase() {
                       <span>+ GHS {dataPurchaseCharge.toFixed(2)} ({chargeDescriptor})</span>
                     </div>
                     <div className="h-px bg-slate-200" />
-                    <div className="flex items-center justify-between text-xs font-black text-slate-900">
+                    <div className="flex items-center justify-between text-xs font-black text-black">
                       <span>Total charged</span>
                       <span>GHS {totalPaystackAmount.toFixed(2)}</span>
                     </div>
                   </div>
                 )}
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-widest">
+                  <label className="block text-xs font-bold text-black mb-2 uppercase tracking-widest">
                     Phone Number <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
-                    <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400" size={16} />
+                    <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 text-black" size={16} />
                     <input
                       type="tel"
                       name="phoneNumber"
@@ -345,16 +345,16 @@ export default function GuestPurchase() {
                   {phoneError ? (
                     <p className="text-xs text-red-500 font-semibold mt-1.5">{phoneError}</p>
                   ) : (
-                    <p className="text-xs text-slate-500 mt-1.5">Data will be sent to this number</p>
+                    <p className="text-xs text-black mt-1.5">Data will be sent to this number</p>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-widest">
+                  <label className="block text-xs font-bold text-black mb-2 uppercase tracking-widest">
                     Email Address <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400" size={16} />
+                    <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-black" size={16} />
                     <input
                       type="email"
                       name="email"
@@ -365,15 +365,15 @@ export default function GuestPurchase() {
                       className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium"
                     />
                   </div>
-                  <p className="text-xs text-slate-500 mt-1.5">For order confirmation and tracking</p>
+                  <p className="text-xs text-black mt-1.5">For order confirmation and tracking</p>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-widest">
+                  <label className="block text-xs font-bold text-black mb-2 uppercase tracking-widest">
                     Full Name <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
-                    <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400" size={16} />
+                    <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-black" size={16} />
                     <input
                       type="text"
                       name="name"
@@ -407,7 +407,7 @@ export default function GuestPurchase() {
               </form>
 
               <div className="mt-6 text-center">
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-black">
                   Secured by <span className="font-bold text-blue-600">Paystack</span>
                 </p>
               </div>
@@ -432,7 +432,7 @@ export default function GuestPurchase() {
       <div className="min-h-screen bg-slate-50/50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-400 mx-auto mb-4"></div>
-          <p className="text-sm text-slate-600">Loading data plans...</p>
+          <p className="text-sm text-black">Loading data plans...</p>
         </div>
       </div>
     );
@@ -460,20 +460,20 @@ export default function GuestPurchase() {
             <div className="flex items-center gap-2">
               <Link
                 to="/guest/track-order"
-                className="text-xs font-bold text-slate-600 hover:text-blue-600 uppercase tracking-wider whitespace-nowrap"
+                className="text-xs font-bold text-black hover:text-blue-600 uppercase tracking-wider whitespace-nowrap"
               >
                 Track Order
               </Link>
               <Link
                 to="/"
-                className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                className="p-2 text-black hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                 title="Home"
               >
                 <Home size={20} />
               </Link>
             </div>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-black flex items-center gap-2">
             Buy Data Bundles
             <span className="text-[10px] font-black px-2 py-0.5 bg-blue-600 text-white rounded-full uppercase tracking-widest">
               Guest
@@ -496,7 +496,7 @@ export default function GuestPurchase() {
         {/* Network Selection */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+            <h2 className="text-lg font-bold text-black flex items-center gap-2">
               <Layout size={18} className="text-blue-500" />
               Select Network
             </h2>
@@ -513,10 +513,10 @@ export default function GuestPurchase() {
                   className={`relative p-4 rounded-2xl border transition-all duration-300 flex flex-col items-center gap-2 overflow-hidden group ${
                     isSelected
                       ? `bg-white ${styles.border} shadow-lg ${styles.ring.replace('ring-', 'shadow-')} ${styles.accent} ring-4 ${styles.ring}`
-                      : 'bg-white border-slate-200 text-slate-500 hover:border-blue-300 hover:text-slate-900'
+                      : 'bg-white border-slate-200 text-black hover:border-blue-300 hover:text-black'
                   }`}
                 >
-                  <Wifi size={24} className={isSelected ? styles.accent : 'text-slate-400 group-hover:text-blue-400 transition-colors'} />
+                  <Wifi size={24} className={isSelected ? styles.accent : 'text-black group-hover:text-blue-400 transition-colors'} />
                   <span className="font-black text-[10px] uppercase tracking-widest w-full text-center">{network}</span>
                   {isSelected && (
                     <div className={`absolute top-0 right-0 p-1 ${styles.bg} ${styles.text} rounded-bl-xl`}>
@@ -537,8 +537,8 @@ export default function GuestPurchase() {
                 <Zap size={20} />
               </div>
               <div>
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{selectedNetwork}</p>
-                <h3 className="text-lg font-black text-slate-900 tracking-tight">Available Offers</h3>
+                <p className="text-[10px] font-black text-black uppercase tracking-widest">{selectedNetwork}</p>
+                <h3 className="text-lg font-black text-black tracking-tight">Available Offers</h3>
               </div>
             </div>
           </div>
@@ -546,12 +546,12 @@ export default function GuestPurchase() {
           <div className="p-6">
             {currentBundles.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
-                <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center text-slate-300">
+                <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center text-black">
                   <Wifi size={40} />
                 </div>
                 <div>
-                  <p className="text-slate-600 font-bold text-lg">No bundles found</p>
-                  <p className="text-slate-400 text-sm">Please check back later or try another network.</p>
+                  <p className="text-black font-bold text-lg">No bundles found</p>
+                  <p className="text-black text-sm">Please check back later or try another network.</p>
                 </div>
               </div>
             ) : (
@@ -580,7 +580,7 @@ export default function GuestPurchase() {
                         <span className={`px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${
                           bundle.inStock
                             ? `${styles.lightBg} ${styles.accent} ${styles.border.replace('border-', 'border-opacity-30 border-')}`
-                            : 'bg-slate-100 text-slate-500 border-slate-200'
+                            : 'bg-slate-100 text-black border-slate-200'
                         }`}>
                           {bundle.network}
                         </span>
@@ -598,7 +598,7 @@ export default function GuestPurchase() {
                       {/* Action Section */}
                       <div className="space-y-2 pt-2.5 border-t border-slate-100">
                         <div className="rounded-xl border border-slate-100 bg-slate-50/80 px-2.5 py-2 flex items-center justify-between">
-                          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Price</span>
+                          <span className="text-[9px] font-bold text-black uppercase tracking-widest">Price</span>
                           <span className={`text-sm sm:text-base font-black ${styles.accent} tracking-tighter`}>
                             {formatCurrencyAbbreviated(bundle.price)}
                           </span>
@@ -608,7 +608,7 @@ export default function GuestPurchase() {
                           className={`w-full py-2 sm:py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all font-black text-[10px] sm:text-[11px] uppercase tracking-widest ${
                             bundle.inStock
                               ? `bg-slate-900 text-white shadow-lg shadow-slate-100 group-hover:bg-gradient-to-br ${styles.gradient} group-hover:shadow-blue-200 group-hover:scale-[1.02]`
-                              : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                              : 'bg-slate-100 text-black cursor-not-allowed'
                           }`}
                         >
                           <ShoppingCart size={14} strokeWidth={3} />

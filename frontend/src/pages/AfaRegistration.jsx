@@ -136,7 +136,7 @@ const styles = `
   .dash-stat-label {
     font-size: 11px;
     font-weight: 700;
-    color: #999;
+    color: #000;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
@@ -352,7 +352,7 @@ export default function AfaRegistration() {
                 </div>
                 <button
                   onClick={fetchData}
-                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#fafaf7] border-1.5 border-[#e4e4de] text-slate-400 hover:text-[#111] transition-all"
+                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#fafaf7] border-1.5 border-[#e4e4de] text-black hover:text-[#111] transition-all"
                   title="Refresh Data"
                 >
                   <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
@@ -370,7 +370,7 @@ export default function AfaRegistration() {
                 </div>
               </div>
               <div className="dash-stat-value">{history.length}</div>
-              <div className="mt-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+              <div className="mt-2 text-[10px] font-bold text-black uppercase tracking-wider flex items-center gap-1">
                 <CheckCircle2 size={12} style={{ color: historyColor.main }} /> Completed Tasks
               </div>
             </div>
@@ -383,7 +383,7 @@ export default function AfaRegistration() {
                 </div>
               </div>
               <div className="dash-stat-value">{formatCurrency(Number(user?.balance || 0))}</div>
-              <div className="mt-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+              <div className="mt-2 text-[10px] font-bold text-black uppercase tracking-wider flex items-center gap-1">
                 <CheckCircle2 size={12} style={{ color: walletColor.main }} /> Ready for Reg
               </div>
             </div>
@@ -396,7 +396,7 @@ export default function AfaRegistration() {
                 </div>
               </div>
               <div className="dash-stat-value !text-base">{lockStatus.enabled ? 'ONLINE' : 'LOCKED'}</div>
-              <div className="mt-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+              <div className="mt-2 text-[10px] font-bold text-black uppercase tracking-wider flex items-center gap-1">
                 <div className={`w-1.5 h-1.5 rounded-full ${lockStatus.enabled ? 'bg-emerald-500' : 'bg-rose-500'}`} /> {lockStatus.enabled ? 'System Available' : 'Maintenance'}
               </div>
             </div>
@@ -436,7 +436,7 @@ export default function AfaRegistration() {
                       const Icon = field.icon;
                       return (
                         <div className="space-y-2" key={field.name}>
-                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">{field.label}</label>
+                          <label className="text-[10px] font-bold text-black uppercase tracking-widest ml-1">{field.label}</label>
                           <div className="relative">
                             <div style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', width: 22, height: 22, borderRadius: 5, background: field.color.soft, color: field.color.main, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                               <Icon size={12} strokeWidth={2.5} />
@@ -458,7 +458,7 @@ export default function AfaRegistration() {
                     })}
 
                     <div className="space-y-2">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Region</label>
+                      <label className="text-[10px] font-bold text-black uppercase tracking-widest ml-1">Region</label>
                       <div className="relative">
                         <div style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', width: 22, height: 22, borderRadius: 5, background: getColor(5).soft, color: getColor(5).main, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <MapPin size={12} strokeWidth={2.5} />
@@ -493,7 +493,7 @@ export default function AfaRegistration() {
                     </div>
 
                     <div className="space-y-2 md:col-span-2">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Date of Birth</label>
+                      <label className="text-[10px] font-bold text-black uppercase tracking-widest ml-1">Date of Birth</label>
                       <div className="relative">
                         <div style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', width: 22, height: 22, borderRadius: 5, background: getColor(6).soft, color: getColor(6).main, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <Calendar size={12} strokeWidth={2.5} />
@@ -521,7 +521,7 @@ export default function AfaRegistration() {
                       {registering ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
                       {registering ? 'Submitting...' : 'Submit Registration'}
                     </button>
-                    <p className="mt-4 text-center text-xs font-bold text-slate-500 flex items-center justify-center gap-2">
+                    <p className="mt-4 text-center text-xs font-bold text-black flex items-center justify-center gap-2">
                        <Info size={14} style={{ color: feeColor.main }} />
                        Fee of {formatCurrency(lockStatus.registrationFee)} will be deducted from your wallet
                     </p>
@@ -570,12 +570,12 @@ export default function AfaRegistration() {
                   <div className="space-y-4">
                     {historyLoading ? (
                        <div className="flex justify-center py-8">
-                          <Loader2 className="w-8 h-8 animate-spin text-slate-300" />
+                          <Loader2 className="w-8 h-8 animate-spin text-black" />
                        </div>
                     ) : history.length === 0 ? (
                        <div className="text-center py-8 space-y-2">
-                          <History className="w-10 h-10 text-slate-200 mx-auto" />
-                          <p className="text-sm font-bold text-slate-400">No registrations yet</p>
+                          <History className="w-10 h-10 text-black mx-auto" />
+                          <p className="text-sm font-bold text-black">No registrations yet</p>
                        </div>
                     ) : (
                       history.slice(0, 5).map((reg, idx) => {

@@ -33,45 +33,45 @@ export default function EditPricesModal({ plan, isOpen, onClose, onSave, loading
     >
       <div className="space-y-4">
         <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-          <p className="text-[9px] font-black text-slate-400 uppercase tracking-tight mb-1">Selected Plan</p>
-          <p className="text-sm font-black text-slate-900 leading-tight">{plan?.planName}</p>
+          <p className="text-[9px] font-black text-black uppercase tracking-tight mb-1">Selected Plan</p>
+          <p className="text-sm font-black text-black leading-tight">{plan?.planName}</p>
           <div className="flex items-center gap-2 mt-1.5">
-            <span className="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-[9px] font-black text-slate-600 uppercase">
+            <span className="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-[9px] font-black text-black uppercase">
               {plan?.network}
             </span>
-            <span className="text-[10px] font-bold text-slate-400">{plan?.dataSize} • {plan?.validity}</span>
+            <span className="text-[10px] font-bold text-black">{plan?.dataSize} • {plan?.validity}</span>
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-tight mb-1">
+            <label className="block text-[10px] font-black text-black uppercase tracking-tight mb-1">
               Cost Price (Synced)
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 font-bold text-xs">GHS</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-black font-bold text-xs">GHS</span>
               <input
                 type="number"
                 value={isNaN(costPrice) ? 0 : costPrice}
                 disabled
-                className="w-full pl-11 pr-3 py-2 rounded-xl border-2 border-slate-50 bg-slate-50 text-slate-400 font-black cursor-not-allowed text-sm"
+                className="w-full pl-11 pr-3 py-2 rounded-xl border-2 border-slate-50 bg-slate-50 text-black font-black cursor-not-allowed text-sm"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-[10px] font-black text-slate-700 uppercase tracking-tight mb-1">
+            <label className="block text-[10px] font-black text-black uppercase tracking-tight mb-1">
               Selling Price
             </label>
             <div className="relative group">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-900 font-bold text-xs">GHS</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-black font-bold text-xs">GHS</span>
               <input
                 type="number"
                 value={isNaN(sellingPrice) ? 0 : sellingPrice}
                 onChange={(e) => setSellingPrice(e.target.value === '' ? 0 : parseFloat(e.target.value))}
                 step="0.01"
                 disabled={loading}
-                className="w-full pl-11 pr-3 py-2 rounded-xl border-2 border-slate-100 bg-white text-slate-900 font-black text-sm focus:border-emerald-600 focus:ring-0 transition-all placeholder:text-slate-200"
+                className="w-full pl-11 pr-3 py-2 rounded-xl border-2 border-slate-100 bg-white text-black font-black text-sm focus:border-emerald-600 focus:ring-0 transition-all placeholder:text-black"
                 placeholder="0.00"
               />
             </div>
@@ -106,7 +106,7 @@ export default function EditPricesModal({ plan, isOpen, onClose, onSave, loading
           <button
             onClick={onClose}
             disabled={loading}
-            className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-black uppercase text-[10px] hover:bg-slate-50 transition-all disabled:opacity-50"
+            className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-black font-black uppercase text-[10px] hover:bg-slate-50 transition-all disabled:opacity-50"
           >
             Cancel
           </button>

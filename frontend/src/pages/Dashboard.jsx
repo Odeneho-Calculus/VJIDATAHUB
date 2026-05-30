@@ -104,7 +104,7 @@ const styles = `
 
   .dash-p {
     font-size: 14px;
-    color: #666;
+    color: #000;
     margin: 4px 0 0 0;
   }
 
@@ -140,7 +140,7 @@ const styles = `
   .dash-stat-label {
     font-size: 11px;
     font-weight: 700;
-    color: #999;
+    color: #000;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
@@ -466,7 +466,7 @@ export default function Dashboard() {
                 <div>
                   <h2 className="dash-h2">Welcome back, {user?.name}</h2>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="text-xs font-bold text-slate-400 font-mono uppercase">Member ID: {memberId}</span>
+                    <span className="text-xs font-bold text-black font-mono uppercase">Member ID: {memberId}</span>
                   </div>
                 </div>
               </div>
@@ -488,7 +488,7 @@ export default function Dashboard() {
 
           {/* Quick Action Navigation */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest">Quick Actions</h3>
+            <h3 className="text-sm font-bold text-black uppercase tracking-widest">Quick Actions</h3>
             <div className="grid grid-cols-2 sm:flex items-center gap-3">
               <Link to="/orders" className="dash-btn-outline flex-1 sm:flex-none">
                 <ShoppingBag size={14} />
@@ -557,7 +557,7 @@ export default function Dashboard() {
                   <p style={{ fontSize: '14px', fontWeight: '800', color: '#111' }} className="truncate">{user?.email}</p>
                   <div className="flex items-center gap-2 mt-1">
                     <Phone size={10} style={{ color: '#7C3AED' }} />
-                    <span style={{ fontSize: '12px', color: '#666' }}>{user?.phone || 'No phone set'}</span>
+                    <span style={{ fontSize: '12px', color: '#000' }}>{user?.phone || 'No phone set'}</span>
                   </div>
                 </div>
                 <div style={{ background: '#ECFDF5', padding: '16px', borderRadius: '12px', border: '1.5px solid #A7F3D0' }}>
@@ -596,7 +596,7 @@ export default function Dashboard() {
                 </div>
                 <div className="flex items-center justify-between p-3 rounded-xl border border-[#e4e4de]" style={{ background: '#FFFBEB' }}>
                    <span className="text-xs font-bold" style={{ color: '#B45309' }}>Total Spent</span>
-                   <span className="text-sm font-black text-slate-900">{formatCurrencyAbbreviated(user?.totalSpent || 0)}</span>
+                   <span className="text-sm font-black text-black">{formatCurrencyAbbreviated(user?.totalSpent || 0)}</span>
                 </div>
               </div>
             </div>
@@ -640,7 +640,7 @@ export default function Dashboard() {
                     >
                       <span className="text-[9px] font-black uppercase mb-1" style={{ color: c.main }}>{bundle.network}</span>
                       <span className="text-lg font-black text-[#111]">{bundle.dataSize}</span>
-                      <span className="text-[10px] font-bold text-slate-500 mb-3">{bundle.validity}</span>
+                      <span className="text-[10px] font-bold text-black mb-3">{bundle.validity}</span>
                       <div className="mt-auto pt-2 border-t border-[#f0f0f0] flex items-center justify-between">
                         <span className="text-sm font-black" style={{ color: c.main }}>{formatCurrencyAbbreviated(bundle.sellingPrice)}</span>
                         <ChevronRight size={14} style={{ color: c.main }} />
@@ -673,7 +673,7 @@ export default function Dashboard() {
             {recentTransactions.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '60px', border: '1.5px dashed #e4e4de', borderRadius: '14px' }}>
                 <ShoppingBag size={40} style={{ color: '#e4e4de', margin: '0 auto 16px' }} />
-                <p style={{ fontSize: '14px', fontWeight: '700', color: '#999' }}>No transactions yet.</p>
+                <p style={{ fontSize: '14px', fontWeight: '700', color: '#000' }}>No transactions yet.</p>
               </div>
             ) : (
               <div className="dash-table-container">
@@ -700,7 +700,7 @@ export default function Dashboard() {
                           <td className="dash-td">
                             <div>
                               <p style={{ fontWeight: '700', color: '#111' }}>{tx.type}</p>
-                              <p style={{ fontSize: '10px', color: '#999' }} className="truncate max-w-[200px]">{tx.description}</p>
+                              <p style={{ fontSize: '10px', color: '#000' }} className="truncate max-w-[200px]">{tx.description}</p>
                             </div>
                           </td>
                           <td className="dash-td font-bold" style={{ color: tx.rawAmount < 0 ? '#b91c1c' : '#059669' }}>
@@ -709,7 +709,7 @@ export default function Dashboard() {
                           <td className="dash-td">
                             <span className="dash-badge" style={statusColor}>{tx.status}</span>
                           </td>
-                          <td className="dash-td" style={{ fontSize: '11px', color: '#999' }}>{tx.date}</td>
+                          <td className="dash-td" style={{ fontSize: '11px', color: '#000' }}>{tx.date}</td>
                           <td className="dash-td text-right">
                             <button
                               onClick={() => {
@@ -718,7 +718,7 @@ export default function Dashboard() {
                               }}
                               style={{ padding: '6px', borderRadius: '6px', border: '1px solid #e4e4de', background: '#fff', cursor: 'pointer' }}
                             >
-                              <Eye size={14} style={{ color: '#666' }} />
+                              <Eye size={14} style={{ color: '#000' }} />
                             </button>
                           </td>
                         </tr>
@@ -751,7 +751,7 @@ export default function Dashboard() {
                 onClick={() => setShowDetails(false)}
                 className="p-2 hover:bg-[#e4e4de] rounded-full transition-colors"
               >
-                <Check size={20} className="text-slate-500" />
+                <Check size={20} className="text-black" />
               </button>
             </div>
 

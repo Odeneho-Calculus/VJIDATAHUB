@@ -76,7 +76,7 @@ const styles = `
 
   .agent-p {
     font-size: 15px;
-    color: #666;
+    color: #000;
     margin: 4px 0 0 0;
     line-height: 1.5;
   }
@@ -335,7 +335,7 @@ export default function BecomeAgent() {
                                     <h3 style={{ fontSize: '15px', fontWeight: '800', color: '#111', marginBottom: '6px' }}>
                                         {benefit.title}
                                     </h3>
-                                    <p style={{ fontSize: '13px', color: '#666', lineHeight: '1.4' }}>
+                                    <p style={{ fontSize: '13px', color: '#000', lineHeight: '1.4' }}>
                                         {benefit.desc}
                                     </p>
                                 </div>
@@ -344,10 +344,10 @@ export default function BecomeAgent() {
 
                         <div className="agent-main-card" style={{ borderStyle: 'dashed', background: '#fafaf7' }}>
                             <div className="flex items-start gap-4">
-                                <AlertCircle size={20} style={{ color: '#999', marginTop: '2px' }} />
+                                <AlertCircle size={20} style={{ color: '#000', marginTop: '2px' }} />
                                 <div>
                                     <h4 style={{ fontSize: '14px', fontWeight: '800', color: '#333' }}>Quick Start Guide</h4>
-                                    <p style={{ fontSize: '13px', color: '#666', marginTop: '4px' }}>
+                                    <p style={{ fontSize: '13px', color: '#000', marginTop: '4px' }}>
                                         Once activated, your account role will change immediately. You will need to re-login to synchronize your new permissions and access the agent dashboard.
                                     </p>
                                 </div>
@@ -372,7 +372,7 @@ export default function BecomeAgent() {
                                     <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', marginTop: '4px' }}>One-time payment</p>
                                 </div>
                                 {isAlreadyAgent && (
-                                    <div className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-2">
+                                    <div className="bg-emerald-500/20 text-emerald-600 border border-emerald-500/30 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-2">
                                         <CheckCircle size={14} />
                                         Activated
                                     </div>
@@ -380,15 +380,15 @@ export default function BecomeAgent() {
                             </div>
 
                             <div className="space-y-4 mb-8">
-                                <div className="flex items-center gap-3 text-sm text-slate-300 font-medium">
+                                <div className="flex items-center gap-3 text-sm text-black font-medium">
                                     <CheckCircle2 size={16} style={{ color: '#f0a500' }} />
                                     Instant store link generation
                                 </div>
-                                <div className="flex items-center gap-3 text-sm text-slate-300 font-medium">
+                                <div className="flex items-center gap-3 text-sm text-black font-medium">
                                     <CheckCircle2 size={16} style={{ color: '#f0a500' }} />
                                     Lifetime access to agent rates
                                 </div>
-                                <div className="flex items-center gap-3 text-sm text-slate-300 font-medium">
+                                <div className="flex items-center gap-3 text-sm text-black font-medium">
                                     <CheckCircle2 size={16} style={{ color: '#f0a500' }} />
                                     24/7 Priority system support
                                 </div>
@@ -447,7 +447,7 @@ export default function BecomeAgent() {
                         <h3 style={{ fontSize: '24px', fontWeight: '800', color: '#111', marginBottom: '8px', letterSpacing: '-0.02em' }}>
                             UPGRADE SUCCESSFUL!
                         </h3>
-                        <p style={{ fontSize: '14px', color: '#666', fontWeight: '500', marginBottom: '32px', lineHeight: '1.5' }}>
+                        <p style={{ fontSize: '14px', color: '#000', fontWeight: '500', marginBottom: '32px', lineHeight: '1.5' }}>
                             Your account is now an Agent account. Please log in again to activate your new features and dashboard.
                         </p>
                         <button onClick={handleLogoutAndLogin} className="agent-btn-primary" style={{ padding: '14px' }}>

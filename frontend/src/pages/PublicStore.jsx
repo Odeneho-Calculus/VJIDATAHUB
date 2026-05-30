@@ -147,7 +147,7 @@ export default function PublicStore() {
           </div>
         </div>
         <div className="mt-6 space-y-1.5 text-center">
-          <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest animate-pulse">Establishing Connection</p>
+          <p className="text-[10px] font-bold text-black uppercase tracking-widest animate-pulse">Establishing Connection</p>
           <div className="flex gap-1 justify-center">
             {[0, 1, 2].map(i => (
               <div key={i} className="w-1 h-1 rounded-full bg-slate-300 animate-bounce" style={{ animationDelay: `${i * 0.2}s` }}></div>
@@ -166,8 +166,8 @@ export default function PublicStore() {
             <Lock size={32} />
           </div>
           <div className="space-y-2">
-            <h1 className="text-xl font-bold text-slate-900 uppercase tracking-tight">Access Restricted</h1>
-            <p className="text-slate-600 text-sm font-medium">{error}</p>
+            <h1 className="text-xl font-bold text-black uppercase tracking-tight">Access Restricted</h1>
+            <p className="text-black text-sm font-medium">{error}</p>
           </div>
           <button
             onClick={() => window.location.reload()}
@@ -302,7 +302,7 @@ export default function PublicStore() {
     };
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900 selection:bg-slate-200">
+    <div className="min-h-screen bg-slate-100 text-black selection:bg-slate-200">
       <style>{`
         @keyframes mesh {
           0% { transform: translate(0, 0) scale(1); }
@@ -389,7 +389,7 @@ export default function PublicStore() {
 
       {isUpdating && (
         <div className="fixed top-20 right-4 sm:right-6 z-[60] animate-in slide-in-from-right-10">
-          <div className="bg-white border border-slate-200 text-slate-700 px-4 py-2.5 rounded-xl flex items-center gap-2.5 shadow-lg">
+          <div className="bg-white border border-slate-200 text-black px-4 py-2.5 rounded-xl flex items-center gap-2.5 shadow-lg">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             <span className="text-[11px] font-semibold">Store updated</span>
           </div>
@@ -414,8 +414,8 @@ export default function PublicStore() {
               )}
 
               <div className="min-w-0">
-                <h1 className="text-base sm:text-lg font-bold text-slate-900 truncate">{store.name}</h1>
-                <p className="text-[11px] text-slate-500 font-medium truncate">Public agent storefront</p>
+                <h1 className="text-base sm:text-lg font-bold text-black truncate">{store.name}</h1>
+                <p className="text-[11px] text-black font-medium truncate">Public agent storefront</p>
               </div>
             </Link>
 
@@ -424,7 +424,7 @@ export default function PublicStore() {
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                 Live
               </span>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-[11px] font-semibold">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-black text-[11px] font-semibold">
                 <ShieldCheck size={12} />
                 Secure Checkout
               </span>
@@ -434,14 +434,14 @@ export default function PublicStore() {
           <div className="flex items-center gap-2">
             <Link
               to={`/store/${slug}/catalog`}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-300 bg-white text-slate-700 text-xs font-semibold hover:bg-slate-50 transition"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-300 bg-white text-black text-xs font-semibold hover:bg-slate-50 transition"
             >
               <Layout size={14} />
               <span className="hidden sm:inline">Catalog</span>
             </Link>
             <Link
               to={`/store/${slug}/track`}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-300 bg-white text-slate-700 text-xs font-semibold hover:bg-slate-50 transition"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-300 bg-white text-black text-xs font-semibold hover:bg-slate-50 transition"
             >
               <Activity size={14} />
               <span className="hidden sm:inline">Track</span>
@@ -490,7 +490,7 @@ export default function PublicStore() {
                 </h2>
 
                 {heroSlogan && (
-                  <p className="text-xs sm:text-sm lg:text-base text-slate-100 max-w-2xl leading-snug">
+                  <p className="text-xs sm:text-sm lg:text-base text-black max-w-2xl leading-snug">
                     {heroSlogan}
                   </p>
                 )}
@@ -498,7 +498,7 @@ export default function PublicStore() {
                 <div className="grid grid-cols-2 gap-2 sm:gap-2.5 sm:max-w-md pt-1">
                   <Link
                     to={`/store/${slug}/catalog`}
-                    className="hero-wave-btn hero-wave-btn--light inline-flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-4 h-10 sm:h-11 rounded-lg bg-white text-slate-900 text-xs sm:text-sm font-semibold whitespace-nowrap hover:bg-slate-100 transition"
+                    className="hero-wave-btn hero-wave-btn--light inline-flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-4 h-10 sm:h-11 rounded-lg bg-white text-black text-xs sm:text-sm font-semibold whitespace-nowrap hover:bg-slate-100 transition"
                   >
                     Browse Plans
                     <ArrowRight size={14} />
@@ -544,8 +544,8 @@ export default function PublicStore() {
               <div className="bg-white rounded-2xl border border-slate-200 p-3 sm:p-4 h-full">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Networks</p>
-                    <h3 className="text-lg sm:text-xl font-bold text-slate-900">Pick a network catalog</h3>
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-black">Networks</p>
+                    <h3 className="text-lg sm:text-xl font-bold text-black">Pick a network catalog</h3>
                   </div>
                   <Link
                     to={`/store/${slug}/catalog`}
@@ -568,20 +568,20 @@ export default function PublicStore() {
                           {net.logoUrl ? (
                             <img src={net.logoUrl} alt={`${net.name} logo`} className="w-full h-full object-contain" />
                           ) : (
-                            <Smartphone size={20} className="text-slate-500" />
+                            <Smartphone size={20} className="text-black" />
                           )}
                         </div>
                         <div className="min-w-0">
-                          <p className="text-sm font-semibold text-slate-900 truncate">{net.name}</p>
-                          <p className="text-xs text-slate-500">Open plans</p>
+                          <p className="text-sm font-semibold text-black truncate">{net.name}</p>
+                          <p className="text-xs text-black">Open plans</p>
                         </div>
-                        <ChevronRight size={16} className="text-slate-400 ml-auto" />
+                        <ChevronRight size={16} className="text-black ml-auto" />
                       </button>
                     ))}
                   </div>
                 ) : (
                   <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center">
-                    <p className="text-sm text-slate-600">No active network catalog available right now.</p>
+                    <p className="text-sm text-black">No active network catalog available right now.</p>
                   </div>
                 )}
 
@@ -590,8 +590,8 @@ export default function PublicStore() {
                     <div>
                       <div className="flex items-center justify-between gap-2 mb-3">
                         <div>
-                          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Result Checkers</p>
-                          <h3 className="text-lg font-bold text-slate-900">Checker cards for students</h3>
+                          <p className="text-[11px] font-semibold uppercase tracking-wide text-black">Result Checkers</p>
+                          <h3 className="text-lg font-bold text-black">Checker cards for students</h3>
                         </div>
                         <Link
                           to={`/store/${slug}/catalog`}
@@ -609,13 +609,13 @@ export default function PublicStore() {
                             return (
                               <div key={checker._id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
                                 <div className="flex items-center justify-between gap-2">
-                                  <p className="text-sm font-bold text-slate-900">{checker.displayName || checker.checkerType}</p>
+                                  <p className="text-sm font-bold text-black">{checker.displayName || checker.checkerType}</p>
                                   <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isAvailable ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
                                     {isAvailable ? 'Available' : 'Low/Out of stock'}
                                   </span>
                                 </div>
-                                <p className="text-xs text-slate-600 mt-1">{checker.checkerType} checker</p>
-                                <p className="text-lg font-black text-slate-900 mt-2">{formatCurrencyAbbreviated(checker.sellingPrice)}</p>
+                                <p className="text-xs text-black mt-1">{checker.checkerType} checker</p>
+                                <p className="text-lg font-black text-black mt-2">{formatCurrencyAbbreviated(checker.sellingPrice)}</p>
                                 <Link
                                   to={`/store/${slug}/catalog`}
                                   className="mt-2 inline-flex items-center gap-1 text-xs font-semibold"
@@ -630,7 +630,7 @@ export default function PublicStore() {
                         </div>
                       ) : (
                         <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 text-center">
-                          <p className="text-sm text-slate-600">No checker products are visible yet.</p>
+                          <p className="text-sm text-black">No checker products are visible yet.</p>
                         </div>
                       )}
                     </div>
@@ -639,8 +639,8 @@ export default function PublicStore() {
                       <div className="mt-6 lg:mt-0 pt-6 lg:pt-0 border-t lg:border-t-0 lg:border-l border-slate-200 lg:pl-8">
                         <div className="flex items-center justify-between gap-2 mb-3">
                           <div>
-                            <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Government Services</p>
-                            <h3 className="text-lg font-bold text-slate-900">AFA Registration</h3>
+                            <p className="text-[11px] font-semibold uppercase tracking-wide text-black">Government Services</p>
+                            <h3 className="text-lg font-bold text-black">AFA Registration</h3>
                           </div>
                           <Link
                             to={`/store/${slug}/catalog`}
@@ -655,13 +655,13 @@ export default function PublicStore() {
                           {afaProducts.map((afa) => (
                             <div key={afa._id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
                               <div className="flex items-center justify-between gap-2">
-                                <p className="text-sm font-bold text-slate-900">{afa.serviceName}</p>
+                                <p className="text-sm font-bold text-black">{afa.serviceName}</p>
                                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">
                                   Active
                                 </span>
                               </div>
-                              <p className="text-xs text-slate-600 mt-1">Register Now</p>
-                              <p className="text-lg font-black text-slate-900 mt-2">{formatCurrencyAbbreviated(afa.sellingPrice)}</p>
+                              <p className="text-xs text-black mt-1">Register Now</p>
+                              <p className="text-lg font-black text-black mt-2">{formatCurrencyAbbreviated(afa.sellingPrice)}</p>
                               <Link
                                 to={`/store/${slug}/catalog`}
                                 className="mt-2 inline-flex items-center gap-1 text-xs font-semibold"
@@ -684,8 +684,8 @@ export default function PublicStore() {
               {displayFeatures.length > 0 && (
                 <div className="bg-white rounded-2xl border border-slate-200 p-3 sm:p-4">
                   <div className="flex items-center justify-between gap-2 mb-3">
-                    <h3 className="text-lg font-bold text-slate-900">Store Highlights</h3>
-                    <span className="text-xs font-semibold text-slate-500">Professional service</span>
+                    <h3 className="text-lg font-bold text-black">Store Highlights</h3>
+                    <span className="text-xs font-semibold text-black">Professional service</span>
                   </div>
                   <div className="space-y-2.5">
                     {displayFeatures.slice(0, 4).map((feat, idx) => (
@@ -695,8 +695,8 @@ export default function PublicStore() {
                             {renderFeatureIcon(feat, idx)}
                           </div>
                           <div>
-                            <h4 className="text-sm font-bold text-slate-900">{feat.title || 'Feature'}</h4>
-                            <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">{feat.description || ''}</p>
+                            <h4 className="text-sm font-bold text-black">{feat.title || 'Feature'}</h4>
+                            <p className="text-xs text-black mt-0.5 leading-relaxed">{feat.description || ''}</p>
                           </div>
                         </div>
                       </div>
@@ -707,21 +707,21 @@ export default function PublicStore() {
 
               <div className="bg-white rounded-2xl border border-slate-200 p-3 sm:p-4">
                 <div className="flex items-center justify-between gap-2 mb-2.5">
-                  <h3 className="text-base font-bold text-slate-900">Store Snapshot</h3>
+                  <h3 className="text-base font-bold text-black">Store Snapshot</h3>
                   <span className="text-xs font-semibold" style={{ color: primaryColor }}>Live</span>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div className="rounded-lg border border-slate-200 bg-slate-50 p-2.5">
-                    <p className="text-[9px] text-slate-500 uppercase tracking-wide font-semibold">Networks</p>
-                    <p className="text-base font-black text-slate-900 mt-0.5">{totalNetworks}</p>
+                    <p className="text-[9px] text-black uppercase tracking-wide font-semibold">Networks</p>
+                    <p className="text-base font-black text-black mt-0.5">{totalNetworks}</p>
                   </div>
                   <div className="rounded-lg border border-slate-200 bg-slate-50 p-2.5">
-                    <p className="text-[9px] text-slate-500 uppercase tracking-wide font-semibold">Plans</p>
-                    <p className="text-base font-black text-slate-900 mt-0.5">{totalPlans}</p>
+                    <p className="text-[9px] text-black uppercase tracking-wide font-semibold">Plans</p>
+                    <p className="text-base font-black text-black mt-0.5">{totalPlans}</p>
                   </div>
                   <div className="rounded-lg border border-slate-200 bg-slate-50 p-2.5">
-                    <p className="text-[9px] text-slate-500 uppercase tracking-wide font-semibold">Store Status</p>
-                    <p className="text-sm font-bold text-slate-900 mt-0.5">Live</p>
+                    <p className="text-[9px] text-black uppercase tracking-wide font-semibold">Store Status</p>
+                    <p className="text-sm font-bold text-black mt-0.5">Live</p>
                   </div>
                   <div className="rounded-lg border border-slate-200 bg-cyan-50 p-2.5">
                     <p className="text-[9px] text-cyan-700 uppercase tracking-wide font-semibold">Support</p>
@@ -731,12 +731,12 @@ export default function PublicStore() {
               </div>
 
               <div className="bg-white rounded-2xl border border-slate-200 p-3 sm:p-4">
-                <h3 className="text-base font-bold text-slate-900">Need Help?</h3>
-                <p className="text-xs text-slate-600 mt-0.5">{phoneContact ? 'Talk to the store agent or track an existing order in seconds.' : 'Track your order or browse our catalog.'}</p>
+                <h3 className="text-base font-bold text-black">Need Help?</h3>
+                <p className="text-xs text-black mt-0.5">{phoneContact ? 'Talk to the store agent or track an existing order in seconds.' : 'Track your order or browse our catalog.'}</p>
                 <div className="mt-2.5 grid grid-cols-2 gap-2">
                   <Link
                     to={`/store/${slug}/track`}
-                    className="inline-flex items-center justify-center gap-1 px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-700 text-xs font-semibold hover:bg-slate-50 transition"
+                    className="inline-flex items-center justify-center gap-1 px-3 py-2 rounded-lg border border-slate-300 bg-white text-black text-xs font-semibold hover:bg-slate-50 transition"
                   >
                     Track order
                     <ArrowRight size={12} />
@@ -797,9 +797,9 @@ export default function PublicStore() {
       <footer className="bg-white border-t border-slate-200 px-4 sm:px-6 py-6 sm:py-8">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between gap-6">
           <div className="space-y-1.5 max-w-md">
-            <h3 className="text-lg font-bold text-slate-900">{store.name}</h3>
-            <p className="text-xs text-slate-600">Fast, reliable and affordable data bundles from a trusted agent storefront.</p>
-            <div className="flex items-center gap-1.5 text-[11px] text-slate-600">
+            <h3 className="text-lg font-bold text-black">{store.name}</h3>
+            <p className="text-xs text-black">Fast, reliable and affordable data bundles from a trusted agent storefront.</p>
+            <div className="flex items-center gap-1.5 text-[11px] text-black">
               <ShieldCheck size={12} />
               <span>Secure, verified payments</span>
             </div>
@@ -807,18 +807,18 @@ export default function PublicStore() {
 
           <div className="grid grid-cols-2 gap-4 sm:gap-8">
             <div>
-              <p className="text-lg font-bold text-slate-900">{totalNetworks}</p>
-              <p className="text-[11px] text-slate-600">Active Networks</p>
+              <p className="text-lg font-bold text-black">{totalNetworks}</p>
+              <p className="text-[11px] text-black">Active Networks</p>
             </div>
             <div>
-              <p className="text-lg font-bold text-slate-900">{totalPlans}</p>
-              <p className="text-[11px] text-slate-600">Available Plans</p>
+              <p className="text-lg font-bold text-black">{totalPlans}</p>
+              <p className="text-[11px] text-black">Available Plans</p>
             </div>
           </div>
         </div>
 
         <div className="max-w-7xl mx-auto mt-5 pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-xs text-slate-500">© {new Date().getFullYear()} {store.name}. All rights reserved.</p>
+          <p className="text-xs text-black">© {new Date().getFullYear()} {store.name}. All rights reserved.</p>
           {hasSocialMedia && footerSocialLinks.length > 0 && (
             <div className="flex items-center gap-2.5">
               {footerSocialLinks.map((social) => (
@@ -851,9 +851,9 @@ function EliteFeature({ text, primaryColor }) {
         className="w-4 h-4 rounded-full flex items-center justify-center border border-slate-100 group-hover/feat:bg-primary-600 transition-colors"
         style={{ '--primary-600': primaryColor }}
       >
-        <CheckCircle2 size={10} className="text-slate-600 group-hover/feat:text-white" />
+        <CheckCircle2 size={10} className="text-black group-hover/feat:text-white" />
       </div>
-      <span className="text-[10px] font-bold uppercase tracking-tight text-slate-600 group-hover/feat:text-slate-900 transition-colors">{text}</span>
+      <span className="text-[10px] font-bold uppercase tracking-tight text-black group-hover/feat:text-black transition-colors">{text}</span>
     </div>
   );
 }

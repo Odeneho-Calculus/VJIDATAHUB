@@ -57,10 +57,10 @@ export default function GuestVerifyPayment() {
                   <Loader className="w-10 h-10 text-blue-600 animate-spin" />
                 </div>
               </div>
-              <h2 className="text-xl font-black text-slate-900 tracking-tight mb-2">
+              <h2 className="text-xl font-black text-black tracking-tight mb-2">
                 Verifying Payment...
               </h2>
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-black">
                 Please wait while we confirm your payment
               </p>
             </div>
@@ -76,37 +76,37 @@ export default function GuestVerifyPayment() {
               <h2 className="text-xl font-black text-green-600 tracking-tight mb-2">
                 Payment Successful!
               </h2>
-              <p className="text-sm text-slate-700 mb-6">{message}</p>
+              <p className="text-sm text-black mb-6">{message}</p>
 
               {orderDetails && (
                 <div className="bg-green-50 border border-green-200 rounded-2xl p-5 mb-6 text-left">
-                  <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest mb-3">Order Details</h3>
+                  <h3 className="text-sm font-black text-black uppercase tracking-widest mb-3">Order Details</h3>
                   <div className="space-y-2 text-sm">
                     <p>
-                      <span className="text-xs text-slate-600">Order Number:</span>{' '}
-                      <span className="font-bold text-slate-900">{orderDetails.orderNumber}</span>
+                      <span className="text-xs text-black">Order Number:</span>{' '}
+                      <span className="font-bold text-black">{orderDetails.orderNumber}</span>
                     </p>
                     <p>
-                      <span className="text-xs text-slate-600">Network:</span>{' '}
-                      <span className="font-bold text-slate-900">{orderDetails.network}</span>
+                      <span className="text-xs text-black">Network:</span>{' '}
+                      <span className="font-bold text-black">{orderDetails.network}</span>
                     </p>
                     <p>
-                      <span className="text-xs text-slate-600">Data:</span>{' '}
-                      <span className="font-bold text-slate-900">{orderDetails.dataAmount || orderDetails.planName}</span>
+                      <span className="text-xs text-black">Data:</span>{' '}
+                      <span className="font-bold text-black">{orderDetails.dataAmount || orderDetails.planName}</span>
                     </p>
                     <p>
-                      <span className="text-xs text-slate-600">Phone Number:</span>{' '}
-                      <span className="font-bold text-slate-900">{orderDetails.phoneNumber}</span>
+                      <span className="text-xs text-black">Phone Number:</span>{' '}
+                      <span className="font-bold text-black">{orderDetails.phoneNumber}</span>
                     </p>
                     <p>
-                      <span className="text-xs text-slate-600">Amount:</span>{' '}
+                      <span className="text-xs text-black">Amount:</span>{' '}
                       <span className="font-black text-green-600 text-lg">
                         {formatCurrencyAbbreviated(orderDetails.amount)}
                       </span>
                     </p>
                     {orderDetails.providerMessage && (
                       <p className="pt-2 border-t border-green-200">
-                        <span className="text-xs text-slate-600">Status:</span>{' '}
+                        <span className="text-xs text-black">Status:</span>{' '}
                         <span className="font-bold text-green-700 text-xs">
                           {orderDetails.providerMessage}
                         </span>
@@ -126,14 +126,14 @@ export default function GuestVerifyPayment() {
                 </Link>
                 <Link
                   to="/guest/purchase"
-                  className="w-full bg-white border border-slate-300 text-slate-700 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
+                  className="w-full bg-white border border-slate-300 text-black py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
                 >
                   <ShoppingCart className="w-5 h-5" />
                   Buy More Data
                 </Link>
                 <Link
                   to="/"
-                  className="w-full text-sm text-slate-600 hover:text-slate-800 font-bold underline inline-flex items-center justify-center gap-2"
+                  className="w-full text-sm text-black hover:text-black font-bold underline inline-flex items-center justify-center gap-2"
                 >
                   <Home className="w-4 h-4" />
                   Go to Homepage
@@ -152,15 +152,15 @@ export default function GuestVerifyPayment() {
               <h2 className="text-xl font-black text-red-600 tracking-tight mb-2">
                 Payment Failed
               </h2>
-              <p className="text-sm text-slate-700 mb-6">{message}</p>
+              <p className="text-sm text-black mb-6">{message}</p>
 
               {orderDetails && (
                 <div className="bg-red-50 border border-red-200 rounded-2xl p-5 mb-6 text-left">
-                  <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest mb-3">Order Information</h3>
+                  <h3 className="text-sm font-black text-black uppercase tracking-widest mb-3">Order Information</h3>
                   <div className="space-y-2 text-sm">
                     <p>
-                      <span className="text-xs text-slate-600">Order Number:</span>{' '}
-                      <span className="font-bold text-slate-900">{orderDetails.orderNumber}</span>
+                      <span className="text-xs text-black">Order Number:</span>{' '}
+                      <span className="font-bold text-black">{orderDetails.orderNumber}</span>
                     </p>
                     {orderDetails.errorMessage && (
                       <p className="text-red-600 pt-2 border-t border-red-200">
@@ -168,7 +168,7 @@ export default function GuestVerifyPayment() {
                       </p>
                     )}
                   </div>
-                  <p className="text-xs text-slate-500 mt-3">
+                  <p className="text-xs text-black mt-3">
                     Please contact support with this order number if you were charged
                   </p>
                 </div>
@@ -184,14 +184,14 @@ export default function GuestVerifyPayment() {
                 </Link>
                 <Link
                   to="/guest/track-order"
-                  className="w-full bg-white border border-slate-300 text-slate-700 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
+                  className="w-full bg-white border border-slate-300 text-black py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
                 >
                   <Package className="w-5 h-5" />
                   Track Orders
                 </Link>
                 <Link
                   to="/"
-                  className="w-full text-sm text-slate-600 hover:text-slate-800 font-bold underline inline-flex items-center justify-center gap-2"
+                  className="w-full text-sm text-black hover:text-black font-bold underline inline-flex items-center justify-center gap-2"
                 >
                   <Home className="w-4 h-4" />
                   Go to Homepage

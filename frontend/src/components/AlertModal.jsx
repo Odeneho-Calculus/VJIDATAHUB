@@ -39,7 +39,7 @@ export default function AlertModal({ isOpen, onClose, type = 'info', title, mess
           <span className="text-base font-black text-[#111] tracking-tight uppercase leading-none flex-1">{heading}</span>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-300 hover:text-[#111] bg-[#fafaf7] border-1.5 border-[#e4e4de] hover:border-slate-200 transition-all active:scale-90"
+            className="p-2 rounded-xl text-black hover:text-[#111] bg-[#fafaf7] border-1.5 border-[#e4e4de] hover:border-slate-200 transition-all active:scale-90"
             aria-label="Close"
           >
             <X size={18} strokeWidth={2.5} />
@@ -49,7 +49,7 @@ export default function AlertModal({ isOpen, onClose, type = 'info', title, mess
         {/* Body */}
         {message && (
           <div className="px-6 py-5">
-            <p className="text-sm font-bold text-slate-600 leading-relaxed">{message}</p>
+            <p className="text-sm font-bold text-black leading-relaxed">{message}</p>
           </div>
         )}
 

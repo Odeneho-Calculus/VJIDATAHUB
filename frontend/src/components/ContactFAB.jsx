@@ -62,7 +62,7 @@ const ContactFAB = () => {
             <div className={`flex flex-col items-end gap-3 transition-all duration-300 ${isOpen ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-10 scale-0'}`}>
                 {contactOptions.map((option) => (
                     <div key={option.id} className="flex items-center gap-2 pointer-events-auto">
-                        <span className="px-3 py-1.5 rounded-full bg-white text-slate-800 text-xs font-semibold whitespace-nowrap shadow-md border border-slate-200">
+                        <span className="px-3 py-1.5 rounded-full bg-white text-black text-xs font-semibold whitespace-nowrap shadow-md border border-slate-200">
                             {option.label}
                         </span>
                         <a

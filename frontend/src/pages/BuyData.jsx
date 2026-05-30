@@ -130,7 +130,7 @@ const styles = `
   .dash-stat-label {
     font-size: 11px;
     font-weight: 700;
-    color: #999;
+    color: #000;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
@@ -293,7 +293,7 @@ const styles = `
   }
 
   .dash-filter-btn:not(.active) {
-    color: #64748b;
+    color: #000;
   }
 
   .dash-filter-btn:not(.active):hover {
@@ -505,7 +505,7 @@ export default function BuyData() {
         <div className="flex items-center justify-center min-h-screen px-4">
           <div className="text-center">
             <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-slate-400 mx-auto mb-4"></div>
-            <p className="text-sm sm:text-base text-slate-600">Loading data plans...</p>
+            <p className="text-sm sm:text-base text-black">Loading data plans...</p>
           </div>
         </div>
       </UserLayout>
@@ -555,7 +555,7 @@ export default function BuyData() {
                 <div>
                   <h2 className="dash-h2">Data Marketplace</h2>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="text-xs font-bold text-slate-400 font-mono uppercase">Buy Data Bundles</span>
+                    <span className="text-xs font-bold text-black font-mono uppercase">Buy Data Bundles</span>
                   </div>
                 </div>
               </div>
@@ -658,7 +658,7 @@ export default function BuyData() {
                     onClick={() => setSelectedNetwork(network)}
                     className={`dash-network-btn group ${isSelected ? 'active' : ''}`}
                   >
-                    <Wifi size={24} className={isSelected ? 'text-white' : 'text-slate-400 group-hover:text-[#0F6E56]'} />
+                    <Wifi size={24} className={isSelected ? 'text-white' : 'text-black group-hover:text-[#0F6E56]'} />
                     <span className="font-black text-[10px] uppercase tracking-widest">{network}</span>
                   </button>
                 );
@@ -669,7 +669,7 @@ export default function BuyData() {
           {/* Offer Filters */}
           {offerTypes.length > 0 && (
             <div className="flex flex-col gap-4">
-              <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest">Offer Categories</h3>
+              <h3 className="text-sm font-bold text-black uppercase tracking-widest">Offer Categories</h3>
               <div className="p-1.5 bg-white border-1.5 border-[#e4e4de] rounded-xl flex gap-1 overflow-x-auto scrollbar-hide">
                 {offerTypes.map(type => (
                   <button
@@ -702,7 +702,7 @@ export default function BuyData() {
             {currentBundles.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '60px', border: '1.5px dashed #e4e4de', borderRadius: '14px' }}>
                 <Wifi size={40} style={{ color: '#e4e4de', margin: '0 auto 16px' }} />
-                <p style={{ fontSize: '14px', fontWeight: '700', color: '#999' }}>No bundles found for this network.</p>
+                <p style={{ fontSize: '14px', fontWeight: '700', color: '#000' }}>No bundles found for this network.</p>
               </div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
@@ -733,7 +733,7 @@ export default function BuyData() {
 
                       <div className="mb-4">
                         <h4 className="text-xl font-black text-[#111] leading-tight mb-1">{displayDataSize}</h4>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <p className="text-[10px] font-bold text-black uppercase tracking-wider flex items-center gap-1.5">
                           <Clock size={10} strokeWidth={3} />
                           {bundle.validity || 'Instantly Active'}
                         </p>
@@ -757,7 +757,7 @@ export default function BuyData() {
                           className="w-full py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all"
                           style={bundle.inStock
                             ? { background: c.main, color: '#fff', boxShadow: `0 4px 12px ${c.glow}` }
-                            : { background: '#f1f5f9', color: '#94a3b8' }
+                            : { background: '#f1f5f9', color: '#000' }
                           }
                         >
                           Buy Bundle
