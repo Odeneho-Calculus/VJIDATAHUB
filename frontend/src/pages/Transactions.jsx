@@ -445,7 +445,10 @@ export default function Transactions() {
   };
 
   const getResolvedOrderStatus = (tx) => {
-    if (!['Data Purchase', 'Checker Purchase'].includes(tx?.type)) return 'n/a';
+    if (['Data Purchase', 'Checker Purchase'].includes(tx?.type)) {
+      return normalizeStatus(tx?.statusRaw || tx?.status) || 'pending';
+    }
+    // For wallet top-ups and other types, show the transaction status
     return normalizeStatus(tx?.statusRaw || tx?.status) || 'pending';
   };
 
