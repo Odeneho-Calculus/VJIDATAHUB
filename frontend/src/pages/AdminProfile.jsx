@@ -76,7 +76,7 @@ const styles = `
 
   .dash-subheading {
     font-size: 14px;
-    color: #666;
+    color: #000;
     margin: 0;
     font-weight: 500;
   }
@@ -108,7 +108,7 @@ const styles = `
   .dash-label {
     font-size: 12px;
     font-weight: 700;
-    color: #666;
+    color: #000;
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
@@ -131,7 +131,7 @@ const styles = `
 
   .dash-input:disabled {
     background: #ffffff;
-    color: #999;
+    color: #000;
     cursor: not-allowed;
   }
 
@@ -442,8 +442,8 @@ export default function AdminProfile() {
                   <Lock size={20} />
                 </div>
                 <div className="text-left">
-                  <h3 className="font-bold text-slate-900 text-sm">Change Password</h3>
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Update your security credentials</p>
+                  <h3 className="font-bold text-black text-sm">Change Password</h3>
+                  <p className="text-[10px] font-bold text-black uppercase tracking-widest">Update your security credentials</p>
                 </div>
               </button>
             </div>
@@ -488,7 +488,7 @@ export default function AdminProfile() {
             <form onSubmit={handleChangePassword}>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-black mb-1">
                     Current Password
                   </label>
                   <div className="relative">
@@ -513,7 +513,7 @@ export default function AdminProfile() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-black mb-1">
                     New Password
                   </label>
                   <div className="relative">
@@ -539,7 +539,7 @@ export default function AdminProfile() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-black mb-1">
                     Confirm New Password
                   </label>
                   <input
@@ -562,7 +562,7 @@ export default function AdminProfile() {
                     setShowPasswordModal(false);
                     setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
                   }}
-                  className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                  className="flex-1 px-4 py-2 text-black bg-gray-100 rounded-md hover:bg-gray-200"
                   style={{ borderRadius: '8px', fontWeight: 700 }}
                 >
                   Cancel

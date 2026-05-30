@@ -325,7 +325,7 @@ export default function AdminTopzaPlans() {
         .topza-stat-label {
           font-size: 11px;
           font-weight: 700;
-          color: #999;
+          color: #000;
           text-transform: uppercase;
           letter-spacing: 0.05em;
         }
@@ -562,7 +562,7 @@ export default function AdminTopzaPlans() {
             </div>
             <div>
               <h2 className="topza-h2">Topza Offers</h2>
-              <p style={{ fontSize: '14px', color: '#666', margin: '4px 0 0' }}>Manage data bundle catalog and retail pricing</p>
+              <p style={{ fontSize: '14px', color: '#000', margin: '4px 0 0' }}>Manage data bundle catalog and retail pricing</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -699,8 +699,8 @@ export default function AdminTopzaPlans() {
                       <td className="topza-td" style={{ whiteSpace: 'nowrap' }}>
                         <div style={{ fontSize: '12px' }}>Topza: <span style={{ fontWeight: '700', color: '#b91c1c' }}>{Number(plan.costPrice || 0).toFixed(2)}</span></div>
                         <div style={{ fontSize: '12px' }}>User: <span style={{ fontWeight: '700' }}>{Number(plan.sellingPrice || 0).toFixed(2)}</span></div>
-                        <div style={{ fontSize: '11px', color: '#666' }}>Agent: {Number(plan.agentPrice || 0).toFixed(2)}</div>
-                        <div style={{ fontSize: '11px', color: '#666' }}>Vendor: {Number(plan.vendorPrice || 0).toFixed(2)}</div>
+                        <div style={{ fontSize: '11px', color: '#000' }}>Agent: {Number(plan.agentPrice || 0).toFixed(2)}</div>
+                        <div style={{ fontSize: '11px', color: '#000' }}>Vendor: {Number(plan.vendorPrice || 0).toFixed(2)}</div>
                         {plan.discount > 0 && <div style={{ fontSize: '10px', color: '#059669' }}>Disc: {plan.discount.toFixed(2)}</div>}
                       </td>
                       <td className="topza-td" style={{ whiteSpace: 'nowrap' }}>

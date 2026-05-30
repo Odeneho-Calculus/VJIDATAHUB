@@ -193,7 +193,7 @@ export default function AdminTransactions() {
     pending: 'bg-amber-100 text-amber-700',
     processing: 'bg-amber-100 text-amber-700',
     failed: 'bg-rose-100 text-rose-700',
-    cancelled: 'bg-slate-100 text-slate-700',
+    cancelled: 'bg-slate-100 text-black',
     success: 'bg-emerald-100 text-emerald-700',
   };
 
@@ -293,7 +293,7 @@ export default function AdminTransactions() {
         .tx-stat-label {
           font-size: 11px;
           font-weight: 700;
-          color: #999;
+          color: #000;
           text-transform: uppercase;
           letter-spacing: 0.05em;
         }
@@ -345,7 +345,7 @@ export default function AdminTransactions() {
           font-weight: 800;
           text-transform: uppercase;
           letter-spacing: 0.05em;
-          color: #64748b;
+          color: #000;
           transition: all 0.2s;
           background: transparent;
           cursor: pointer;
@@ -599,7 +599,7 @@ export default function AdminTransactions() {
                   onChange={(e) => setPendingVerificationOnly(e.target.checked)}
                   style={{ width: '14px', height: '14px', accentColor: '#DC2626', cursor: 'pointer' }}
                 />
-                <label htmlFor="pendingVerify" style={{ fontSize: '9px', fontWeight: '800', color: '#666', textTransform: 'uppercase', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                <label htmlFor="pendingVerify" style={{ fontSize: '9px', fontWeight: '800', color: '#000', textTransform: 'uppercase', cursor: 'pointer', whiteSpace: 'nowrap' }}>
                   Pending
                 </label>
               </div>
@@ -611,11 +611,11 @@ export default function AdminTransactions() {
               <div style={{ padding: '40px', display: 'flex', justifyContent: 'center' }}><div className="tx-spinner"></div></div>
             ) : filteredTransactions.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-24 bg-white">
-                <div className="w-20 h-20 rounded-[2rem] bg-slate-50 flex items-center justify-center text-slate-300 mb-6">
+                <div className="w-20 h-20 rounded-[2rem] bg-slate-50 flex items-center justify-center text-black mb-6">
                   <Search size={40} strokeWidth={1.5} />
                 </div>
-                <h3 className="text-xl font-black text-slate-900 tracking-tight">No Transactions Found</h3>
-                <p className="text-sm font-bold text-slate-400 mt-1 uppercase tracking-widest">Adjust your filters or check back later</p>
+                <h3 className="text-xl font-black text-black tracking-tight">No Transactions Found</h3>
+                <p className="text-sm font-bold text-black mt-1 uppercase tracking-widest">Adjust your filters or check back later</p>
               </div>
             ) : (
               <table className="tx-table">

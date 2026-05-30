@@ -372,7 +372,7 @@ export default function BecomeAgent() {
                                     <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', marginTop: '4px' }}>One-time payment</p>
                                 </div>
                                 {isAlreadyAgent && (
-                                    <div className="bg-emerald-500/20 text-emerald-600 border border-emerald-500/30 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-2">
+                                    <div className="bg-emerald-500 text-emerald-600 border border-emerald-500 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-2">
                                         <CheckCircle size={14} />
                                         Activated
                                     </div>

@@ -25,12 +25,12 @@ export const PurchaseDetailsModal = ({ isOpen, onClose, purchase }) => {
       <div className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-            <p className="text-[9px] font-bold text-slate-500 uppercase tracking-tight mb-0.5">Purchase Ref</p>
-            <p className="text-[10px] font-mono font-black text-slate-900 break-all">{purchase.id || purchase._id}</p>
+            <p className="text-[9px] font-bold text-black uppercase tracking-tight mb-0.5">Purchase Ref</p>
+            <p className="text-[10px] font-mono font-black text-black break-all">{purchase.id || purchase._id}</p>
           </div>
           <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
             <div>
-              <p className="text-[9px] font-bold text-slate-500 uppercase tracking-tight mb-1">Status</p>
+              <p className="text-[9px] font-bold text-black uppercase tracking-tight mb-1">Status</p>
               <span className={`inline-block px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${purchase.status === 'completed'
                 ? 'bg-emerald-100 text-emerald-700'
                 : purchase.status === 'pending'
@@ -41,46 +41,46 @@ export const PurchaseDetailsModal = ({ isOpen, onClose, purchase }) => {
               </span>
             </div>
             <div className="text-right">
-              <p className="text-[9px] font-bold text-slate-500 uppercase tracking-tight mb-0.5">Date</p>
-              <p className="text-xs font-black text-slate-900">{new Date(purchase.date || purchase.createdAt).toLocaleDateString()}</p>
+              <p className="text-[9px] font-bold text-black uppercase tracking-tight mb-0.5">Date</p>
+              <p className="text-xs font-black text-black">{new Date(purchase.date || purchase.createdAt).toLocaleDateString()}</p>
             </div>
           </div>
         </div>
 
         <div>
-          <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+          <h3 className="text-[10px] font-black text-black uppercase tracking-widest mb-2 flex items-center gap-2">
             <User size={14} className="text-blue-600" />
             Customer Info
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <div className="p-2.5 bg-white border-2 border-slate-50 rounded-xl">
-              <p className="text-[9px] font-bold text-slate-400 uppercase">Name</p>
-              <p className="text-xs font-black text-slate-900">{purchase.user?.name || purchase.userId?.name || 'Unknown'}</p>
+              <p className="text-[9px] font-bold text-black uppercase">Name</p>
+              <p className="text-xs font-black text-black">{purchase.user?.name || purchase.userId?.name || 'Unknown'}</p>
             </div>
             <div className="p-2.5 bg-white border-2 border-slate-50 rounded-xl">
-              <p className="text-[9px] font-bold text-slate-400 uppercase">Email</p>
-              <p className="text-xs font-black text-slate-900 truncate">{purchase.user?.email || purchase.userId?.email || 'N/A'}</p>
+              <p className="text-[9px] font-bold text-black uppercase">Email</p>
+              <p className="text-xs font-black text-black truncate">{purchase.user?.email || purchase.userId?.email || 'N/A'}</p>
             </div>
             <div className="p-2.5 bg-white border-2 border-slate-50 rounded-xl sm:col-span-2">
-              <p className="text-[9px] font-bold text-slate-400 uppercase">Phone</p>
-              <p className="text-xs font-black text-slate-900">{purchase.phoneNumber || purchase.phone || 'N/A'}</p>
+              <p className="text-[9px] font-bold text-black uppercase">Phone</p>
+              <p className="text-xs font-black text-black">{purchase.phoneNumber || purchase.phone || 'N/A'}</p>
             </div>
           </div>
         </div>
 
         <div>
-          <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+          <h3 className="text-[10px] font-black text-black uppercase tracking-widest mb-2 flex items-center gap-2">
             <Briefcase size={14} className="text-blue-600" />
             Product Info
           </h3>
           <div className="grid grid-cols-2 gap-2">
             <div className="p-2.5 bg-white border-2 border-slate-50 rounded-xl">
-              <p className="text-[9px] font-bold text-slate-400 uppercase">Network</p>
-              <p className="text-xs font-black text-slate-900">{purchase.network || 'N/A'}</p>
+              <p className="text-[9px] font-bold text-black uppercase">Network</p>
+              <p className="text-xs font-black text-black">{purchase.network || 'N/A'}</p>
             </div>
             <div className="p-2.5 bg-white border-2 border-slate-50 rounded-xl">
-              <p className="text-[9px] font-bold text-slate-400 uppercase">Plan</p>
-              <p className="text-xs font-black text-slate-900">{purchase.planName || 'N/A'}</p>
+              <p className="text-[9px] font-bold text-black uppercase">Plan</p>
+              <p className="text-xs font-black text-black">{purchase.planName || 'N/A'}</p>
             </div>
             <div className="p-3 bg-blue-50 border border-blue-100 rounded-xl col-span-2 flex justify-between items-center">
               <p className="text-[10px] font-bold text-blue-600 uppercase">Paid Amount</p>

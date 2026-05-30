@@ -52,7 +52,7 @@ export const UserViewModal = ({ isOpen, onClose, user, getStatusColor, getStatus
           className={`flex-1 py-3 px-4 text-sm font-bold border-b-2 transition ${
             activeTab === 'details'
               ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-slate-500 hover:text-slate-700'
+              : 'border-transparent text-black hover:text-black'
           }`}
         >
           <Info size={16} className="inline mr-2" />
@@ -63,7 +63,7 @@ export const UserViewModal = ({ isOpen, onClose, user, getStatusColor, getStatus
           className={`flex-1 py-3 px-4 text-sm font-bold border-b-2 transition ${
             activeTab === 'expenses'
               ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-slate-500 hover:text-slate-700'
+              : 'border-transparent text-black hover:text-black'
           }`}
         >
           <DollarSign size={16} className="inline mr-2" />
@@ -99,26 +99,26 @@ export const UserViewModal = ({ isOpen, onClose, user, getStatusColor, getStatus
         </div>
 
         <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-tight mb-2">User Details</p>
+          <p className="text-[10px] font-bold text-black uppercase tracking-tight mb-2">User Details</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
             <div className="flex justify-between items-center sm:border-b border-slate-200 pb-1">
-              <span className="text-xs font-bold text-slate-500">Name:</span>
-              <span className="text-xs font-black text-slate-900">{user.name}</span>
+              <span className="text-xs font-bold text-black">Name:</span>
+              <span className="text-xs font-black text-black">{user.name}</span>
             </div>
             <div className="flex justify-between items-center sm:border-b border-slate-200 pb-1">
-              <span className="text-xs font-bold text-slate-500">Email:</span>
-              <span className="text-xs font-black text-slate-900 break-all ml-2">{user.email}</span>
+              <span className="text-xs font-bold text-black">Email:</span>
+              <span className="text-xs font-black text-black break-all ml-2">{user.email}</span>
             </div>
             <div className="flex justify-between items-center sm:border-b border-slate-200 pb-1">
-              <span className="text-xs font-bold text-slate-500">Balance:</span>
+              <span className="text-xs font-bold text-black">Balance:</span>
               <span className="text-xs font-black text-blue-600">GHS {formatNumberAbbreviated(user.wallet?.balance || user.balance) || '0'}</span>
             </div>
             <div className="flex justify-between items-center sm:border-b border-slate-200 pb-1">
-              <span className="text-xs font-bold text-slate-500">Role:</span>
-              <span className="text-xs font-black text-slate-900 uppercase">{user.role}</span>
+              <span className="text-xs font-bold text-black">Role:</span>
+              <span className="text-xs font-black text-black uppercase">{user.role}</span>
             </div>
             <div className="flex justify-between items-center sm:border-b border-slate-200 pb-1">
-              <span className="text-xs font-bold text-slate-500">Status:</span>
+              <span className="text-xs font-bold text-black">Status:</span>
               <span 
                 className="px-2 py-0.5 rounded text-[9px] font-black uppercase"
                 style={{ 
@@ -130,19 +130,19 @@ export const UserViewModal = ({ isOpen, onClose, user, getStatusColor, getStatus
               </span>
             </div>
             <div className="flex justify-between items-center sm:border-b border-slate-200 pb-1">
-              <span className="text-xs font-bold text-slate-500">Joined:</span>
-              <span className="text-xs font-black text-slate-900">{new Date(user.createdAt).toLocaleDateString()}</span>
+              <span className="text-xs font-bold text-black">Joined:</span>
+              <span className="text-xs font-black text-black">{new Date(user.createdAt).toLocaleDateString()}</span>
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-2">
           <div className="p-2 bg-slate-50 rounded-xl border border-slate-100">
-            <p className="text-[9px] font-bold text-slate-500 uppercase">Referral Code</p>
-            <p className="text-sm font-black text-slate-900">{user.referralCode || 'N/A'}</p>
+            <p className="text-[9px] font-bold text-black uppercase">Referral Code</p>
+            <p className="text-sm font-black text-black">{user.referralCode || 'N/A'}</p>
           </div>
           <div className="p-2 bg-slate-50 rounded-xl border border-slate-100">
-            <p className="text-[9px] font-bold text-slate-500 uppercase">Earnings</p>
+            <p className="text-[9px] font-bold text-black uppercase">Earnings</p>
             <p className="text-sm font-black text-emerald-600">GHS {formatNumberAbbreviated(user.referralEarnings) || '0'}</p>
           </div>
         </div>
@@ -166,14 +166,14 @@ export const UserViewModal = ({ isOpen, onClose, user, getStatusColor, getStatus
       {activeTab === 'expenses' && (
         <div className="space-y-4">
           <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-tight mb-3">Total Expenses</p>
+            <p className="text-[10px] font-bold text-black uppercase tracking-tight mb-3">Total Expenses</p>
 
             {user.role === 'agent' ? (
               <div className="space-y-3">
                 <div className="flex justify-between items-center p-3 bg-white rounded-lg border border-slate-200">
                   <div className="flex items-center gap-2">
                     <ShoppingCart size={16} className="text-blue-600" />
-                    <span className="text-sm font-bold text-slate-700">Personal Spending</span>
+                    <span className="text-sm font-bold text-black">Personal Spending</span>
                   </div>
                   <span className="text-sm font-black text-blue-600">GHS {formatNumberAbbreviated(totalSpent)}</span>
                 </div>
@@ -181,7 +181,7 @@ export const UserViewModal = ({ isOpen, onClose, user, getStatusColor, getStatus
                 <div className="flex justify-between items-center p-3 bg-white rounded-lg border border-slate-200">
                   <div className="flex items-center gap-2">
                     <DollarSign size={16} className="text-emerald-600" />
-                    <span className="text-sm font-bold text-slate-700">Store Revenue</span>
+                    <span className="text-sm font-bold text-black">Store Revenue</span>
                   </div>
                   <span className="text-sm font-black text-emerald-600">GHS {formatNumberAbbreviated(storeRevenue)}</span>
                 </div>
@@ -189,7 +189,7 @@ export const UserViewModal = ({ isOpen, onClose, user, getStatusColor, getStatus
                 <div className="flex justify-between items-center p-3 bg-gradient-to-r from-blue-50 to-emerald-50 rounded-lg border-2 border-blue-200">
                   <div className="flex items-center gap-2">
                     <AlertCircle size={16} className="text-blue-600" />
-                    <span className="text-sm font-bold text-slate-700">Total Expenses</span>
+                    <span className="text-sm font-bold text-black">Total Expenses</span>
                   </div>
                   <span className="text-lg font-black text-blue-600">GHS {formatNumberAbbreviated(totalExpenses)}</span>
                 </div>
@@ -198,7 +198,7 @@ export const UserViewModal = ({ isOpen, onClose, user, getStatusColor, getStatus
               <div className="flex justify-between items-center p-4 bg-white rounded-lg border border-slate-200">
                 <div className="flex items-center gap-2">
                   <DollarSign size={16} className="text-blue-600" />
-                  <span className="text-sm font-bold text-slate-700">Total Spent</span>
+                  <span className="text-sm font-bold text-black">Total Spent</span>
                 </div>
                 <span className="text-lg font-black text-blue-600">GHS {formatNumberAbbreviated(totalSpent)}</span>
               </div>
@@ -240,7 +240,7 @@ export const UserRoleModal = ({ isOpen, onClose, user, newRole, setNewRole, onUp
           <button
             onClick={onClose}
             disabled={loading}
-            className="flex-1 px-4 py-2.5 border border-slate-200 text-slate-900 font-bold rounded-xl hover:bg-slate-50 transition disabled:opacity-50 text-sm"
+            className="flex-1 px-4 py-2.5 border border-slate-200 text-black font-bold rounded-xl hover:bg-slate-50 transition disabled:opacity-50 text-sm"
           >
             Cancel
           </button>
@@ -262,17 +262,17 @@ export const UserRoleModal = ({ isOpen, onClose, user, newRole, setNewRole, onUp
       <div className="space-y-3">
         <div className="bg-blue-50/50 p-3 rounded-xl border border-blue-100">
           <p className="text-[9px] font-bold text-blue-600 uppercase mb-1">Target User</p>
-          <p className="text-sm font-black text-slate-900">{user.name}</p>
-          <p className="text-[10px] font-medium text-slate-500">{user.email}</p>
+          <p className="text-sm font-black text-black">{user.name}</p>
+          <p className="text-[10px] font-medium text-black">{user.email}</p>
         </div>
 
         <div>
-          <label className="block text-[10px] font-bold text-slate-700 mb-1.5 border-l-2 border-blue-600 pl-2">New Role</label>
+          <label className="block text-[10px] font-bold text-black mb-1.5 border-l-2 border-blue-600 pl-2">New Role</label>
           <select
             value={newRole}
             onChange={(e) => setNewRole(e.target.value)}
             disabled={loading}
-            className="w-full px-3 py-2 bg-white border-2 border-slate-100 rounded-xl text-slate-900 font-bold focus:border-blue-600 outline-none transition-all text-sm"
+            className="w-full px-3 py-2 bg-white border-2 border-slate-100 rounded-xl text-black font-bold focus:border-blue-600 outline-none transition-all text-sm"
           >
             <option value="user">User (Standard)</option>
             <option value="agent">Agent (Store Owner)</option>
@@ -298,7 +298,7 @@ export const UserBanModal = ({ isOpen, onClose, user, banReason, setBanReason, o
           <button
             onClick={onClose}
             disabled={loading}
-            className="flex-1 px-4 py-2.5 border border-slate-200 text-slate-900 font-bold rounded-xl hover:bg-slate-50 transition disabled:opacity-50 text-sm"
+            className="flex-1 px-4 py-2.5 border border-slate-200 text-black font-bold rounded-xl hover:bg-slate-50 transition disabled:opacity-50 text-sm"
           >
             Cancel
           </button>
@@ -324,13 +324,13 @@ export const UserBanModal = ({ isOpen, onClose, user, banReason, setBanReason, o
         </div>
 
         <div>
-          <label className="block text-[10px] font-bold text-slate-500 mb-1.5 border-l-2 border-red-600 pl-2">Reason (Optional)</label>
+          <label className="block text-[10px] font-bold text-black mb-1.5 border-l-2 border-red-600 pl-2">Reason (Optional)</label>
           <textarea
             value={banReason}
             onChange={(e) => setBanReason(e.target.value)}
             disabled={loading}
             placeholder="e.g. Fraudulent activities..."
-            className="w-full px-3 py-2 bg-white border-2 border-slate-100 rounded-xl text-slate-900 font-medium focus:border-red-500 outline-none transition-all text-sm"
+            className="w-full px-3 py-2 bg-white border-2 border-slate-100 rounded-xl text-black font-medium focus:border-red-500 outline-none transition-all text-sm"
             rows="2"
           />
         </div>
@@ -354,7 +354,7 @@ export const UserSuspendModal = ({ isOpen, onClose, user, suspendDays, setSuspen
           <button
             onClick={onClose}
             disabled={loading}
-            className="flex-1 px-4 py-2.5 border border-slate-200 text-slate-900 font-bold rounded-xl hover:bg-slate-50 transition disabled:opacity-50 text-sm"
+            className="flex-1 px-4 py-2.5 border border-slate-200 text-black font-bold rounded-xl hover:bg-slate-50 transition disabled:opacity-50 text-sm"
           >
             Cancel
           </button>
@@ -380,7 +380,7 @@ export const UserSuspendModal = ({ isOpen, onClose, user, suspendDays, setSuspen
         </div>
 
         <div>
-          <label className="block text-[10px] font-bold text-slate-500 mb-1.5 border-l-2 border-amber-600 pl-2">Duration (Days)</label>
+          <label className="block text-[10px] font-bold text-black mb-1.5 border-l-2 border-amber-600 pl-2">Duration (Days)</label>
           <input
             type="number"
             min="1"
@@ -388,7 +388,7 @@ export const UserSuspendModal = ({ isOpen, onClose, user, suspendDays, setSuspen
             value={suspendDays}
             onChange={(e) => setSuspendDays(Math.max(1, parseInt(e.target.value) || 1))}
             disabled={loading}
-            className="w-full px-3 py-2 bg-white border-2 border-slate-100 rounded-xl text-slate-900 font-black focus:border-amber-600 outline-none transition-all text-sm"
+            className="w-full px-3 py-2 bg-white border-2 border-slate-100 rounded-xl text-black font-black focus:border-amber-600 outline-none transition-all text-sm"
           />
         </div>
       </div>
@@ -453,7 +453,7 @@ export const UserEditModal = ({ isOpen, onClose, user, onUpdate, loading }) => {
           <button
             onClick={onClose}
             disabled={loading}
-            className="flex-1 px-4 py-2.5 border border-slate-200 text-slate-900 font-bold rounded-xl hover:bg-slate-50 transition disabled:opacity-50 text-sm"
+            className="flex-1 px-4 py-2.5 border border-slate-200 text-black font-bold rounded-xl hover:bg-slate-50 transition disabled:opacity-50 text-sm"
           >
             Cancel
           </button>
@@ -475,20 +475,20 @@ export const UserEditModal = ({ isOpen, onClose, user, onUpdate, loading }) => {
       <div className="space-y-3">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Name</label>
+            <label className="block text-[10px] font-bold text-black uppercase mb-1">Name</label>
             <input
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-3 py-2 bg-slate-50 border-2 border-slate-200 rounded-xl text-slate-900 font-bold focus:border-blue-600 outline-none transition-all text-sm"
+              className="w-full px-3 py-2 bg-slate-50 border-2 border-slate-200 rounded-xl text-black font-bold focus:border-blue-600 outline-none transition-all text-sm"
             />
           </div>
           <div>
-            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Role</label>
+            <label className="block text-[10px] font-bold text-black uppercase mb-1">Role</label>
             <select
               value={formData.role}
               onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-              className="w-full px-3 py-2 bg-slate-50 border-2 border-slate-200 rounded-xl text-slate-900 font-bold focus:border-blue-600 outline-none transition-all text-sm"
+              className="w-full px-3 py-2 bg-slate-50 border-2 border-slate-200 rounded-xl text-black font-bold focus:border-blue-600 outline-none transition-all text-sm"
             >
               <option value="user">User</option>
               <option value="agent">Agent</option>
@@ -498,16 +498,16 @@ export const UserEditModal = ({ isOpen, onClose, user, onUpdate, loading }) => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Email</label>
+            <label className="block text-[10px] font-bold text-black uppercase mb-1">Email</label>
             <input
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full px-3 py-2 bg-slate-50 border-2 border-slate-200 rounded-xl text-slate-900 font-bold focus:border-blue-600 outline-none transition-all text-sm"
+              className="w-full px-3 py-2 bg-slate-50 border-2 border-slate-200 rounded-xl text-black font-bold focus:border-blue-600 outline-none transition-all text-sm"
             />
           </div>
           <div>
-            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Phone</label>
+            <label className="block text-[10px] font-bold text-black uppercase mb-1">Phone</label>
             <input
               type="tel"
               value={formData.phone}
@@ -517,7 +517,7 @@ export const UserEditModal = ({ isOpen, onClose, user, onUpdate, loading }) => {
                   setFormData({ ...formData, phone: value });
                 }
               }}
-              className="w-full px-3 py-2 bg-slate-50 border-2 border-slate-200 rounded-xl text-slate-900 font-bold focus:border-blue-600 outline-none transition-all text-sm"
+              className="w-full px-3 py-2 bg-slate-50 border-2 border-slate-200 rounded-xl text-black font-bold focus:border-blue-600 outline-none transition-all text-sm"
             />
           </div>
         </div>
@@ -525,16 +525,16 @@ export const UserEditModal = ({ isOpen, onClose, user, onUpdate, loading }) => {
         <div className="p-3 bg-blue-50 border-2 border-blue-100 rounded-xl">
           <div className="flex justify-between items-center mb-2">
             <span className="text-[10px] font-bold text-blue-600 uppercase tracking-tight">Wallet Management</span>
-            <span className="text-[10px] font-bold text-slate-600">Current: GHS {formatNumberAbbreviated(user.balance)}</span>
+            <span className="text-[10px] font-bold text-black">Current: GHS {formatNumberAbbreviated(user.balance)}</span>
           </div>
 
           <div className="grid grid-cols-2 gap-2 mb-2">
             <div>
-              <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Operation</label>
+              <label className="block text-[9px] font-bold text-black uppercase mb-1">Operation</label>
               <select
                 value={formData.walletOperation}
                 onChange={(e) => setFormData({ ...formData, walletOperation: e.target.value, walletAmount: e.target.value === 'set' ? user.balance : 0 })}
-                className="w-full px-2 py-1.5 bg-white border-2 border-blue-100 rounded-lg text-slate-900 font-bold text-xs outline-none focus:border-blue-400"
+                className="w-full px-2 py-1.5 bg-white border-2 border-blue-100 rounded-lg text-black font-bold text-xs outline-none focus:border-blue-400"
               >
                 <option value="set">Set Balance</option>
                 <option value="credit">Credit (Add)</option>
@@ -542,19 +542,19 @@ export const UserEditModal = ({ isOpen, onClose, user, onUpdate, loading }) => {
               </select>
             </div>
             <div>
-              <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Amount</label>
+              <label className="block text-[9px] font-bold text-black uppercase mb-1">Amount</label>
               <input
                 type="number"
                 step="0.01"
                 value={formData.walletAmount}
                 onChange={(e) => setFormData({ ...formData, walletAmount: parseFloat(e.target.value) || 0 })}
-                className="w-full px-2 py-1.5 bg-white border-2 border-blue-100 rounded-lg text-slate-900 font-bold text-xs outline-none focus:border-blue-400"
+                className="w-full px-2 py-1.5 bg-white border-2 border-blue-100 rounded-lg text-black font-bold text-xs outline-none focus:border-blue-400"
               />
             </div>
           </div>
 
           <div className="flex justify-between items-center pt-1.5 border-t border-blue-100">
-            <span className="text-[10px] font-bold text-slate-500">Preview:</span>
+            <span className="text-[10px] font-bold text-black">Preview:</span>
             <span className={`text-xs font-black ${isNegativeIssue ? 'text-red-600' : 'text-blue-700'}`}>
               GHS {formatNumberAbbreviated(previewBalance)}
             </span>
@@ -576,8 +576,8 @@ export const UserEditModal = ({ isOpen, onClose, user, onUpdate, loading }) => {
 
         <div className="p-3 bg-slate-50 border-2 border-slate-200 rounded-xl flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-bold text-slate-500 uppercase">Email Verification</p>
-            <p className="text-[10px] text-slate-400">Manual verification toggle</p>
+            <p className="text-[10px] font-bold text-black uppercase">Email Verification</p>
+            <p className="text-[10px] text-black">Manual verification toggle</p>
           </div>
           <button
             type="button"
@@ -585,7 +585,7 @@ export const UserEditModal = ({ isOpen, onClose, user, onUpdate, loading }) => {
             className={`px-4 h-10 flex items-center justify-center rounded-xl border-2 transition-all text-[10px] font-black uppercase ${
               formData.isEmailVerified 
                 ? 'bg-emerald-50 border-emerald-200 text-emerald-600' 
-                : 'bg-white border-slate-200 text-slate-400'
+                : 'bg-white border-slate-200 text-black'
             }`}
           >
             {formData.isEmailVerified ? 'Verified' : 'Unverified'}
@@ -615,7 +615,7 @@ export const UserDeleteModal = ({ isOpen, onClose, user, onDelete, loading }) =>
           <button
             onClick={onClose}
             disabled={loading}
-            className="flex-1 px-4 py-2.5 border border-slate-200 text-slate-900 font-bold rounded-xl hover:bg-slate-50 transition disabled:opacity-50 text-sm"
+            className="flex-1 px-4 py-2.5 border border-slate-200 text-black font-bold rounded-xl hover:bg-slate-50 transition disabled:opacity-50 text-sm"
           >
             Cancel
           </button>
@@ -642,7 +642,7 @@ export const UserDeleteModal = ({ isOpen, onClose, user, onDelete, loading }) =>
         </div>
 
         <div className="space-y-3">
-          <p className="text-[10px] font-bold text-slate-500 uppercase border-l-2 border-red-600 pl-2">Deletion Type</p>
+          <p className="text-[10px] font-bold text-black uppercase border-l-2 border-red-600 pl-2">Deletion Type</p>
           
           <div className="grid grid-cols-1 gap-2">
             <button
@@ -654,10 +654,10 @@ export const UserDeleteModal = ({ isOpen, onClose, user, onDelete, loading }) =>
               }`}
             >
               <div className="flex justify-between items-center mb-1">
-                <p className={`text-xs font-black ${deleteType === 'temporary' ? 'text-red-600' : 'text-slate-700'}`}>Temporary Deletion</p>
+                <p className={`text-xs font-black ${deleteType === 'temporary' ? 'text-red-600' : 'text-black'}`}>Temporary Deletion</p>
                 {deleteType === 'temporary' && <div className="w-2 h-2 rounded-full bg-red-600" />}
               </div>
-              <p className="text-[10px] font-medium text-slate-500 leading-tight">
+              <p className="text-[10px] font-medium text-black leading-tight">
                 Restricts platform access but preserves all data. Can be restored later by an admin.
               </p>
             </button>
@@ -671,10 +671,10 @@ export const UserDeleteModal = ({ isOpen, onClose, user, onDelete, loading }) =>
               }`}
             >
               <div className="flex justify-between items-center mb-1">
-                <p className={`text-xs font-black ${deleteType === 'permanent' ? 'text-red-800' : 'text-slate-700'}`}>Permanent Deletion</p>
+                <p className={`text-xs font-black ${deleteType === 'permanent' ? 'text-red-800' : 'text-black'}`}>Permanent Deletion</p>
                 {deleteType === 'permanent' && <div className="w-2 h-2 rounded-full bg-red-800" />}
               </div>
-              <p className="text-[10px] font-medium text-slate-500 leading-tight text-red-600/70 font-bold">
+              <p className="text-[10px] font-medium text-black leading-tight text-red-600/70 font-bold">
                 CRITICAL: Removes all transactions, orders, and associated data. THIS ACTION CANNOT BE UNDONE.
               </p>
             </button>

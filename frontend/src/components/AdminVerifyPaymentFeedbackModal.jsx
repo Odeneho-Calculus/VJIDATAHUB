@@ -21,7 +21,7 @@ export function VerifyingPaymentModal({ isOpen, themeColor }) {
         </div>
         <div>
           <p className="text-sm font-black text-[#111] uppercase tracking-tight">Checking payment...</p>
-          <p className="text-xs font-bold text-slate-400 mt-1">Please wait while we verify this transaction.</p>
+          <p className="text-xs font-bold text-black mt-1">Please wait while we verify this transaction.</p>
         </div>
         <div className="flex justify-center gap-1">
           <span className="w-2 h-2 rounded-full animate-bounce [animation-delay:-0.2s]" style={{ background: c.main + '88' }} />
@@ -61,7 +61,7 @@ export function VerifiedPaymentModal({ isOpen, onClose, message = 'Payment verif
         </div>
         <div>
           <p className="text-base font-black text-[#111] uppercase tracking-tight">Success!</p>
-          <p className="text-xs font-bold text-slate-400 mt-1">{message}</p>
+          <p className="text-xs font-bold text-black mt-1">{message}</p>
         </div>
       </div>
     </Modal>

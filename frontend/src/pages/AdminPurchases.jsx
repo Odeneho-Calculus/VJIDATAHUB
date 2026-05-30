@@ -200,7 +200,7 @@ export default function AdminPurchases() {
         
         .purchases-subtitle {
           font-size: 14px;
-          color: #666;
+          color: #000;
           margin: 4px 0 0 0;
         }
         
@@ -259,7 +259,7 @@ export default function AdminPurchases() {
           left: 14px;
           top: 50%;
           transform: translateY(-50%);
-          color: #999;
+          color: #000;
         }
         
         .purchases-input {
@@ -497,7 +497,7 @@ export default function AdminPurchases() {
                 ) : filteredPurchases.length === 0 ? (
                   <div style={{ padding: '64px', textAlign: 'center' }}>
                     <Database size={48} style={{ color: '#e4e4de', marginBottom: '16px' }} />
-                    <p style={{ color: '#666', margin: 0 }}>No purchases found</p>
+                    <p style={{ color: '#000', margin: 0 }}>No purchases found</p>
                   </div>
                 ) : (
                   <table className="purchases-table">
@@ -516,11 +516,11 @@ export default function AdminPurchases() {
                         <tr key={purchase.id || purchase._id}>
                           <td>
                             <div style={{ fontWeight: 700 }}>{purchase.user?.name || purchase.userId?.name || 'Unknown'}</div>
-                            <div style={{ fontSize: '11px', color: '#999' }}>{purchase.user?.email || purchase.userId?.email || 'N/A'}</div>
+                            <div style={{ fontSize: '11px', color: '#000' }}>{purchase.user?.email || purchase.userId?.email || 'N/A'}</div>
                           </td>
                           <td>
                             <div style={{ fontWeight: 700 }}>{purchase.planName || 'N/A'}</div>
-                            <div style={{ fontSize: '11px', color: '#666', fontWeight: 700 }}>{purchase.network} • #{purchase._id?.slice(-8)}</div>
+                            <div style={{ fontSize: '11px', color: '#000', fontWeight: 700 }}>{purchase.network} • #{purchase._id?.slice(-8)}</div>
                           </td>
                           <td style={{ fontWeight: 800 }}>GHS {formatNumberAbbreviated(purchase.amount)}</td>
                           <td>
@@ -530,7 +530,7 @@ export default function AdminPurchases() {
                           </td>
                           <td>
                             <div style={{ fontSize: '12px', fontWeight: 700 }}>{new Date(purchase.date || purchase.createdAt).toLocaleDateString()}</div>
-                            <div style={{ fontSize: '10px', color: '#999' }}>{new Date(purchase.date || purchase.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                            <div style={{ fontSize: '10px', color: '#000' }}>{new Date(purchase.date || purchase.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                           </td>
                           <td>
                             <div style={{ display: 'flex', gap: '4px' }}>

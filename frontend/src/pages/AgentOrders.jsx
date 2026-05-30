@@ -115,7 +115,7 @@ const styles = `
   .vtu-stat-label {
     font-size: 11px;
     font-weight: 700;
-    color: #999;
+    color: #000;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
@@ -241,7 +241,7 @@ const styles = `
     text-align: left;
     padding: 14px 16px;
     font-weight: 800;
-    color: #999;
+    color: #000;
     border-bottom: 1.5px solid #e4e4de;
     font-size: 10px;
     text-transform: uppercase;
@@ -492,7 +492,7 @@ export default function AgentOrders() {
           <div className="vtu-main-card">
             <div className="vtu-filter-bar">
               <form onSubmit={handleSearch} style={{ flex: 1, minWidth: '240px', position: 'relative' }}>
-                <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#999' }} />
+                <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#000' }} />
                 <input
                   type="text"
                   value={searchInput}
@@ -541,7 +541,7 @@ export default function AgentOrders() {
               <div style={{ textAlign: 'center', padding: '100px', background: '#fafaf7' }}>
                 <ShoppingBag size={48} style={{ margin: '0 auto 16px', color: '#e4e4de' }} />
                 <p style={{ fontSize: '16px', fontWeight: '800', color: '#111' }}>No orders found</p>
-                <p style={{ fontSize: '13px', color: '#666', marginTop: '4px' }}>Try adjusting your filters or search query.</p>
+                <p style={{ fontSize: '13px', color: '#000', marginTop: '4px' }}>Try adjusting your filters or search query.</p>
               </div>
             ) : (
               <table className="vtu-table">
@@ -560,19 +560,19 @@ export default function AgentOrders() {
                 <tbody>
                   {displayedOrders.map((order) => (
                     <tr key={order._id} className="vtu-table-row">
-                      <td className="vtu-td font-mono" style={{ fontSize: '11px', color: '#999' }}>
+                      <td className="vtu-td font-mono" style={{ fontSize: '11px', color: '#000' }}>
                         #{order._id?.slice(-8).toUpperCase()}
                       </td>
                       <td className="vtu-td">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <Phone size={12} style={{ color: '#999' }} />
+                          <Phone size={12} style={{ color: '#000' }} />
                           <span style={{ fontWeight: '700', color: '#111' }}>{order.phoneNumber || 'N/A'}</span>
                         </div>
-                        <div style={{ fontSize: '10px', fontWeight: '800', color: '#666', marginTop: '2px' }}>{order.network}</div>
+                        <div style={{ fontSize: '10px', fontWeight: '800', color: '#000', marginTop: '2px' }}>{order.network}</div>
                       </td>
                       <td className="vtu-td">
                         <div style={{ fontWeight: '600' }}>{getOrderPlanDisplay(order)}</div>
-                        <div style={{ fontSize: '11px', color: '#999' }}>{formatDate(order.createdAt)}</div>
+                        <div style={{ fontSize: '11px', color: '#000' }}>{formatDate(order.createdAt)}</div>
                       </td>
                       <td className="vtu-td font-bold" style={{ color: '#111' }}>{formatCurrency(order.amount)}</td>
                       <td className="vtu-td">
@@ -599,7 +599,7 @@ export default function AgentOrders() {
                           className="vtu-btn-outline"
                           style={{ padding: '8px' }}
                         >
-                          <Eye size={16} style={{ color: '#666' }} />
+                          <Eye size={16} style={{ color: '#000' }} />
                         </button>
                       </td>
                     </tr>
@@ -632,11 +632,11 @@ export default function AgentOrders() {
             <div style={{ fontFamily: 'DM Sans, sans-serif' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
                 <div>
-                  <p style={{ fontSize: '10px', fontWeight: '800', color: '#999', textTransform: 'uppercase', marginBottom: '4px' }}>Reference</p>
+                  <p style={{ fontSize: '10px', fontWeight: '800', color: '#000', textTransform: 'uppercase', marginBottom: '4px' }}>Reference</p>
                   <p style={{ fontSize: '14px', fontWeight: '800', color: '#111', fontFamily: 'monospace' }}>#{selectedOrder._id?.toUpperCase()}</p>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <p style={{ fontSize: '10px', fontWeight: '800', color: '#999', textTransform: 'uppercase', marginBottom: '4px' }}>Fulfillment</p>
+                  <p style={{ fontSize: '10px', fontWeight: '800', color: '#000', textTransform: 'uppercase', marginBottom: '4px' }}>Fulfillment</p>
                   <span className={`vtu-badge ${getOrderStatusColor(selectedOrder.status)}`}>
                     {selectedOrder.status}
                   </span>
@@ -645,14 +645,14 @@ export default function AgentOrders() {
 
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div style={{ background: '#fafaf7', padding: '16px', borderRadius: '12px', border: '1.5px solid #e4e4de' }}>
-                  <p style={{ fontSize: '10px', fontWeight: '800', color: '#999', textTransform: 'uppercase', marginBottom: '4px' }}>Customer</p>
+                  <p style={{ fontSize: '10px', fontWeight: '800', color: '#000', textTransform: 'uppercase', marginBottom: '4px' }}>Customer</p>
                   <p style={{ fontSize: '14px', fontWeight: '800', color: '#111' }}>{selectedOrder.phoneNumber}</p>
-                  <p style={{ fontSize: '11px', color: '#666', marginTop: '2px', fontWeight: '700' }}>{selectedOrder.network}</p>
+                  <p style={{ fontSize: '11px', color: '#000', marginTop: '2px', fontWeight: '700' }}>{selectedOrder.network}</p>
                 </div>
                 <div style={{ background: '#fafaf7', padding: '16px', borderRadius: '12px', border: '1.5px solid #e4e4de' }}>
-                  <p style={{ fontSize: '10px', fontWeight: '800', color: '#999', textTransform: 'uppercase', marginBottom: '4px' }}>Plan Details</p>
+                  <p style={{ fontSize: '10px', fontWeight: '800', color: '#000', textTransform: 'uppercase', marginBottom: '4px' }}>Plan Details</p>
                   <p style={{ fontSize: '14px', fontWeight: '800', color: '#111' }}>{getOrderPlanDisplay(selectedOrder)}</p>
-                  <p style={{ fontSize: '11px', color: '#666', marginTop: '2px' }}>{formatCurrency(selectedOrder.amount)}</p>
+                  <p style={{ fontSize: '11px', color: '#000', marginTop: '2px' }}>{formatCurrency(selectedOrder.amount)}</p>
                 </div>
               </div>
 
@@ -661,19 +661,19 @@ export default function AgentOrders() {
                   <p style={{ fontSize: '10px', fontWeight: '800', color: '#059669', textTransform: 'uppercase', marginBottom: '12px' }}>AFA Registration Info</p>
                   <div className="grid grid-cols-2 gap-y-3 gap-x-4">
                     <div>
-                      <p style={{ fontSize: '9px', fontWeight: '700', color: '#666', textTransform: 'uppercase' }}>Applicant</p>
+                      <p style={{ fontSize: '9px', fontWeight: '700', color: '#000', textTransform: 'uppercase' }}>Applicant</p>
                       <p style={{ fontSize: '12px', fontWeight: '800', color: '#111' }}>{selectedOrder.afaRegistration.name}</p>
                     </div>
                     <div>
-                      <p style={{ fontSize: '9px', fontWeight: '700', color: '#666', textTransform: 'uppercase' }}>ID Number</p>
+                      <p style={{ fontSize: '9px', fontWeight: '700', color: '#000', textTransform: 'uppercase' }}>ID Number</p>
                       <p style={{ fontSize: '12px', fontWeight: '800', color: '#111' }}>{selectedOrder.afaRegistration.idNumber}</p>
                     </div>
                     <div>
-                      <p style={{ fontSize: '9px', fontWeight: '700', color: '#666', textTransform: 'uppercase' }}>Occupation</p>
+                      <p style={{ fontSize: '9px', fontWeight: '700', color: '#000', textTransform: 'uppercase' }}>Occupation</p>
                       <p style={{ fontSize: '12px', fontWeight: '800', color: '#111' }}>{selectedOrder.afaRegistration.occupation}</p>
                     </div>
                     <div>
-                      <p style={{ fontSize: '9px', fontWeight: '700', color: '#666', textTransform: 'uppercase' }}>Location</p>
+                      <p style={{ fontSize: '9px', fontWeight: '700', color: '#000', textTransform: 'uppercase' }}>Location</p>
                       <p style={{ fontSize: '12px', fontWeight: '800', color: '#111' }}>{selectedOrder.afaRegistration.location}</p>
                     </div>
                   </div>
@@ -682,22 +682,22 @@ export default function AgentOrders() {
 
               <div style={{ borderTop: '1.5px solid #f0f0f0', paddingTop: '16px' }}>
                 <div className="flex justify-between items-center py-2">
-                  <span style={{ fontSize: '12px', fontWeight: '700', color: '#666' }}>Payment Status</span>
+                  <span style={{ fontSize: '12px', fontWeight: '700', color: '#000' }}>Payment Status</span>
                   <span className={`vtu-badge ${getPaymentStatusColor(selectedOrder.paymentStatus || 'pending')}`}>
                     {selectedOrder.paymentStatus || 'pending'}
                   </span>
                 </div>
                 <div className="flex justify-between items-center py-2">
-                  <span style={{ fontSize: '12px', fontWeight: '700', color: '#666' }}>Store Commission</span>
+                  <span style={{ fontSize: '12px', fontWeight: '700', color: '#000' }}>Store Commission</span>
                   <span style={{ fontSize: '14px', fontWeight: '800', color: '#059669' }}>+{formatCurrency(selectedOrder.agentCommission || 0)}</span>
                 </div>
                 <div className="flex justify-between items-center py-2">
-                  <span style={{ fontSize: '12px', fontWeight: '700', color: '#666' }}>Order Date</span>
+                  <span style={{ fontSize: '12px', fontWeight: '700', color: '#000' }}>Order Date</span>
                   <span style={{ fontSize: '12px', fontWeight: '800', color: '#111' }}>{formatDate(selectedOrder.createdAt)}</span>
                 </div>
                 {selectedOrder.transactionId && (
                   <div className="flex justify-between items-center py-2">
-                    <span style={{ fontSize: '12px', fontWeight: '700', color: '#666' }}>Transaction ID</span>
+                    <span style={{ fontSize: '12px', fontWeight: '700', color: '#000' }}>Transaction ID</span>
                     <span style={{ fontSize: '11px', fontWeight: '800', color: '#111', fontFamily: 'monospace' }}>{selectedOrder.transactionId}</span>
                   </div>
                 )}

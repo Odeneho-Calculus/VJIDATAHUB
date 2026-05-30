@@ -111,21 +111,21 @@ export const OrderDetailsModal = ({ isOpen, onClose, order, onRefund, themeColor
         )}
 
         <div>
-          <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+          <h3 className="text-[10px] font-black text-black uppercase tracking-widest mb-2 flex items-center gap-2">
             <div className="w-1.5 h-1.5 rounded-full" style={{ background: c.main }}></div>
             Customer Info
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <div className="p-2.5 bg-[#fafaf7] border border-slate-100 rounded-xl">
-              <p className="text-[9px] font-bold text-slate-400 uppercase">Name</p>
+              <p className="text-[9px] font-bold text-black uppercase">Name</p>
               <p className="text-xs font-black text-[#111]">{order.user?.name || order.userId?.name || 'Unknown'}</p>
             </div>
             <div className="p-2.5 bg-[#fafaf7] border border-slate-100 rounded-xl">
-              <p className="text-[9px] font-bold text-slate-400 uppercase">Email</p>
+              <p className="text-[9px] font-bold text-black uppercase">Email</p>
               <p className="text-xs font-black text-[#111] truncate">{order.user?.email || order.userId?.email || 'N/A'}</p>
             </div>
             <div className="p-2.5 bg-[#fafaf7] border border-slate-100 rounded-xl sm:col-span-2">
-              <p className="text-[9px] font-bold text-slate-400 uppercase">Phone</p>
+              <p className="text-[9px] font-bold text-black uppercase">Phone</p>
               <p className="text-xs font-black text-[#111]">{order.phoneNumber || 'N/A'}</p>
             </div>
           </div>
@@ -133,17 +133,17 @@ export const OrderDetailsModal = ({ isOpen, onClose, order, onRefund, themeColor
 
         {order.store && (
           <div>
-            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+            <h3 className="text-[10px] font-black text-black uppercase tracking-widest mb-2 flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full" style={{ background: c.main }}></div>
               Store Information
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div className="p-2.5 bg-[#fafaf7] border border-slate-100 rounded-xl">
-                <p className="text-[9px] font-bold text-slate-400 uppercase">Store Name</p>
+                <p className="text-[9px] font-bold text-black uppercase">Store Name</p>
                 <p className="text-xs font-black text-[#111]">{order.store?.name || 'N/A'}</p>
               </div>
               <div className="p-2.5 bg-[#fafaf7] border border-slate-100 rounded-xl">
-                <p className="text-[9px] font-bold text-slate-400 uppercase">Owner</p>
+                <p className="text-[9px] font-bold text-black uppercase">Owner</p>
                 <p className="text-xs font-black text-[#111]">{order.store?.owner?.name || 'N/A'}</p>
               </div>
             </div>
@@ -152,55 +152,55 @@ export const OrderDetailsModal = ({ isOpen, onClose, order, onRefund, themeColor
 
         {isAfaOrder && order.afaRegistration && (
           <div>
-            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+            <h3 className="text-[10px] font-black text-black uppercase tracking-widest mb-2 flex items-center gap-2">
               <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
               AFA Registration Details
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div className="p-2.5 bg-white border border-slate-200 rounded-xl">
-                <p className="text-[9px] font-bold text-slate-400 uppercase">Applicant Name</p>
-                <p className="text-xs font-black text-slate-900">{order.afaRegistration.name}</p>
+                <p className="text-[9px] font-bold text-black uppercase">Applicant Name</p>
+                <p className="text-xs font-black text-black">{order.afaRegistration.name}</p>
               </div>
               <div className="p-2.5 bg-white border border-slate-200 rounded-xl">
-                <p className="text-[9px] font-bold text-slate-400 uppercase">Phone Number</p>
-                <p className="text-xs font-black text-slate-900">{order.afaRegistration.phoneNumber}</p>
+                <p className="text-[9px] font-bold text-black uppercase">Phone Number</p>
+                <p className="text-xs font-black text-black">{order.afaRegistration.phoneNumber}</p>
               </div>
               <div className="p-2.5 bg-white border border-slate-200 rounded-xl">
-                <p className="text-[9px] font-bold text-slate-400 uppercase">ID Number (Ghana Card)</p>
-                <p className="text-xs font-black text-slate-900">{order.afaRegistration.idNumber}</p>
+                <p className="text-[9px] font-bold text-black uppercase">ID Number (Ghana Card)</p>
+                <p className="text-xs font-black text-black">{order.afaRegistration.idNumber}</p>
               </div>
               <div className="p-2.5 bg-white border border-slate-200 rounded-xl">
-                <p className="text-[9px] font-bold text-slate-400 uppercase">Date of Birth</p>
-                <p className="text-xs font-black text-slate-900">{order.afaRegistration.dateOfBirth}</p>
+                <p className="text-[9px] font-bold text-black uppercase">Date of Birth</p>
+                <p className="text-xs font-black text-black">{order.afaRegistration.dateOfBirth}</p>
               </div>
               <div className="p-2.5 bg-white border border-slate-200 rounded-xl">
-                <p className="text-[9px] font-bold text-slate-400 uppercase">Occupation</p>
-                <p className="text-xs font-black text-slate-900">{order.afaRegistration.occupation}</p>
+                <p className="text-[9px] font-bold text-black uppercase">Occupation</p>
+                <p className="text-xs font-black text-black">{order.afaRegistration.occupation}</p>
               </div>
               <div className="p-2.5 bg-white border border-slate-200 rounded-xl">
-                <p className="text-[9px] font-bold text-slate-400 uppercase">Location / Region</p>
-                <p className="text-xs font-black text-slate-900">{order.afaRegistration.location}, {order.afaRegistration.region}</p>
+                <p className="text-[9px] font-bold text-black uppercase">Location / Region</p>
+                <p className="text-xs font-black text-black">{order.afaRegistration.location}, {order.afaRegistration.region}</p>
               </div>
             </div>
           </div>
         )}
 
         <div>
-          <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+          <h3 className="text-[10px] font-black text-black uppercase tracking-widest mb-2 flex items-center gap-2">
             <div className="w-1.5 h-1.5 rounded-full" style={{ background: c.main }}></div>
             Plan Information
           </h3>
           <div className="grid grid-cols-2 gap-2">
             <div className="p-2.5 bg-[#fafaf7] border border-slate-100 rounded-xl">
-              <p className="text-[9px] font-bold text-slate-400 uppercase">Network</p>
+              <p className="text-[9px] font-bold text-black uppercase">Network</p>
               <p className="text-xs font-black text-[#111] uppercase">{order.network || 'N/A'}</p>
             </div>
             <div className="p-2.5 bg-[#fafaf7] border border-slate-100 rounded-xl">
-              <p className="text-[9px] font-bold text-slate-400 uppercase">{planAmountLabel}</p>
+              <p className="text-[9px] font-bold text-black uppercase">{planAmountLabel}</p>
               <p className="text-xs font-black text-[#111]">{planAmountValue}</p>
             </div>
             <div className="p-3 border rounded-xl col-span-2 flex justify-between items-center" style={{ background: c.soft, borderColor: c.main + '22' }}>
-              <p className="text-[10px] font-black text-slate-500 uppercase">Total Amount</p>
+              <p className="text-[10px] font-black text-black uppercase">Total Amount</p>
               <p className="text-lg font-black" style={{ color: c.main }}>GHS {formatNumberAbbreviated(order.amount) || '0'}</p>
             </div>
           </div>
@@ -208,15 +208,15 @@ export const OrderDetailsModal = ({ isOpen, onClose, order, onRefund, themeColor
 
         {(order.providerMessage || order.errorMessage || order.adminNotes) && (
           <div className="space-y-2 pt-1 border-t border-slate-100">
-            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+            <h3 className="text-[10px] font-black text-black uppercase tracking-widest mb-2 flex items-center gap-2">
               <div className="w-1.5 h-1.5 bg-amber-500 rounded-full"></div>
               Audit Logs
             </h3>
             <div className="grid grid-cols-1 gap-2">
               {order.providerMessage && (
                 <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
-                  <p className="text-[8px] font-bold text-slate-500 uppercase mb-0.5">Provider</p>
-                  <p className="text-[11px] font-bold text-slate-700 leading-tight">{order.providerMessage}</p>
+                  <p className="text-[8px] font-bold text-black uppercase mb-0.5">Provider</p>
+                  <p className="text-[11px] font-bold text-black leading-tight">{order.providerMessage}</p>
                 </div>
               )}
               {order.errorMessage && (
@@ -235,9 +235,9 @@ export const OrderDetailsModal = ({ isOpen, onClose, order, onRefund, themeColor
           </div>
         )}
 
-        <div className="pt-2 flex justify-between items-center text-[10px] font-bold text-slate-400">
+        <div className="pt-2 flex justify-between items-center text-[10px] font-bold text-black">
           <span className="uppercase">Created On</span>
-          <span className="text-slate-500">
+          <span className="text-black">
             {new Date(order.date || order.createdAt).toLocaleString()}
           </span>
         </div>
@@ -291,11 +291,11 @@ export const OrderStatusModal = ({ isOpen, onClose, order, newStatus, setNewStat
         <div className="p-3 rounded-xl border border-slate-100" style={{ background: c.soft }}>
           <p className="text-[9px] font-black uppercase tracking-widest mb-1" style={{ color: c.main }}>Order Reference</p>
           <p className="text-sm font-black text-[#111]">#{order.orderNumber?.toUpperCase() || order._id?.slice(-8).toUpperCase()}</p>
-          <p className="text-[10px] font-bold text-slate-500 truncate">{order.planName}</p>
+          <p className="text-[10px] font-bold text-black truncate">{order.planName}</p>
         </div>
 
         <div>
-          <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest flex items-center gap-2">
+          <label className="block text-[10px] font-black text-black uppercase mb-2 tracking-widest flex items-center gap-2">
             <div className="w-1.5 h-1.5 rounded-full" style={{ background: c.main }}></div>
             Current: <span style={{ color: c.main }}>{order.status}</span>
           </label>
@@ -314,7 +314,7 @@ export const OrderStatusModal = ({ isOpen, onClose, order, newStatus, setNewStat
         </div>
 
         <div>
-          <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest flex items-center gap-2">
+          <label className="block text-[10px] font-black text-black uppercase mb-2 tracking-widest flex items-center gap-2">
             <div className="w-1.5 h-1.5 rounded-full" style={{ background: c.main }}></div>
             Admin Notes
           </label>

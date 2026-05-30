@@ -114,7 +114,7 @@ const styles = `
   .vtu-stat-label {
     font-size: 11px;
     font-weight: 700;
-    color: #999;
+    color: #000;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
@@ -199,7 +199,7 @@ const styles = `
     text-align: left;
     padding: 14px 16px;
     font-weight: 800;
-    color: #999;
+    color: #000;
     border-bottom: 1.5px solid #e4e4de;
     font-size: 10px;
     text-transform: uppercase;
@@ -479,11 +479,11 @@ export default function AgentCommissions() {
                     <tr key={payout._id} className="hover:bg-slate-50 transition-colors">
                       <td className="vtu-td">
                         <div style={{ fontWeight: '800', color: '#111' }}>{formatCurrency(payout.amount)}</div>
-                        <div style={{ fontSize: '11px', color: '#999' }}>Net: {formatCurrency(payout.netAmount)}</div>
+                        <div style={{ fontSize: '11px', color: '#000' }}>Net: {formatCurrency(payout.netAmount)}</div>
                       </td>
                       <td className="vtu-td">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          {payout.method === 'mobile_money' ? <Smartphone size={14} style={{ color: '#666' }} /> : <Landmark size={14} style={{ color: '#666' }} />}
+                          {payout.method === 'mobile_money' ? <Smartphone size={14} style={{ color: '#000' }} /> : <Landmark size={14} style={{ color: '#000' }} />}
                           <span style={{ fontWeight: '700', textTransform: 'capitalize' }}>{payout.method === 'mobile_money' ? 'Momo' : 'Bank'}</span>
                         </div>
                       </td>
@@ -492,7 +492,7 @@ export default function AgentCommissions() {
                           {payout.status}
                         </span>
                       </td>
-                      <td className="vtu-td" style={{ color: '#666', fontWeight: '600' }}>
+                      <td className="vtu-td" style={{ color: '#000', fontWeight: '600' }}>
                         {new Date(payout.createdAt).toLocaleDateString()}
                       </td>
                       <td className="vtu-td text-right">
@@ -504,7 +504,7 @@ export default function AgentCommissions() {
                           className="vtu-btn-outline"
                           style={{ padding: '8px' }}
                         >
-                          <Eye size={16} style={{ color: '#666' }} />
+                          <Eye size={16} style={{ color: '#000' }} />
                         </button>
                       </td>
                     </tr>
@@ -542,7 +542,7 @@ export default function AgentCommissions() {
                   <Send size={24} style={{ color: '#0369A1' }} />
                   Withdraw Earnings
                 </h3>
-                <button onClick={() => setShowPayoutForm(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#999' }}>
+                <button onClick={() => setShowPayoutForm(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#000' }}>
                   <X size={20} />
                 </button>
               </div>
@@ -633,7 +633,7 @@ export default function AgentCommissions() {
                 {requestedAmount > 0 && !payoutValidationMessage && (
                   <div style={{ background: '#fafaf7', borderRadius: '12px', padding: '16px', border: '1.5px solid #e4e4de' }}>
                     <div className="flex justify-between items-center mb-2">
-                      <span style={{ fontSize: '13px', color: '#666', fontWeight: '600' }}>Withdrawal Fee</span>
+                      <span style={{ fontSize: '13px', color: '#000', fontWeight: '600' }}>Withdrawal Fee</span>
                       <span style={{ fontSize: '13px', fontWeight: '800', color: '#111' }}>GHS {feeAmount.toFixed(2)}</span>
                     </div>
                     <div style={{ height: '1px', background: '#e4e4de', margin: '8px 0' }} />
@@ -666,14 +666,14 @@ export default function AgentCommissions() {
                   <Activity size={20} style={{ color: '#0369A1' }} />
                   Payout Details
                 </h3>
-                <button onClick={() => setShowPayoutDetails(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#999' }}>
+                <button onClick={() => setShowPayoutDetails(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#000' }}>
                   <X size={20} />
                 </button>
               </div>
 
               <div style={{ padding: '32px' }}>
                 <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-                  <p style={{ fontSize: '11px', fontWeight: '800', color: '#999', textTransform: 'uppercase', marginBottom: '4px' }}>Requested Amount</p>
+                  <p style={{ fontSize: '11px', fontWeight: '800', color: '#000', textTransform: 'uppercase', marginBottom: '4px' }}>Requested Amount</p>
                   <p style={{ fontSize: '32px', fontWeight: '900', color: '#111', margin: 0 }}>GHS {selectedPayout.amount.toFixed(2)}</p>
                   <div style={{ display: 'inline-flex', marginTop: '12px' }}>
                     <span className={`vtu-badge ${getStatusBadge(selectedPayout.status)}`}>{selectedPayout.status}</span>
@@ -682,19 +682,19 @@ export default function AgentCommissions() {
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <div className="flex justify-between items-center py-2 border-b border-[#f0f0f0]">
-                    <span style={{ fontSize: '12px', fontWeight: '700', color: '#666' }}>Method</span>
+                    <span style={{ fontSize: '12px', fontWeight: '700', color: '#000' }}>Method</span>
                     <span style={{ fontSize: '13px', fontWeight: '800', color: '#111', textTransform: 'capitalize' }}>{selectedPayout.method?.replace('_', ' ')}</span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-[#f0f0f0]">
-                    <span style={{ fontSize: '12px', fontWeight: '700', color: '#666' }}>Net Payout</span>
+                    <span style={{ fontSize: '12px', fontWeight: '700', color: '#000' }}>Net Payout</span>
                     <span style={{ fontSize: '14px', fontWeight: '900', color: '#0369A1' }}>GHS {selectedPayout.netAmount?.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-[#f0f0f0]">
-                    <span style={{ fontSize: '12px', fontWeight: '700', color: '#666' }}>Date</span>
+                    <span style={{ fontSize: '12px', fontWeight: '700', color: '#000' }}>Date</span>
                     <span style={{ fontSize: '13px', fontWeight: '800', color: '#111' }}>{new Date(selectedPayout.createdAt).toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-[#f0f0f0]">
-                    <span style={{ fontSize: '12px', fontWeight: '700', color: '#666' }}>Reference</span>
+                    <span style={{ fontSize: '12px', fontWeight: '700', color: '#000' }}>Reference</span>
                     <span style={{ fontSize: '11px', fontWeight: '800', color: '#111', fontFamily: 'monospace' }}>#{selectedPayout._id?.toUpperCase()}</span>
                   </div>
                   

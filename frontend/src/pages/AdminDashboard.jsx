@@ -43,7 +43,7 @@ const styles = `
   }
   
   .dash-title { font-size: 28px; font-weight: 800; color: #111; margin: 0; letter-spacing: -0.02em; }
-  .dash-subtitle { font-size: 14px; color: #666; margin: 8px 0 0 0; }
+  .dash-subtitle { font-size: 14px; color: #000; margin: 8px 0 0 0; }
   .dash-error { background-color: #fff5f5; border: 1.5px solid #fecaca; border-radius: 7px; color: #b91c1c; padding: 14px 16px; font-size: 14px; display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
   .dash-stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 24px; }
   
@@ -81,9 +81,9 @@ const styles = `
     box-shadow: 0 2px 8px var(--stat-glow, rgba(0,0,0,0.05));
   }
   
-  .dash-stat-label { font-size: 11px; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 0.05em; }
+  .dash-stat-label { font-size: 11px; font-weight: 700; color: #000; text-transform: uppercase; letter-spacing: 0.05em; }
   .dash-stat-value { font-size: 22px; font-weight: 800; color: #111; white-space: nowrap; overflow: visible; text-overflow: unset; }
-  .dash-stat-meta { font-size: 11px; font-weight: 700; color: #999; margin-top: 4px; }
+  .dash-stat-meta { font-size: 11px; font-weight: 700; color: #000; margin-top: 4px; }
   
   .dash-card { background-color: #fff; border: 1.5px solid #e4e4de; border-radius: 14px; padding: 24px; box-shadow: 0 8px 40px rgba(0,0,0,0.06); margin-bottom: 24px; }
   .dash-card-title { font-size: 16px; font-weight: 800; color: #111; margin: 0 0 20px 0; display: flex; align-items: center; gap: 8px; }
@@ -191,7 +191,7 @@ export default function AdminDashboard() {
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ textAlign: 'center' }}>
             <div className="dash-spinner" />
-            <p style={{ color: '#666', fontSize: '14px', fontWeight: 600 }}>Loading dashboard...</p>
+            <p style={{ color: '#000', fontSize: '14px', fontWeight: 600 }}>Loading dashboard...</p>
           </div>
         </div>
       </div>
@@ -505,7 +505,7 @@ export default function AdminDashboard() {
                         </div>
                         <div>
                           <p style={{ fontSize: '13px', fontWeight: '800', color: '#1D4ED8', margin: 0 }}>Total User Balance</p>
-                          <p style={{ fontSize: '11px', fontWeight: '600', color: '#666', margin: 0 }}>All wallet balances combined</p>
+                          <p style={{ fontSize: '11px', fontWeight: '600', color: '#000', margin: 0 }}>All wallet balances combined</p>
                         </div>
                       </div>
                       <p style={{ fontSize: '22px', fontWeight: '800', color: '#111', margin: 0 }}>
@@ -525,7 +525,7 @@ export default function AdminDashboard() {
                         </div>
                         <div>
                           <p style={{ fontSize: '13px', fontWeight: '800', color: '#BE185D', margin: 0 }}>Referral Earnings</p>
-                          <p style={{ fontSize: '11px', fontWeight: '600', color: '#666', margin: 0 }}>Total distributed rewards</p>
+                          <p style={{ fontSize: '11px', fontWeight: '600', color: '#000', margin: 0 }}>Total distributed rewards</p>
                         </div>
                       </div>
                       <p style={{ fontSize: '22px', fontWeight: '800', color: '#111', margin: 0 }}>
@@ -537,12 +537,12 @@ export default function AdminDashboard() {
                       <div style={{ background: '#F5F3FF', padding: '16px', borderRadius: '12px', border: '1.5px solid #DDD6FE' }}>
                         <p className="dash-stat-label" style={{ marginBottom: '4px', color: '#7C3AED' }}>Purchase Conversion</p>
                         <p style={{ fontSize: '20px', fontWeight: '800', color: '#111', margin: 0 }}>{purchaseConversion}%</p>
-                        <p style={{ fontSize: '11px', color: '#666' }}>Transaction success rate</p>
+                        <p style={{ fontSize: '11px', color: '#000' }}>Transaction success rate</p>
                       </div>
                       <div style={{ background: '#ECFDF5', padding: '16px', borderRadius: '12px', border: '1.5px solid #A7F3D0' }}>
                         <p className="dash-stat-label" style={{ marginBottom: '4px', color: '#0F6E56' }}>Active User Rate</p>
                         <p style={{ fontSize: '20px', fontWeight: '800', color: '#111', margin: 0 }}>{activeRate}%</p>
-                        <p style={{ fontSize: '11px', color: '#666' }}>User engagement level</p>
+                        <p style={{ fontSize: '11px', color: '#000' }}>User engagement level</p>
                       </div>
                     </div>
                   </div>
@@ -570,18 +570,18 @@ export default function AdminDashboard() {
                     
                     <div className="space-y-3 pt-2">
                       <div className="flex items-center justify-between">
-                        <span style={{ fontSize: '13px', fontWeight: '600', color: '#666' }}>Admin Accounts</span>
+                        <span style={{ fontSize: '13px', fontWeight: '600', color: '#000' }}>Admin Accounts</span>
                         <span style={{ fontSize: '13px', fontWeight: '800', color: '#111' }}>{totalAdmins} Verified</span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span style={{ fontSize: '13px', fontWeight: '600', color: '#666' }}>Data Engine</span>
+                        <span style={{ fontSize: '13px', fontWeight: '600', color: '#000' }}>Data Engine</span>
                         <span style={{ fontSize: '13px', fontWeight: '800', color: '#059669', display: 'flex', alignItems: 'center', gap: '4px' }}>
                           <CheckCircle size={14} />
                           Active
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span style={{ fontSize: '13px', fontWeight: '600', color: '#666' }}>Security Layer</span>
+                        <span style={{ fontSize: '13px', fontWeight: '600', color: '#000' }}>Security Layer</span>
                         <span style={{ fontSize: '13px', fontWeight: '800', color: '#111' }}>SSL Protected</span>
                       </div>
                     </div>

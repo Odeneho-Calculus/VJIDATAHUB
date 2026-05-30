@@ -86,7 +86,7 @@ const styles = `
 
   .vtu-p {
     font-size: 14px;
-    color: #666;
+    color: #000;
     margin: 4px 0 0 0;
   }
 
@@ -124,7 +124,7 @@ const styles = `
   .vtu-stat-label {
     font-size: 11.5px;
     font-weight: 700;
-    color: #666;
+    color: #000;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
@@ -593,7 +593,7 @@ export default function AdminVtuSettings() {
                     <div>
                       <p className="vtu-stat-label" style={{ color: stat.color.main }}>{stat.label}</p>
                       <p className="vtu-stat-value">{stat.value}</p>
-                      {stat.subvalue && <p style={{ fontSize: '10px', color: '#999' }}>{stat.subvalue}</p>}
+                      {stat.subvalue && <p style={{ fontSize: '10px', color: '#000' }}>{stat.subvalue}</p>}
                     </div>
                     <div style={{
                       width: 32, height: 32, borderRadius: 8,
@@ -610,9 +610,9 @@ export default function AdminVtuSettings() {
 
             {/* Provider Specific Banner Actions */}
             <div className="vtu-main-card" style={{
-              background: 'linear-gradient(135deg, #111111 0%, #1a1a1a 100%)',
-              color: '#fff',
-              border: 'none',
+              background: `linear-gradient(135deg, ${pageTheme.soft} 0%, ${pageTheme.bg} 100%)`,
+              color: '#111',
+              border: `1.5px solid ${pageTheme.main}33`,
               position: 'relative',
               overflow: 'hidden'
             }}>
@@ -622,17 +622,17 @@ export default function AdminVtuSettings() {
                 right: '-20px',
                 width: '100px',
                 height: '100px',
-                background: 'rgba(240, 165, 0, 0.05)',
+                background: pageTheme.glow,
                 borderRadius: '50%',
               }}></div>
 
               <div className="vtu-banner-flex">
                 <div>
-                  <h3 style={{ fontSize: '20px', fontWeight: '800', margin: 0, color: '#fff', letterSpacing: '-0.01em' }}>
+                  <h3 style={{ fontSize: '20px', fontWeight: '800', margin: 0, color: '#111', letterSpacing: '-0.01em' }}>
                     Topza Integration
                   </h3>
-                  <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', marginTop: '6px', fontWeight: '500' }}>
-                    Real-time connection with <span style={{ color: '#f0a500' }}>Topza</span> is active and healthy.
+                  <p style={{ fontSize: '14px', color: '#444', marginTop: '6px', fontWeight: '500' }}>
+                    Real-time connection with <span style={{ color: pageTheme.main, fontWeight: 700 }}>Topza</span> is active and healthy.
                   </p>
                 </div>
                 <div className="flex gap-3">
@@ -642,9 +642,9 @@ export default function AdminVtuSettings() {
                     rel="noopener noreferrer"
                     className="vtu-btn-primary"
                     style={{
-                      background: '#f0a500',
-                      color: '#111',
-                      boxShadow: '0 4px 15px rgba(240, 165, 0, 0.2)'
+                      background: pageTheme.main,
+                      color: '#fff',
+                      boxShadow: `0 4px 15px ${pageTheme.glow}`
                     }}
                   >
                     <Wallet size={18} />
@@ -655,8 +655,9 @@ export default function AdminVtuSettings() {
                     disabled={syncing || transactionsLoading}
                     className="vtu-btn-primary"
                     style={{
-                      background: 'rgba(255,255,255,0.08)',
-                      border: '1.5px solid rgba(255,255,255,0.15)'
+                      background: '#fff',
+                      color: '#111',
+                      border: '1.5px solid #e4e4de'
                     }}
                   >
                     <RefreshCw size={18} className={(syncing || transactionsLoading) ? 'animate-spin' : ''} />
@@ -686,7 +687,7 @@ export default function AdminVtuSettings() {
               {topzaNetworksLoading ? (
                 <div style={{ textAlign: 'center', padding: '40px' }}>
                   <RefreshCw size={24} className="animate-spin" style={{ margin: '0 auto 12px', color: pageTheme.main }} />
-                  <p style={{ fontSize: '13px', color: '#999' }}>Fetching networks...</p>
+                  <p style={{ fontSize: '13px', color: '#000' }}>Fetching networks...</p>
                 </div>
               ) : (
                 <>
@@ -754,14 +755,14 @@ export default function AdminVtuSettings() {
               {transactionsLoading && transactions.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '40px' }}>
                   <RefreshCw size={24} className="animate-spin" style={{ margin: '0 auto 12px', color: pageTheme.main }} />
-                  <p style={{ fontSize: '13px', color: '#999' }}>Loading transactions...</p>
+                  <p style={{ fontSize: '13px', color: '#000' }}>Loading transactions...</p>
                 </div>
               ) : transactionsError ? (
                 <div style={{ padding: '20px', textAlign: 'center', color: '#b91c1c', background: '#fff5f5', borderRadius: '8px' }}>
                   {transactionsError}
                 </div>
               ) : transactions.length === 0 ? (
-                <div style={{ padding: '40px', textAlign: 'center', color: '#999', border: '1.5px dashed #e4e4de', borderRadius: '14px' }}>
+                <div style={{ padding: '40px', textAlign: 'center', color: '#000', border: '1.5px dashed #e4e4de', borderRadius: '14px' }}>
                   No recent transactions found
                 </div>
               ) : (
@@ -807,7 +808,7 @@ export default function AdminVtuSettings() {
 
                           return (
                             <tr key={txnId + i}>
-                              <td className="vtu-td font-mono" style={{ fontSize: '11px', color: '#999' }}>{String(txnId).slice(-8)}</td>
+                              <td className="vtu-td font-mono" style={{ fontSize: '11px', color: '#000' }}>{String(txnId).slice(-8)}</td>
                               <td className="vtu-td">
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                   <div style={{
@@ -825,14 +826,14 @@ export default function AdminVtuSettings() {
                               <td className="vtu-td">
                                 <div style={{ fontSize: '12px' }}>
                                   <div style={{ fontWeight: '600', color: c.main }}>{network}</div>
-                                  <div style={{ color: '#666' }}>{bundle}</div>
+                                  <div style={{ color: '#000' }}>{bundle}</div>
                                 </div>
                               </td>
                               <td className="vtu-td font-bold" style={{ color: '#059669' }}>{amount}</td>
                               <td className="vtu-td">
                                 <span className="vtu-badge" style={badgeStyles}>{status}</span>
                               </td>
-                              <td className="vtu-td" style={{ fontSize: '11px', color: '#999' }}>
+                              <td className="vtu-td" style={{ fontSize: '11px', color: '#000' }}>
                                 {date ? (isNaN(Date.parse(date)) ? date : new Date(date).toLocaleString()) : '-'}
                               </td>
                               <td className="vtu-td">
@@ -898,7 +899,7 @@ export default function AdminVtuSettings() {
               </div>
               <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0 }}>Confirm Refund</h3>
             </div>
-            <p style={{ fontSize: '14px', color: '#666', margin: '0 0 20px 0' }}>
+            <p style={{ fontSize: '14px', color: '#000', margin: '0 0 20px 0' }}>
               Are you sure you want to refund this order? This action cannot be undone.
             </p>
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>

@@ -131,7 +131,7 @@ const styles = `
   .comm-stat-label {
     font-size: 10px;
     font-weight: 700;
-    color: #666;
+    color: #000;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     white-space: nowrap;
@@ -175,7 +175,7 @@ const styles = `
     text-align: left;
     padding: 14px 16px;
     font-weight: 800;
-    color: #666;
+    color: #000;
     border-bottom: 1.5px solid #e4e4de;
     font-size: 10px;
     text-transform: uppercase;
@@ -506,7 +506,7 @@ export default function AdminCommissions() {
                 </div>
                 <div>
                   <h2 className="comm-h2">Agent Withdrawals</h2>
-                  <p className="text-sm text-blue-600/80 font-medium">Review and process agent commission payout requests</p>
+                  <p className="text-sm text-blue-600 font-medium">Review and process agent commission payout requests</p>
                 </div>
               </div>
 
@@ -565,7 +565,7 @@ export default function AdminCommissions() {
               <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-2">
                   <Filter size={16} className="text-blue-600" />
-                  <span className="text-sm font-bold text-gray-800 uppercase tracking-wider">Filter by Status</span>
+                  <span className="text-sm font-bold text-black uppercase tracking-wider">Filter by Status</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {['all', 'pending', 'processing', 'paid', 'rejected'].map((status) => (
@@ -577,7 +577,7 @@ export default function AdminCommissions() {
                       }}
                       className={`filter-tab capitalize ${filter === status
                           ? 'bg-[#1D4ED8] text-white shadow-lg shadow-blue-600/20'
-                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'
+                          : 'bg-gray-100 text-black hover:bg-gray-200 border-gray-200'
                         }`}
                     >
                       {status}
@@ -592,14 +592,14 @@ export default function AdminCommissions() {
               {loading ? (
                 <div className="flex flex-col items-center justify-center py-20 gap-4">
                   <RotateCw size={40} className="text-blue-600 animate-spin" />
-                  <p className="text-gray-500 font-medium">Loading payout requests...</p>
+                  <p className="text-black font-medium">Loading payout requests...</p>
                 </div>
               ) : payouts.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 gap-4">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center text-gray-400">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center text-black">
                     <HandCoins size={32} />
                   </div>
-                  <p className="text-gray-500 font-medium text-lg">No payout requests found</p>
+                  <p className="text-black font-medium text-lg">No payout requests found</p>
                 </div>
               ) : (
                 <>
@@ -629,30 +629,30 @@ export default function AdminCommissions() {
                                   {payout.agentId?.name?.slice(0, 2).toUpperCase() || 'AG'}
                                 </div>
                                 <div className="min-w-0">
-                                  <p className="font-bold text-gray-900 truncate">{payout.agentId?.name || 'N/A'}</p>
+                                  <p className="font-bold text-black truncate">{payout.agentId?.name || 'N/A'}</p>
                                   <div className="flex items-center gap-2 md:hidden">
                                     <StatusBadge status={payout.status} compact />
                                   </div>
-                                  <p className="text-[10px] text-gray-500 font-medium truncate md:block hidden">{payout.agentId?.email || 'N/A'}</p>
+                                  <p className="text-[10px] text-black font-medium truncate md:block hidden">{payout.agentId?.email || 'N/A'}</p>
                                 </div>
                               </div>
                             </td>
                             <td className="comm-td hidden sm:table-cell">
-                              <div className="flex items-center gap-2 text-gray-700 font-medium capitalize">
+                              <div className="flex items-center gap-2 text-black font-medium capitalize">
                                 {payout.method === 'mobile_money' ? <ShieldCheck size={14} className="text-blue-600" /> : <Banknote size={14} className="text-emerald-600" />}
                                 <span className="truncate">{payout.method === 'mobile_money' ? 'Mobile' : 'Bank'}</span>
                               </div>
                             </td>
                             <td className="comm-td">
-                              <p className="font-bold text-gray-900 leading-none">{formatCurrencyAbbreviated(Number(payout.amount || 0))}</p>
+                              <p className="font-bold text-black leading-none">{formatCurrencyAbbreviated(Number(payout.amount || 0))}</p>
                               <p className="text-[10px] font-bold text-blue-600 mt-1">Net: {formatCurrencyAbbreviated(Number(payout.netAmount || 0))}</p>
                             </td>
                             <td className="comm-td hidden md:table-cell text-center">
                               <StatusBadge status={payout.status} />
                             </td>
                             <td className="comm-td hidden lg:table-cell text-right">
-                              <p className="font-bold text-gray-900 text-xs">{new Date(payout.createdAt).toLocaleDateString()}</p>
-                              <p className="text-[10px] text-gray-500 font-medium">{new Date(payout.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                              <p className="font-bold text-black text-xs">{new Date(payout.createdAt).toLocaleDateString()}</p>
+                              <p className="text-[10px] text-black font-medium">{new Date(payout.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                             </td>
                             <td className="comm-td text-right">
                               <div className="flex items-center justify-end gap-1.5" onClick={e => e.stopPropagation()}>
@@ -716,13 +716,13 @@ export default function AdminCommissions() {
                   <HandCoins size={20} />
                 </div>
                 <div>
-                  <h2 className="text-xl font-black text-gray-900 tracking-tight">
+                  <h2 className="text-xl font-black text-black tracking-tight">
                     {modalAction === 'approve' ? 'Approve' : modalAction === 'markPaid' ? 'Paid' : modalAction === 'reject' ? 'Reject' : 'Details'}
                   </h2>
-                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">#{selectedPayout._id?.slice(-8)}</p>
+                  <p className="text-[10px] text-black font-bold uppercase tracking-wider">#{selectedPayout._id?.slice(-8)}</p>
                 </div>
               </div>
-              <button onClick={closeModal} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors">
+              <button onClick={closeModal} className="p-2 rounded-lg hover:bg-gray-100 text-black transition-colors">
                 <X size={18} />
               </button>
             </div>
@@ -747,7 +747,7 @@ export default function AdminCommissions() {
 
               {selectedPayout.details && typeof selectedPayout.details === 'object' && (
                 <div className="pt-4 border-t border-gray-100">
-                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-400 mb-3 flex items-center gap-2">
+                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-black mb-3 flex items-center gap-2">
                     <ShieldCheck size={12} className="text-blue-600" />
                     Account Details
                   </p>
@@ -788,7 +788,7 @@ export default function AdminCommissions() {
                     onChange={(e) => setFormData((prev) => ({ ...prev, requiresOtp: e.target.checked }))}
                     className="w-4 h-4 rounded text-blue-600"
                   />
-                  <span className="text-[10px] font-black text-gray-700 uppercase">Require OTP</span>
+                  <span className="text-[10px] font-black text-black uppercase">Require OTP</span>
                 </label>
                 {formData.requiresOtp && (
                   <input
@@ -816,13 +816,13 @@ export default function AdminCommissions() {
 
             <div className="flex gap-2 mt-4">
               {(modalAction === 'approve' || modalAction === 'markPaid' || modalAction === 'reject') && (
-                <button onClick={() => setModalAction('details')} disabled={submitting} className="px-4 py-2.5 bg-gray-100 text-gray-600 rounded-xl font-bold text-xs hover:bg-gray-200 transition-colors">Back</button>
+                <button onClick={() => setModalAction('details')} disabled={submitting} className="px-4 py-2.5 bg-gray-100 text-black rounded-xl font-bold text-xs hover:bg-gray-200 transition-colors">Back</button>
               )}
               <button 
                 onClick={closeModal} 
                 disabled={submitting} 
                 className={`flex-1 px-4 py-2.5 rounded-xl font-bold text-xs transition-all ${
-                  modalAction === 'details' ? 'bg-[#1D4ED8] text-white shadow-lg shadow-blue-600/20' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  modalAction === 'details' ? 'bg-[#1D4ED8] text-white shadow-lg shadow-blue-600/20' : 'bg-gray-100 text-black hover:bg-gray-200'
                 }`}
               >
                 Close
@@ -921,7 +921,7 @@ function DetailRow({ label, value, fullWidth = false, colorIdx = 2 }) {
   return (
     <div className={`${fullWidth ? 'col-span-2' : ''} p-2.5 rounded-xl border transition-colors`} style={{ background: c.soft, borderColor: c.bg + '88' }}>
       <p className="text-[9px] font-black uppercase tracking-widest mb-0.5" style={{ color: c.main }}>{label}</p>
-      <div className="font-bold text-gray-900 break-words text-xs sm:text-sm">{value}</div>
+      <div className="font-bold text-black break-words text-xs sm:text-sm">{value}</div>
     </div>
   );
 }

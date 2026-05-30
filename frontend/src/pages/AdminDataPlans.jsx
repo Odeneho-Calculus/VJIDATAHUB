@@ -16,14 +16,14 @@ const styles = `
   .plan-content { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
   .plan-header { background-color: #fff; border: 1.5px solid #e4e4de; border-radius: 14px; padding: 20px; box-shadow: 0 8px 40px rgba(0,0,0,0.10); margin-bottom: 24px; }
   .plan-title { font-size: 26px; font-weight: 800; color: #111; margin: 0; }
-  .plan-subtitle { font-size: 14px; color: #666; margin: 8px 0 0 0; }
+  .plan-subtitle { font-size: 14px; color: #000; margin: 8px 0 0 0; }
   .plan-error { background-color: #fff5f5; border: 1.5px solid #fecaca; border-radius: 7px; color: #b91c1c; padding: 14px 16px; font-size: 14px; display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
   .plan-success { background-color: #f0fdf4; border: 1.5px solid #86efac; border-radius: 7px; color: #166534; padding: 14px 16px; font-size: 14px; display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
   .plan-stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
   .plan-stat-card { background-color: #fff; border: 1.5px solid #e4e4de; border-radius: 14px; padding: 20px; }
   .plan-stat-card:hover { border-color: #d4d4ce; box-shadow: 0 8px 40px rgba(0,0,0,0.10); }
   .plan-stat-icon { width: 36px; height: 36px; background-color: rgba(240,165,0,0.15); border-radius: 6px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; color: #f0a500; }
-  .plan-stat-label { font-size: 12px; color: #999; margin-bottom: 4px; }
+  .plan-stat-label { font-size: 12px; color: #000; margin-bottom: 4px; }
   .plan-stat-value { font-size: 20px; font-weight: 700; color: #111; }
   .plan-card { background-color: #fff; border: 1.5px solid #e4e4de; border-radius: 14px; box-shadow: 0 8px 40px rgba(0,0,0,0.10); margin-bottom: 24px; }
   .plan-search { width: 100%; padding: 11px 14px; border: 1.5px solid #e0e0d8; border-radius: 7px; background-color: #fafaf7; font-size: 14px; font-family: 'DM Sans', sans-serif; color: #111; }
@@ -241,14 +241,14 @@ export default function AdminDataPlans() {
               <div className="rounded-2xl border border-slate-200 bg-white px-4 py-5 sm:px-6 sm:py-6 shadow-sm">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Manage Data Plans</h1>
-                    <p className="text-sm sm:text-base text-slate-600 mt-1">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-black">Manage Data Plans</h1>
+                    <p className="text-sm sm:text-base text-black mt-1">
                       Sync and manage {activeProviderDisplayName} data plan pricing, margins, and availability
                     </p>
                   </div>
                   <div className="inline-flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200 self-start sm:self-auto">
                     <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                    <span className="text-xs sm:text-sm font-semibold text-slate-700">Active: {activeProviderDisplayName}</span>
+                    <span className="text-xs sm:text-sm font-semibold text-black">Active: {activeProviderDisplayName}</span>
                   </div>
                 </div>
               </div>
@@ -306,13 +306,13 @@ export default function AdminDataPlans() {
               <section className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm space-y-4">
                 <div className="flex flex-col sm:flex-row gap-3">
                   <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-black" />
                     <input
                       type="text"
                       placeholder="Search by plan name"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-9 pr-4 py-2.5 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-slate-500 text-sm"
+                      className="w-full pl-9 pr-4 py-2.5 border border-slate-300 rounded-xl text-black focus:outline-none focus:border-slate-500 text-sm"
                     />
                   </div>
                   <button
@@ -326,13 +326,13 @@ export default function AdminDataPlans() {
                 </div>
 
                 <div>
-                  <p className="text-xs font-semibold text-slate-600 mb-2 block">Network</p>
+                  <p className="text-xs font-semibold text-black mb-2 block">Network</p>
                   <div className="flex flex-wrap gap-2">
                     <button
                       onClick={() => setSelectedNetwork('')}
                       className={`px-3 py-2 rounded-lg font-medium transition text-sm whitespace-nowrap border ${selectedNetwork === ''
                         ? 'bg-slate-900 text-white border-slate-900'
-                        : 'bg-slate-100 text-slate-900 hover:bg-slate-200 border-slate-200'
+                        : 'bg-slate-100 text-black hover:bg-slate-200 border-slate-200'
                         }`}
                     >
                       All Networks
@@ -343,7 +343,7 @@ export default function AdminDataPlans() {
                         onClick={() => setSelectedNetwork(network.name)}
                         className={`flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition text-sm whitespace-nowrap border ${selectedNetwork === network.name
                           ? 'bg-slate-900 text-white border-slate-900'
-                          : 'bg-slate-100 text-slate-900 hover:bg-slate-200 border-slate-200'
+                          : 'bg-slate-100 text-black hover:bg-slate-200 border-slate-200'
                           }`}
                       >
                         {network.logoUrl && (
@@ -358,21 +358,21 @@ export default function AdminDataPlans() {
 
               <section className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                 <div className="px-4 sm:px-6 py-4 border-b border-slate-200 bg-slate-50">
-                  <h2 className="text-base sm:text-lg font-bold text-slate-900">Data Plans</h2>
-                  <p className="text-xs sm:text-sm text-slate-600 mt-0.5">Review, edit, and control data plan status</p>
+                  <h2 className="text-base sm:text-lg font-bold text-black">Data Plans</h2>
+                  <p className="text-xs sm:text-sm text-black mt-0.5">Review, edit, and control data plan status</p>
                 </div>
               {loading ? (
                 <div className="flex justify-center py-16">
                   <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-2 border-slate-300 border-t-blue-700 mx-auto mb-4"></div>
-                    <p className="text-slate-600">Loading data plans...</p>
+                    <p className="text-black">Loading data plans...</p>
                   </div>
                 </div>
               ) : filteredPlans.length === 0 ? (
                 <div className="text-center py-16">
-                  <Database size={48} className="mx-auto text-slate-300 mb-4" />
-                  <p className="text-slate-600 text-lg">No data plans found</p>
-                  <p className="text-slate-500 text-sm">Try adjusting your search or network filter</p>
+                  <Database size={48} className="mx-auto text-black mb-4" />
+                  <p className="text-black text-lg">No data plans found</p>
+                  <p className="text-black text-sm">Try adjusting your search or network filter</p>
                 </div>
               ) : (
                 <>
@@ -380,11 +380,11 @@ export default function AdminDataPlans() {
                     <table className="w-full">
                       <thead>
                         <tr className="bg-slate-50 border-b border-slate-200">
-                          <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-slate-900 whitespace-nowrap">Plan</th>
-                          <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-slate-900 whitespace-nowrap">Pricing</th>
-                          <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-slate-900 whitespace-nowrap">Margin</th>
-                          <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-slate-900 whitespace-nowrap">Status</th>
-                          <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-slate-900 whitespace-nowrap">Actions</th>
+                          <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-black whitespace-nowrap">Plan</th>
+                          <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-black whitespace-nowrap">Pricing</th>
+                          <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-black whitespace-nowrap">Margin</th>
+                          <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-black whitespace-nowrap">Status</th>
+                          <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-black whitespace-nowrap">Actions</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-200">
@@ -399,22 +399,22 @@ export default function AdminDataPlans() {
                               <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                                 <div className="flex flex-col gap-1">
                                   <div className="flex items-center gap-2">
-                                    <p className="text-sm font-semibold text-slate-900">{plan.planName}</p>
+                                    <p className="text-sm font-semibold text-black">{plan.planName}</p>
                                     {!plan.inStock && (
                                       <span className="bg-red-100 text-red-800 text-[10px] px-2 py-0.5 rounded-full font-medium uppercase tracking-tight">Out of Stock</span>
                                     )}
                                   </div>
-                                  <p className="text-[11px] text-slate-600">{plan.network} • {plan.dataSize} • {plan.validity}</p>
+                                  <p className="text-[11px] text-black">{plan.network} • {plan.dataSize} • {plan.validity}</p>
                                 </div>
                               </td>
                               <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                                 <div className="flex flex-col gap-1">
-                                  <p className="text-[11px] text-slate-600">Cost: <span className="font-semibold text-slate-900">GHS {formatPrice2dpNoRound(plan.costPrice)}</span></p>
-                                  <p className="text-sm font-bold text-slate-900">Admin: GHS {formatPrice2dpNoRound(plan.sellingPrice)}</p>
+                                  <p className="text-[11px] text-black">Cost: <span className="font-semibold text-black">GHS {formatPrice2dpNoRound(plan.costPrice)}</span></p>
+                                  <p className="text-sm font-bold text-black">Admin: GHS {formatPrice2dpNoRound(plan.sellingPrice)}</p>
                                 </div>
                               </td>
                               <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                                <p className="text-sm font-bold text-slate-900">{margin}%</p>
+                                <p className="text-sm font-bold text-black">{margin}%</p>
                               </td>
                               <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                                 <span className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-tight ${plan.status === 'active'

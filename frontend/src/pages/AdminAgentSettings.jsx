@@ -57,7 +57,7 @@ const styles = `
 
   .agent-subtitle {
     font-size: 14px;
-    color: #666;
+    color: #000;
     line-height: 1.5;
   }
 
@@ -142,7 +142,7 @@ const styles = `
   .agent-stat-label {
     font-size: 11px;
     font-weight: 700;
-    color: #999;
+    color: #000;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin-bottom: 4px;
@@ -229,7 +229,7 @@ const styles = `
 
   .agent-toggle-desc {
     font-size: 11.5px;
-    color: #999;
+    color: #000;
   }
 
   .agent-toggle-switch {
@@ -423,7 +423,7 @@ export default function AdminAgentSettings() {
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffff' }}>
           <div style={{ textAlign: 'center' }}>
             <div style={{ width: '48px', height: '48px', border: `2.5px solid ${pageTheme.soft}`, borderTopColor: pageTheme.main, borderRadius: '50%', margin: '0 auto 16px', animation: 'spin 0.8s linear infinite' }} />
-            <p style={{ color: '#666', fontSize: '14px' }}>Loading agent settings...</p>
+            <p style={{ color: '#000', fontSize: '14px' }}>Loading agent settings...</p>
           </div>
         </div>
       </div>

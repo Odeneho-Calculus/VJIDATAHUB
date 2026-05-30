@@ -33,19 +33,19 @@ export const TransactionDetailsModal = ({ isOpen, onClose, transaction, typeLabe
       <div className="space-y-4">
         <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200">
           <div>
-            <p className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Reference ID</p>
-            <p className="text-[10px] font-mono font-black text-slate-900 break-all">{transaction.reference || transaction._id}</p>
+            <p className="text-[9px] font-bold text-black uppercase tracking-wider mb-0.5">Reference ID</p>
+            <p className="text-[10px] font-mono font-black text-black break-all">{transaction.reference || transaction._id}</p>
           </div>
           <div className="text-right space-y-1">
             <div>
-              <p className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Payment</p>
-              <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-black uppercase ${statusColors[paymentStatus] || 'bg-slate-100 text-slate-700'}`}>
+              <p className="text-[9px] font-bold text-black uppercase tracking-wider mb-0.5">Payment</p>
+              <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-black uppercase ${statusColors[paymentStatus] || 'bg-slate-100 text-black'}`}>
                 {paymentStatus}
               </span>
             </div>
             <div>
-              <p className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Order</p>
-              <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-black uppercase ${orderStatus === 'n/a' ? 'bg-slate-100 text-slate-500' : (statusColors[orderStatus] || 'bg-slate-100 text-slate-700')}`}>
+              <p className="text-[9px] font-bold text-black uppercase tracking-wider mb-0.5">Order</p>
+              <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-black uppercase ${orderStatus === 'n/a' ? 'bg-slate-100 text-black' : (statusColors[orderStatus] || 'bg-slate-100 text-black')}`}>
                 {orderStatus === 'n/a' ? 'N/A' : orderStatus}
               </span>
             </div>
@@ -59,11 +59,11 @@ export const TransactionDetailsModal = ({ isOpen, onClose, transaction, typeLabe
                 <User size={14} />
               </div>
               <div className="min-w-0">
-                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Agent & Store</p>
-                <p className="text-sm font-black text-slate-900 truncate">{transaction.agentName || 'Agent'}</p>
-                <p className="text-[10px] font-medium text-slate-500 truncate">{transaction.storeName}</p>
+                <p className="text-[9px] font-bold text-black uppercase tracking-wider">Agent & Store</p>
+                <p className="text-sm font-black text-black truncate">{transaction.agentName || 'Agent'}</p>
+                <p className="text-[10px] font-medium text-black truncate">{transaction.storeName}</p>
                 {transaction.agentPhone && (
-                  <p className="text-[10px] font-medium text-slate-500 truncate">{transaction.agentPhone}</p>
+                  <p className="text-[10px] font-medium text-black truncate">{transaction.agentPhone}</p>
                 )}
               </div>
             </div>
@@ -74,11 +74,11 @@ export const TransactionDetailsModal = ({ isOpen, onClose, transaction, typeLabe
               <User size={14} />
             </div>
             <div className="min-w-0">
-              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Customer</p>
-              <p className="text-sm font-black text-slate-900 truncate">{transaction.userId?.name || transaction.guestId?.name || transaction.guestInfo?.name || 'Unknown User'}</p>
-              <p className="text-[10px] font-medium text-slate-500 truncate">{transaction.userId?.email || transaction.guestId?.email || transaction.guestInfo?.email || 'N/A'}</p>
+              <p className="text-[9px] font-bold text-black uppercase tracking-wider">Customer</p>
+              <p className="text-sm font-black text-black truncate">{transaction.userId?.name || transaction.guestId?.name || transaction.guestInfo?.name || 'Unknown User'}</p>
+              <p className="text-[10px] font-medium text-black truncate">{transaction.userId?.email || transaction.guestId?.email || transaction.guestInfo?.email || 'N/A'}</p>
               {(transaction.userId?.phone || transaction.guestId?.phone || transaction.guestInfo?.phone) && (
-                <p className="text-[10px] font-medium text-slate-500 truncate">{transaction.userId?.phone || transaction.guestId?.phone || transaction.guestInfo?.phone}</p>
+                <p className="text-[10px] font-medium text-black truncate">{transaction.userId?.phone || transaction.guestId?.phone || transaction.guestInfo?.phone}</p>
               )}
             </div>
           </div>
@@ -88,9 +88,9 @@ export const TransactionDetailsModal = ({ isOpen, onClose, transaction, typeLabe
               <Tag size={14} />
             </div>
             <div>
-              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Type & Details</p>
-              <p className="text-sm font-black text-slate-900">{typeLabels[transaction.type] || transaction.type}</p>
-              <p className="text-[10px] font-medium text-slate-500 leading-tight">{transaction.description || 'No description'}</p>
+              <p className="text-[9px] font-bold text-black uppercase tracking-wider">Type & Details</p>
+              <p className="text-sm font-black text-black">{typeLabels[transaction.type] || transaction.type}</p>
+              <p className="text-[10px] font-medium text-black leading-tight">{transaction.description || 'No description'}</p>
             </div>
           </div>
 
@@ -111,8 +111,8 @@ export const TransactionDetailsModal = ({ isOpen, onClose, transaction, typeLabe
               <Calendar size={14} />
             </div>
             <div>
-              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Timestamp</p>
-              <p className="text-xs font-black text-slate-900">
+              <p className="text-[9px] font-bold text-black uppercase tracking-wider">Timestamp</p>
+              <p className="text-xs font-black text-black">
                 {new Date(transaction.createdAt).toLocaleString()}
               </p>
             </div>

@@ -143,7 +143,7 @@ const styles = `
   .dash-stat-label {
     font-size: 11px;
     font-weight: 700;
-    color: #999;
+    color: #000;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
@@ -255,7 +255,7 @@ const styles = `
     text-align: left;
     padding: 14px 16px;
     font-weight: 800;
-    color: #999;
+    color: #000;
     border-bottom: 1.5px solid #e4e4de;
     font-size: 10px;
     text-transform: uppercase;
@@ -528,7 +528,7 @@ export default function AgentWallet() {
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label style={{ fontSize: '12px', fontWeight: '800', color: '#999', textTransform: 'uppercase' }}>Amount to Fund</label>
+                  <label style={{ fontSize: '12px', fontWeight: '800', color: '#000', textTransform: 'uppercase' }}>Amount to Fund</label>
                   <div style={{ position: 'relative' }}>
                     <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', fontWeight: '800', color: '#111' }}>GHS</span>
                     <input
@@ -558,11 +558,11 @@ export default function AgentWallet() {
                 {amount && (
                   <div style={{ background: '#fafaf7', border: '1.5px solid #e4e4de', borderRadius: '12px', padding: '16px' }}>
                     <div className="flex justify-between items-center mb-2">
-                      <span style={{ fontSize: '13px', color: '#666' }}>Subtotal</span>
+                      <span style={{ fontSize: '13px', color: '#000' }}>Subtotal</span>
                       <span style={{ fontSize: '13px', fontWeight: '700', color: '#111' }}>GHS {parsedAmount.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between items-center mb-2">
-                      <span style={{ fontSize: '13px', color: '#666' }}>Charges</span>
+                      <span style={{ fontSize: '13px', color: '#000' }}>Charges</span>
                       <span style={{ fontSize: '13px', fontWeight: '700', color: '#111' }}>GHS {walletFundingCharge.toFixed(2)}</span>
                     </div>
                     <div style={{ height: '1.5px', background: '#e4e4de', margin: '12px 0' }} />
@@ -595,13 +595,13 @@ export default function AgentWallet() {
                 {txLoading ? (
                   <div style={{ textAlign: 'center', padding: '60px' }}>
                     <Loader2 size={32} className="animate-spin" style={{ margin: '0 auto 12px', color: '#DC2626' }} />
-                    <p style={{ fontSize: '13px', color: '#666' }}>Fetching transactions...</p>
+                    <p style={{ fontSize: '13px', color: '#000' }}>Fetching transactions...</p>
                   </div>
                 ) : transactions.length === 0 ? (
                   <div style={{ textAlign: 'center', padding: '60px', background: '#fafaf7' }}>
                     <Activity size={40} style={{ margin: '0 auto 12px', color: '#e4e4de' }} />
                     <p style={{ fontSize: '14px', fontWeight: '800', color: '#111' }}>No transactions yet</p>
-                    <p style={{ fontSize: '12px', color: '#666' }}>Your financial activity will appear here.</p>
+                    <p style={{ fontSize: '12px', color: '#000' }}>Your financial activity will appear here.</p>
                   </div>
                 ) : (
                   <table className="dash-table">
@@ -620,7 +620,7 @@ export default function AgentWallet() {
                           <tr key={tx._id} className="hover:bg-slate-50 transition-colors">
                             <td className="dash-td">
                               <div style={{ fontWeight: '700', color: '#111', fontSize: '13px' }}>{typeLabelMap[tx.type] || 'Transaction'}</div>
-                              <div style={{ fontSize: '11px', color: '#999' }}>{new Date(tx.createdAt).toLocaleDateString()}</div>
+                              <div style={{ fontSize: '11px', color: '#000' }}>{new Date(tx.createdAt).toLocaleDateString()}</div>
                             </td>
                             <td className="dash-td">
                               <span style={{ fontWeight: '800', color: isCreditTransaction(tx) ? '#059669' : '#DC2626' }}>
@@ -676,7 +676,7 @@ export default function AgentWallet() {
           {selectedTx && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div style={{ background: '#fafaf7', padding: '20px', borderRadius: '16px', textAlign: 'center', border: '1.5px solid #e4e4de' }}>
-                <p style={{ fontSize: '11px', fontWeight: '800', color: '#999', textTransform: 'uppercase', marginBottom: '4px' }}>Amount</p>
+                <p style={{ fontSize: '11px', fontWeight: '800', color: '#000', textTransform: 'uppercase', marginBottom: '4px' }}>Amount</p>
                 <p style={{ fontSize: '28px', fontWeight: '900', color: selectedTx.amount > 0 ? '#059669' : '#DC2626' }}>
                   GHS {Math.abs(selectedTx.amount).toFixed(2)}
                 </p>
@@ -689,21 +689,21 @@ export default function AgentWallet() {
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div className="flex justify-between items-center py-2 border-b border-[#f0f0f0]">
-                  <span style={{ fontSize: '12px', fontWeight: '700', color: '#666' }}>Type</span>
+                  <span style={{ fontSize: '12px', fontWeight: '700', color: '#000' }}>Type</span>
                   <span style={{ fontSize: '13px', fontWeight: '800', color: '#111' }}>{typeLabelMap[selectedTx.type] || 'Transaction'}</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-[#f0f0f0]">
-                  <span style={{ fontSize: '12px', fontWeight: '700', color: '#666' }}>Date</span>
+                  <span style={{ fontSize: '12px', fontWeight: '700', color: '#000' }}>Date</span>
                   <span style={{ fontSize: '13px', fontWeight: '800', color: '#111' }}>{new Date(selectedTx.createdAt).toLocaleString()}</span>
                 </div>
                 {selectedTx.description && (
                   <div className="flex justify-between items-start py-2 border-b border-[#f0f0f0]">
-                    <span style={{ fontSize: '12px', fontWeight: '700', color: '#666' }}>Description</span>
+                    <span style={{ fontSize: '12px', fontWeight: '700', color: '#000' }}>Description</span>
                     <span style={{ fontSize: '13px', fontWeight: '800', color: '#111', textAlign: 'right', maxWidth: '60%' }}>{selectedTx.description}</span>
                   </div>
                 )}
                 <div className="flex justify-between items-center py-2 border-b border-[#f0f0f0]">
-                  <span style={{ fontSize: '12px', fontWeight: '700', color: '#666' }}>Reference</span>
+                  <span style={{ fontSize: '12px', fontWeight: '700', color: '#000' }}>Reference</span>
                   <span style={{ fontSize: '11px', fontWeight: '800', color: '#111', fontFamily: 'monospace' }}>#{selectedTx._id?.toUpperCase()}</span>
                 </div>
               </div>

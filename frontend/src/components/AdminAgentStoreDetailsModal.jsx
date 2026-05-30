@@ -24,8 +24,8 @@ function LedgerCard({ title, value, icon: Icon, iconBg, iconColor }) {
           <Icon className={`w-4 h-4 ${iconColor}`} />
         </div>
       </div>
-      <p className="text-[11px] text-slate-500 mb-0.5">{title}</p>
-      <p className="text-base sm:text-lg font-bold text-slate-900">{value}</p>
+      <p className="text-[11px] text-black mb-0.5">{title}</p>
+      <p className="text-base sm:text-lg font-bold text-black">{value}</p>
     </div>
   );
 }
@@ -37,7 +37,7 @@ function DetailsTable({ columns, rows, renderRow }) {
         <thead>
           <tr className="bg-slate-50 border-b border-slate-200">
             {columns.map((c) => (
-              <th key={c} className="text-left py-2.5 px-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+              <th key={c} className="text-left py-2.5 px-3 text-[11px] font-bold text-black uppercase tracking-wider whitespace-nowrap">
                 {c}
               </th>
             ))}
@@ -46,7 +46,7 @@ function DetailsTable({ columns, rows, renderRow }) {
         <tbody>
           {rows.length > 0 ? rows.map(renderRow) : (
             <tr>
-              <td colSpan={columns.length} className="py-8 px-3 text-sm text-slate-400 text-center">
+              <td colSpan={columns.length} className="py-8 px-3 text-sm text-black text-center">
                 No records found
               </td>
             </tr>
@@ -66,10 +66,10 @@ function StatusPill({ value }) {
     pending:    'bg-amber-100 text-amber-700',
     processing: 'bg-blue-100 text-blue-700',
     failed:     'bg-red-100 text-red-700',
-    cancelled:  'bg-slate-100 text-slate-600',
+    cancelled:  'bg-slate-100 text-black',
   };
   return (
-    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${colorMap[v] || 'bg-slate-100 text-slate-600'}`}>
+    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${colorMap[v] || 'bg-slate-100 text-black'}`}>
       {value || 'N/A'}
     </span>
   );
@@ -102,14 +102,14 @@ export default function AdminAgentStoreDetailsModal({
         {/* Header */}
         <div className="flex items-start justify-between gap-3 px-5 sm:px-6 pt-5 pb-4 border-b border-slate-100 flex-shrink-0">
           <div>
-            <h2 className="text-lg font-bold text-slate-900">Agent Store Details</h2>
-            <p className="text-sm text-slate-500 mt-0.5">
-              {store.name} <span className="text-slate-400">/ {store.slug}</span>
+            <h2 className="text-lg font-bold text-black">Agent Store Details</h2>
+            <p className="text-sm text-black mt-0.5">
+              {store.name} <span className="text-black">/ {store.slug}</span>
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition flex-shrink-0"
+            className="p-2 rounded-lg hover:bg-slate-100 text-black hover:text-black transition flex-shrink-0"
           >
             <X size={18} />
           </button>
@@ -127,8 +127,8 @@ export default function AdminAgentStoreDetailsModal({
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-1.5 px-3 py-3 text-xs font-semibold whitespace-nowrap border-b-2 transition-colors ${
                   activeTab === tab.id
-                    ? 'border-slate-900 text-slate-900'
-                    : 'border-transparent text-slate-400 hover:text-slate-700 hover:border-slate-300'
+                    ? 'border-slate-900 text-black'
+                    : 'border-transparent text-black hover:text-black hover:border-slate-300'
                 }`}
               >
                 <tab.icon size={13} />
@@ -158,25 +158,25 @@ export default function AdminAgentStoreDetailsModal({
 
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
                     <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-1">
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Agent</p>
-                      <p className="font-semibold text-slate-900 text-sm">{details.agent?.name || 'N/A'}</p>
-                      <p className="text-xs text-slate-600">{details.agent?.email || 'N/A'}</p>
-                      <p className="text-xs text-slate-600">{details.agent?.phone || 'N/A'}</p>
+                      <p className="text-[10px] font-bold text-black uppercase tracking-wider mb-2">Agent</p>
+                      <p className="font-semibold text-black text-sm">{details.agent?.name || 'N/A'}</p>
+                      <p className="text-xs text-black">{details.agent?.email || 'N/A'}</p>
+                      <p className="text-xs text-black">{details.agent?.phone || 'N/A'}</p>
                     </div>
                     <div className="p-4 rounded-xl border border-slate-200 bg-slate-50">
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Store Stats</p>
+                      <p className="text-[10px] font-bold text-black uppercase tracking-wider mb-2">Store Stats</p>
                       <div className="space-y-1.5">
-                        <div className="flex justify-between text-xs"><span className="text-slate-500">Total Orders</span><span className="font-semibold text-slate-900">{details.stats?.totalOrders || 0}</span></div>
-                        <div className="flex justify-between text-xs"><span className="text-slate-500">Paid Orders</span><span className="font-semibold text-emerald-700">{details.stats?.paidOrders || 0}</span></div>
-                        <div className="flex justify-between text-xs"><span className="text-slate-500">Failed Orders</span><span className="font-semibold text-red-600">{details.stats?.failedOrders || 0}</span></div>
+                        <div className="flex justify-between text-xs"><span className="text-black">Total Orders</span><span className="font-semibold text-black">{details.stats?.totalOrders || 0}</span></div>
+                        <div className="flex justify-between text-xs"><span className="text-black">Paid Orders</span><span className="font-semibold text-emerald-700">{details.stats?.paidOrders || 0}</span></div>
+                        <div className="flex justify-between text-xs"><span className="text-black">Failed Orders</span><span className="font-semibold text-red-600">{details.stats?.failedOrders || 0}</span></div>
                       </div>
                     </div>
                     <div className="p-4 rounded-xl border border-slate-200 bg-slate-50">
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Payout Stats</p>
+                      <p className="text-[10px] font-bold text-black uppercase tracking-wider mb-2">Payout Stats</p>
                       <div className="space-y-1.5">
-                        <div className="flex justify-between text-xs"><span className="text-slate-500">Paid Payouts</span><span className="font-semibold text-slate-900">{details.stats?.paidPayouts || 0}</span></div>
-                        <div className="flex justify-between text-xs"><span className="text-slate-500">Pending Payouts</span><span className="font-semibold text-amber-700">{details.stats?.pendingPayouts || 0}</span></div>
-                        <div className="flex justify-between text-xs"><span className="text-slate-500">Commission Rows</span><span className="font-semibold text-slate-900">{details.stats?.commissionRecords || 0}</span></div>
+                        <div className="flex justify-between text-xs"><span className="text-black">Paid Payouts</span><span className="font-semibold text-black">{details.stats?.paidPayouts || 0}</span></div>
+                        <div className="flex justify-between text-xs"><span className="text-black">Pending Payouts</span><span className="font-semibold text-amber-700">{details.stats?.pendingPayouts || 0}</span></div>
+                        <div className="flex justify-between text-xs"><span className="text-black">Commission Rows</span><span className="font-semibold text-black">{details.stats?.commissionRecords || 0}</span></div>
                       </div>
                     </div>
                   </div>
@@ -190,9 +190,9 @@ export default function AdminAgentStoreDetailsModal({
                   rows={details.orders || []}
                   renderRow={(row) => (
                     <tr key={row._id} className="border-b border-slate-100 hover:bg-slate-50 transition">
-                      <td className="py-2.5 px-3 text-xs font-medium text-slate-900">{row.orderNumber || '-'}</td>
-                      <td className="py-2.5 px-3 text-xs text-slate-600">{row.phoneNumber || '-'}</td>
-                      <td className="py-2.5 px-3 text-xs font-semibold text-slate-900">{formatCurrencyAbbreviated(row.amount || 0)}</td>
+                      <td className="py-2.5 px-3 text-xs font-medium text-black">{row.orderNumber || '-'}</td>
+                      <td className="py-2.5 px-3 text-xs text-black">{row.phoneNumber || '-'}</td>
+                      <td className="py-2.5 px-3 text-xs font-semibold text-black">{formatCurrencyAbbreviated(row.amount || 0)}</td>
                       <td className="py-2.5 px-3 text-xs"><StatusPill value={row.paymentStatus} /></td>
                       <td className="py-2.5 px-3 text-xs"><StatusPill value={row.status} /></td>
                     </tr>
@@ -207,11 +207,11 @@ export default function AdminAgentStoreDetailsModal({
                   rows={details.transactions || []}
                   renderRow={(row) => (
                     <tr key={row._id} className="border-b border-slate-100 hover:bg-slate-50 transition">
-                      <td className="py-2.5 px-3 text-xs font-mono text-slate-700">{row.reference || '-'}</td>
-                      <td className="py-2.5 px-3 text-xs text-slate-600 capitalize">{row.type || '-'}</td>
-                      <td className="py-2.5 px-3 text-xs font-semibold text-slate-900">{formatCurrencyAbbreviated(row.amount || 0)}</td>
+                      <td className="py-2.5 px-3 text-xs font-mono text-black">{row.reference || '-'}</td>
+                      <td className="py-2.5 px-3 text-xs text-black capitalize">{row.type || '-'}</td>
+                      <td className="py-2.5 px-3 text-xs font-semibold text-black">{formatCurrencyAbbreviated(row.amount || 0)}</td>
                       <td className="py-2.5 px-3 text-xs"><StatusPill value={row.status} /></td>
-                      <td className="py-2.5 px-3 text-xs text-slate-500 whitespace-nowrap">{new Date(row.createdAt).toLocaleDateString()}</td>
+                      <td className="py-2.5 px-3 text-xs text-black whitespace-nowrap">{new Date(row.createdAt).toLocaleDateString()}</td>
                     </tr>
                   )}
                 />
@@ -221,15 +221,15 @@ export default function AdminAgentStoreDetailsModal({
               {activeTab === 'commissions' && (
                 <div className="space-y-6">
                   <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Commission History</p>
+                    <p className="text-xs font-semibold text-black uppercase tracking-wider mb-3">Commission History</p>
                     <DetailsTable
                       columns={['Order', 'Seller Price', 'Admin Price', 'Commission', 'Status']}
                       rows={details.commissions || []}
                       renderRow={(row) => (
                         <tr key={row._id} className="border-b border-slate-100 hover:bg-slate-50 transition">
-                          <td className="py-2.5 px-3 text-xs text-slate-700">{row.orderId?.orderNumber || '-'}</td>
-                          <td className="py-2.5 px-3 text-xs text-slate-700">{formatCurrencyAbbreviated(row.sellerPrice || 0)}</td>
-                          <td className="py-2.5 px-3 text-xs text-slate-700">{formatCurrencyAbbreviated(row.adminPlanPrice || 0)}</td>
+                          <td className="py-2.5 px-3 text-xs text-black">{row.orderId?.orderNumber || '-'}</td>
+                          <td className="py-2.5 px-3 text-xs text-black">{formatCurrencyAbbreviated(row.sellerPrice || 0)}</td>
+                          <td className="py-2.5 px-3 text-xs text-black">{formatCurrencyAbbreviated(row.adminPlanPrice || 0)}</td>
                           <td className="py-2.5 px-3 text-xs font-semibold text-emerald-700">{formatCurrencyAbbreviated(row.commissionEarned || 0)}</td>
                           <td className="py-2.5 px-3 text-xs"><StatusPill value={row.status} /></td>
                         </tr>
@@ -237,17 +237,17 @@ export default function AdminAgentStoreDetailsModal({
                     />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Payout History</p>
+                    <p className="text-xs font-semibold text-black uppercase tracking-wider mb-3">Payout History</p>
                     <DetailsTable
                       columns={['Amount', 'Net Amount', 'Method', 'Status', 'Date']}
                       rows={details.payouts || []}
                       renderRow={(row) => (
                         <tr key={row._id} className="border-b border-slate-100 hover:bg-slate-50 transition">
-                          <td className="py-2.5 px-3 text-xs font-semibold text-slate-900">{formatCurrencyAbbreviated(row.amount || 0)}</td>
-                          <td className="py-2.5 px-3 text-xs text-slate-700">{formatCurrencyAbbreviated(row.netAmount || 0)}</td>
-                          <td className="py-2.5 px-3 text-xs text-slate-600 capitalize">{row.method || '-'}</td>
+                          <td className="py-2.5 px-3 text-xs font-semibold text-black">{formatCurrencyAbbreviated(row.amount || 0)}</td>
+                          <td className="py-2.5 px-3 text-xs text-black">{formatCurrencyAbbreviated(row.netAmount || 0)}</td>
+                          <td className="py-2.5 px-3 text-xs text-black capitalize">{row.method || '-'}</td>
                           <td className="py-2.5 px-3 text-xs"><StatusPill value={row.status} /></td>
-                          <td className="py-2.5 px-3 text-xs text-slate-500 whitespace-nowrap">{new Date(row.createdAt).toLocaleDateString()}</td>
+                          <td className="py-2.5 px-3 text-xs text-black whitespace-nowrap">{new Date(row.createdAt).toLocaleDateString()}</td>
                         </tr>
                       )}
                     />
@@ -259,23 +259,23 @@ export default function AdminAgentStoreDetailsModal({
               {activeTab === 'billing' && (
                 <div className="space-y-6">
                   <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Agent Fee Payments</p>
+                    <p className="text-xs font-semibold text-black uppercase tracking-wider mb-3">Agent Fee Payments</p>
                     <DetailsTable
                       columns={['Reference', 'Amount', 'Status', 'Paid At', 'Created']}
                       rows={details.feePayments || []}
                       renderRow={(row) => (
                         <tr key={row._id} className="border-b border-slate-100 hover:bg-slate-50 transition">
-                          <td className="py-2.5 px-3 text-xs font-mono text-slate-700">{row.reference || '-'}</td>
-                          <td className="py-2.5 px-3 text-xs font-semibold text-slate-900">{formatCurrencyAbbreviated(row.amount || 0)}</td>
+                          <td className="py-2.5 px-3 text-xs font-mono text-black">{row.reference || '-'}</td>
+                          <td className="py-2.5 px-3 text-xs font-semibold text-black">{formatCurrencyAbbreviated(row.amount || 0)}</td>
                           <td className="py-2.5 px-3 text-xs"><StatusPill value={row.status} /></td>
-                          <td className="py-2.5 px-3 text-xs text-slate-500 whitespace-nowrap">{row.paidAt ? new Date(row.paidAt).toLocaleDateString() : '—'}</td>
-                          <td className="py-2.5 px-3 text-xs text-slate-500 whitespace-nowrap">{new Date(row.createdAt).toLocaleDateString()}</td>
+                          <td className="py-2.5 px-3 text-xs text-black whitespace-nowrap">{row.paidAt ? new Date(row.paidAt).toLocaleDateString() : '—'}</td>
+                          <td className="py-2.5 px-3 text-xs text-black whitespace-nowrap">{new Date(row.createdAt).toLocaleDateString()}</td>
                         </tr>
                       )}
                     />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Adjustment History</p>
+                    <p className="text-xs font-semibold text-black uppercase tracking-wider mb-3">Adjustment History</p>
                     <DetailsTable
                       columns={['Type', 'Amount', 'Reason', 'By', 'Date']}
                       rows={details.adjustments || []}
@@ -286,10 +286,10 @@ export default function AdminAgentStoreDetailsModal({
                               {row.type}
                             </span>
                           </td>
-                          <td className="py-2.5 px-3 text-xs font-semibold text-slate-900">{formatCurrencyAbbreviated(row.amount || 0)}</td>
-                          <td className="py-2.5 px-3 text-xs text-slate-600">{row.reason || '-'}</td>
-                          <td className="py-2.5 px-3 text-xs text-slate-600">{row.performedBy?.name || 'Admin'}</td>
-                          <td className="py-2.5 px-3 text-xs text-slate-500 whitespace-nowrap">{new Date(row.createdAt).toLocaleDateString()}</td>
+                          <td className="py-2.5 px-3 text-xs font-semibold text-black">{formatCurrencyAbbreviated(row.amount || 0)}</td>
+                          <td className="py-2.5 px-3 text-xs text-black">{row.reason || '-'}</td>
+                          <td className="py-2.5 px-3 text-xs text-black">{row.performedBy?.name || 'Admin'}</td>
+                          <td className="py-2.5 px-3 text-xs text-black whitespace-nowrap">{new Date(row.createdAt).toLocaleDateString()}</td>
                         </tr>
                       )}
                     />
@@ -301,12 +301,12 @@ export default function AdminAgentStoreDetailsModal({
               {activeTab === 'adjust' && (
                 <form onSubmit={onAdjustSubmit} className="space-y-5 max-w-lg">
                   <div className="p-4 rounded-xl border border-slate-200 bg-slate-50">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Current Withdrawable Balance</p>
-                    <p className="text-xl font-bold text-slate-900">{formatCurrencyAbbreviated(details.ledger?.totalEarned || 0)}</p>
+                    <p className="text-[10px] font-bold text-black uppercase tracking-wider mb-0.5">Current Withdrawable Balance</p>
+                    <p className="text-xl font-bold text-black">{formatCurrencyAbbreviated(details.ledger?.totalEarned || 0)}</p>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">Type</label>
+                    <label className="block text-xs font-semibold text-black uppercase tracking-wider mb-2">Type</label>
                     <div className="flex gap-2">
                       {['credit', 'debit'].map((t) => (
                         <button
@@ -316,7 +316,7 @@ export default function AdminAgentStoreDetailsModal({
                           className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-colors capitalize ${
                             adjustForm.type === t
                               ? 'bg-slate-900 text-white border-slate-900'
-                              : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                              : 'bg-white text-black border-slate-200 hover:bg-slate-50'
                           }`}
                         >
                           {t === 'credit'
@@ -329,7 +329,7 @@ export default function AdminAgentStoreDetailsModal({
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">Amount</label>
+                    <label className="block text-xs font-semibold text-black uppercase tracking-wider mb-2">Amount</label>
                     <input
                       type="number"
                       min="0.01"
@@ -342,7 +342,7 @@ export default function AdminAgentStoreDetailsModal({
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">
+                    <label className="block text-xs font-semibold text-black uppercase tracking-wider mb-2">
                       Reason <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -354,8 +354,8 @@ export default function AdminAgentStoreDetailsModal({
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">
-                      Internal Note <span className="text-slate-400 font-normal normal-case">(optional)</span>
+                    <label className="block text-xs font-semibold text-black uppercase tracking-wider mb-2">
+                      Internal Note <span className="text-black font-normal normal-case">(optional)</span>
                     </label>
                     <textarea
                       rows="2"
@@ -379,7 +379,7 @@ export default function AdminAgentStoreDetailsModal({
               )}
             </>
           ) : (
-            <p className="text-slate-500 text-sm">No details available.</p>
+            <p className="text-black text-sm">No details available.</p>
           )}
         </div>
       </div>

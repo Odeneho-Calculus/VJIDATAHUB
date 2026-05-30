@@ -25,11 +25,11 @@ export const ReferralSettingsModal = ({
     >
       <div className="space-y-4">
         <div>
-          <label className="block text-[10px] font-black text-slate-500 uppercase tracking-tight mb-1 border-l-2 pl-2" style={{ borderColor: c.main }}>
+          <label className="block text-[10px] font-black text-black uppercase tracking-tight mb-1 border-l-2 pl-2" style={{ borderColor: c.main }}>
             Reward Amount (GHS)
           </label>
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-slate-400 text-sm">GHS</span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-black text-sm">GHS</span>
             <input
               type="number"
               className="w-full pl-11 pr-3 py-2 bg-white border-2 border-slate-100 rounded-xl focus:ring-0 transition-all font-black text-sm"
@@ -50,7 +50,7 @@ export const ReferralSettingsModal = ({
         </div>
 
         <div>
-          <label className="block text-[10px] font-black text-slate-500 uppercase tracking-tight mb-1 border-l-2 pl-2" style={{ borderColor: c.main + '66' }}>
+          <label className="block text-[10px] font-black text-black uppercase tracking-tight mb-1 border-l-2 pl-2" style={{ borderColor: c.main + '66' }}>
             Program Description
           </label>
           <textarea
@@ -90,7 +90,7 @@ export const ReferralSettingsModal = ({
         <div className="flex gap-2 pt-1">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2.5 border border-slate-200 rounded-xl font-black text-slate-600 hover:bg-slate-50 transition-all uppercase text-[10px] tracking-widest"
+            className="flex-1 px-4 py-2.5 border border-slate-200 rounded-xl font-black text-black hover:bg-slate-50 transition-all uppercase text-[10px] tracking-widest"
           >
             Cancel
           </button>

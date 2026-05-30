@@ -549,7 +549,7 @@ export default function AfaRegistration() {
                        'Quick 5-minute activation',
                        'Exclusive member rewards'
                      ].map((item, i) => (
-                       <li key={i} className="flex items-center gap-3 text-sm font-bold text-white/90">
+                       <li key={i} className="flex items-center gap-3 text-sm font-bold text-white">
                           <div style={{ width: 22, height: 22, borderRadius: 6, background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                             <CheckCircle2 size={12} strokeWidth={3} />
                           </div>

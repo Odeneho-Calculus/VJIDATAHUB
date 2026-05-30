@@ -223,7 +223,7 @@ export default function AdminPlatformSettings() {
 
         .settings-subtitle {
           font-size: 14px;
-          color: #666;
+          color: #000;
           margin: 4px 0 0 0;
         }
 
@@ -245,7 +245,7 @@ export default function AdminPlatformSettings() {
           cursor: pointer;
           border: none;
           background: transparent;
-          color: #666;
+          color: #000;
           display: flex;
           align-items: center;
           justify-content: center;

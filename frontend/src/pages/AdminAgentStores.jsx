@@ -66,7 +66,7 @@ const styles = `
 
   .store-header-card p {
     font-size: 14px;
-    color: #666;
+    color: #000;
     margin: 0;
   }
 
@@ -171,7 +171,7 @@ const styles = `
   .store-search-icon {
     position: absolute;
     left: 14px;
-    color: #999;
+    color: #000;
     pointer-events: none;
   }
 
@@ -265,7 +265,7 @@ const styles = `
     text-align: left;
     padding: 14px 16px;
     font-weight: 800;
-    color: #999;
+    color: #000;
     border-bottom: 1.5px solid #e4e4de;
     font-size: 10px;
     text-transform: uppercase;
@@ -715,11 +715,11 @@ export default function AdminAgentStores() {
                             <tr key={store._id} className="store-table-row">
                               <td>
                                 <p style={{ fontWeight: 700, margin: '0 0 4px 0', color: c.main }}>{store.name}</p>
-                                <p style={{ fontSize: '12px', color: '#999', margin: 0 }}>/{store.slug}</p>
+                                <p style={{ fontSize: '12px', color: '#000', margin: 0 }}>/{store.slug}</p>
                               </td>
                               <td>
                                 <p style={{ fontWeight: 600, margin: '0 0 4px 0' }}>{store.owner?.name || 'N/A'}</p>
-                                <p style={{ fontSize: '12px', color: '#999', margin: 0 }}>{store.owner?.email || 'N/A'}</p>
+                                <p style={{ fontSize: '12px', color: '#000', margin: 0 }}>{store.owner?.email || 'N/A'}</p>
                               </td>
                               <td>
                                 <StatusBadge status={store.owner?.agentFeeStatus} type="fee" />
@@ -763,7 +763,7 @@ export default function AdminAgentStores() {
                             </div>
                             <div>
                               <p style={{ fontWeight: 700, fontSize: '15px', margin: '0 0 2px 0', color: getColor(idx).main }}>{store.name}</p>
-                              <p style={{ fontSize: '11px', color: '#999', margin: 0, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>/{store.slug}</p>
+                              <p style={{ fontSize: '11px', color: '#000', margin: 0, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>/{store.slug}</p>
                             </div>
                           </div>
                           <div style={{ display: 'flex', gap: '8px' }}>
@@ -792,7 +792,7 @@ export default function AdminAgentStores() {
                             <p style={{ fontSize: '12.5px', fontWeight: 700, color: '#111', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                               {store.owner?.name || 'N/A'}
                             </p>
-                            <p style={{ fontSize: '10px', color: '#999', margin: 0 }}>{store.owner?.email || 'N/A'}</p>
+                            <p style={{ fontSize: '10px', color: '#000', margin: 0 }}>{store.owner?.email || 'N/A'}</p>
                           </div>
                         </div>
 

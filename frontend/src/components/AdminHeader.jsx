@@ -21,7 +21,7 @@ export default function AdminHeader() {
               className="lg:hidden p-2 hover:bg-slate-100 rounded-lg border border-slate-200/70 shadow-sm transition"
               aria-label="Toggle sidebar"
             >
-              <Menu size={20} className="text-slate-900" />
+              <Menu size={20} className="text-black" />
             </button>
             <Link to="/admin" className="flex items-center gap-2 hover:opacity-80 transition min-w-0">
               <div className="min-w-0">
@@ -30,8 +30,8 @@ export default function AdminHeader() {
                   textShadow: '0 2px 6px rgba(37, 99, 235, 0.2)',
                   letterSpacing: '0.025em'
                 }}>VJI DATA HUB </div>
-                <div className="hidden sm:inline-flex w-fit rounded-full border border-slate-300/80 bg-white/80 px-2 py-0.5 text-[10px] text-slate-700 font-bold tracking-wide">ADMIN CONTROL</div>
-                <div className="inline-flex sm:hidden w-fit rounded-full border border-slate-300/80 bg-white/80 px-2 py-0.5 text-[9px] text-slate-700 font-bold tracking-wide">ADMIN</div>
+                <div className="hidden sm:inline-flex w-fit rounded-full border border-slate-300/80 bg-white/80 px-2 py-0.5 text-[10px] text-black font-bold tracking-wide">ADMIN CONTROL</div>
+                <div className="inline-flex sm:hidden w-fit rounded-full border border-slate-300/80 bg-white/80 px-2 py-0.5 text-[9px] text-black font-bold tracking-wide">ADMIN</div>
               </div>
             </Link>
           </div>

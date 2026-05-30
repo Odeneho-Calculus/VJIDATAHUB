@@ -45,15 +45,15 @@ export const VtuTransactionDetailsModal = ({ isOpen, onClose, transaction }) => 
         {/* Main Status & Amount */}
         <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
           <div className="flex flex-col">
-            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tight mb-1">
+            <p className="text-[9px] font-bold text-black uppercase tracking-tight mb-1">
               {transaction.transactionType?.replace('_', ' ') || 'TRANSACTION'}
             </p>
-            <div className="text-2xl font-black text-slate-900 flex items-baseline gap-1">
-              <span className="text-sm text-slate-400">GHS</span>
+            <div className="text-2xl font-black text-black flex items-baseline gap-1">
+              <span className="text-sm text-black">GHS</span>
               {typeof transaction.amount === 'number' ? formatNumberAbbreviated(transaction.amount) : '0'}
             </div>
           </div>
-          <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-tight border ${statusColors[transaction.status] || 'bg-slate-100 text-slate-700 border-slate-200'}`}>
+          <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-tight border ${statusColors[transaction.status] || 'bg-slate-100 text-black border-slate-200'}`}>
             {transaction.status}
           </span>
         </div>
@@ -61,22 +61,22 @@ export const VtuTransactionDetailsModal = ({ isOpen, onClose, transaction }) => 
         {/* Info Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <DetailItem
-            icon={<Calendar size={14} className="text-slate-400" />}
+            icon={<Calendar size={14} className="text-black" />}
             label="Date & Time"
             value={formatDate(transaction.date || transaction.createdAt)}
           />
           <DetailItem
-            icon={<Hash size={14} className="text-slate-400" />}
+            icon={<Hash size={14} className="text-black" />}
             label="Reference"
             value={reference}
           />
           <DetailItem
-            icon={<Tag size={14} className="text-slate-400" />}
+            icon={<Tag size={14} className="text-black" />}
             label="Provider ID"
             value={transactionId}
           />
           <DetailItem
-            icon={<CreditCard size={14} className="text-slate-400" />}
+            icon={<CreditCard size={14} className="text-black" />}
             label="Balance (Old/New)"
             value={`GHS ${formatNumberAbbreviated(Number(balanceBefore))} → GHS ${formatNumberAbbreviated(Number(balanceAfter))}`}
           />
@@ -84,11 +84,11 @@ export const VtuTransactionDetailsModal = ({ isOpen, onClose, transaction }) => 
 
         {transaction.description && (
           <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-            <label className="flex items-center gap-2 text-[9px] font-black text-slate-400 uppercase mb-1">
+            <label className="flex items-center gap-2 text-[9px] font-black text-black uppercase mb-1">
               <Info size={12} />
               Description
             </label>
-            <p className="text-xs font-bold text-slate-700 leading-tight">
+            <p className="text-xs font-bold text-black leading-tight">
               {transaction.description}
             </p>
           </div>
@@ -110,8 +110,8 @@ const DetailItem = ({ icon, label, value }) => (
   <div className="p-3 bg-white border border-slate-100 rounded-xl shadow-sm">
     <div className="flex items-center gap-2 mb-1">
       {icon}
-      <span className="text-[9px] font-black text-slate-400 uppercase tracking-tight">{label}</span>
+      <span className="text-[9px] font-black text-black uppercase tracking-tight">{label}</span>
     </div>
-    <div className="text-xs font-black text-slate-900 break-all">{value}</div>
+    <div className="text-xs font-black text-black break-all">{value}</div>
   </div>
 );

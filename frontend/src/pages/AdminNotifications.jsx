@@ -189,7 +189,7 @@ export default function AdminNotifications() {
     user_created: 'bg-blue-100 text-blue-700',
     data_purchase: 'bg-green-100 text-green-700',
     low_balance: 'bg-yellow-100 text-yellow-700',
-    system: 'bg-gray-100 text-gray-700',
+    system: 'bg-gray-100 text-black',
   };
 
   const formatDate = (dateString) => {
@@ -217,7 +217,7 @@ export default function AdminNotifications() {
     .notif-heading-section { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; }
     .notif-icon-box { width: 46px; height: 46px; background: ${pageTheme.main}; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0; box-shadow: 0 8px 20px ${pageTheme.glow}; }
     .notif-title { font-size: 26px; font-weight: 800; color: #111; margin: 0; }
-    .notif-subtitle { font-size: 14px; color: #666; margin-top: 4px; }
+    .notif-subtitle { font-size: 14px; color: #000; margin-top: 4px; }
 
     .notif-stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px; }
     @media (min-width: 1024px) { .notif-stat-grid { grid-template-columns: repeat(4, 1fr); } }
@@ -272,22 +272,22 @@ export default function AdminNotifications() {
     .notif-item-title-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
     .notif-item-title { font-size: 14px; font-weight: 700; color: #111; margin: 0; }
     .notif-item-msg { font-size: 13px; color: #555; line-height: 1.5; margin: 0 0 8px 0; }
-    .notif-item-desc { font-size: 12px; color: #888; margin: 0 0 10px 0; }
+    .notif-item-desc { font-size: 12px; color: #000; margin: 0 0 10px 0; }
     .notif-item-meta { display: flex; align-items: center; gap: 12px; font-size: 11px; font-weight: 600; color: #aaa; }
 
     .notif-tag { font-size: 9px; font-weight: 800; text-transform: uppercase; padding: 3px 7px; border-radius: 4px; letter-spacing: 0.03em; }
 
     .notif-actions { display: flex; gap: 4px; }
-    .notif-icon-btn { padding: 8px; border-radius: 6px; border: none; background: transparent; cursor: pointer; color: #666; transition: all 0.2s; }
+    .notif-icon-btn { padding: 8px; border-radius: 6px; border: none; background: transparent; cursor: pointer; color: #000; transition: all 0.2s; }
     .notif-icon-btn:hover { background: ${pageTheme.soft}; color: ${pageTheme.main}; }
     .notif-icon-btn.danger:hover { background: #fff5f5; color: #b91c1c; }
 
     .notif-pagination { padding: 20px; display: flex; align-items: center; justify-content: space-between; border-top: 1.5px solid #e4e4de; background: #fafaf7; }
-    .notif-page-info { font-size: 13px; font-weight: 700; color: #666; }
+    .notif-page-info { font-size: 13px; font-weight: 700; color: #000; }
     .notif-page-btns { display: flex; gap: 8px; }
 
     .notif-empty { padding: 60px 20px; text-align: center; color: #aaa; }
-    .notif-empty-title { font-size: 16px; font-weight: 700; color: #666; margin: 12px 0 4px 0; }
+    .notif-empty-title { font-size: 16px; font-weight: 700; color: #000; margin: 12px 0 4px 0; }
     .notif-empty-text { font-size: 14px; }
 
     .notif-error-box { background: #fff5f5; border: 1.5px solid #fecaca; color: #b91c1c; border-radius: 7px; padding: 12px 16px; margin-bottom: 24px; display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; }
@@ -421,7 +421,7 @@ export default function AdminNotifications() {
             {loading && notifications.length === 0 ? (
               <div className="notif-loading">
                 <div className="notif-spinner"></div>
-                <p style={{ fontSize: '14px', color: '#666', fontWeight: 600 }}>Loading notifications...</p>
+                <p style={{ fontSize: '14px', color: '#000', fontWeight: 600 }}>Loading notifications...</p>
               </div>
             ) : notifications.length === 0 ? (
               <div className="notif-empty">

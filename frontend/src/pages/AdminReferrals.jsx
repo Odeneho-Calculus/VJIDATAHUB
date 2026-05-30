@@ -164,7 +164,7 @@ export default function AdminReferrals() {
           box-shadow: 0 8px 20px ${pageTheme.glow}; flex-shrink: 0;
         }
         .ref-title { font-size: 26px; font-weight: 800; color: #111; margin: 0; letter-spacing: -0.02em; }
-        .ref-subtitle { font-size: 14px; color: #666; margin: 4px 0 0 0; }
+        .ref-subtitle { font-size: 14px; color: #000; margin: 4px 0 0 0; }
 
         .ref-stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
         @media (min-width: 1024px) { .ref-stats-grid { grid-template-columns: repeat(4, 1fr); gap: 16px; } }
@@ -183,7 +183,7 @@ export default function AdminReferrals() {
           border-color: var(--stat-color, #d4d4ce);
           box-shadow: 0 8px 40px var(--stat-glow, rgba(0,0,0,0.06));
         }
-        .ref-stat-label { font-size: 11px; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 0.05em; }
+        .ref-stat-label { font-size: 11px; font-weight: 700; color: #000; text-transform: uppercase; letter-spacing: 0.05em; }
         .ref-stat-value { font-size: 20px; font-weight: 800; color: #111; }
 
         .ref-input {
@@ -212,7 +212,7 @@ export default function AdminReferrals() {
         .ref-table { width: 100%; border-collapse: collapse; text-align: left; }
         .ref-table th {
           padding: 14px 16px; background: #fafaf7; border-bottom: 1.5px solid #e4e4de;
-          font-size: 10px; font-weight: 800; color: #999; text-transform: uppercase; letter-spacing: 0.05em;
+          font-size: 10px; font-weight: 800; color: #000; text-transform: uppercase; letter-spacing: 0.05em;
         }
         .ref-table td { padding: 16px; border-bottom: 1px solid #f0f0f0; font-size: 13px; color: #111; }
         .ref-table tr { transition: all 0.2s; }
@@ -326,11 +326,11 @@ export default function AdminReferrals() {
                     </div>
                     <div>
                       <h2 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#111' }}>Referral Records</h2>
-                      <p style={{ margin: 0, fontSize: '11px', color: '#999', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{filteredReferrals.length} matching entries</p>
+                      <p style={{ margin: 0, fontSize: '11px', color: '#000', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{filteredReferrals.length} matching entries</p>
                     </div>
                   </div>
                   <div style={{ position: 'relative', maxWidth: '320px', width: '100%' }}>
-                    <Search style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#999', pointerEvents: 'none' }} size={16} />
+                    <Search style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#000', pointerEvents: 'none' }} size={16} />
                     <input
                       type="text"
                       placeholder="Search referrers or referred users..."
@@ -363,7 +363,7 @@ export default function AdminReferrals() {
                       </tr>
                     ) : filteredReferrals.length === 0 ? (
                       <tr>
-                        <td colSpan="6" style={{ padding: '48px', textAlign: 'center', color: '#999' }}>
+                        <td colSpan="6" style={{ padding: '48px', textAlign: 'center', color: '#000' }}>
                           <div style={{ width: 64, height: 64, borderRadius: 20, background: '#fafaf7', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', border: '1.5px dashed #e4e4de' }}>
                             <Database size={32} style={{ color: '#e4e4de' }} />
                           </div>
@@ -389,13 +389,13 @@ export default function AdminReferrals() {
                                 </div>
                                 <div>
                                   <div style={{ fontWeight: 700, color: '#111' }}>{ref.referrer?.name}</div>
-                                  <div style={{ fontSize: '11px', color: '#999', fontWeight: 600 }}>{ref.referrer?.email}</div>
+                                  <div style={{ fontSize: '11px', color: '#000', fontWeight: 600 }}>{ref.referrer?.email}</div>
                                 </div>
                               </div>
                             </td>
                             <td style={{ whiteSpace: 'nowrap' }}>
                               <div style={{ fontWeight: 700, color: '#111' }}>{ref.referredUser?.name}</div>
-                              <div style={{ fontSize: '11px', color: '#999', fontWeight: 600 }}>{ref.referredUser?.email}</div>
+                              <div style={{ fontSize: '11px', color: '#000', fontWeight: 600 }}>{ref.referredUser?.email}</div>
                             </td>
                             <td style={{ whiteSpace: 'nowrap' }}>
                               <span style={{ fontWeight: 800, color: c.main }}>GHS {formatNumberAbbreviated(ref.amount)}</span>
@@ -412,7 +412,7 @@ export default function AdminReferrals() {
                             <td style={{ whiteSpace: 'nowrap' }}>
                               <div style={{ display: 'flex', flexDirection: 'column' }}>
                                 <span style={{ fontSize: '12px', fontWeight: 700, color: '#111' }}>{new Date(ref.createdAt).toLocaleDateString()}</span>
-                                <span style={{ fontSize: '10px', color: '#999', fontWeight: 600 }}>{new Date(ref.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                <span style={{ fontSize: '10px', color: '#000', fontWeight: 600 }}>{new Date(ref.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                               </div>
                             </td>
                             <td style={{ whiteSpace: 'nowrap', textAlign: 'right' }}>

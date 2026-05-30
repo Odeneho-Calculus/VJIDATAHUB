@@ -107,7 +107,7 @@ const styles = `
 
   .dash-p {
     font-size: 14px;
-    color: #666;
+    color: #000;
     margin: 4px 0 0 0;
   }
 
@@ -143,7 +143,7 @@ const styles = `
   .dash-stat-label {
     font-size: 11px;
     font-weight: 700;
-    color: #999;
+    color: #000;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
@@ -354,7 +354,7 @@ export default function AdminStore() {
                 <div className="min-w-0">
                   <h2 className="dash-h2 !text-base sm:!text-xl">{storeData?.name || 'My Store'}</h2>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-slate-400 font-mono uppercase truncate">/{storeData?.slug}</span>
+                    <span className="text-[10px] font-bold text-black font-mono uppercase truncate">/{storeData?.slug}</span>
                   </div>
                 </div>
               </div>
@@ -370,7 +370,7 @@ export default function AdminStore() {
                 </a>
                 <button
                   onClick={fetchStore}
-                  className="p-1.5 text-slate-400 hover:text-[#0F6E56] transition-colors"
+                  className="p-1.5 text-black hover:text-[#0F6E56] transition-colors"
                   title="Refresh Data"
                 >
                   <RefreshCw size={16} />
@@ -387,19 +387,19 @@ export default function AdminStore() {
                   <Lock size={24} />
                 </div>
                 <div className="flex-1 text-center md:text-left">
-                  <h3 className="text-base font-bold text-slate-900">Action Required</h3>
-                  <p className="text-sm text-slate-600 mt-1">
+                  <h3 className="text-base font-bold text-black">Action Required</h3>
+                  <p className="text-sm text-black mt-1">
                     {accessStatus.code === 'AGENT_FEE_UNPAID' && 'Your agent registration fee is pending. Complete payment to start selling and earning commissions.'}
                     {accessStatus.code === 'STORE_TEMP_BANNED' && `Store suspended: ${storeData?.temporaryBanReason || 'Access suspended.'}`}
                   </p>
                   <div className="mt-3 flex flex-wrap items-center justify-center md:justify-start gap-2">
                     {storeData?.adminContact?.email && (
-                      <a href={`mailto:${storeData.adminContact.email}`} className="text-xs font-bold text-slate-500 hover:text-slate-700 underline flex items-center gap-1">
+                      <a href={`mailto:${storeData.adminContact.email}`} className="text-xs font-bold text-black hover:text-black underline flex items-center gap-1">
                         <Mail size={12} /> {storeData.adminContact.email}
                       </a>
                     )}
                     {storeData?.adminContact?.phone && (
-                      <a href={`tel:${storeData.adminContact.phone}`} className="text-xs font-bold text-slate-500 hover:text-slate-700 underline flex items-center gap-1 ml-2">
+                      <a href={`tel:${storeData.adminContact.phone}`} className="text-xs font-bold text-black hover:text-black underline flex items-center gap-1 ml-2">
                         <Phone size={12} /> {storeData.adminContact.phone}
                       </a>
                     )}
@@ -499,8 +499,8 @@ export default function AdminStore() {
                   <div className="w-12 h-12 mx-auto mb-4 rounded-lg bg-red-50 text-red-600 flex items-center justify-center">
                     <Lock size={24} />
                   </div>
-                  <h3 className="text-lg font-bold text-slate-900 mb-2">Store Locked</h3>
-                  <p className="text-sm text-slate-600 mb-6">
+                  <h3 className="text-lg font-bold text-black mb-2">Store Locked</h3>
+                  <p className="text-sm text-black mb-6">
                     {accessStatus.code === 'AGENT_FEE_UNPAID' && 'Complete activation to unlock store settings and make your public store accessible.'}
                     {accessStatus.code === 'STORE_TEMP_BANNED' && `Store suspended: ${storeData?.temporaryBanReason || 'Access suspended by admin.'}`}
                     {accessStatus.code !== 'AGENT_FEE_UNPAID' && accessStatus.code !== 'STORE_TEMP_BANNED' && 'Store settings are currently locked.'}
@@ -732,7 +732,7 @@ function OverviewTab({ data, onRefresh, showAlert }) {
               </div>
             </div>
             <div className="mt-8 pt-8 border-t border-[#e4e4de]">
-              <h4 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2 uppercase tracking-wider">
+              <h4 className="text-sm font-bold text-black mb-4 flex items-center gap-2 uppercase tracking-wider">
                 <Palette size={16} /> Branding Colors
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -750,12 +750,12 @@ function OverviewTab({ data, onRefresh, showAlert }) {
               <InputGroup label="Hero Image URL" value={formData.content.heroImage} onChange={(v) => setFormData({ ...formData, content: { ...formData.content, heroImage: v } })} placeholder="https://example.com/hero.jpg" />
               
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Preview</label>
+                <label className="text-[10px] font-bold text-black uppercase tracking-widest ml-1">Preview</label>
                 <div className="w-full h-40 rounded-xl border-1.5 border-[#e4e4de] bg-[#fafaf7] overflow-hidden flex items-center justify-center">
                   {formData.content.heroImage?.trim() ? (
                     <img src={formData.content.heroImage} alt="Hero" className="w-full h-full object-cover" />
                   ) : (
-                    <div className="text-xs text-slate-400 font-medium">Hero Image Preview</div>
+                    <div className="text-xs text-black font-medium">Hero Image Preview</div>
                   )}
                 </div>
               </div>
@@ -764,7 +764,7 @@ function OverviewTab({ data, onRefresh, showAlert }) {
 
           <SectionCard title="Value Props" icon={Sparkles}>
             <div className="flex items-center justify-between mb-6">
-              <p className="text-xs text-slate-500 font-medium">Add up to {maxFeatures} key features to display.</p>
+              <p className="text-xs text-black font-medium">Add up to {maxFeatures} key features to display.</p>
               <button
                 type="button"
                 onClick={handleAddFeature}
@@ -780,7 +780,7 @@ function OverviewTab({ data, onRefresh, showAlert }) {
                 <div key={idx} className="p-4 rounded-xl border-1.5 border-[#e4e4de] bg-[#fff] relative">
                   <button
                     onClick={() => handleRemoveFeature(idx)}
-                    className="absolute top-3 right-3 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    className="absolute top-3 right-3 p-1.5 text-black hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                   >
                     <X size={14} />
                   </button>
@@ -791,7 +791,7 @@ function OverviewTab({ data, onRefresh, showAlert }) {
                       setFormData({ ...formData, content: { ...formData.content, features: next } });
                     }} />
                     <div className="space-y-2">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Icon</label>
+                      <label className="text-[10px] font-bold text-black uppercase tracking-widest ml-1">Icon</label>
                       <select
                         value={feat.icon || ''}
                         onChange={(e) => {
@@ -818,7 +818,7 @@ function OverviewTab({ data, onRefresh, showAlert }) {
                 </div>
               ))}
               {formData.content.features.length === 0 && (
-                <div className="py-10 text-center border-2 border-dashed border-[#e4e4de] rounded-xl text-slate-400 text-sm font-medium">
+                <div className="py-10 text-center border-2 border-dashed border-[#e4e4de] rounded-xl text-black text-sm font-medium">
                   No features added yet.
                 </div>
               )}
@@ -833,12 +833,12 @@ function OverviewTab({ data, onRefresh, showAlert }) {
                 {formData.logo ? (
                   <img src={formData.logo} alt="Logo" className="w-full h-full object-contain p-2" />
                 ) : (
-                  <ImageIcon size={32} className="text-slate-300" />
+                  <ImageIcon size={32} className="text-black" />
                 )}
               </div>
               <div className="w-full">
                 <InputGroup label="Logo URL" value={formData.logo} onChange={(v) => setFormData({ ...formData, logo: v })} placeholder="https://..." />
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest text-center mt-3">Square PNG Recommended</p>
+                <p className="text-[10px] text-black font-bold uppercase tracking-widest text-center mt-3">Square PNG Recommended</p>
               </div>
             </div>
           </SectionCard>
@@ -865,8 +865,8 @@ function OverviewTab({ data, onRefresh, showAlert }) {
           </SectionCard>
 
           <div className="dash-card sticky top-6">
-            <h4 className="text-sm font-bold text-slate-900 mb-2">Unsaved Changes</h4>
-            <p className="text-xs text-slate-500 mb-6">Review your changes before applying them to your storefront.</p>
+            <h4 className="text-sm font-bold text-black mb-2">Unsaved Changes</h4>
+            <p className="text-xs text-black mb-6">Review your changes before applying them to your storefront.</p>
             <button
               onClick={handleSave}
               disabled={isSaving}
@@ -938,8 +938,8 @@ function InventoryTab({ plans, onRefresh, showAlert }) {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-900">Store Inventory</h2>
-          <p className="text-sm text-slate-600 mt-1">Manage data bundles available on your storefront.</p>
+          <h2 className="text-xl font-bold text-black">Store Inventory</h2>
+          <p className="text-sm text-black mt-1">Manage data bundles available on your storefront.</p>
         </div>
         <button
           onClick={() => setShowAdd(true)}
@@ -962,11 +962,11 @@ function InventoryTab({ plans, onRefresh, showAlert }) {
         ))}
         {plans.length === 0 && (
           <div className="col-span-full py-20 text-center border-2 border-dashed border-[#e4e4de] rounded-2xl bg-white/50">
-            <div className="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400">
+            <div className="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-black">
               <Smartphone size={28} />
             </div>
-            <h3 className="text-base font-bold text-slate-900">Empty Inventory</h3>
-            <p className="text-sm text-slate-500 mt-1 mb-6">You haven't added any data plans to your store yet.</p>
+            <h3 className="text-base font-bold text-black">Empty Inventory</h3>
+            <p className="text-sm text-black mt-1 mb-6">You haven't added any data plans to your store yet.</p>
             <button onClick={() => setShowAdd(true)} className="dash-btn-outline mx-auto">
               Browse Available Plans
             </button>
@@ -984,7 +984,7 @@ function InventoryTab({ plans, onRefresh, showAlert }) {
           <div className="flex flex-col gap-6">
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-black" size={16} />
                 <input
                   type="text"
                   placeholder="Search plans..."
@@ -1017,9 +1017,9 @@ function InventoryTab({ plans, onRefresh, showAlert }) {
                       }`}
                     >
                       <div className="min-w-0">
-                        <h4 className="text-sm font-bold text-slate-900 truncate uppercase">{p.name || p.planName}</h4>
+                        <h4 className="text-sm font-bold text-black truncate uppercase">{p.name || p.planName}</h4>
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded uppercase">{p.network}</span>
+                          <span className="text-[10px] font-bold text-black bg-slate-100 px-1.5 py-0.5 rounded uppercase">{p.network}</span>
                           <span className="text-xs font-bold text-[#111]">{formatCurrencyAbbreviated(p.agentPrice || p.sellingPrice)}</span>
                         </div>
                       </div>
@@ -1027,7 +1027,7 @@ function InventoryTab({ plans, onRefresh, showAlert }) {
                         onClick={() => !isAlreadyAdded && setSelectedPlanForPrice(p)}
                         disabled={isAlreadyAdded}
                         className={`p-2 rounded-lg transition-colors ${
-                          isAlreadyAdded ? 'text-slate-300' : 'text-[#0F6E56] hover:bg-[#0F6E56] hover:text-white'
+                          isAlreadyAdded ? 'text-black' : 'text-[#0F6E56] hover:bg-[#0F6E56] hover:text-white'
                         }`}
                       >
                         {isAlreadyAdded ? <CheckCircle2 size={20} /> : <Plus size={20} />}
@@ -1156,7 +1156,7 @@ function CheckerInventoryTab({ onRefresh, showAlert }) {
     return (
       <div className="dash-card py-20 text-center">
         <Loader2 className="animate-spin mx-auto text-[#0F6E56]" size={32} />
-        <p className="mt-4 text-slate-500 font-medium">Loading checkers...</p>
+        <p className="mt-4 text-black font-medium">Loading checkers...</p>
       </div>
     );
   }
@@ -1166,7 +1166,7 @@ function CheckerInventoryTab({ onRefresh, showAlert }) {
       <SectionCard title="Config Checker" icon={CreditCard}>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
           <div className="space-y-2">
-            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Type</label>
+            <label className="text-[10px] font-bold text-black uppercase tracking-widest ml-1">Type</label>
             <select
               value={selectedCheckerId}
               onChange={(e) => {
@@ -1210,12 +1210,12 @@ function CheckerInventoryTab({ onRefresh, showAlert }) {
             {storeCheckers.map((row) => (
               <tr key={row._id}>
                 <td className="dash-td">
-                  <p className="font-bold text-slate-900">{row.checkerId?.displayName || 'Checker'}</p>
-                  <p className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">{row.checkerId?.checkerType}</p>
+                  <p className="font-bold text-black">{row.checkerId?.displayName || 'Checker'}</p>
+                  <p className="text-[10px] font-medium text-black uppercase tracking-wider">{row.checkerId?.checkerType}</p>
                 </td>
-                <td className="dash-td font-bold text-slate-900">GHc {Number(row.customPrice || 0).toFixed(2)}</td>
+                <td className="dash-td font-bold text-black">GHc {Number(row.customPrice || 0).toFixed(2)}</td>
                 <td className="dash-td">
-                  <span className={`dash-badge ${row.isActive ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'}`}>
+                  <span className={`dash-badge ${row.isActive ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-black'}`}>
                     {row.isActive ? 'Visible' : 'Hidden'}
                   </span>
                 </td>
@@ -1226,19 +1226,19 @@ function CheckerInventoryTab({ onRefresh, showAlert }) {
                         const p = window.prompt('New price:', String(row.customPrice));
                         if (p) updateChecker(row, { customPrice: Number(p) });
                       }}
-                      className="p-2 text-slate-400 hover:text-[#0F6E56] hover:bg-[#ECFDF5] rounded-lg transition-all"
+                      className="p-2 text-black hover:text-[#0F6E56] hover:bg-[#ECFDF5] rounded-lg transition-all"
                     >
                       <Edit2 size={16} />
                     </button>
                     <button
                       onClick={() => updateChecker(row, { isActive: !row.isActive })}
-                      className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                      className="p-2 text-black hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
                     >
                       {row.isActive ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
                     <button
                       onClick={() => removeChecker(row)}
-                      className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                      className="p-2 text-black hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
                     >
                       <Trash2 size={16} />
                     </button>
@@ -1248,7 +1248,7 @@ function CheckerInventoryTab({ onRefresh, showAlert }) {
             ))}
             {storeCheckers.length === 0 && (
               <tr>
-                <td colSpan="4" className="dash-td py-20 text-center text-slate-400 font-medium">
+                <td colSpan="4" className="dash-td py-20 text-center text-black font-medium">
                   No checkers configured yet.
                 </td>
               </tr>
@@ -1334,7 +1334,7 @@ function AfaInventoryTab({ onRefresh, showAlert }) {
     return (
       <div className="dash-card py-20 text-center">
         <Loader2 className="animate-spin mx-auto text-[#0F6E56]" size={32} />
-        <p className="mt-4 text-slate-500 font-medium">Loading AFA...</p>
+        <p className="mt-4 text-black font-medium">Loading AFA...</p>
       </div>
     );
   }
@@ -1344,7 +1344,7 @@ function AfaInventoryTab({ onRefresh, showAlert }) {
       <SectionCard title="Config AFA" icon={User}>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
           <div className="space-y-2">
-            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Service</label>
+            <label className="text-[10px] font-bold text-black uppercase tracking-widest ml-1">Service</label>
             <select
               value={selectedAfaId}
               onChange={(e) => {
@@ -1388,11 +1388,11 @@ function AfaInventoryTab({ onRefresh, showAlert }) {
             {storeAfa.map((row) => (
               <tr key={row._id}>
                 <td className="dash-td">
-                  <p className="font-bold text-slate-900">{row.afaId?.serviceName || 'AFA Registration'}</p>
+                  <p className="font-bold text-black">{row.afaId?.serviceName || 'AFA Registration'}</p>
                 </td>
-                <td className="dash-td font-bold text-slate-900">GHc {Number(row.customPrice || 0).toFixed(2)}</td>
+                <td className="dash-td font-bold text-black">GHc {Number(row.customPrice || 0).toFixed(2)}</td>
                 <td className="dash-td">
-                  <span className={`dash-badge ${row.isActive ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'}`}>
+                  <span className={`dash-badge ${row.isActive ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-black'}`}>
                     {row.isActive ? 'Visible' : 'Hidden'}
                   </span>
                 </td>
@@ -1403,19 +1403,19 @@ function AfaInventoryTab({ onRefresh, showAlert }) {
                         const p = window.prompt('New price:', String(row.customPrice));
                         if (p) updateAfa(row, { customPrice: Number(p) });
                       }}
-                      className="p-2 text-slate-400 hover:text-[#0F6E56] hover:bg-[#ECFDF5] rounded-lg transition-all"
+                      className="p-2 text-black hover:text-[#0F6E56] hover:bg-[#ECFDF5] rounded-lg transition-all"
                     >
                       <Edit2 size={16} />
                     </button>
                     <button
                       onClick={() => updateAfa(row, { isActive: !row.isActive })}
-                      className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                      className="p-2 text-black hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
                     >
                       {row.isActive ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
                     <button
                       onClick={() => removeAfa(row)}
-                      className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                      className="p-2 text-black hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
                     >
                       <Trash2 size={16} />
                     </button>
@@ -1425,7 +1425,7 @@ function AfaInventoryTab({ onRefresh, showAlert }) {
             ))}
             {storeAfa.length === 0 && (
               <tr>
-                <td colSpan="4" className="dash-td py-20 text-center text-slate-400 font-medium">
+                <td colSpan="4" className="dash-td py-20 text-center text-black font-medium">
                   No AFA services configured yet.
                 </td>
               </tr>
@@ -1462,7 +1462,7 @@ function SectionCard({ title, icon: Icon, color = '#0F6E56', iconBg = '#ECFDF5',
 function InputGroup({ label, value = '', onChange, placeholder = '', isTextArea = false }) {
   return (
     <div className="flex flex-col gap-2">
-      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">{label}</label>
+      <label className="text-[10px] font-bold text-black uppercase tracking-widest ml-1">{label}</label>
       {isTextArea ? (
         <textarea
           value={value || ''}
@@ -1487,15 +1487,15 @@ function InputGroup({ label, value = '', onChange, placeholder = '', isTextArea 
 function IconInput({ icon: Icon, label, value = '', onChange, prefix = '' }) {
   return (
     <div className="flex flex-col gap-2">
-      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">{label}</label>
+      <label className="text-[10px] font-bold text-black uppercase tracking-widest ml-1">{label}</label>
       <div className="relative">
         {Icon && (
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-black">
             <Icon size={16} />
           </div>
         )}
         {prefix && (
-          <span className="absolute left-8 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-medium">
+          <span className="absolute left-8 top-1/2 -translate-y-1/2 text-black text-sm font-medium">
             {prefix}
           </span>
         )}
@@ -1526,8 +1526,8 @@ function ColorInput({ label, value = '', onChange }) {
         />
       </div>
       <div className="min-w-0">
-        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{label}</p>
-        <p className="text-xs font-mono font-bold text-slate-900 truncate uppercase">{value}</p>
+        <p className="text-[10px] font-bold text-black uppercase tracking-wider">{label}</p>
+        <p className="text-xs font-mono font-bold text-black truncate uppercase">{value}</p>
       </div>
     </div>
   );
@@ -1543,23 +1543,23 @@ function InventoryCard({ plan, onEdit, onRemove }) {
           <Smartphone size={24} />
         </div>
         <div className="min-w-0">
-          <h4 className="font-bold text-slate-900 truncate uppercase tracking-tight">{plan.planId?.name || plan.planName}</h4>
+          <h4 className="font-bold text-black truncate uppercase tracking-tight">{plan.planId?.name || plan.planName}</h4>
           <p className="text-[10px] font-bold text-[#0F6E56] uppercase tracking-widest">{plan.network}</p>
         </div>
       </div>
 
       <div className="flex items-end justify-between pt-6 border-t border-[#f0f0f0]">
         <div>
-          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Selling Price</p>
-          <p className="text-2xl font-black text-slate-900 tracking-tight">
+          <p className="text-[10px] text-black font-bold uppercase tracking-wider mb-1">Selling Price</p>
+          <p className="text-2xl font-black text-black tracking-tight">
             {formatCurrencyAbbreviated(plan.customPrice)}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={onEdit} className="p-2 text-slate-400 hover:text-[#0F6E56] hover:bg-[#ECFDF5] rounded-lg transition-all" title="Edit">
+          <button onClick={onEdit} className="p-2 text-black hover:text-[#0F6E56] hover:bg-[#ECFDF5] rounded-lg transition-all" title="Edit">
             <Edit2 size={16} />
           </button>
-          <button onClick={onRemove} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Remove">
+          <button onClick={onRemove} className="p-2 text-black hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Remove">
             <Trash2 size={16} />
           </button>
         </div>
@@ -1595,7 +1595,7 @@ function OrdersTab() {
       case 'completed': return 'bg-green-100 text-green-700';
       case 'pending': return 'bg-amber-100 text-amber-700';
       case 'processing': return 'bg-blue-100 text-blue-700';
-      default: return 'bg-slate-100 text-slate-700';
+      default: return 'bg-slate-100 text-black';
     }
   };
 
@@ -1604,8 +1604,8 @@ function OrdersTab() {
       <div className="dash-header">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-bold text-slate-900">Sales History</h3>
-            <p className="text-sm text-slate-500 mt-1">Track all orders coming through your storefront.</p>
+            <h3 className="text-lg font-bold text-black">Sales History</h3>
+            <p className="text-sm text-black mt-1">Track all orders coming through your storefront.</p>
           </div>
           <div className="dash-icon-box !w-10 !h-10">
             <ShoppingBag size={20} />
@@ -1631,14 +1631,14 @@ function OrdersTab() {
               {orders.map(order => (
                 <tr key={order._id}>
                   <td className="dash-td">
-                    <p className="font-bold text-slate-900">#{order.orderNumber}</p>
-                    <p className="text-[10px] text-slate-400 font-medium">{new Date(order.createdAt).toLocaleDateString()}</p>
+                    <p className="font-bold text-black">#{order.orderNumber}</p>
+                    <p className="text-[10px] text-black font-medium">{new Date(order.createdAt).toLocaleDateString()}</p>
                   </td>
                   <td className="dash-td">
-                    <p className="font-bold text-slate-700 text-sm truncate max-w-[150px]">{order.planName}</p>
+                    <p className="font-bold text-black text-sm truncate max-w-[150px]">{order.planName}</p>
                     <p className="text-[10px] font-black text-[#0F6E56] uppercase">{order.network}</p>
                   </td>
-                  <td className="dash-td font-black text-slate-900">{formatCurrencyAbbreviated(order.amount)}</td>
+                  <td className="dash-td font-black text-black">{formatCurrencyAbbreviated(order.amount)}</td>
                   <td className="dash-td">
                     <span className={`dash-badge ${getStatusStyle(order.status)}`}>
                       {order.status}
@@ -1650,7 +1650,7 @@ function OrdersTab() {
                         setSelectedOrder(order);
                         setShowOrderDetails(true);
                       }}
-                      className="p-2 text-slate-400 hover:text-[#0F6E56] hover:bg-[#ECFDF5] rounded-lg transition-all"
+                      className="p-2 text-black hover:text-[#0F6E56] hover:bg-[#ECFDF5] rounded-lg transition-all"
                     >
                       <Eye size={18} />
                     </button>
@@ -1659,7 +1659,7 @@ function OrdersTab() {
               ))}
               {orders.length === 0 && (
                 <tr>
-                  <td colSpan="5" className="dash-td py-20 text-center text-slate-400 font-medium">No sales recorded yet.</td>
+                  <td colSpan="5" className="dash-td py-20 text-center text-black font-medium">No sales recorded yet.</td>
                 </tr>
               )}
             </tbody>
@@ -1677,11 +1677,11 @@ function OrdersTab() {
           <div className="flex flex-col gap-6">
             <div className="flex justify-between items-start border-b border-[#f0f0f0] pb-4">
               <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Order Ref</p>
-                <p className="font-bold text-lg text-slate-900">#{selectedOrder.orderNumber}</p>
+                <p className="text-[10px] font-bold text-black uppercase tracking-widest mb-1">Order Ref</p>
+                <p className="font-bold text-lg text-black">#{selectedOrder.orderNumber}</p>
               </div>
               <div className="text-right">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Status</p>
+                <p className="text-[10px] font-bold text-black uppercase tracking-widest mb-1">Status</p>
                 <span className={`dash-badge ${getStatusStyle(selectedOrder.status)} !px-3 !py-1`}>
                   {selectedOrder.status}
                 </span>
@@ -1691,23 +1691,23 @@ function OrdersTab() {
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 bg-[#ECFDF5] rounded-xl border border-[#A7F3D0]">
                 <p className="text-[10px] font-bold text-[#0F6E56] uppercase tracking-widest mb-1">Product</p>
-                <p className="font-bold text-slate-900 text-sm truncate">{selectedOrder.planName}</p>
+                <p className="font-bold text-black text-sm truncate">{selectedOrder.planName}</p>
                 <p className="text-[10px] font-black text-[#0F6E56] uppercase mt-1">{selectedOrder.network}</p>
               </div>
               <div className="p-4 bg-[#F5F3FF] rounded-xl border border-[#DDD6FE]">
                 <p className="text-[10px] font-bold text-[#7C3AED] uppercase tracking-widest mb-1">Amount Paid</p>
-                <p className="font-black text-slate-900 text-lg">{formatCurrencyAbbreviated(selectedOrder.amount)}</p>
+                <p className="font-black text-black text-lg">{formatCurrencyAbbreviated(selectedOrder.amount)}</p>
               </div>
             </div>
 
             <div className="flex flex-col gap-3">
               <div className="flex justify-between items-center py-2 border-b border-[#f0f0f0]">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Beneficiary</span>
-                <span className="text-sm font-bold text-slate-900">{selectedOrder.phoneNumber || 'N/A'}</span>
+                <span className="text-xs font-bold text-black uppercase tracking-wider">Beneficiary</span>
+                <span className="text-sm font-bold text-black">{selectedOrder.phoneNumber || 'N/A'}</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-[#f0f0f0]">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Transaction Date</span>
-                <span className="text-sm font-bold text-slate-900">{new Date(selectedOrder.createdAt).toLocaleString()}</span>
+                <span className="text-xs font-bold text-black uppercase tracking-wider">Transaction Date</span>
+                <span className="text-sm font-bold text-black">{new Date(selectedOrder.createdAt).toLocaleString()}</span>
               </div>
             </div>
 
@@ -1788,7 +1788,7 @@ function CommissionsTab() {
             </div>
           </div>
           
-          <p className="text-sm text-slate-600">Your earnings are automatically aggregated from every sale processed through your storefront link.</p>
+          <p className="text-sm text-black">Your earnings are automatically aggregated from every sale processed through your storefront link.</p>
           
           <button
             onClick={() => navigate('/agent/commissions')}
@@ -1909,10 +1909,10 @@ function BillingTab({ storeData, onRefresh, showAlert }) {
         </div>
         
         <div className="space-y-2">
-          <h3 className="text-xl font-bold text-slate-900">
+          <h3 className="text-xl font-bold text-black">
             {isActive ? 'Account Fully Activated' : 'Unlock Your Public Storefront'}
           </h3>
-          <p className="text-sm text-slate-600 leading-relaxed">
+          <p className="text-sm text-black leading-relaxed">
             {isActive 
               ? 'Congratulations! Your agent account is active. You can now customize your store and start earning commissions from sales.' 
               : `To start selling data bundles and earning commissions, you need to pay a one-time activation fee of ${formatCurrencyAbbreviated(registrationFee)}.`}
@@ -1922,7 +1922,7 @@ function BillingTab({ storeData, onRefresh, showAlert }) {
         {!isActive && (
           <div className="w-full flex flex-col gap-6 mt-4">
             <div className="space-y-2">
-              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Select Payment Method</label>
+              <label className="text-[10px] font-bold text-black uppercase tracking-widest">Select Payment Method</label>
               <div className="grid grid-cols-2 gap-3 p-1.5 bg-[#ECFDF5] border-1.5 border-[#A7F3D0] rounded-xl">
                 <button
                   onClick={() => setPaymentMethod('wallet')}
@@ -1998,9 +1998,9 @@ function Modal({ title, onClose, children, icon: HeaderIcon }) {
                 <HeaderIcon size={16} strokeWidth={2.5} />
               </div>
             )}
-            <h3 className="text-base font-bold text-slate-900 uppercase tracking-wider">{title}</h3>
+            <h3 className="text-base font-bold text-black uppercase tracking-wider">{title}</h3>
           </div>
-          <button onClick={onClose} className="p-2 text-slate-300 hover:text-[#0F6E56] hover:bg-[#ECFDF5] rounded-lg transition-colors"><X size={20} /></button>
+          <button onClick={onClose} className="p-2 text-black hover:text-[#0F6E56] hover:bg-[#ECFDF5] rounded-lg transition-colors"><X size={20} /></button>
         </div>
         <div className="p-6 flex-1 overflow-y-auto custom-scrollbar">
           {children}
@@ -2048,18 +2048,18 @@ function PriceModal({ plan, onClose, onConfirm, initialPrice, submitLabel = 'Add
             <div className="w-14 h-14 bg-[#ECFDF5] border-1.5 border-[#A7F3D0] rounded-xl flex items-center justify-center mx-auto text-[#0F6E56] mb-4">
               <CreditCard size={28} />
             </div>
-            <h3 className="text-lg font-bold text-slate-900 uppercase tracking-tight">Configure Price</h3>
-            <p className="text-xs text-slate-500 mt-1 uppercase font-bold tracking-widest">{plan.name} • {plan.network}</p>
+            <h3 className="text-lg font-bold text-black uppercase tracking-tight">Configure Price</h3>
+            <p className="text-xs text-black mt-1 uppercase font-bold tracking-widest">{plan.name} • {plan.network}</p>
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-6">
             <div className="flex flex-col gap-3">
               <div className="flex justify-between items-center px-1">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Base Cost</label>
+                <label className="text-[10px] font-bold text-black uppercase tracking-widest">Base Cost</label>
                 <span className="text-xs font-bold text-[#111]">{formatCurrencyAbbreviated(plan.sellingPrice)}</span>
               </div>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-400 text-sm">GHS</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-black text-sm">GHS</span>
                 <input
                   autoFocus
                   type="number"

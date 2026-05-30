@@ -344,7 +344,7 @@ export default function AdminUsers() {
         .usr-stat-label {
           font-size: 11px;
           font-weight: 700;
-          color: #999;
+          color: #000;
           text-transform: uppercase;
           letter-spacing: 0.05em;
         }
@@ -541,7 +541,7 @@ export default function AdminUsers() {
           </div>
           <div>
             <h2 className="usr-h2">Manage Accounts</h2>
-            <p style={{ fontSize: '14px', color: '#666', margin: '4px 0 0' }}>Monitor users and agents across the platform</p>
+            <p style={{ fontSize: '14px', color: '#000', margin: '4px 0 0' }}>Monitor users and agents across the platform</p>
           </div>
         </div>
 
@@ -615,7 +615,7 @@ export default function AdminUsers() {
                     <tr key={user._id}>
                       <td className="usr-td" style={{ whiteSpace: 'nowrap' }}>
                         <div style={{ fontWeight: '700', color: '#111' }}>{user.name}</div>
-                        <div style={{ fontSize: '12px', color: '#666' }}>{user.email}</div>
+                        <div style={{ fontSize: '12px', color: '#000' }}>{user.email}</div>
                       </td>
                       <td className="usr-td" style={{ whiteSpace: 'nowrap' }}>
                         <span className="usr-badge" style={getRoleBadgeStyles(user.role)}>{user.role}</span>

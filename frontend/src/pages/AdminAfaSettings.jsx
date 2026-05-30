@@ -208,7 +208,7 @@ export default function AdminAfaSettings() {
     .afa-label {
       font-size: 11px;
       font-weight: 800;
-      color: #999;
+      color: #000;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       margin-left: 4px;
@@ -299,7 +299,7 @@ export default function AdminAfaSettings() {
     .afa-stat-label {
       font-size: 11px;
       font-weight: 800;
-      color: #999;
+      color: #000;
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
@@ -339,7 +339,7 @@ export default function AdminAfaSettings() {
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="flex flex-col items-center gap-4">
             <div className="afa-spinner"></div>
-            <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">Loading AFA Settings...</span>
+            <span className="text-sm font-bold text-black uppercase tracking-widest">Loading AFA Settings...</span>
           </div>
         </div>
       </AdminLayout>
@@ -413,7 +413,7 @@ export default function AdminAfaSettings() {
                 <Info size={32} />
               </div>
               <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#111', marginBottom: '8px' }}>Offer Not Initialized</h3>
-              <p style={{ fontSize: '14px', color: '#666', maxWidth: '400px', margin: '0 auto 24px' }}>Click the sync button above to fetch the initial AFA offer and pricing details from the main platform.</p>
+              <p style={{ fontSize: '14px', color: '#000', maxWidth: '400px', margin: '0 auto 24px' }}>Click the sync button above to fetch the initial AFA offer and pricing details from the main platform.</p>
               <button 
                 onClick={handleSync}
                 className="afa-btn-primary"

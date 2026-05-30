@@ -142,7 +142,7 @@ const styles = `
   .dash-stat-label {
     font-size: 11px;
     font-weight: 700;
-    color: #999;
+    color: #000;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
@@ -416,7 +416,7 @@ export default function AgentDashboard() {
                 <div>
                   <h2 className="dash-h2">{storeData?.name || 'My Store'}</h2>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="text-xs font-bold text-slate-400 font-mono uppercase">/{storeData?.slug}</span>
+                    <span className="text-xs font-bold text-black font-mono uppercase">/{storeData?.slug}</span>
                     <button onClick={handleCopyLink} className="text-[10px] font-bold text-indigo-600 hover:text-indigo-700">
                       {copiedLink ? 'Copied!' : 'Copy Link'}
                     </button>
@@ -446,7 +446,7 @@ export default function AgentDashboard() {
 
           {/* Quick Action Navigation */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest">Quick Actions</h3>
+            <h3 className="text-sm font-bold text-black uppercase tracking-widest">Quick Actions</h3>
             <div className="grid grid-cols-2 sm:flex items-center gap-3">
               <Link to="/agent/orders" className="dash-btn-outline flex-1 sm:flex-none">
                 <ShoppingBag size={14} />
@@ -571,7 +571,7 @@ export default function AgentDashboard() {
                 <div style={{ background: '#F5F3FF', padding: '16px', borderRadius: '12px', border: '1.5px solid #DDD6FE' }}>
                   <p className="dash-stat-label" style={{ marginBottom: '4px', color: '#7C3AED' }}>Live Catalog</p>
                   <p style={{ fontSize: '18px', fontWeight: '800', color: '#111' }}>{plansCount} Packages</p>
-                  <p style={{ fontSize: '12px', color: '#666' }}>Currently visible to customers</p>
+                  <p style={{ fontSize: '12px', color: '#000' }}>Currently visible to customers</p>
                 </div>
                 <div style={{ background: '#ECFDF5', padding: '16px', borderRadius: '12px', border: '1.5px solid #A7F3D0' }}>
                   <p className="dash-stat-label" style={{ marginBottom: '4px', color: '#0F6E56' }}>Store URL</p>
@@ -614,7 +614,7 @@ export default function AgentDashboard() {
                   </div>
                 ))}
                 <div style={{ textAlign: 'center', paddingTop: '16px', borderTop: '1px solid #f0f0f0' }}>
-                  <p style={{ fontSize: '10px', fontWeight: '800', color: '#999', textTransform: 'uppercase', letterSpacing: '0.2em' }}>
+                  <p style={{ fontSize: '10px', fontWeight: '800', color: '#000', textTransform: 'uppercase', letterSpacing: '0.2em' }}>
                     System Status: 100%
                   </p>
                 </div>
@@ -643,7 +643,7 @@ export default function AgentDashboard() {
             {recentOrders.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '60px', border: '1.5px dashed #e4e4de', borderRadius: '14px' }}>
                 <ShoppingBag size={40} style={{ color: '#e4e4de', margin: '0 auto 16px' }} />
-                <p style={{ fontSize: '14px', fontWeight: '700', color: '#999' }}>No sales recorded yet.</p>
+                <p style={{ fontSize: '14px', fontWeight: '700', color: '#000' }}>No sales recorded yet.</p>
               </div>
             ) : (
               <div className="dash-table-container">
@@ -676,7 +676,7 @@ export default function AgentDashboard() {
                           </td>
                           <td className="dash-td">
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <Phone size={12} style={{ color: '#999' }} />
+                              <Phone size={12} style={{ color: '#000' }} />
                               <span style={{ fontWeight: '700' }}>{order.phoneNumber || 'N/A'}</span>
                             </div>
                           </td>
@@ -685,7 +685,7 @@ export default function AgentDashboard() {
                           <td className="dash-td">
                             <span className="dash-badge" style={statusColor}>{order.status}</span>
                           </td>
-                          <td className="dash-td" style={{ fontSize: '11px', color: '#999' }}>{formatDate(order.createdAt)}</td>
+                          <td className="dash-td" style={{ fontSize: '11px', color: '#000' }}>{formatDate(order.createdAt)}</td>
                           <td className="dash-td text-right">
                             <button
                               onClick={() => {
@@ -694,7 +694,7 @@ export default function AgentDashboard() {
                               }}
                               style={{ padding: '6px', borderRadius: '6px', border: '1px solid #e4e4de', background: '#fff', cursor: 'pointer' }}
                             >
-                              <Eye size={14} style={{ color: '#666' }} />
+                              <Eye size={14} style={{ color: '#000' }} />
                             </button>
                           </td>
                         </tr>
@@ -720,11 +720,11 @@ export default function AgentDashboard() {
           <div style={{ fontFamily: 'DM Sans, sans-serif' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
               <div>
-                <p style={{ fontSize: '10px', fontWeight: '800', color: '#999', textTransform: 'uppercase', marginBottom: '4px' }}>Reference</p>
+                <p style={{ fontSize: '10px', fontWeight: '800', color: '#000', textTransform: 'uppercase', marginBottom: '4px' }}>Reference</p>
                 <p style={{ fontSize: '14px', fontWeight: '800', color: '#111', fontFamily: 'monospace' }}>#{String(selectedOrder._id).slice(-10).toUpperCase()}</p>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <p style={{ fontSize: '10px', fontWeight: '800', color: '#999', textTransform: 'uppercase', marginBottom: '4px' }}>Order Status</p>
+                <p style={{ fontSize: '10px', fontWeight: '800', color: '#000', textTransform: 'uppercase', marginBottom: '4px' }}>Order Status</p>
                 <span className="dash-badge" style={{ 
                   background: selectedOrder.status === 'completed' ? '#ecfdf5' : '#fffbeb', 
                   color: selectedOrder.status === 'completed' ? '#059669' : '#d97706' 
@@ -738,27 +738,27 @@ export default function AgentDashboard() {
               <div style={{ background: '#F5F3FF', padding: '16px', borderRadius: '12px', border: '1.5px solid #DDD6FE' }}>
                 <p className="dash-stat-label" style={{ color: '#7C3AED' }}>Customer</p>
                 <p style={{ fontSize: '14px', fontWeight: '800', color: '#111' }}>{selectedOrder.phoneNumber}</p>
-                <p style={{ fontSize: '11px', color: '#666', marginTop: '2px' }}>{selectedOrder.network}</p>
+                <p style={{ fontSize: '11px', color: '#000', marginTop: '2px' }}>{selectedOrder.network}</p>
               </div>
               <div style={{ background: '#ECFDF5', padding: '16px', borderRadius: '12px', border: '1.5px solid #A7F3D0' }}>
                 <p className="dash-stat-label" style={{ color: '#0F6E56' }}>Package</p>
                 <p style={{ fontSize: '14px', fontWeight: '800', color: '#111' }}>{getOrderPlanDisplay(selectedOrder)}</p>
-                <p style={{ fontSize: '11px', color: '#666', marginTop: '2px' }}>{formatCurrency(selectedOrder.amount)}</p>
+                <p style={{ fontSize: '11px', color: '#000', marginTop: '2px' }}>{formatCurrency(selectedOrder.amount)}</p>
               </div>
             </div>
 
             <div style={{ borderTop: '1.5px solid #f0f0f0', paddingTop: '16px' }}>
               <div className="flex justify-between items-center py-2">
-                <span style={{ fontSize: '12px', fontWeight: '700', color: '#666' }}>Purchase Date</span>
+                <span style={{ fontSize: '12px', fontWeight: '700', color: '#000' }}>Purchase Date</span>
                 <span style={{ fontSize: '12px', fontWeight: '800', color: '#111' }}>{formatDate(selectedOrder.createdAt)}</span>
               </div>
               <div className="flex justify-between items-center py-2">
-                <span style={{ fontSize: '12px', fontWeight: '700', color: '#666' }}>Net Commission</span>
+                <span style={{ fontSize: '12px', fontWeight: '700', color: '#000' }}>Net Commission</span>
                 <span style={{ fontSize: '14px', fontWeight: '800', color: '#059669' }}>+{formatCurrency(selectedOrder.agentCommission || 0)}</span>
               </div>
               {selectedOrder.transactionId && (
                 <div className="flex justify-between items-center py-2">
-                  <span style={{ fontSize: '12px', fontWeight: '700', color: '#666' }}>API Transaction</span>
+                  <span style={{ fontSize: '12px', fontWeight: '700', color: '#000' }}>API Transaction</span>
                   <span style={{ fontSize: '11px', fontWeight: '800', color: '#111', fontFamily: 'monospace' }}>{selectedOrder.transactionId}</span>
                 </div>
               )}

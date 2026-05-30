@@ -269,7 +269,7 @@ export default function AdminResultCheckers() {
           text-align: left;
           padding: 14px 16px;
           font-weight: 800;
-          color: #999;
+          color: #000;
           border-bottom: 1.5px solid #e4e4de;
           font-size: 10px;
           text-transform: uppercase;
@@ -447,7 +447,7 @@ export default function AdminResultCheckers() {
                             <div style={{ width: 8, height: 8, borderRadius: '50%', background: rowColor.main }} />
                             <div>
                               <div style={{ fontWeight: '800', color: '#111', fontSize: '14px' }}>{offer.displayName || offer.checkerType}</div>
-                              <div style={{ fontSize: '11px', color: '#999', fontWeight: '600', textTransform: 'uppercase' }}>{offer.checkerType}</div>
+                              <div style={{ fontSize: '11px', color: '#000', fontWeight: '600', textTransform: 'uppercase' }}>{offer.checkerType}</div>
                             </div>
                           </div>
                         </td>
@@ -469,7 +469,7 @@ export default function AdminResultCheckers() {
                         <td className="chk-td">
                           <div className="flex flex-col">
                             <span style={{ fontWeight: '800', color: offer.stockCount > 0 ? '#059669' : '#DC2626', fontSize: '14px' }}>{offer.stockCount || 0}</span>
-                            <span style={{ fontSize: '10px', fontWeight: '700', color: '#999', textTransform: 'uppercase' }}>
+                            <span style={{ fontSize: '10px', fontWeight: '700', color: '#000', textTransform: 'uppercase' }}>
                               {offer.available ? 'In Stock' : 'Out of Stock'}
                             </span>
                           </div>
@@ -514,7 +514,7 @@ export default function AdminResultCheckers() {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
               <div>
                 <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#111', margin: 0 }}>Edit Prices</h3>
-                <p style={{ fontSize: '11px', fontWeight: '700', color: '#999', textTransform: 'uppercase', margin: '4px 0 0' }}>{editing.displayName || editing.checkerType}</p>
+                <p style={{ fontSize: '11px', fontWeight: '700', color: '#000', textTransform: 'uppercase', margin: '4px 0 0' }}>{editing.displayName || editing.checkerType}</p>
               </div>
               <button onClick={() => setEditing(null)} className="chk-btn-icon" style={{ borderRadius: '50%' }}>
                 <X size={18} />
@@ -523,14 +523,14 @@ export default function AdminResultCheckers() {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '11px', fontWeight: '800', color: '#999', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.05em' }}>Cost Price (Provider)</label>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: '800', color: '#000', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.05em' }}>Cost Price (Provider)</label>
                 <div style={{ padding: '12px', background: '#f5f5f0', border: '1.5px solid #e4e4de', borderRadius: '10px', fontWeight: '700', color: '#111' }}>
                   {formatAmount(editing.costPrice)}
                 </div>
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '11px', fontWeight: '800', color: '#999', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.05em' }}>Selling Price (User)</label>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: '800', color: '#000', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.05em' }}>Selling Price (User)</label>
                 <input
                   className="chk-input"
                   type="number"
@@ -541,7 +541,7 @@ export default function AdminResultCheckers() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '11px', fontWeight: '800', color: '#999', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.05em' }}>Agent Price</label>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: '800', color: '#000', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.05em' }}>Agent Price</label>
                 <input
                   className="chk-input"
                   type="number"

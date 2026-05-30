@@ -414,7 +414,7 @@ export default function AdminOrders() {
         
         .orders-subtitle {
           font-size: 14px;
-          color: #666;
+          color: #000;
           margin: 4px 0 0 0;
         }
         
@@ -450,7 +450,7 @@ export default function AdminOrders() {
         .orders-stat-label {
           font-size: 11px;
           font-weight: 700;
-          color: #999;
+          color: #000;
           text-transform: uppercase;
           letter-spacing: 0.05em;
         }
@@ -476,7 +476,7 @@ export default function AdminOrders() {
           left: 14px;
           top: 50%;
           transform: translateY(-50%);
-          color: #999;
+          color: #000;
         }
         
         .orders-input {
@@ -502,7 +502,7 @@ export default function AdminOrders() {
         .orders-filter-label {
           font-size: 10px;
           font-weight: 800;
-          color: #999;
+          color: #000;
           letter-spacing: 0.1em;
           margin-bottom: 8px;
           text-transform: uppercase;
@@ -522,7 +522,7 @@ export default function AdminOrders() {
           cursor: pointer;
           border: 1.5px solid #e4e4de;
           background: #fff;
-          color: #666;
+          color: #000;
           transition: all 0.2s;
         }
         
@@ -555,7 +555,7 @@ export default function AdminOrders() {
           border-bottom: 1.5px solid #e4e4de;
           font-size: 10px;
           font-weight: 800;
-          color: #999;
+          color: #000;
           text-transform: uppercase;
           letter-spacing: 0.05em;
         }
@@ -767,7 +767,7 @@ export default function AdminOrders() {
                     </div>
                     <div>
                       <h2 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#111' }}>Order Records</h2>
-                      <p style={{ margin: 0, fontSize: '11px', color: '#999', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{filteredOrders.length} matching entries</p>
+                      <p style={{ margin: 0, fontSize: '11px', color: '#000', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{filteredOrders.length} matching entries</p>
                     </div>
                   </div>
                   {someSelected && (
@@ -785,14 +785,14 @@ export default function AdminOrders() {
                 {loading ? (
                   <div style={{ padding: '64px', display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
                     <div className="orders-spinner" style={{ width: '32px', height: '32px' }}></div>
-                    <p style={{ fontSize: '13px', fontWeight: '700', color: '#999' }}>Fetching records...</p>
+                    <p style={{ fontSize: '13px', fontWeight: '700', color: '#000' }}>Fetching records...</p>
                   </div>
                 ) : filteredOrders.length === 0 ? (
                   <div style={{ padding: '64px', textAlign: 'center' }}>
                     <div style={{ width: 64, height: 64, borderRadius: 20, background: '#fafaf7', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', border: '1.5px dashed #e4e4de' }}>
                       <Database size={32} style={{ color: '#e4e4de' }} />
                     </div>
-                    <p style={{ color: '#999', margin: 0, fontWeight: 700, fontSize: '14px' }}>No orders found matching your criteria</p>
+                    <p style={{ color: '#000', margin: 0, fontWeight: 700, fontSize: '14px' }}>No orders found matching your criteria</p>
                   </div>
                 ) : (
                   <table className="orders-table">
@@ -836,7 +836,7 @@ export default function AdminOrders() {
                                 </div>
                                 <div className="flex flex-col">
                                   <span className="font-black text-[#111]">#{order.orderNumber?.slice(-8).toUpperCase() || order._id?.slice(-8).toUpperCase()}</span>
-                                  <span className="text-[10px] text-slate-400 font-bold uppercase">{order.network || 'Generic'}</span>
+                                  <span className="text-[10px] text-black font-bold uppercase">{order.network || 'Generic'}</span>
                                 </div>
                               </div>
                             </td>
@@ -845,22 +845,22 @@ export default function AdminOrders() {
                                 <div className="flex flex-col">
                                   <div className="flex items-center gap-1.5">
                                     <span className="font-bold text-[#111]">{order.storeId.owner?.name || 'Agent'}</span>
-                                    <ChevronRight size={10} className="text-slate-300" />
+                                    <ChevronRight size={10} className="text-black" />
                                     <span className="text-[11px] font-black uppercase tracking-tight" style={{ color: pageTheme.main }}>{order.storeId.name}</span>
                                   </div>
-                                  <span className="text-[10px] text-slate-400 font-bold uppercase">Buyer: {order.guestInfo?.name || order.userId?.name || order.phoneNumber || 'N/A'}</span>
+                                  <span className="text-[10px] text-black font-bold uppercase">Buyer: {order.guestInfo?.name || order.userId?.name || order.phoneNumber || 'N/A'}</span>
                                 </div>
                               ) : (
                                 <div className="flex flex-col">
                                   <span className="font-bold text-[#111]">{order.isGuest ? (order.guestInfo?.name || 'Guest User') : (order.userId?.name || 'Direct User')}</span>
-                                  <span className="text-[10px] text-slate-400 font-bold uppercase">{order.isGuest ? order.guestInfo?.email : order.userId?.email || 'No Email'}</span>
+                                  <span className="text-[10px] text-black font-bold uppercase">{order.isGuest ? order.guestInfo?.email : order.userId?.email || 'No Email'}</span>
                                 </div>
                               )}
                             </td>
                             <td>
                               <div className="flex flex-col">
                                 <span className="font-bold text-[#111]">{getPlanDisplayValue(order)}</span>
-                                <span className="text-[10px] text-slate-400 font-bold">{order.phoneNumber}</span>
+                                <span className="text-[10px] text-black font-bold">{order.phoneNumber}</span>
                               </div>
                             </td>
                             <td>
@@ -896,7 +896,7 @@ export default function AdminOrders() {
                             <td>
                               <div className="flex flex-col">
                                 <span className="font-bold text-[#111] text-[11px]">{new Date(order.date || order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                                <span className="text-[10px] text-slate-400 font-bold">{new Date(order.date || order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                <span className="text-[10px] text-black font-bold">{new Date(order.date || order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                               </div>
                             </td>
                             <td className="text-right">
