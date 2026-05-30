@@ -1,12 +1,26 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Edit2, Trash2, RefreshCw, Database, CheckCircle, AlertCircle, Search, Filter, X, Save, Package, RotateCcw } from 'lucide-react';
+import { Edit2, Trash2, RefreshCw, Database, CheckCircle, AlertCircle, Search, Filter, X, Save, Package, RotateCcw, TrendingUp } from 'lucide-react';
 import AdminSidebar from '../components/AdminSidebar';
 import ConfirmDialog from '../components/ConfirmDialog';
 import Pagination from '../components/Pagination';
 import { useSidebar } from '../hooks/useSidebar';
 import { topza as topzaAPI, admin as adminAPI } from '../services/api';
 import { useSettings } from '../context/SettingsContext';
+
+/* ── Multi-colour palette ── */
+const palette = [
+  { main: '#7C3AED', bg: '#EDE9FE', soft: '#F5F3FF', glow: 'rgba(124,58,237,0.15)' },   // purple
+  { main: '#0F6E56', bg: '#D1FAE5', soft: '#ECFDF5', glow: 'rgba(15,110,86,0.15)' },    // teal
+  { main: '#1D4ED8', bg: '#DBEAFE', soft: '#EFF6FF', glow: 'rgba(29,78,216,0.15)' },    // blue
+  { main: '#B45309', bg: '#FEF3C7', soft: '#FFFBEB', glow: 'rgba(180,83,9,0.15)' },     // amber
+  { main: '#BE185D', bg: '#FCE7F3', soft: '#FDF2F8', glow: 'rgba(190,24,93,0.15)' },    // pink
+  { main: '#DC2626', bg: '#FEE2E2', soft: '#FFF5F5', glow: 'rgba(220,38,38,0.15)' },    // coral/red
+  { main: '#0369A1', bg: '#E0F2FE', soft: '#F0F9FF', glow: 'rgba(3,105,161,0.15)' },    // sky
+  { main: '#4D7C0F', bg: '#ECFCCB', soft: '#F7FEE7', glow: 'rgba(77,124,15,0.15)' },    // lime/green
+];
+
+const getColor = (index) => palette[index % palette.length];
 
 export default function AdminTopzaPlans() {
   const { sidebarOpen, closeSidebar } = useSidebar();
@@ -211,6 +225,7 @@ export default function AdminTopzaPlans() {
         
         .topza-page-container {
           font-family: 'DM Sans', sans-serif;
+          background-color: #f5f5f0;
         }
 
         .topza-content {
@@ -220,36 +235,41 @@ export default function AdminTopzaPlans() {
           display: flex;
           flex-direction: column;
           align-items: center;
+          gap: 24px;
         }
 
-        .topza-main-card {
-          background: #fff;
-          border: 1.5px solid #e4e4de;
-          border-radius: 14px;
-          box-shadow: 0 8px 40px rgba(0,0,0,0.10);
+        .topza-header { 
+          background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%); 
+          border: 1.5px solid #93C5FD; 
+          border-radius: 14px; 
+          padding: 24px; 
+          box-shadow: 0 8px 40px rgba(29,78,216,0.08); 
           width: 100%;
           max-width: 1100px;
-          padding: 24px;
-          margin-bottom: 24px;
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
         }
 
-        .topza-heading-section {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-          margin-bottom: 32px;
+        @media (min-width: 768px) {
+          .topza-header {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+          }
         }
 
         .topza-icon-box {
           width: 46px;
           height: 46px;
-          background: #111;
+          background: #1D4ED8;
           border-radius: 8px;
           display: flex;
           align-items: center;
           justify-content: center;
-          color: #f0a500;
+          color: #fff;
           flex-shrink: 0;
+          box-shadow: 0 4px 16px rgba(29,78,216,0.25);
         }
 
         .topza-h2 {
@@ -260,12 +280,22 @@ export default function AdminTopzaPlans() {
           letter-spacing: -0.02em;
         }
 
+        .topza-main-card {
+          background: #fff;
+          border: 1.5px solid #e4e4de;
+          border-radius: 14px;
+          box-shadow: 0 8px 40px rgba(0,0,0,0.06);
+          width: 100%;
+          max-width: 1100px;
+          padding: 24px;
+        }
+
         .topza-stats-grid {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
           gap: 12px;
           width: 100%;
-          margin-bottom: 24px;
+          max-width: 1100px;
         }
 
         @media (min-width: 768px) {
@@ -276,19 +306,26 @@ export default function AdminTopzaPlans() {
         }
 
         .topza-stat-card {
-          background: #fff;
-          border: 1.5px solid #e4e4de;
+          background: var(--stat-bg, #fff);
+          border: 1.5px solid var(--stat-border, #e4e4de);
           border-radius: 14px;
           padding: 16px;
           display: flex;
           flex-direction: column;
           gap: 4px;
+          transition: all 0.2s;
+        }
+
+        .topza-stat-card:hover {
+          border-color: var(--stat-color, #d4d4ce);
+          box-shadow: 0 8px 40px var(--stat-glow, rgba(0,0,0,0.06));
+          transform: translateY(-2px);
         }
 
         .topza-stat-label {
-          font-size: 11.5px;
+          font-size: 11px;
           font-weight: 700;
-          color: #666;
+          color: #999;
           text-transform: uppercase;
           letter-spacing: 0.05em;
         }
@@ -302,7 +339,6 @@ export default function AdminTopzaPlans() {
         .topza-search-box {
           position: relative;
           width: 100%;
-          margin-bottom: 20px;
         }
 
         .topza-input {
@@ -317,39 +353,54 @@ export default function AdminTopzaPlans() {
         }
 
         .topza-input:focus {
-          border-color: #111;
-          box-shadow: 0 0 0 3px rgba(17,17,17,0.07);
+          border-color: #1D4ED8;
+          box-shadow: 0 0 0 3px rgba(29,78,216,0.07);
           background: #fff;
           outline: none;
         }
 
         .topza-btn-primary {
-          background: #111;
+          background: #1D4ED8;
           color: #fff;
-          border-radius: 7px;
-          padding: 12px 20px;
+          border-radius: 8px;
+          padding: 10px 20px;
           font-size: 14px;
           font-weight: 700;
           border: none;
           cursor: pointer;
+          transition: all 0.2s;
           display: flex;
           align-items: center;
           justify-content: center;
           gap: 8px;
+          box-shadow: 0 4px 12px rgba(29,78,216,0.2);
+        }
+
+        .topza-btn-primary:hover:not(:disabled) {
+          background: #1e40af;
+          transform: translateY(-1px);
+          box-shadow: 0 6px 16px rgba(29,78,216,0.3);
         }
 
         .topza-btn-outline {
           background: #fff;
           color: #111;
           border: 1.5px solid #e4e4de;
-          border-radius: 7px;
-          padding: 10px 16px;
+          border-radius: 8px;
+          padding: 8px 16px;
           font-size: 13px;
           font-weight: 700;
           cursor: pointer;
+          transition: all 0.2s;
           display: flex;
           align-items: center;
           gap: 6px;
+        }
+
+        .topza-btn-outline:hover:not(:disabled) {
+          background: #fafaf7;
+          border-color: #1D4ED8;
+          color: #1D4ED8;
         }
 
         .topza-table-container {
@@ -362,7 +413,7 @@ export default function AdminTopzaPlans() {
         .topza-table {
           width: 100%;
           border-collapse: collapse;
-          font-size: 13.5px;
+          font-size: 13px;
         }
 
         .topza-th {
@@ -372,8 +423,9 @@ export default function AdminTopzaPlans() {
           font-weight: 700;
           color: #333;
           border-bottom: 1.5px solid #e4e4de;
-          font-size: 11.5px;
+          font-size: 11px;
           text-transform: uppercase;
+          letter-spacing: 0.05em;
         }
 
         .topza-td {
@@ -393,11 +445,51 @@ export default function AdminTopzaPlans() {
           background: #fff;
           color: #444;
           cursor: pointer;
+          transition: all 0.2s;
         }
 
         .topza-btn-icon:hover {
-          background: #111;
+          background: #1D4ED8;
           color: #fff;
+          border-color: #1D4ED8;
+          transform: translateY(-1px);
+        }
+
+        .topza-badge {
+          padding: 4px 8px;
+          border-radius: 6px;
+          font-size: 10px;
+          font-weight: 700;
+          text-transform: uppercase;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+        }
+
+        .tab-button {
+          flex-shrink: 0;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 8px 16px;
+          border-radius: 10px;
+          transition: all 0.2s;
+          border: 1.5px solid #e4e4de;
+          background: #fff;
+          cursor: pointer;
+          font-size: 12px;
+          font-weight: 700;
+          color: #444;
+        }
+
+        .tab-button.active {
+          color: #fff;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .tab-button:not(.active):hover {
+          background: #f8f8f4;
+          border-color: #d4d4cd;
         }
 
         .topza-filter-btn {
@@ -463,43 +555,56 @@ export default function AdminTopzaPlans() {
       <AdminSidebar isOpen={sidebarOpen} onClose={closeSidebar} />
 
       <div className="topza-content">
-        <div className="topza-main-card">
-          <div className="topza-heading-section">
+        <div className="topza-header">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <div className="topza-icon-box">
-              <Database size={24} />
+              <Package size={24} />
             </div>
             <div>
               <h2 className="topza-h2">Topza Offers</h2>
-              <p style={{ fontSize: '14px', color: '#666', margin: '4px 0 0' }}>Sync and manage Topza pricing and stock</p>
+              <p style={{ fontSize: '14px', color: '#666', margin: '4px 0 0' }}>Manage data bundle catalog and retail pricing</p>
             </div>
           </div>
-
-          {error && <div style={{ background: '#fff5f5', border: '1.5px solid #fecaca', color: '#b91c1c', borderRadius: '7px', padding: '12px', marginBottom: '20px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}><AlertCircle size={16} /> {error}</div>}
-          {success && <div style={{ background: '#ecfdf5', border: '1.5px solid #a7f3d0', color: '#047857', borderRadius: '7px', padding: '12px', marginBottom: '20px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}><CheckCircle size={16} /> {success}</div>}
-
-          <div className="topza-stats-grid">
-            <div className="topza-stat-card">
-              <span className="topza-stat-label">Total Plans</span>
-              <span className="topza-stat-value">{stats.totalPlans}</span>
-            </div>
-            <div className="topza-stat-card">
-              <span className="topza-stat-label">Active</span>
-              <span className="topza-stat-value" style={{ color: '#059669' }}>{stats.activePlans}</span>
-            </div>
-            <div className="topza-stat-card">
-              <span className="topza-stat-label">Out of Stock</span>
-              <span className="topza-stat-value" style={{ color: '#b91c1c' }}>{stats.outOfStockPlans}</span>
-            </div>
-            <div className="topza-stat-card">
-              <span className="topza-stat-label">Provider Off</span>
-              <span className="topza-stat-value" style={{ color: '#f0a500' }}>{stats.providerInactive || 0}</span>
-            </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleSync}
+              disabled={syncing}
+              className="topza-btn-primary"
+            >
+              <RefreshCw size={18} className={syncing ? 'animate-spin' : ''} />
+              {syncing ? 'Syncing...' : 'Sync Catalog'}
+            </button>
           </div>
+        </div>
+
+        {error && <div style={{ background: '#fff5f5', border: '1.5px solid #fecaca', color: '#b91c1c', borderRadius: '7px', padding: '12px', width: '100%', maxWidth: '1100px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}><AlertCircle size={16} /> {error}</div>}
+        {success && <div style={{ background: '#ecfdf5', border: '1.5px solid #a7f3d0', color: '#047857', borderRadius: '7px', padding: '12px', width: '100%', maxWidth: '1100px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}><CheckCircle size={16} /> {success}</div>}
+
+        <div className="topza-stats-grid">
+          <div className="topza-stat-card" style={{ '--stat-color': getColor(2).main, '--stat-glow': getColor(2).glow, '--stat-bg': getColor(2).soft, '--stat-border': getColor(2).main + '33' }}>
+            <span className="topza-stat-label" style={{ color: getColor(2).main }}>Total Plans</span>
+            <span className="topza-stat-value">{stats.totalPlans}</span>
+          </div>
+          <div className="topza-stat-card" style={{ '--stat-color': getColor(1).main, '--stat-glow': getColor(1).glow, '--stat-bg': getColor(1).soft, '--stat-border': getColor(1).main + '33' }}>
+            <span className="topza-stat-label" style={{ color: getColor(1).main }}>Active</span>
+            <span className="topza-stat-value">{stats.activePlans}</span>
+          </div>
+          <div className="topza-stat-card" style={{ '--stat-color': getColor(5).main, '--stat-glow': getColor(5).glow, '--stat-bg': getColor(5).soft, '--stat-border': getColor(5).main + '33' }}>
+            <span className="topza-stat-label" style={{ color: getColor(5).main }}>Out of Stock</span>
+            <span className="topza-stat-value">{stats.outOfStockPlans}</span>
+          </div>
+          <div className="topza-stat-card" style={{ '--stat-color': getColor(3).main, '--stat-glow': getColor(3).glow, '--stat-bg': getColor(3).soft, '--stat-border': getColor(3).main + '33' }}>
+            <span className="topza-stat-label" style={{ color: getColor(3).main }}>Provider Off</span>
+            <span className="topza-stat-value">{stats.providerInactive || 0}</span>
+          </div>
+        </div>
+
+        <div className="topza-main-card">
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '20px' }}>
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
               <div className="topza-search-box" style={{ flex: '1', minWidth: '240px', marginBottom: 0 }}>
-                <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#999' }} />
+                <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#1D4ED8' }} />
                 <input
                   className="topza-input"
                   placeholder="Search plans..."
@@ -513,18 +618,38 @@ export default function AdminTopzaPlans() {
               </button>
             </div>
 
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
-              <span style={{ fontSize: '11px', fontWeight: '800', color: '#666', textTransform: 'uppercase' }}>Network:</span>
-              <button className={`topza-filter-btn ${selectedNetwork === '' ? 'active' : ''}`} onClick={() => setSelectedNetwork('')}>All</button>
-              {networkCatalog.map(n => (
+            {/* Network Filters */}
+            <div className="w-full overflow-x-auto pb-2 scrollbar-hide">
+              <div className="flex items-center gap-2 min-w-max">
                 <button
-                  key={n.slug || n.name}
-                  className={`topza-filter-btn ${selectedNetwork === (n.name || n.slug) ? 'active' : ''}`}
-                  onClick={() => setSelectedNetwork(n.name || n.slug)}
+                  onClick={() => setSelectedNetwork('')}
+                  className={`tab-button ${selectedNetwork === '' ? 'active' : ''}`}
+                  style={selectedNetwork === '' ? { background: '#1D4ED8', borderColor: '#1D4ED8' } : {}}
                 >
-                  {n.name || n.slug}
+                  <TrendingUp size={14} />
+                  <span>All Networks</span>
                 </button>
-              ))}
+                {networkCatalog.map((n, idx) => {
+                  const c = getColor(idx + 1);
+                  const active = selectedNetwork === (n.name || n.slug);
+                  return (
+                    <button
+                      key={n.slug || n.name}
+                      onClick={() => setSelectedNetwork(n.name || n.slug)}
+                      className={`tab-button ${active ? 'active' : ''}`}
+                      style={active ? { background: c.main, borderColor: c.main } : {}}
+                    >
+                      <div 
+                        className="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black"
+                        style={{ background: active ? 'rgba(255,255,255,0.2)' : c.bg, color: active ? '#fff' : c.main }}
+                      >
+                        {n.name?.charAt(0).toUpperCase()}
+                      </div>
+                      <span>{n.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {selectedIds.size > 0 && (
@@ -537,11 +662,10 @@ export default function AdminTopzaPlans() {
             )}
           </div>
 
-          <div className="topza-table-container">
+          <div className="topza-table-container" style={{ borderBottom: 'none', borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }}>
             {loading ? (
               <div style={{ padding: '40px', display: 'flex', justifyContent: 'center' }}><div className="topza-spinner"></div></div>
             ) : (
-              <>
               <table className="topza-table">
                 <thead>
                   <tr>
@@ -580,17 +704,31 @@ export default function AdminTopzaPlans() {
                         {plan.discount > 0 && <div style={{ fontSize: '10px', color: '#059669' }}>Disc: {plan.discount.toFixed(2)}</div>}
                       </td>
                       <td className="topza-td" style={{ whiteSpace: 'nowrap' }}>
-                        <span style={{ fontSize: '12px', fontWeight: '700', color: plan.inStock ? '#059669' : '#b91c1c' }}>
+                        <span
+                          className="topza-badge"
+                          style={{
+                            background: plan.inStock ? '#D1FAE5' : '#FEE2E2',
+                            color: plan.inStock ? '#0F6E56' : '#DC2626',
+                            border: `1px solid ${plan.inStock ? '#A7F3D0' : '#FECACA'}`
+                          }}
+                        >
                           {plan.inStock ? 'In Stock' : 'Out of Stock'}
                         </span>
-                        {plan.stockOverriddenByAdmin && <div style={{ fontSize: '10px', color: '#f0a500' }}>Admin Override</div>}
-                        {plan.providerIsActive === false && <div style={{ fontSize: '10px', color: '#b91c1c' }}>Provider Off</div>}
+                        {plan.stockOverriddenByAdmin && <div style={{ fontSize: '10px', color: '#f0a500', fontWeight: '700', marginTop: '2px' }}>Admin Override</div>}
+                        {plan.providerIsActive === false && <div style={{ fontSize: '10px', color: '#b91c1c', fontWeight: '700', marginTop: '2px' }}>Provider Off</div>}
                       </td>
                       <td className="topza-td" style={{ whiteSpace: 'nowrap' }}>
-                        <span style={{ fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', color: plan.status === 'active' ? '#059669' : '#666' }}>
+                        <span
+                          className="topza-badge"
+                          style={{
+                            background: plan.status === 'active' ? '#DBEAFE' : '#F3F4F6',
+                            color: plan.status === 'active' ? '#1D4ED8' : '#666',
+                            border: `1px solid ${plan.status === 'active' ? '#BFDBFE' : '#E5E7EB'}`
+                          }}
+                        >
                           {plan.status}
                         </span>
-                        {plan.isEdited && <div style={{ fontSize: '10px', color: '#f0a500' }}>Edited</div>}
+                        {plan.isEdited && <div style={{ fontSize: '10px', color: '#f0a500', fontWeight: '700', marginTop: '2px' }}>Edited</div>}
                       </td>
                       <td className="topza-td">
                         <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
@@ -603,17 +741,19 @@ export default function AdminTopzaPlans() {
                   ))}
                 </tbody>
               </table>
-              {pagination && pagination.pages > 1 && (
-                <Pagination
-                  currentPage={page}
-                  totalPages={pagination.pages}
-                  onPageChange={(newPage) => setPage(newPage)}
-                  isLoading={loading}
-                />
-              )}
-              </>
             )}
           </div>
+
+          {!loading && pagination && pagination.pages > 1 && (
+            <div style={{ padding: '16px', background: '#fafaf7', border: '1.5px solid #e4e4de', borderTop: 'none', borderBottomLeftRadius: '8px', borderBottomRightRadius: '8px' }}>
+              <Pagination
+                currentPage={page}
+                totalPages={pagination.pages}
+                onPageChange={(newPage) => setPage(newPage)}
+                isLoading={loading}
+              />
+            </div>
+          )}
         </div>
       </div>
 

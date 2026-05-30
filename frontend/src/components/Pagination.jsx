@@ -41,25 +41,25 @@ export default function Pagination({ currentPage, totalPages, onPageChange, isLo
   const pageNumbers = getPageNumbers();
 
   return (
-    <div className="flex items-center justify-between px-6 py-4 bg-white border-t border-slate-200 rounded-b-2xl">
-      <div className="text-sm text-slate-600">
-        Page <span className="font-medium text-slate-900">{currentPage}</span> of{' '}
-        <span className="font-medium text-slate-900">{totalPages}</span>
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-5 bg-white border-t border-slate-100 rounded-b-2xl mt-4">
+      <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+        Page <span className="text-[#1D4ED8]">{currentPage}</span> of{' '}
+        <span className="text-slate-600">{totalPages}</span>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
         <button
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1 || isLoading}
-          className="p-2 rounded-lg border-2 border-slate-200 text-slate-600 hover:border-blue-300 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+          className="p-2 rounded-lg border-1.5 border-slate-200 text-slate-400 hover:border-[#1D4ED8] hover:text-[#1D4ED8] hover:bg-blue-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
           title="Previous page"
         >
-          <ChevronLeft size={18} />
+          <ChevronLeft size={16} />
         </button>
 
         {pageNumbers.map((page, index) => (
           page === '...' ? (
-            <span key={`ellipsis-${index}`} className="px-2 text-slate-600">
+            <span key={`ellipsis-${index}`} className="px-2 text-slate-400 font-bold">
               ...
             </span>
           ) : (
@@ -67,10 +67,10 @@ export default function Pagination({ currentPage, totalPages, onPageChange, isLo
               key={page}
               onClick={() => onPageChange(page)}
               disabled={isLoading}
-              className={`px-3 py-2 rounded-lg font-medium transition ${
+              className={`px-3 py-2 rounded-lg font-bold text-xs transition-all ${
                 page === currentPage
-                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
-                  : 'border-2 border-slate-200 text-slate-700 hover:border-blue-300 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed'
+                  ? 'bg-[#1D4ED8] text-white shadow-lg shadow-blue-200 scale-105'
+                  : 'border-1.5 border-slate-200 text-slate-600 hover:border-[#1D4ED8] hover:text-[#1D4ED8] hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed'
               }`}
             >
               {page}
@@ -81,10 +81,10 @@ export default function Pagination({ currentPage, totalPages, onPageChange, isLo
         <button
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages || isLoading}
-          className="p-2 rounded-lg border-2 border-slate-200 text-slate-600 hover:border-blue-300 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+          className="p-2 rounded-lg border-1.5 border-slate-200 text-slate-400 hover:border-[#1D4ED8] hover:text-[#1D4ED8] hover:bg-blue-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
           title="Next page"
         >
-          <ChevronRight size={18} />
+          <ChevronRight size={16} />
         </button>
       </div>
     </div>
