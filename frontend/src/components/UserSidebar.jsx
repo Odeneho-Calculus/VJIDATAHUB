@@ -166,14 +166,14 @@ export default function UserSidebar({ isOpen, onClose }) {
 
       {/* Backdrop */}
       <div
-        className={`lg:hidden fixed inset-0 z-40 transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        className={`lg:hidden fixed top-16 inset-x-0 bottom-0 z-30 transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(3px)' }}
         onClick={onClose}
       />
 
       {/* Sidebar */}
       <aside
-        className={`usb-wrapper fixed top-0 left-0 h-screen z-50 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        className={`usb-wrapper fixed top-16 left-0 h-[calc(100vh-64px)] z-50 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
         style={{
           width: 264,
           background: '#fff',
