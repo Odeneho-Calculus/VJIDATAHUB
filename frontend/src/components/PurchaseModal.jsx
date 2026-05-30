@@ -3,7 +3,6 @@ import { X, Wallet, CreditCard, Loader, Clock, Zap, Smartphone, CheckCircle } fr
 import { purchases, publicAPI } from '../services/api';
 import PurchasePaymentModal from './PurchasePaymentModal';
 import Modal from './Modal';
-import { getNetworkStyles } from '../utils/networkStyles';
 import { formatCurrencyAbbreviated } from '../utils/formatCurrency';
 import {
   formatChargeDescriptor,
@@ -82,22 +81,6 @@ export default function PurchaseModal({ bundle, isOpen, onClose, userBalance, us
   }, [isOpen]);
 
   if (!isOpen || !bundle) return null;
-
-  const ns = planColor ? {
-    accent: '',
-    cardGradient: '',
-    cardBorder: '',
-    blobBg: '',
-    selectedOption: '',
-    selectedIcon: '',
-    unselectedText: '',
-    focusBorder: '',
-    focusGroupText: '',
-    buttonBg: '',
-    buttonText: '',
-    buttonHover: '',
-    buttonShadow: '',
-  } : getNetworkStyles(bundle.network);
 
   const c = planColor || null;
 

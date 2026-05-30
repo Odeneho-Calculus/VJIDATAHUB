@@ -303,7 +303,6 @@ export default function AgentWallet() {
   const [businessStatus, setBusinessStatus] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [txLoading, setTxLoading] = useState(false);
-  const [txTotal, setTxTotal] = useState(0);
   const [selectedTx, setSelectedTx] = useState(null);
   const [showTxDetails, setShowTxDetails] = useState(false);
   const [txPage, setTxPage] = useState(1);
@@ -350,7 +349,6 @@ export default function AgentWallet() {
 
       setTransactions(txList);
       setTxHasMore(!!pagination.hasMore);
-      setTxTotal(pagination.total || 0);
     } catch (err) {
       console.error('Failed to fetch wallet transactions:', err);
     } finally {

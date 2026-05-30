@@ -8,6 +8,20 @@ import PasswordResetModal from '../components/PasswordResetModal';
 import { useSidebar } from '../hooks/useSidebar';
 import { admin as adminAPI } from '../services/api';
 
+/* ── Multi-colour palette ── */
+const palette = [
+  { main: '#7C3AED', bg: '#EDE9FE', soft: '#F5F3FF', glow: 'rgba(124,58,237,0.15)' },   // purple
+  { main: '#0F6E56', bg: '#D1FAE5', soft: '#ECFDF5', glow: 'rgba(15,110,86,0.15)' },    // teal
+  { main: '#1D4ED8', bg: '#DBEAFE', soft: '#EFF6FF', glow: 'rgba(29,78,216,0.15)' },    // blue
+  { main: '#B45309', bg: '#FEF3C7', soft: '#FFFBEB', glow: 'rgba(180,83,9,0.15)' },     // amber
+  { main: '#BE185D', bg: '#FCE7F3', soft: '#FDF2F8', glow: 'rgba(190,24,93,0.15)' },    // pink
+  { main: '#DC2626', bg: '#FEE2E2', soft: '#FFF5F5', glow: 'rgba(220,38,38,0.15)' },    // coral/red
+  { main: '#0369A1', bg: '#E0F2FE', soft: '#F0F9FF', glow: 'rgba(3,105,161,0.15)' },    // sky
+  { main: '#4D7C0F', bg: '#ECFCCB', soft: '#F7FEE7', glow: 'rgba(77,124,15,0.15)' },    // lime/green
+];
+
+const getColor = (index) => palette[index % palette.length];
+
 export default function AdminUsers() {
   const { sidebarOpen, closeSidebar } = useSidebar();
   const [users, setUsers] = useState([]);
@@ -224,6 +238,12 @@ export default function AdminUsers() {
     return 'Active';
   };
 
+  const getRoleBadgeStyles = (role) => {
+    if (role === 'admin') return { background: palette[0].soft, color: palette[0].main, border: `1px solid ${palette[0].main}33` };
+    if (role === 'agent') return { background: palette[1].soft, color: palette[1].main, border: `1px solid ${palette[1].main}33` };
+    return { background: palette[2].soft, color: palette[2].main, border: `1px solid ${palette[2].main}33` };
+  };
+
   return (
     <div className="usr-page-container" style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f5f5f0' }}>
       <style>{`
@@ -231,6 +251,7 @@ export default function AdminUsers() {
         
         .usr-page-container {
           font-family: 'DM Sans', sans-serif;
+          background-color: #f5f5f0;
         }
 
         .usr-content {
@@ -240,36 +261,33 @@ export default function AdminUsers() {
           display: flex;
           flex-direction: column;
           align-items: center;
+          gap: 24px;
         }
 
-        .usr-main-card {
-          background: #fff;
-          border: 1.5px solid #e4e4de;
-          border-radius: 14px;
-          box-shadow: 0 8px 40px rgba(0,0,0,0.10);
+        .usr-header { 
+          background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%); 
+          border: 1.5px solid #A7F3D0; 
+          border-radius: 14px; 
+          padding: 24px; 
+          box-shadow: 0 8px 40px rgba(15,110,86,0.08); 
           width: 100%;
           max-width: 1000px;
-          padding: 24px;
-          margin-bottom: 24px;
-        }
-
-        .usr-heading-section {
           display: flex;
           align-items: center;
           gap: 16px;
-          margin-bottom: 32px;
         }
 
         .usr-icon-box {
           width: 46px;
           height: 46px;
-          background: #111;
+          background: #0F6E56;
           border-radius: 8px;
           display: flex;
           align-items: center;
           justify-content: center;
-          color: #f0a500;
+          color: #fff;
           flex-shrink: 0;
+          box-shadow: 0 4px 16px rgba(15,110,86,0.25);
         }
 
         .usr-h2 {
@@ -280,12 +298,22 @@ export default function AdminUsers() {
           letter-spacing: -0.02em;
         }
 
+        .usr-main-card {
+          background: #fff;
+          border: 1.5px solid #e4e4de;
+          border-radius: 14px;
+          box-shadow: 0 8px 40px rgba(0,0,0,0.06);
+          width: 100%;
+          max-width: 1000px;
+          padding: 24px;
+        }
+
         .usr-stats-grid {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
           gap: 12px;
           width: 100%;
-          margin-bottom: 24px;
+          max-width: 1000px;
         }
 
         @media (min-width: 768px) {
@@ -296,19 +324,26 @@ export default function AdminUsers() {
         }
 
         .usr-stat-card {
-          background: #fff;
-          border: 1.5px solid #e4e4de;
+          background: var(--stat-bg, #fff);
+          border: 1.5px solid var(--stat-border, #e4e4de);
           border-radius: 14px;
           padding: 16px;
           display: flex;
           flex-direction: column;
           gap: 4px;
+          transition: all 0.2s;
+        }
+
+        .usr-stat-card:hover {
+          border-color: var(--stat-color, #d4d4ce);
+          box-shadow: 0 8px 40px var(--stat-glow, rgba(0,0,0,0.06));
+          transform: translateY(-2px);
         }
 
         .usr-stat-label {
-          font-size: 11.5px;
+          font-size: 11px;
           font-weight: 700;
-          color: #666;
+          color: #999;
           text-transform: uppercase;
           letter-spacing: 0.05em;
         }
@@ -322,7 +357,6 @@ export default function AdminUsers() {
         .usr-search-box {
           position: relative;
           width: 100%;
-          margin-bottom: 20px;
         }
 
         .usr-input {
@@ -337,8 +371,8 @@ export default function AdminUsers() {
         }
 
         .usr-input:focus {
-          border-color: #111;
-          box-shadow: 0 0 0 3px rgba(17,17,17,0.07);
+          border-color: #0F6E56;
+          box-shadow: 0 0 0 3px rgba(15,110,86,0.07);
           background: #fff;
           outline: none;
         }
@@ -353,6 +387,12 @@ export default function AdminUsers() {
           color: #111;
           appearance: none;
           cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .usr-select:focus {
+          border-color: #0F6E56;
+          outline: none;
         }
 
         .usr-table-container {
@@ -365,7 +405,7 @@ export default function AdminUsers() {
         .usr-table {
           width: 100%;
           border-collapse: collapse;
-          font-size: 14px;
+          font-size: 13px;
         }
 
         .usr-th {
@@ -375,9 +415,9 @@ export default function AdminUsers() {
           font-weight: 700;
           color: #333;
           border-bottom: 1.5px solid #e4e4de;
-          font-size: 12px;
+          font-size: 11px;
           text-transform: uppercase;
-          letter-spacing: 0.02em;
+          letter-spacing: 0.05em;
         }
 
         .usr-td {
@@ -389,9 +429,12 @@ export default function AdminUsers() {
         .usr-badge {
           padding: 4px 8px;
           border-radius: 6px;
-          font-size: 11px;
+          font-size: 10px;
           font-weight: 700;
           text-transform: uppercase;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
         }
 
         .usr-btn-icon {
@@ -409,9 +452,10 @@ export default function AdminUsers() {
         }
 
         .usr-btn-icon:hover {
-          background: #111;
+          background: #0F6E56;
           color: #fff;
-          border-color: #111;
+          border-color: #0F6E56;
+          transform: translateY(-1px);
         }
 
         .usr-error-box {
@@ -457,19 +501,26 @@ export default function AdminUsers() {
           font-weight: 700;
           font-size: 13px;
           cursor: pointer;
+          transition: all 0.2s;
         }
 
         .usr-page-btn.active {
-          background: #111;
+          background: #0F6E56;
           color: #fff;
-          border-color: #111;
+          border-color: #0F6E56;
+          box-shadow: 0 4px 12px rgba(15,110,86,0.2);
+        }
+
+        .usr-page-btn:not(.active):hover {
+          border-color: #0F6E56;
+          color: #0F6E56;
         }
 
         .usr-spinner {
-          width: 18px;
-          height: 18px;
-          border: 2.5px solid rgba(17,17,17,0.1);
-          border-top-color: #111;
+          width: 24px;
+          height: 24px;
+          border: 3px solid rgba(15,110,86,0.1);
+          border-top-color: #0F6E56;
           border-radius: 50%;
           animation: usr-spin 0.8s linear infinite;
         }
@@ -477,47 +528,49 @@ export default function AdminUsers() {
         @keyframes usr-spin {
           to { transform: rotate(360deg); }
         }
+
       `}</style>
 
       <AdminSidebar isOpen={sidebarOpen} onClose={closeSidebar} />
 
       <div className="usr-content">
+        <div className="usr-header">
+          <div className="usr-icon-box">
+            <Users size={24} />
+          </div>
+          <div>
+            <h2 className="usr-h2">Manage Accounts</h2>
+            <p style={{ fontSize: '14px', color: '#666', margin: '4px 0 0' }}>Monitor users and agents across the platform</p>
+          </div>
+        </div>
+
+        {error && <div className="usr-error-box"><AlertCircle size={16} /> {error}</div>}
+        {success && <div className="usr-success-box"><CheckCircle size={16} /> {success}</div>}
+
+        <div className="usr-stats-grid">
+          <div className="usr-stat-card" style={{ '--stat-color': getColor(2).main, '--stat-glow': getColor(2).glow, '--stat-bg': getColor(2).soft, '--stat-border': getColor(2).main + '33' }}>
+            <span className="usr-stat-label" style={{ color: getColor(2).main }}>Total Users</span>
+            <span className="usr-stat-value">{stats.total}</span>
+          </div>
+          <div className="usr-stat-card" style={{ '--stat-color': getColor(1).main, '--stat-glow': getColor(1).glow, '--stat-bg': getColor(1).soft, '--stat-border': getColor(1).main + '33' }}>
+            <span className="usr-stat-label" style={{ color: getColor(1).main }}>Active</span>
+            <span className="usr-stat-value">{stats.active}</span>
+          </div>
+          <div className="usr-stat-card" style={{ '--stat-color': getColor(5).main, '--stat-glow': getColor(5).glow, '--stat-bg': getColor(5).soft, '--stat-border': getColor(5).main + '33' }}>
+            <span className="usr-stat-label" style={{ color: getColor(5).main }}>Banned</span>
+            <span className="usr-stat-value">{stats.banned}</span>
+          </div>
+          <div className="usr-stat-card" style={{ '--stat-color': getColor(3).main, '--stat-glow': getColor(3).glow, '--stat-bg': getColor(3).soft, '--stat-border': getColor(3).main + '33' }}>
+            <span className="usr-stat-label" style={{ color: getColor(3).main }}>Total Balance</span>
+            <span className="usr-stat-value">GHS {formatNumberAbbreviated(stats.totalBalance)}</span>
+          </div>
+        </div>
+
         <div className="usr-main-card">
-          <div className="usr-heading-section">
-            <div className="usr-icon-box">
-              <Users size={24} />
-            </div>
-            <div>
-              <h2 className="usr-h2">Manage Accounts</h2>
-              <p style={{ fontSize: '14px', color: '#666', margin: '4px 0 0' }}>Monitor users and agents across the platform</p>
-            </div>
-          </div>
-
-          {error && <div className="usr-error-box"><AlertCircle size={16} /> {error}</div>}
-          {success && <div className="usr-success-box"><CheckCircle size={16} /> {success}</div>}
-
-          <div className="usr-stats-grid">
-            <div className="usr-stat-card">
-              <span className="usr-stat-label">Total Users</span>
-              <span className="usr-stat-value">{stats.total}</span>
-            </div>
-            <div className="usr-stat-card">
-              <span className="usr-stat-label">Active</span>
-              <span className="usr-stat-value" style={{ color: '#059669' }}>{stats.active}</span>
-            </div>
-            <div className="usr-stat-card">
-              <span className="usr-stat-label">Banned</span>
-              <span className="usr-stat-value" style={{ color: '#b91c1c' }}>{stats.banned}</span>
-            </div>
-            <div className="usr-stat-card">
-              <span className="usr-stat-label">Balance</span>
-              <span className="usr-stat-value">GHS {formatNumberAbbreviated(stats.totalBalance)}</span>
-            </div>
-          </div>
 
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginBottom: '20px' }}>
             <div className="usr-search-box" style={{ flex: '1', minWidth: '200px', marginBottom: 0 }}>
-              <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#999' }} />
+              <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#0F6E56' }} />
               <input
                 className="usr-input"
                 placeholder="Search name, email or phone..."
@@ -525,7 +578,7 @@ export default function AdminUsers() {
                 onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               />
             </div>
-            <div style={{ width: '160px' }}>
+            <div style={{ width: '160px', position: 'relative' }}>
               <select
                 className="usr-select"
                 value={roleFilter}
@@ -536,6 +589,9 @@ export default function AdminUsers() {
                 <option value="agent">Agents</option>
                 <option value="admin">Admins</option>
               </select>
+              <div style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#0F6E56' }}>
+                <TrendingUp size={14} />
+              </div>
             </div>
           </div>
 
@@ -561,11 +617,11 @@ export default function AdminUsers() {
                         <div style={{ fontSize: '12px', color: '#666' }}>{user.email}</div>
                       </td>
                       <td className="usr-td" style={{ whiteSpace: 'nowrap' }}>
-                        <span className="usr-badge" style={{ background: '#111', color: '#fff' }}>{user.role}</span>
+                        <span className="usr-badge" style={getRoleBadgeStyles(user.role)}>{user.role}</span>
                       </td>
-                      <td className="usr-td" style={{ whiteSpace: 'nowrap' }}>GHS {Number((user.wallet?.balance || user.balance) || 0).toFixed(2)}</td>
+                      <td className="usr-td" style={{ whiteSpace: 'nowrap', fontWeight: '800', color: '#111' }}>GHS {Number((user.wallet?.balance || user.balance) || 0).toFixed(2)}</td>
                       <td className="usr-td" style={{ whiteSpace: 'nowrap' }}>
-                        <span className="usr-badge" style={{ background: getStatusBg(user), color: getStatusColor(user) }}>
+                        <span className="usr-badge" style={{ background: getStatusBg(user), color: getStatusColor(user), border: `1px solid ${getStatusColor(user)}22` }}>
                           {getStatusText(user)}
                         </span>
                       </td>

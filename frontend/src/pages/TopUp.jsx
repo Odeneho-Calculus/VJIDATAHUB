@@ -245,7 +245,6 @@ export default function TopUp() {
   const [txLoading, setTxLoading] = useState(false);
   const [txTotal, setTxTotal] = useState(0);
   const [txPage, setTxPage] = useState(1);
-  const [txHasMore, setTxHasMore] = useState(false);
   const [selectedTx, setSelectedTx] = useState(null);
   const [showTxDetails, setShowTxDetails] = useState(false);
 
@@ -300,7 +299,6 @@ export default function TopUp() {
       const offset = (page - 1) * TX_LIMIT;
       const res = await wallet.getTransactions(TX_LIMIT, offset);
       setTransactions(res?.transactions || []);
-      setTxHasMore(!!(res?.pagination?.hasMore));
       setTxTotal(res?.pagination?.total || 0);
     } catch (err) {
       console.error('Failed to fetch wallet transactions:', err);
