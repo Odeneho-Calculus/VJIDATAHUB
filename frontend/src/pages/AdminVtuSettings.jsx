@@ -9,9 +9,24 @@ import { useSidebar } from '../hooks/useSidebar';
 import { admin as adminAPI, topza as topzaAPI } from '../services/api';
 import { useSettings } from '../context/SettingsContext';
 
+/* ── Homepage multi-colour palette ── */
+const palette = [
+  { main: '#7C3AED', bg: '#EDE9FE', soft: '#F5F3FF', glow: 'rgba(124,58,237,0.15)' },   // purple
+  { main: '#0F6E56', bg: '#D1FAE5', soft: '#ECFDF5', glow: 'rgba(15,110,86,0.15)' },    // teal
+  { main: '#1D4ED8', bg: '#DBEAFE', soft: '#EFF6FF', glow: 'rgba(29,78,216,0.15)' },    // blue
+  { main: '#B45309', bg: '#FEF3C7', soft: '#FFFBEB', glow: 'rgba(180,83,9,0.15)' },     // amber
+  { main: '#BE185D', bg: '#FCE7F3', soft: '#FDF2F8', glow: 'rgba(190,24,93,0.15)' },    // pink
+  { main: '#DC2626', bg: '#FEE2E2', soft: '#FFF5F5', glow: 'rgba(220,38,38,0.15)' },    // coral/red
+  { main: '#0369A1', bg: '#E0F2FE', soft: '#F0F9FF', glow: 'rgba(3,105,161,0.15)' },    // sky
+  { main: '#4D7C0F', bg: '#ECFCCB', soft: '#F7FEE7', glow: 'rgba(77,124,15,0.15)' },    // lime/green
+];
+
+const getColor = (index) => palette[index % palette.length];
+const pageTheme = getColor(5); // coral/red — matches sidebar VTU Settings nav colour
+
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
-  
+
   .vtu-page-container {
     font-family: 'DM Sans', sans-serif;
     display: flex;
@@ -51,13 +66,14 @@ const styles = `
   .vtu-icon-box {
     width: 46px;
     height: 46px;
-    background: #111;
+    background: ${pageTheme.main};
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #f0a500;
+    color: #fff;
     flex-shrink: 0;
+    box-shadow: 0 8px 20px ${pageTheme.glow};
   }
 
   .vtu-h2 {
@@ -90,13 +106,19 @@ const styles = `
   }
 
   .vtu-stat-card {
-    background: #fff;
-    border: 1.5px solid #e4e4de;
+    background: var(--stat-bg, #fff);
+    border: 1.5px solid var(--stat-border, #e4e4de);
     border-radius: 14px;
     padding: 16px;
     display: flex;
     flex-direction: column;
     gap: 4px;
+    transition: all 0.2s;
+  }
+
+  .vtu-stat-card:hover {
+    border-color: var(--stat-color, #d4d4ce);
+    box-shadow: 0 8px 40px var(--stat-glow, rgba(0,0,0,0.06));
   }
 
   .vtu-stat-label {
@@ -125,14 +147,14 @@ const styles = `
   }
 
   .vtu-input:focus {
-    border-color: #111;
-    box-shadow: 0 0 0 3px rgba(17,17,17,0.07);
+    border-color: ${pageTheme.main};
+    box-shadow: 0 0 0 3px ${pageTheme.glow};
     background: #fff;
     outline: none;
   }
 
   .vtu-btn-primary {
-    background: #111;
+    background: ${pageTheme.main};
     color: #fff;
     padding: 8px 16px;
     border-radius: 8px;
@@ -145,10 +167,11 @@ const styles = `
     align-items: center;
     justify-content: center;
     gap: 8px;
+    box-shadow: 0 4px 12px ${pageTheme.glow};
   }
 
   .vtu-btn-primary:hover:not(:disabled) {
-    background: #333;
+    opacity: 0.9;
     transform: translateY(-1px);
   }
 
@@ -483,29 +506,6 @@ export default function AdminVtuSettings() {
   const formatDate = (ds) => new Date(ds).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
   const formatTime = (ds) => new Date(ds).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
-  // const handleNetworkChange = (index, field, value) => {
-  //   setNetworkCatalog((prev) => {
-  //     const updated = [...prev];
-  //     updated[index] = { ...updated[index], [field]: value };
-  //     return updated;
-  //   });
-  // };
-  //
-  // const handleSaveNetworks = async () => {
-  //   try {
-  //     setUpdatingSettings(true);
-  //     const payload = networkCatalog.map((n) => ({
-  //       name: n.name || '', slug: n.slug || n.name, logoUrl: n.logoUrl || '', isActive: n.isActive !== false,
-  //     }));
-  //     await adminAPI.updateSystemSettings({ networkCatalog: payload });
-  //     await fetchSystemSettings();
-  //   } catch (err) {
-  //     setError(err?.message || 'Failed to save networks');
-  //   } finally {
-  //     setUpdatingSettings(false);
-  //   }
-  // };
-
   const handleTopzaLogoChange = (networkId, logoUrl) => {
     setTopzaNetworks((prev) => prev.map((n) => n.networkId === networkId ? { ...n, logoUrl } : n));
   };
@@ -535,16 +535,27 @@ export default function AdminVtuSettings() {
     }
   };
 
+  const statItems = [
+    { label: 'Wallet Balance', value: walletData?.balance ? `GHS ${formatCurrencyAbbreviated(walletData.balance)}` : 'GHS 0.00', icon: DollarSign, color: getColor(0) },
+    { label: 'Last Sync Date', value: walletData?.lastSync ? formatDate(walletData.lastSync) : '—', subvalue: walletData?.lastSync ? formatTime(walletData.lastSync) : null, icon: Clock, color: getColor(1) },
+    { label: 'Active Provider', value: 'Topza', icon: Activity, color: getColor(2) },
+    { label: 'Sync Status', value: 'Operational', icon: CheckCircle, color: getColor(3) },
+  ];
+
   return (
     <div className="vtu-page-container">
       <style>{styles}</style>
       <AdminSidebar isOpen={sidebarOpen} onClose={closeSidebar} />
       <div className="vtu-content">
-        <div className="vtu-heading-section">
+        <div className="vtu-heading-section" style={{ background: `linear-gradient(135deg, ${pageTheme.soft} 0%, ${pageTheme.bg} 100%)`, border: `1.5px solid ${pageTheme.main}33`, borderRadius: '14px', padding: '24px', boxShadow: `0 8px 40px ${pageTheme.glow}` }}>
           <div className="vtu-icon-box">
             <Settings size={24} />
           </div>
           <div style={{ flex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+              <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: pageTheme.main }} />
+              <span style={{ fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: pageTheme.main }}>Management Center</span>
+            </div>
             <h2 className="vtu-h2">VTU Service Settings</h2>
             <p className="vtu-p">Manage your VTU providers and view wallet activity</p>
           </div>
@@ -560,78 +571,61 @@ export default function AdminVtuSettings() {
 
         {loading ? (
           <div className="vtu-main-card" style={{ textAlign: 'center', padding: '60px' }}>
-            <RefreshCw size={40} className="animate-spin" style={{ margin: '0 auto 16px', color: '#f0a500' }} />
+            <RefreshCw size={40} className="animate-spin" style={{ margin: '0 auto 16px', color: pageTheme.main }} />
             <p className="vtu-p">Loading wallet settings...</p>
           </div>
         ) : (
           <>
             {/* Stats Overview */}
             <div className="vtu-stats-grid">
-              <div className="vtu-stat-card">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div>
-                    <p className="vtu-stat-label">Wallet Balance</p>
-                    <p className="vtu-stat-value">
-                      {walletData?.balance ? `GHS ${formatCurrencyAbbreviated(walletData.balance)}` : 'GHS 0.00'}
-                    </p>
-                  </div>
-                  <DollarSign size={20} style={{ color: '#f0a500' }} />
-                </div>
-              </div>
-
-              {walletData?.lastSync && (
-                <div className="vtu-stat-card">
+              {statItems.map((stat, i) => (
+                <div
+                  key={i}
+                  className="vtu-stat-card"
+                  style={{
+                    '--stat-color': stat.color.main + '66',
+                    '--stat-glow': stat.color.glow,
+                    '--stat-bg': stat.color.soft,
+                    '--stat-border': stat.color.main + '33',
+                  }}
+                >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div>
-                      <p className="vtu-stat-label">Last Sync Date</p>
-                      <p className="vtu-stat-value">{formatDate(walletData.lastSync)}</p>
-                      <p style={{ fontSize: '10px', color: '#999' }}>{formatTime(walletData.lastSync)}</p>
+                      <p className="vtu-stat-label" style={{ color: stat.color.main }}>{stat.label}</p>
+                      <p className="vtu-stat-value">{stat.value}</p>
+                      {stat.subvalue && <p style={{ fontSize: '10px', color: '#999' }}>{stat.subvalue}</p>}
                     </div>
-                    <Clock size={20} style={{ color: '#f0a500' }} />
+                    <div style={{
+                      width: 32, height: 32, borderRadius: 8,
+                      background: stat.color.soft, color: stat.color.main,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      boxShadow: `0 2px 8px ${stat.color.glow}`,
+                    }}>
+                      <stat.icon size={16} strokeWidth={2.5} />
+                    </div>
                   </div>
                 </div>
-              )}
-
-              <div className="vtu-stat-card">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div>
-                    <p className="vtu-stat-label">Active Provider</p>
-                    <p className="vtu-stat-value" style={{ textTransform: 'capitalize' }}>topza</p>
-                  </div>
-                  <Activity size={20} style={{ color: '#f0a500' }} />
-                </div>
-              </div>
-
-              <div className="vtu-stat-card">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div>
-                    <p className="vtu-stat-label">Sync Status</p>
-                    <p className="vtu-stat-value" style={{ color: '#059669', fontSize: '16px' }}>Operational</p>
-                  </div>
-                  <CheckCircle size={20} style={{ color: '#059669' }} />
-                </div>
-              </div>
+              ))}
             </div>
 
             {/* Provider Specific Banner Actions */}
-            <div className="vtu-main-card" style={{ 
-              background: 'linear-gradient(135deg, #111111 0%, #1a1a1a 100%)', 
-              color: '#fff', 
+            <div className="vtu-main-card" style={{
+              background: 'linear-gradient(135deg, #111111 0%, #1a1a1a 100%)',
+              color: '#fff',
               border: 'none',
               position: 'relative',
               overflow: 'hidden'
             }}>
-              <div style={{ 
-                position: 'absolute', 
-                top: '-20px', 
-                right: '-20px', 
-                width: '100px', 
-                height: '100px', 
-                background: 'rgba(240, 165, 0, 0.05)', 
-                borderRadius: '50%', 
-                blur: '40px' 
+              <div style={{
+                position: 'absolute',
+                top: '-20px',
+                right: '-20px',
+                width: '100px',
+                height: '100px',
+                background: 'rgba(240, 165, 0, 0.05)',
+                borderRadius: '50%',
               }}></div>
-              
+
               <div className="vtu-banner-flex">
                 <div>
                   <h3 style={{ fontSize: '20px', fontWeight: '800', margin: 0, color: '#fff', letterSpacing: '-0.01em' }}>
@@ -647,9 +641,9 @@ export default function AdminVtuSettings() {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="vtu-btn-primary"
-                    style={{ 
-                      background: '#f0a500', 
-                      color: '#111', 
+                    style={{
+                      background: '#f0a500',
+                      color: '#111',
                       boxShadow: '0 4px 15px rgba(240, 165, 0, 0.2)'
                     }}
                   >
@@ -660,8 +654,8 @@ export default function AdminVtuSettings() {
                     onClick={handleTopzaRefresh}
                     disabled={syncing || transactionsLoading}
                     className="vtu-btn-primary"
-                    style={{ 
-                      background: 'rgba(255,255,255,0.08)', 
+                    style={{
+                      background: 'rgba(255,255,255,0.08)',
                       border: '1.5px solid rgba(255,255,255,0.15)'
                     }}
                   >
@@ -691,7 +685,7 @@ export default function AdminVtuSettings() {
 
               {topzaNetworksLoading ? (
                 <div style={{ textAlign: 'center', padding: '40px' }}>
-                  <RefreshCw size={24} className="animate-spin" style={{ margin: '0 auto 12px', color: '#999' }} />
+                  <RefreshCw size={24} className="animate-spin" style={{ margin: '0 auto 12px', color: pageTheme.main }} />
                   <p style={{ fontSize: '13px', color: '#999' }}>Fetching networks...</p>
                 </div>
               ) : (
@@ -707,31 +701,34 @@ export default function AdminVtuSettings() {
                       </tr>
                     </thead>
                     <tbody>
-                      {topzaNetworks.map((n, idx) => (
-                        <tr key={n.networkId || n.code || idx}>
-                          <td className="vtu-td" style={{ fontWeight: '700' }}>{n.name}</td>
-                          <td className="vtu-td font-mono" style={{ fontSize: '12px' }}>{n.slug || n.code || n.networkId}</td>
-                          <td className="vtu-td">
-                            <input
-                              type="text"
-                              value={n.logoUrl || ''}
-                              onChange={(e) => handleTopzaLogoChange(n.networkId, e.target.value)}
-                              placeholder="https://example.com/logo.png"
-                              className="vtu-input"
-                              style={{ height: '36px' }}
-                            />
-                          </td>
-                          <td className="vtu-td">
-                            {n.logoUrl ? (
-                              <img src={n.logoUrl} alt={n.name} style={{ width: '32px', height: '32px', borderRadius: '4px', objectFit: 'contain', background: '#f9f9f9', padding: '2px' }} />
-                            ) : (
-                              <div style={{ width: '32px', height: '32px', borderRadius: '4px', background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ccc' }}>
-                                <Globe size={16} />
-                              </div>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
+                      {topzaNetworks.map((n, idx) => {
+                        const c = getColor(idx);
+                        return (
+                          <tr key={n.networkId || n.code || idx}>
+                            <td className="vtu-td" style={{ fontWeight: '700', color: c.main }}>{n.name}</td>
+                            <td className="vtu-td font-mono" style={{ fontSize: '12px' }}>{n.slug || n.code || n.networkId}</td>
+                            <td className="vtu-td">
+                              <input
+                                type="text"
+                                value={n.logoUrl || ''}
+                                onChange={(e) => handleTopzaLogoChange(n.networkId, e.target.value)}
+                                placeholder="https://example.com/logo.png"
+                                className="vtu-input"
+                                style={{ height: '36px' }}
+                              />
+                            </td>
+                            <td className="vtu-td">
+                              {n.logoUrl ? (
+                                <img src={n.logoUrl} alt={n.name} style={{ width: '32px', height: '32px', borderRadius: '4px', objectFit: 'contain', background: '#f9f9f9', padding: '2px' }} />
+                              ) : (
+                                <div style={{ width: '32px', height: '32px', borderRadius: '4px', background: c.soft, display: 'flex', alignItems: 'center', justifyContent: 'center', color: c.main, border: `1.5px solid ${c.main}22` }}>
+                                  <Globe size={16} />
+                                </div>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -756,7 +753,7 @@ export default function AdminVtuSettings() {
 
               {transactionsLoading && transactions.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '40px' }}>
-                  <RefreshCw size={24} className="animate-spin" style={{ margin: '0 auto 12px', color: '#999' }} />
+                  <RefreshCw size={24} className="animate-spin" style={{ margin: '0 auto 12px', color: pageTheme.main }} />
                   <p style={{ fontSize: '13px', color: '#999' }}>Loading transactions...</p>
                 </div>
               ) : transactionsError ? (
@@ -795,7 +792,7 @@ export default function AdminVtuSettings() {
                           const amount = Number.isFinite(Number(txn.amount)) ? `GHS ${formatPrice2dpNoRound(txn.amount)}` : '-';
                           const status = item.status || txn.status || txn.transaction_status || '-';
                           const date = txn.createdAt || txn.created_at || txn.lastUpdated || txn.date || txn.timestamp;
-                          
+
                           const statusLower = String(status).toLowerCase();
                           let badgeStyles = { background: '#f3f4f6', color: '#6b7280' };
                           if (statusLower.includes('success') || statusLower.includes('complete')) {
@@ -806,18 +803,28 @@ export default function AdminVtuSettings() {
                             badgeStyles = { background: '#fffbeb', color: '#d97706', border: '1px solid #fef3c7' };
                           }
 
+                          const c = getColor(i);
+
                           return (
                             <tr key={txnId + i}>
                               <td className="vtu-td font-mono" style={{ fontSize: '11px', color: '#999' }}>{String(txnId).slice(-8)}</td>
                               <td className="vtu-td">
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                  <Phone size={12} style={{ color: '#999' }} />
+                                  <div style={{
+                                    width: 28, height: 28, borderRadius: 6,
+                                    background: c.soft, color: c.main,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    border: `1.5px solid ${c.main}22`,
+                                    boxShadow: `0 2px 8px ${c.glow}`,
+                                  }}>
+                                    <Phone size={12} />
+                                  </div>
                                   <span style={{ fontWeight: '700' }}>{recipient}</span>
                                 </div>
                               </td>
                               <td className="vtu-td">
                                 <div style={{ fontSize: '12px' }}>
-                                  <div style={{ fontWeight: '600' }}>{network}</div>
+                                  <div style={{ fontWeight: '600', color: c.main }}>{network}</div>
                                   <div style={{ color: '#666' }}>{bundle}</div>
                                 </div>
                               </td>
@@ -831,9 +838,11 @@ export default function AdminVtuSettings() {
                               <td className="vtu-td">
                                 <button
                                   onClick={() => openTransactionDetails(txn)}
-                                  style={{ padding: '6px', borderRadius: '6px', border: '1px solid #e4e4de', background: '#fff', cursor: 'pointer' }}
+                                  style={{ padding: '6px', borderRadius: '6px', border: '1.5px solid #e4e4de', background: '#fff', cursor: 'pointer', color: pageTheme.main, transition: 'all 0.2s' }}
+                                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = pageTheme.main; e.currentTarget.style.background = pageTheme.soft; }}
+                                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e4e4de'; e.currentTarget.style.background = '#fff'; }}
                                 >
-                                  <Eye size={14} style={{ color: '#666' }} />
+                                  <Eye size={14} />
                                 </button>
                               </td>
                             </tr>
@@ -851,6 +860,7 @@ export default function AdminVtuSettings() {
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                       }}
                       isLoading={transactionsLoading}
+                      themeColor={pageTheme}
                     />
                   )}
                 </>
@@ -865,6 +875,7 @@ export default function AdminVtuSettings() {
         onClose={() => setShowOrderDetailsModal(false)}
         order={selectedTransaction}
         onRefund={handleRefund}
+        themeColor={pageTheme}
       />
 
       {showRefundConfirm && (
@@ -876,23 +887,31 @@ export default function AdminVtuSettings() {
             background: '#fff', borderRadius: '14px', padding: '24px', maxWidth: '400px', width: '100%',
             boxShadow: '0 20px 60px rgba(0,0,0,0.2)'
           }}>
-            <h3 style={{ fontSize: '18px', fontWeight: '800', margin: '0 0 8px 0' }}>Confirm Refund</h3>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+              <div style={{
+                width: 40, height: 40, borderRadius: 8,
+                background: pageTheme.soft, color: pageTheme.main,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: `0 2px 8px ${pageTheme.glow}`,
+              }}>
+                <AlertCircle size={20} />
+              </div>
+              <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0 }}>Confirm Refund</h3>
+            </div>
             <p style={{ fontSize: '14px', color: '#666', margin: '0 0 20px 0' }}>
               Are you sure you want to refund this order? This action cannot be undone.
             </p>
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
               <button
                 onClick={() => setShowRefundConfirm(false)}
-                className="vtu-btn-primary"
-                style={{ background: '#f5f5f0', color: '#111' }}
+                style={{ padding: '10px 16px', borderRadius: '8px', border: '1.5px solid #e4e4de', background: '#f5f5f0', color: '#111', fontWeight: 700, cursor: 'pointer', fontSize: '13px' }}
               >
                 Cancel
               </button>
               <button
                 onClick={confirmRefund}
                 disabled={refundLoading}
-                className="vtu-btn-primary"
-                style={{ background: '#dc2626' }}
+                style={{ padding: '10px 16px', borderRadius: '8px', border: 'none', background: '#dc2626', color: '#fff', fontWeight: 700, cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}
               >
                 {refundLoading ? <RefreshCw size={16} className="animate-spin" /> : 'Confirm Refund'}
               </button>

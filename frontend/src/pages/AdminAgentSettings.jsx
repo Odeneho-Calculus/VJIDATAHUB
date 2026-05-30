@@ -5,6 +5,21 @@ import { useSidebar } from '../hooks/useSidebar';
 import { formatCurrencyAbbreviated } from '../utils/formatCurrency';
 import { admin as adminAPI } from '../services/api';
 
+/* ── Homepage multi-colour palette ── */
+const palette = [
+  { main: '#7C3AED', bg: '#EDE9FE', soft: '#F5F3FF', glow: 'rgba(124,58,237,0.15)' },   // purple
+  { main: '#0F6E56', bg: '#D1FAE5', soft: '#ECFDF5', glow: 'rgba(15,110,86,0.15)' },    // teal
+  { main: '#1D4ED8', bg: '#DBEAFE', soft: '#EFF6FF', glow: 'rgba(29,78,216,0.15)' },    // blue
+  { main: '#B45309', bg: '#FEF3C7', soft: '#FFFBEB', glow: 'rgba(180,83,9,0.15)' },     // amber
+  { main: '#BE185D', bg: '#FCE7F3', soft: '#FDF2F8', glow: 'rgba(190,24,93,0.15)' },    // pink
+  { main: '#DC2626', bg: '#FEE2E2', soft: '#FFF5F5', glow: 'rgba(220,38,38,0.15)' },    // coral/red
+  { main: '#0369A1', bg: '#E0F2FE', soft: '#F0F9FF', glow: 'rgba(3,105,161,0.15)' },    // sky
+  { main: '#4D7C0F', bg: '#ECFCCB', soft: '#F7FEE7', glow: 'rgba(77,124,15,0.15)' },    // lime/green
+];
+
+const getColor = (index) => palette[index % palette.length];
+const pageTheme = getColor(3); // amber — matches sidebar Agent Settings nav colour
+
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
 
@@ -24,6 +39,11 @@ const styles = `
   }
 
   .agent-header {
+    background: linear-gradient(135deg, ${pageTheme.soft} 0%, ${pageTheme.bg} 100%);
+    border: 1.5px solid ${pageTheme.main}33;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 8px 40px ${pageTheme.glow};
     margin-bottom: 32px;
   }
 
@@ -81,45 +101,56 @@ const styles = `
 
   .agent-stat-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
     margin-bottom: 24px;
   }
 
+  @media (min-width: 1024px) {
+    .agent-stat-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+  }
+
   .agent-stat-card {
-    background-color: #fff;
-    border: 1.5px solid #e4e4de;
+    background: var(--stat-bg, #fff);
+    border: 1.5px solid var(--stat-border, #e4e4de);
     border-radius: 14px;
-    padding: 20px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
     transition: all 0.2s ease;
   }
 
   .agent-stat-card:hover {
-    border-color: #d4d4ce;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.10);
+    border-color: var(--stat-color, #d4d4ce);
+    box-shadow: 0 8px 40px var(--stat-glow, rgba(0,0,0,0.06));
   }
 
   .agent-stat-icon-box {
-    width: 36px;
-    height: 36px;
-    background-color: rgba(240,165,0,0.15);
-    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 12px;
-    color: #f0a500;
+    margin-bottom: 8px;
   }
 
   .agent-stat-label {
-    font-size: 12px;
+    font-size: 11px;
+    font-weight: 700;
     color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
     margin-bottom: 4px;
   }
 
   .agent-stat-value {
     font-size: 20px;
-    font-weight: 700;
+    font-weight: 800;
     color: #111;
   }
 
@@ -167,9 +198,9 @@ const styles = `
   .agent-input:focus,
   .agent-select:focus {
     outline: none;
-    border-color: #111;
+    border-color: ${pageTheme.main};
     background-color: #fff;
-    box-shadow: 0 0 0 3px rgba(17,17,17,0.07);
+    box-shadow: 0 0 0 3px ${pageTheme.glow};
   }
 
   .agent-toggle-group {
@@ -213,7 +244,7 @@ const styles = `
   }
 
   .agent-toggle-switch.active {
-    background-color: #111;
+    background-color: ${pageTheme.main};
   }
 
   .agent-toggle-dot {
@@ -241,7 +272,7 @@ const styles = `
   }
 
   .agent-button-save {
-    background-color: #111;
+    background-color: ${pageTheme.main};
     color: #fff;
     border: none;
     border-radius: 7px;
@@ -254,10 +285,12 @@ const styles = `
     gap: 8px;
     transition: all 0.2s ease;
     font-family: 'DM Sans', sans-serif;
+    box-shadow: 0 4px 12px ${pageTheme.glow};
   }
 
   .agent-button-save:hover:not(:disabled) {
-    background-color: #222;
+    opacity: 0.9;
+    transform: translateY(-1px);
   }
 
   .agent-button-save:disabled {
@@ -389,13 +422,20 @@ export default function AdminAgentSettings() {
         <AdminSidebar isOpen={sidebarOpen} onClose={closeSidebar} />
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f5f5f0' }}>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ width: '48px', height: '48px', border: '2.5px solid rgba(0,0,0,0.1)', borderTopColor: '#111', borderRadius: '50%', margin: '0 auto 16px', animation: 'spin 0.8s linear infinite' }} />
+            <div style={{ width: '48px', height: '48px', border: `2.5px solid ${pageTheme.soft}`, borderTopColor: pageTheme.main, borderRadius: '50%', margin: '0 auto 16px', animation: 'spin 0.8s linear infinite' }} />
             <p style={{ color: '#666', fontSize: '14px' }}>Loading agent settings...</p>
           </div>
         </div>
       </div>
     );
   }
+
+  const stats = [
+    { title: 'Registration Fee', value: formatCurrencyAbbreviated(formData.registrationFee || 0), icon: Settings2, color: getColor(0) },
+    { title: 'Withdrawal Fee Mode', value: String(formData.withdrawalFeeType).charAt(0).toUpperCase() + String(formData.withdrawalFeeType).slice(1), icon: HandCoins, color: getColor(1) },
+    { title: 'Withdrawal Fee Value', value: formData.withdrawalFeeType === 'percentage' ? `${Number(formData.withdrawalFeeValue || 0)}%` : formatCurrencyAbbreviated(Number(formData.withdrawalFeeValue || 0)), icon: Save, color: getColor(2) },
+    { title: 'Recruitment Status', value: formData.recruitNewAgents ? 'Enabled' : 'Disabled', icon: UserPlus, color: getColor(3) },
+  ];
 
   return (
     <div style={{ display: 'flex', height: '100vh' }} className="agent-wrapper">
@@ -405,7 +445,23 @@ export default function AdminAgentSettings() {
         <div style={{ flex: 1, overflow: 'auto' }} className="agent-container">
           <div className="agent-content">
             <div className="agent-header">
-              <h1 className="agent-title">Agent Settings</h1>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '8px' }}>
+                <div style={{
+                  width: 46, height: 46, borderRadius: 8,
+                  background: pageTheme.main, color: '#fff',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: `0 8px 20px ${pageTheme.glow}`,
+                }}>
+                  <Settings2 size={22} strokeWidth={2.5} />
+                </div>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                    <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: pageTheme.main }} />
+                    <span style={{ fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: pageTheme.main }}>Management Center</span>
+                  </div>
+                  <h1 className="agent-title" style={{ margin: 0 }}>Agent Settings</h1>
+                </div>
+              </div>
               <p className="agent-subtitle">Configure registration fee, withdrawal fee model, and agent payout limits</p>
             </div>
 
@@ -424,10 +480,24 @@ export default function AdminAgentSettings() {
             )}
 
             <div className="agent-stat-grid">
-              <StatCard title="Registration Fee" value={formatCurrencyAbbreviated(formData.registrationFee || 0)} icon={Settings2} />
-              <StatCard title="Withdrawal Fee Mode" value={String(formData.withdrawalFeeType).charAt(0).toUpperCase() + String(formData.withdrawalFeeType).slice(1)} icon={HandCoins} />
-              <StatCard title="Withdrawal Fee Value" value={formData.withdrawalFeeType === 'percentage' ? `${Number(formData.withdrawalFeeValue || 0)}%` : formatCurrencyAbbreviated(Number(formData.withdrawalFeeValue || 0))} icon={Save} />
-              <StatCard title="Recruitment Status" value={formData.recruitNewAgents ? 'Enabled' : 'Disabled'} icon={UserPlus} />
+              {stats.map((stat, i) => (
+                <div
+                  key={i}
+                  className="agent-stat-card"
+                  style={{
+                    '--stat-color': stat.color.main + '66',
+                    '--stat-glow': stat.color.glow,
+                    '--stat-bg': stat.color.soft,
+                    '--stat-border': stat.color.main + '33',
+                  }}
+                >
+                  <div className="agent-stat-icon-box" style={{ background: stat.color.soft, color: stat.color.main, boxShadow: `0 2px 8px ${stat.color.glow}` }}>
+                    <stat.icon size={18} />
+                  </div>
+                  <p className="agent-stat-label" style={{ color: stat.color.main }}>{stat.title}</p>
+                  <p className="agent-stat-value">{stat.value}</p>
+                </div>
+              ))}
             </div>
 
             <div className="agent-form-card">
@@ -527,19 +597,6 @@ export default function AdminAgentSettings() {
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-// eslint-disable-next-line no-unused-vars
-function StatCard({ title, value, icon: Icon }) {
-  return (
-    <div className="agent-stat-card">
-      <div className="agent-stat-icon-box">
-        <Icon size={18} />
-      </div>
-      <p className="agent-stat-label">{title}</p>
-      <p className="agent-stat-value">{value}</p>
     </div>
   );
 }

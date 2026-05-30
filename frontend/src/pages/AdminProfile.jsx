@@ -7,6 +7,21 @@ import { useNavigate } from 'react-router-dom';
 import { auth as authAPI } from '../services/api';
 import AdminLayout from '../components/AdminLayout';
 
+/* ── Homepage multi-colour palette ── */
+const palette = [
+  { main: '#7C3AED', bg: '#EDE9FE', soft: '#F5F3FF', glow: 'rgba(124,58,237,0.15)' },   // purple
+  { main: '#0F6E56', bg: '#D1FAE5', soft: '#ECFDF5', glow: 'rgba(15,110,86,0.15)' },    // teal
+  { main: '#1D4ED8', bg: '#DBEAFE', soft: '#EFF6FF', glow: 'rgba(29,78,216,0.15)' },    // blue
+  { main: '#B45309', bg: '#FEF3C7', soft: '#FFFBEB', glow: 'rgba(180,83,9,0.15)' },     // amber
+  { main: '#BE185D', bg: '#FCE7F3', soft: '#FDF2F8', glow: 'rgba(190,24,93,0.15)' },    // pink
+  { main: '#DC2626', bg: '#FEE2E2', soft: '#FFF5F5', glow: 'rgba(220,38,38,0.15)' },    // coral/red
+  { main: '#0369A1', bg: '#E0F2FE', soft: '#F0F9FF', glow: 'rgba(3,105,161,0.15)' },    // sky
+  { main: '#4D7C0F', bg: '#ECFCCB', soft: '#F7FEE7', glow: 'rgba(77,124,15,0.15)' },    // lime/green
+];
+
+const getColor = (index) => palette[index % palette.length];
+const pageTheme = getColor(7); // lime/green — matches sidebar Profile nav colour
+
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
 
@@ -109,8 +124,9 @@ const styles = `
 
   .dash-input:focus {
     outline: none;
-    border-color: #111;
+    border-color: ${pageTheme.main};
     background: #fff;
+    box-shadow: 0 0 0 3px ${pageTheme.glow};
   }
 
   .dash-input:disabled {
@@ -127,7 +143,7 @@ const styles = `
   }
 
   .dash-btn-primary {
-    background: #111;
+    background: ${pageTheme.main};
     color: #fff;
     padding: 8px 16px;
     border-radius: 8px;
@@ -140,10 +156,11 @@ const styles = `
     align-items: center;
     justify-content: center;
     gap: 8px;
+    box-shadow: 0 4px 12px ${pageTheme.glow};
   }
 
   .dash-btn-primary:hover:not(:disabled) {
-    background: #333;
+    opacity: 0.9;
     transform: translateY(-1px);
   }
 
@@ -164,8 +181,9 @@ const styles = `
   }
 
   .dash-btn-outline:hover {
-    background: #fafaf7;
-    border-color: #d4d4ce;
+    background: ${pageTheme.soft};
+    border-color: ${pageTheme.main};
+    color: ${pageTheme.main};
   }
 
   .dash-badge {
@@ -259,7 +277,6 @@ export default function AdminProfile() {
       setShowPasswordModal(false);
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
 
-      // Logout and redirect
       setTimeout(() => {
         logout();
         navigate('/login');
@@ -278,11 +295,22 @@ export default function AdminProfile() {
       <div className="dash-wrapper">
         <div className="dash-content">
           {/* Header */}
-          <div className="dash-header">
+          <div className="dash-header" style={{ background: `linear-gradient(135deg, ${pageTheme.soft} 0%, ${pageTheme.bg} 100%)`, borderColor: `${pageTheme.main}33`, boxShadow: `0 8px 40px ${pageTheme.glow}` }}>
             <div className="dash-heading-row">
-              <User size={24} />
+              <div style={{
+                width: 46, height: 46, borderRadius: 8,
+                background: pageTheme.main, color: '#fff',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: `0 8px 20px ${pageTheme.glow}`, flexShrink: 0,
+              }}>
+                <User size={22} strokeWidth={2.5} />
+              </div>
               <div>
-                <h1 className="dash-heading">Admin Profile</h1>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                  <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: pageTheme.main }} />
+                  <span style={{ fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: pageTheme.main }}>Management Center</span>
+                </div>
+                <h1 className="dash-heading" style={{ margin: 0 }}>Admin Profile</h1>
                 <p className="dash-subheading">Manage your account settings and preferences</p>
               </div>
             </div>
@@ -291,7 +319,9 @@ export default function AdminProfile() {
           {/* Profile Information Card */}
           <div className="dash-card">
             <h2 className="dash-card-title">
-              <User size={18} />
+              <div style={{ width: 28, height: 28, borderRadius: 6, background: pageTheme.soft, color: pageTheme.main, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 2px 8px ${pageTheme.glow}` }}>
+                <User size={14} strokeWidth={2.5} />
+              </div>
               Profile Information
             </h2>
 
@@ -394,16 +424,21 @@ export default function AdminProfile() {
           {/* Security Settings Card */}
           <div className="dash-card">
             <h2 className="dash-card-title">
-              <Shield size={18} />
+              <div style={{ width: 28, height: 28, borderRadius: 6, background: pageTheme.soft, color: pageTheme.main, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 2px 8px ${pageTheme.glow}` }}>
+                <Shield size={14} strokeWidth={2.5} />
+              </div>
               Security Settings
             </h2>
 
             <div className="grid grid-cols-1 gap-4">
               <button
                 onClick={() => setShowPasswordModal(true)}
-                className="dash-btn-outline w-full !justify-start !gap-4 !p-4 hover:!bg-red-50 hover:!border-red-200 transition-all group"
+                className="dash-btn-outline w-full !justify-start !gap-4 !p-4 transition-all group"
+                style={{ borderColor: '#e4e4de' }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = pageTheme.main; e.currentTarget.style.background = pageTheme.soft; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e4e4de'; e.currentTarget.style.background = '#fff'; }}
               >
-                <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center text-red-600 group-hover:bg-red-200 transition-colors">
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center transition-colors" style={{ background: pageTheme.soft, color: pageTheme.main }}>
                   <Lock size={20} />
                 </div>
                 <div className="text-left">
@@ -417,14 +452,19 @@ export default function AdminProfile() {
           {/* Account Actions Card */}
           <div className="dash-card">
             <h2 className="dash-card-title">
-              <Settings size={18} />
+              <div style={{ width: 28, height: 28, borderRadius: 6, background: pageTheme.soft, color: pageTheme.main, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 2px 8px ${pageTheme.glow}` }}>
+                <Settings size={14} strokeWidth={2.5} />
+              </div>
               Account Actions
             </h2>
 
             <div className="flex gap-4">
               <button
                 onClick={handleLogout}
-                className="dash-btn-outline text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
+                className="dash-btn-outline"
+                style={{ color: '#DC2626', borderColor: '#fecaca' }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = '#FFF5F5'; e.currentTarget.style.borderColor = '#DC2626'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.borderColor = '#fecaca'; }}
               >
                 <LogOut size={14} />
                 Logout
@@ -436,9 +476,14 @@ export default function AdminProfile() {
 
       {/* Password Change Modal */}
       {showPasswordModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-            <h3 className="text-lg font-bold mb-4">Change Password</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4" style={{ border: '1.5px solid #e4e4de', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+              <div style={{ width: 40, height: 40, borderRadius: 8, background: pageTheme.soft, color: pageTheme.main, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 2px 8px ${pageTheme.glow}` }}>
+                <Lock size={20} />
+              </div>
+              <h3 className="text-lg font-bold" style={{ color: '#111' }}>Change Password</h3>
+            </div>
 
             <form onSubmit={handleChangePassword}>
               <div className="space-y-4">
@@ -451,7 +496,10 @@ export default function AdminProfile() {
                       type={showCurrentPassword ? 'text' : 'password'}
                       value={passwordData.currentPassword}
                       onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2"
+                      style={{ borderRadius: '8px' }}
+                      onFocus={(e) => { e.currentTarget.style.borderColor = pageTheme.main; e.currentTarget.style.boxShadow = `0 0 0 3px ${pageTheme.glow}`; }}
+                      onBlur={(e) => { e.currentTarget.style.borderColor = '#d1d5db'; e.currentTarget.style.boxShadow = 'none'; }}
                       required
                     />
                     <button
@@ -473,7 +521,10 @@ export default function AdminProfile() {
                       type={showNewPassword ? 'text' : 'password'}
                       value={passwordData.newPassword}
                       onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2"
+                      style={{ borderRadius: '8px' }}
+                      onFocus={(e) => { e.currentTarget.style.borderColor = pageTheme.main; e.currentTarget.style.boxShadow = `0 0 0 3px ${pageTheme.glow}`; }}
+                      onBlur={(e) => { e.currentTarget.style.borderColor = '#d1d5db'; e.currentTarget.style.boxShadow = 'none'; }}
                       required
                       minLength={6}
                     />
@@ -495,7 +546,10 @@ export default function AdminProfile() {
                     type="password"
                     value={passwordData.confirmPassword}
                     onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2"
+                    style={{ borderRadius: '8px' }}
+                    onFocus={(e) => { e.currentTarget.style.borderColor = pageTheme.main; e.currentTarget.style.boxShadow = `0 0 0 3px ${pageTheme.glow}`; }}
+                    onBlur={(e) => { e.currentTarget.style.borderColor = '#d1d5db'; e.currentTarget.style.boxShadow = 'none'; }}
                     required
                   />
                 </div>
@@ -509,13 +563,15 @@ export default function AdminProfile() {
                     setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
                   }}
                   className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                  style={{ borderRadius: '8px', fontWeight: 700 }}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={passwordLoading}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2 text-white rounded-md hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ background: pageTheme.main, borderRadius: '8px', fontWeight: 700, boxShadow: `0 4px 12px ${pageTheme.glow}` }}
                 >
                   {passwordLoading ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
                   {passwordLoading ? 'Updating...' : 'Update Password'}

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Edit2, Trash2, RefreshCw, Eye, Database, TrendingUp, AlertCircle, CheckCircle, Search } from 'lucide-react';
 import AdminSidebar from '../components/AdminSidebar';
 import ConfirmDialog from '../components/ConfirmDialog';
+import Pagination from '../components/Pagination';
 import ViewPlanModal from '../components/ViewPlanModal';
 import EditPricesModal from '../components/EditPricesModal';
 import { useSidebar } from '../hooks/useSidebar';
@@ -478,27 +479,14 @@ export default function AdminDataPlans() {
                   </div>
 
                   {/* Pagination */}
-                  <div className="p-4 sm:p-6 border-t border-slate-200 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                    <p className="text-sm text-slate-600">
-                      Page {page} of {totalPages} • {filteredPlans.length} plans total
-                    </p>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => setPage(Math.max(1, page - 1))}
-                        disabled={page === 1}
-                        className="px-4 py-2 bg-slate-100 border border-slate-200 hover:bg-slate-200 text-slate-900 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
-                      >
-                        ← Previous
-                      </button>
-                      <button
-                        onClick={() => setPage(Math.min(totalPages, page + 1))}
-                        disabled={page === totalPages}
-                        className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
-                      >
-                        Next →
-                      </button>
-                    </div>
-                  </div>
+                  {totalPages > 1 && (
+                    <Pagination
+                      currentPage={page}
+                      totalPages={totalPages}
+                      onPageChange={(newPage) => setPage(newPage)}
+                      isLoading={loading}
+                    />
+                  )}
                 </>
               )}
               </section>

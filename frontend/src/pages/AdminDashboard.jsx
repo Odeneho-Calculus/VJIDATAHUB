@@ -117,6 +117,20 @@ const styles = `
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
   }
+
+  .dash-spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid #EDE9FE;
+    border-top-color: #7C3AED;
+    border-radius: 50%;
+    margin: 0 auto 16px;
+    animation: dash-spin 0.8s linear infinite;
+  }
+
+  @keyframes dash-spin {
+    to { transform: rotate(360deg); }
+  }
   
   .dash-badge {
     padding: 4px 8px;
@@ -172,10 +186,13 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-100">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-2 border-slate-300 border-t-blue-700 mx-auto mb-4"></div>
-          <p className="text-slate-600 font-medium">Loading dashboard...</p>
+      <div style={{ display: 'flex', height: '100vh', backgroundColor: '#f5f5f0', fontFamily: "'DM Sans', sans-serif" }}>
+        <AdminSidebar isOpen={sidebarOpen} onClose={closeSidebar} />
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ textAlign: 'center' }}>
+            <div className="dash-spinner" />
+            <p style={{ color: '#666', fontSize: '14px', fontWeight: 600 }}>Loading dashboard...</p>
+          </div>
         </div>
       </div>
     );
@@ -292,7 +309,7 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="flex min-h-[calc(100vh-56px)] sm:min-h-[calc(100vh-64px)] bg-slate-100 dash-wrapper">
+    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f5f5f0' }} className="dash-wrapper">
       <style>{styles}</style>
       <AdminSidebar isOpen={sidebarOpen} onClose={closeSidebar} />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">

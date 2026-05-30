@@ -13,12 +13,28 @@ import {
   Clock,
   CheckCircle2,
   XCircle,
-  MoreVertical
+  MoreVertical,
+  Gift
 } from 'lucide-react';
 import AdminSidebar from '../components/AdminSidebar';
 import { useSidebar } from '../hooks/useSidebar';
 import { admin as adminAPI } from '../services/api';
 import { ReferralSettingsModal } from '../components/AdminReferralModals';
+
+/* ── Homepage multi-colour palette ── */
+const palette = [
+  { main: '#7C3AED', bg: '#EDE9FE', soft: '#F5F3FF', glow: 'rgba(124,58,237,0.15)' },   // purple
+  { main: '#0F6E56', bg: '#D1FAE5', soft: '#ECFDF5', glow: 'rgba(15,110,86,0.15)' },    // teal
+  { main: '#1D4ED8', bg: '#DBEAFE', soft: '#EFF6FF', glow: 'rgba(29,78,216,0.15)' },    // blue
+  { main: '#B45309', bg: '#FEF3C7', soft: '#FFFBEB', glow: 'rgba(180,83,9,0.15)' },     // amber
+  { main: '#BE185D', bg: '#FCE7F3', soft: '#FDF2F8', glow: 'rgba(190,24,93,0.15)' },    // pink
+  { main: '#DC2626', bg: '#FEE2E2', soft: '#FFF5F5', glow: 'rgba(220,38,38,0.15)' },    // coral/red
+  { main: '#0369A1', bg: '#E0F2FE', soft: '#F0F9FF', glow: 'rgba(3,105,161,0.15)' },    // sky
+  { main: '#4D7C0F', bg: '#ECFCCB', soft: '#F7FEE7', glow: 'rgba(77,124,15,0.15)' },    // lime/green
+];
+
+const getColor = (index) => palette[index % palette.length];
+const pageTheme = getColor(4); // pink — matches sidebar Referral Program nav colour
 
 export default function AdminReferrals() {
   const { sidebarOpen, closeSidebar } = useSidebar();
@@ -54,7 +70,6 @@ export default function AdminReferrals() {
         setSettingsForm(settingsRes.data);
       }
 
-      // Basic stats calculation from the list
       const totalEarnings = referralsRes.data
         .filter(r => r.status === 'paid')
         .reduce((acc, curr) => acc + curr.amount, 0);
@@ -117,167 +132,336 @@ export default function AdminReferrals() {
     ref.referredUser?.phone?.toLowerCase().includes(search.toLowerCase())
   );
 
+  const statItems = [
+    { label: 'Total Referrals', value: stats?.totalReferrals || 0, icon: Users, color: getColor(0) },
+    { label: 'Pending', value: stats?.pendingReferrals || 0, icon: Clock, color: getColor(3) },
+    { label: 'Total Paid', value: `GHS ${formatNumberAbbreviated(stats?.paidEarnings) || '0'}`, icon: DollarSign, color: getColor(1) },
+    { label: 'Active Referrers', value: stats?.activeReferrers || 0, icon: Award, color: getColor(2) },
+  ];
+
   return (
-    <div className="flex h-screen bg-slate-50">
+    <div style={{ display: 'flex', height: '100vh', backgroundColor: '#f5f5f0', fontFamily: "'DM Sans', sans-serif" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
+
+        .ref-container { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .ref-scrollable { flex: 1; overflow-y: auto; padding: 24px 16px; }
+        .ref-max-width { max-width: 1280px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+
+        .ref-card {
+          background: #fff;
+          border: 1.5px solid #e4e4de;
+          border-radius: 14px;
+          box-shadow: 0 8px 40px rgba(0,0,0,0.06);
+          padding: 24px;
+          transition: all 0.2s;
+        }
+
+        .ref-header { display: flex; align-items: center; gap: 16px; }
+        .ref-icon-box {
+          width: 46px; height: 46px; background: ${pageTheme.main}; border-radius: 8px;
+          display: flex; align-items: center; justify-content: center; color: #fff;
+          box-shadow: 0 8px 20px ${pageTheme.glow}; flex-shrink: 0;
+        }
+        .ref-title { font-size: 26px; font-weight: 800; color: #111; margin: 0; letter-spacing: -0.02em; }
+        .ref-subtitle { font-size: 14px; color: #666; margin: 4px 0 0 0; }
+
+        .ref-stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        @media (min-width: 1024px) { .ref-stats-grid { grid-template-columns: repeat(4, 1fr); gap: 16px; } }
+
+        .ref-stat-card {
+          background: var(--stat-bg, #fff);
+          border: 1.5px solid var(--stat-border, #e4e4de);
+          border-radius: 14px;
+          padding: 16px;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          transition: all 0.2s;
+        }
+        .ref-stat-card:hover {
+          border-color: var(--stat-color, #d4d4ce);
+          box-shadow: 0 8px 40px var(--stat-glow, rgba(0,0,0,0.06));
+        }
+        .ref-stat-label { font-size: 11px; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 0.05em; }
+        .ref-stat-value { font-size: 20px; font-weight: 800; color: #111; }
+
+        .ref-input {
+          width: 100%; background: #fafaf7; border: 1.5px solid #e0e0d8; border-radius: 12px;
+          padding: 12px 14px 12px 40px; font-size: 14px; color: #111; transition: all 0.2s;
+          box-sizing: border-box; font-weight: 600;
+        }
+        .ref-input:focus {
+          outline: none; border-color: ${pageTheme.main}; box-shadow: 0 0 0 4px ${pageTheme.glow}; background: #fff;
+        }
+
+        .ref-btn-primary {
+          background: ${pageTheme.main}; color: #fff; border: none; border-radius: 8px;
+          padding: 10px 16px; font-size: 13px; font-weight: 700; cursor: pointer;
+          transition: all 0.2s; display: flex; align-items: center; gap: 8px;
+          box-shadow: 0 4px 12px ${pageTheme.glow};
+        }
+        .ref-btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        .ref-btn-icon {
+          width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+          border: 1.5px solid #e4e4de; background: #fff; color: ${pageTheme.main}; cursor: pointer; transition: all 0.2s;
+        }
+        .ref-btn-icon:hover { border-color: ${pageTheme.main}; background: ${pageTheme.soft}; }
+
+        .ref-table { width: 100%; border-collapse: collapse; text-align: left; }
+        .ref-table th {
+          padding: 14px 16px; background: #fafaf7; border-bottom: 1.5px solid #e4e4de;
+          font-size: 10px; font-weight: 800; color: #999; text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        .ref-table td { padding: 16px; border-bottom: 1px solid #f0f0f0; font-size: 13px; color: #111; }
+        .ref-table tr { transition: all 0.2s; }
+        .ref-table tr:hover { background: #fafaf7; }
+
+        .ref-badge {
+          padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 900;
+          text-transform: uppercase; letter-spacing: 0.5px; display: inline-block;
+        }
+
+        .ref-alert-error {
+          background: #fff5f5; border: 1.5px solid #fecaca; color: #b91c1c;
+          border-radius: 7px; padding: 12px 16px; margin-bottom: 16px;
+          display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600;
+        }
+        .ref-alert-success {
+          background: #f0fdf4; border: 1.5px solid #bbf7d0; color: #15803d;
+          border-radius: 7px; padding: 12px 16px; margin-bottom: 16px;
+          display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600;
+        }
+      `}</style>
+
       <AdminSidebar isOpen={sidebarOpen} onClose={closeSidebar} />
 
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="bg-white border-b border-slate-200 p-4 flex justify-between items-center">
-          <h1 className="text-xl font-bold text-slate-800">Referral Management</h1>
-          <button
-            onClick={() => setShowSettingsModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 font-medium transition-colors"
-          >
-            <Settings size={18} />
-            Settings
-          </button>
-        </header>
+      <div className="ref-container">
+        <div className="ref-scrollable">
+          <div className="ref-max-width">
 
-        <main className="flex-1 overflow-auto p-6">
-          <div className="max-w-7xl mx-auto space-y-6">
-            {/* Stats */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                <p className="text-sm font-medium text-slate-500 mb-1">Total Referrals</p>
-                <p className="text-2xl font-bold text-slate-900">{stats?.totalReferrals || 0}</p>
-              </div>
-              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                <p className="text-sm font-medium text-slate-500 mb-1">Pending</p>
-                <p className="text-2xl font-bold text-yellow-600">{stats?.pendingReferrals || 0}</p>
-              </div>
-              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                <p className="text-sm font-medium text-slate-500 mb-1">Total Paid</p>
-                <p className="text-2xl font-bold text-green-600">GHS {formatNumberAbbreviated(stats?.paidEarnings) || '0'}</p>
-              </div>
-              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                <p className="text-sm font-medium text-slate-500 mb-1">Active Referrers</p>
-                <p className="text-2xl font-bold text-blue-600">{stats?.activeReferrers || 0}</p>
+            {/* Header */}
+            <div className="ref-card !p-5" style={{ background: `linear-gradient(135deg, ${pageTheme.soft} 0%, ${pageTheme.bg} 100%)`, borderColor: `${pageTheme.main}33`, boxShadow: `0 8px 40px ${pageTheme.glow}` }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+                <div className="ref-header">
+                  <div className="ref-icon-box">
+                    <Gift size={22} strokeWidth={2.5} />
+                  </div>
+                  <div className="min-w-0">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                      <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: pageTheme.main }} />
+                      <span style={{ fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: pageTheme.main }}>Management Center</span>
+                    </div>
+                    <h1 className="ref-title">Referral Management</h1>
+                    <p className="ref-subtitle">Track and manage your platform's referral program</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowSettingsModal(true)}
+                  className="ref-btn-primary"
+                >
+                  <Settings size={16} />
+                  Settings
+                </button>
               </div>
             </div>
 
-            {/* Notifications */}
+            {/* Stats */}
+            <div className="ref-stats-grid">
+              {statItems.map((stat, i) => (
+                <div
+                  key={i}
+                  className="ref-stat-card"
+                  style={{
+                    '--stat-color': stat.color.main + '66',
+                    '--stat-glow': stat.color.glow,
+                    '--stat-bg': stat.color.soft,
+                    '--stat-border': stat.color.main + '33',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <p className="ref-stat-label" style={{ color: stat.color.main }}>{stat.label}</p>
+                      <p className="ref-stat-value">{stat.value}</p>
+                    </div>
+                    <div style={{
+                      width: 32, height: 32, borderRadius: 8,
+                      background: stat.color.soft, color: stat.color.main,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      boxShadow: `0 2px 8px ${stat.color.glow}`,
+                    }}>
+                      <stat.icon size={16} strokeWidth={2.5} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Alerts */}
             {success && (
-              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl flex items-center gap-2">
+              <div className="ref-alert-success">
                 <CheckCircle size={18} />
                 {success}
               </div>
             )}
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center gap-2">
+              <div className="ref-alert-error">
                 <AlertCircle size={18} />
                 {error}
               </div>
             )}
 
             {/* List */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-              <div className="p-4 border-b border-slate-200 flex flex-col sm:flex-row justify-between gap-4">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                  <input
-                    type="text"
-                    placeholder="Search referrers or referred users..."
-                    className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                  />
+            <div className="ref-card" style={{ padding: 0 }}>
+              <div style={{ padding: '20px 24px', borderBottom: '1.5px solid #e4e4de', background: '#fafaf7', borderTopLeftRadius: '14px', borderTopRightRadius: '14px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', sm: { flexDirection: 'row' }, justifyContent: 'space-between', gap: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{
+                      width: 32, height: 32, borderRadius: 8,
+                      background: pageTheme.soft, color: pageTheme.main,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <Database size={16} strokeWidth={2.5} />
+                    </div>
+                    <div>
+                      <h2 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#111' }}>Referral Records</h2>
+                      <p style={{ margin: 0, fontSize: '11px', color: '#999', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{filteredReferrals.length} matching entries</p>
+                    </div>
+                  </div>
+                  <div style={{ position: 'relative', maxWidth: '320px', width: '100%' }}>
+                    <Search style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#999', pointerEvents: 'none' }} size={16} />
+                    <input
+                      type="text"
+                      placeholder="Search referrers or referred users..."
+                      className="ref-input"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full">
+              <div style={{ overflowX: 'auto' }}>
+                <table className="ref-table">
                   <thead>
-                    <tr className="bg-gradient-to-r from-slate-100 to-blue-50 border-b-2 border-slate-200">
-                      <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-slate-900 whitespace-nowrap">Referrer</th>
-                      <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-slate-900 whitespace-nowrap">Referred User</th>
-                      <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-slate-900 whitespace-nowrap">Amount</th>
-                      <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-slate-900 whitespace-nowrap">Status</th>
-                      <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-slate-900 whitespace-nowrap">Date</th>
-                      <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-slate-900 whitespace-nowrap text-right">Actions</th>
+                    <tr>
+                      <th>Referrer</th>
+                      <th>Referred User</th>
+                      <th>Amount</th>
+                      <th>Status</th>
+                      <th>Date</th>
+                      <th style={{ textAlign: 'right' }}>Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-200">
+                  <tbody>
                     {loading ? (
                       <tr>
-                        <td colSpan="6" className="px-4 sm:px-6 py-12 text-center">
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                        <td colSpan="6" style={{ padding: '48px', textAlign: 'center' }}>
+                          <div style={{ width: '32px', height: '32px', border: `3px solid ${pageTheme.soft}`, borderTopColor: pageTheme.main, borderRadius: '50%', margin: '0 auto', animation: 'spin 0.8s linear infinite' }} />
                         </td>
                       </tr>
                     ) : filteredReferrals.length === 0 ? (
                       <tr>
-                        <td colSpan="6" className="px-4 sm:px-6 py-12 text-center text-slate-500">
-                          No referrals found
+                        <td colSpan="6" style={{ padding: '48px', textAlign: 'center', color: '#999' }}>
+                          <div style={{ width: 64, height: 64, borderRadius: 20, background: '#fafaf7', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', border: '1.5px dashed #e4e4de' }}>
+                            <Database size={32} style={{ color: '#e4e4de' }} />
+                          </div>
+                          <p style={{ fontWeight: 700, fontSize: '14px', margin: 0 }}>No referrals found</p>
                         </td>
                       </tr>
                     ) : (
-                      filteredReferrals.map((ref) => (
-                        <tr key={ref._id} className="hover:bg-blue-50 transition">
-                          <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                            <div className="font-semibold text-slate-900">{ref.referrer?.name}</div>
-                            <div className="text-[11px] text-slate-500 font-medium">{ref.referrer?.email}</div>
-                          </td>
-                          <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                            <div className="font-semibold text-slate-900">{ref.referredUser?.name}</div>
-                            <div className="text-[11px] text-slate-500 font-medium">{ref.referredUser?.email}</div>
-                          </td>
-                          <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                            <p className="text-sm font-black text-blue-600">GHS {formatNumberAbbreviated(ref.amount)}</p>
-                          </td>
-                          <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-tight ${ref.status === 'paid' ? 'bg-green-100 text-green-700' :
-                              ref.status === 'approved' ? 'bg-blue-100 text-blue-700' :
-                                ref.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                                  'bg-amber-100 text-amber-700'
-                              }`}>
-                              {ref.status}
-                            </span>
-                          </td>
-                          <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                            <div className="flex flex-col">
-                              <p className="text-xs font-bold text-slate-900">{new Date(ref.createdAt).toLocaleDateString()}</p>
-                              <p className="text-[10px] text-slate-500 font-medium">{new Date(ref.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                            </div>
-                          </td>
-                          <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-right">
-                            <div className="flex justify-end gap-1">
-                              {ref.status === 'pending' && (
-                                <>
+                      filteredReferrals.map((ref, idx) => {
+                        const c = getColor(idx);
+                        return (
+                          <tr key={ref._id}>
+                            <td style={{ whiteSpace: 'nowrap' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <div style={{
+                                  width: 32, height: 32, borderRadius: 8,
+                                  background: c.soft, color: c.main,
+                                  border: `1.5px solid ${c.main}22`,
+                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                  boxShadow: `0 2px 8px ${c.glow}`,
+                                  fontSize: '12px', fontWeight: 800,
+                                }}>
+                                  {ref.referrer?.name?.charAt(0).toUpperCase() || '?'}
+                                </div>
+                                <div>
+                                  <div style={{ fontWeight: 700, color: '#111' }}>{ref.referrer?.name}</div>
+                                  <div style={{ fontSize: '11px', color: '#999', fontWeight: 600 }}>{ref.referrer?.email}</div>
+                                </div>
+                              </div>
+                            </td>
+                            <td style={{ whiteSpace: 'nowrap' }}>
+                              <div style={{ fontWeight: 700, color: '#111' }}>{ref.referredUser?.name}</div>
+                              <div style={{ fontSize: '11px', color: '#999', fontWeight: 600 }}>{ref.referredUser?.email}</div>
+                            </td>
+                            <td style={{ whiteSpace: 'nowrap' }}>
+                              <span style={{ fontWeight: 800, color: c.main }}>GHS {formatNumberAbbreviated(ref.amount)}</span>
+                            </td>
+                            <td style={{ whiteSpace: 'nowrap' }}>
+                              <span className="ref-badge" style={{
+                                background: ref.status === 'paid' ? '#f0fdf4' : ref.status === 'approved' ? '#eff6ff' : ref.status === 'rejected' ? '#fef2f2' : '#fffbeb',
+                                color: ref.status === 'paid' ? '#166534' : ref.status === 'approved' ? '#1e40af' : ref.status === 'rejected' ? '#991b1b' : '#92400e',
+                                border: `1px solid ${ref.status === 'paid' ? '#d1fae5' : ref.status === 'approved' ? '#dbeafe' : ref.status === 'rejected' ? '#fee2e2' : '#fef3c7'}`,
+                              }}>
+                                {ref.status}
+                              </span>
+                            </td>
+                            <td style={{ whiteSpace: 'nowrap' }}>
+                              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                <span style={{ fontSize: '12px', fontWeight: 700, color: '#111' }}>{new Date(ref.createdAt).toLocaleDateString()}</span>
+                                <span style={{ fontSize: '10px', color: '#999', fontWeight: 600 }}>{new Date(ref.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                              </div>
+                            </td>
+                            <td style={{ whiteSpace: 'nowrap', textAlign: 'right' }}>
+                              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '4px' }}>
+                                {ref.status === 'pending' && (
+                                  <>
+                                    <button
+                                      onClick={() => handleUpdateStatus(ref._id, 'approved')}
+                                      className="ref-btn-icon"
+                                      title="Approve"
+                                    >
+                                      <CheckCircle2 size={16} />
+                                    </button>
+                                    <button
+                                      onClick={() => handleUpdateStatus(ref._id, 'rejected')}
+                                      className="ref-btn-icon"
+                                      title="Reject"
+                                      style={{ color: '#DC2626' }}
+                                      onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#DC2626'; e.currentTarget.style.background = '#FFF5F5'; }}
+                                      onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e4e4de'; e.currentTarget.style.background = '#fff'; }}
+                                    >
+                                      <XCircle size={16} />
+                                    </button>
+                                  </>
+                                )}
+                                {(ref.status === 'approved' || ref.status === 'pending') && (
                                   <button
-                                    onClick={() => handleUpdateStatus(ref._id, 'approved')}
-                                    className="p-2 hover:bg-slate-100 rounded-lg transition"
-                                    title="Approve"
+                                    onClick={() => handleUpdateStatus(ref._id, 'paid')}
+                                    className="ref-btn-icon"
+                                    title="Mark as Paid"
+                                    style={{ color: '#059669' }}
+                                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#059669'; e.currentTarget.style.background = '#f0fdf4'; }}
+                                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e4e4de'; e.currentTarget.style.background = '#fff'; }}
                                   >
-                                    <CheckCircle2 size={18} className="text-blue-600" />
+                                    <DollarSign size={16} />
                                   </button>
-                                  <button
-                                    onClick={() => handleUpdateStatus(ref._id, 'rejected')}
-                                    className="p-2 hover:bg-slate-100 rounded-lg transition"
-                                    title="Reject"
-                                  >
-                                    <XCircle size={18} className="text-red-600" />
-                                  </button>
-                                </>
-                              )}
-                              {(ref.status === 'approved' || ref.status === 'pending') && (
-                                <button
-                                  onClick={() => handleUpdateStatus(ref._id, 'paid')}
-                                  className="p-2 hover:bg-slate-100 rounded-lg transition"
-                                  title="Mark as Paid"
-                                >
-                                  <DollarSign size={18} className="text-green-600" />
-                                </button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      ))
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
                     )}
                   </tbody>
                 </table>
               </div>
             </div>
           </div>
-        </main>
+        </div>
       </div>
 
       <ReferralSettingsModal
@@ -287,6 +471,7 @@ export default function AdminReferrals() {
         setSettingsForm={setSettingsForm}
         onSave={handleUpdateSettings}
         loading={updateLoading}
+        themeColor={pageTheme}
       />
     </div>
   );

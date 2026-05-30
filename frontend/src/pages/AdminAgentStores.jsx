@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Search, RefreshCw, Store, User, Shield, Ban, CheckCircle, AlertCircle, X, Eye } from 'lucide-react';
 import AdminAgentStoreDetailsModal from '../components/AdminAgentStoreDetailsModal';
+import Pagination from '../components/Pagination';
 import { toast } from 'react-hot-toast';
 import AdminSidebar from '../components/AdminSidebar';
 import { useSidebar } from '../hooks/useSidebar';
@@ -807,23 +808,12 @@ export default function AdminAgentStores() {
             </div>
 
             {totalPages > 1 && (
-              <div className="store-pagination">
-                <button
-                  onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-                  disabled={page === 1}
-                  className="store-pagination-button"
-                >
-                  ← Previous
-                </button>
-                <span style={{ fontSize: '14px', color: '#666' }}>Page {page} of {totalPages}</span>
-                <button
-                  onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
-                  disabled={page === totalPages}
-                  className="store-pagination-button next"
-                >
-                  Next
-                </button>
-              </div>
+              <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={(newPage) => setPage(newPage)}
+                isLoading={loading}
+              />
             )}
           </div>
         </div>

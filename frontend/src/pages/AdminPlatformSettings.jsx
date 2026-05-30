@@ -19,6 +19,21 @@ import Modal from '../components/Modal';
 import { useSidebar } from '../hooks/useSidebar';
 import { admin as adminAPI } from '../services/api';
 
+/* ── Homepage multi-colour palette ── */
+const palette = [
+  { main: '#7C3AED', bg: '#EDE9FE', soft: '#F5F3FF', glow: 'rgba(124,58,237,0.15)' },   // purple
+  { main: '#0F6E56', bg: '#D1FAE5', soft: '#ECFDF5', glow: 'rgba(15,110,86,0.15)' },    // teal
+  { main: '#1D4ED8', bg: '#DBEAFE', soft: '#EFF6FF', glow: 'rgba(29,78,216,0.15)' },    // blue
+  { main: '#B45309', bg: '#FEF3C7', soft: '#FFFBEB', glow: 'rgba(180,83,9,0.15)' },     // amber
+  { main: '#BE185D', bg: '#FCE7F3', soft: '#FDF2F8', glow: 'rgba(190,24,93,0.15)' },    // pink
+  { main: '#DC2626', bg: '#FEE2E2', soft: '#FFF5F5', glow: 'rgba(220,38,38,0.15)' },    // coral/red
+  { main: '#0369A1', bg: '#E0F2FE', soft: '#F0F9FF', glow: 'rgba(3,105,161,0.15)' },    // sky
+  { main: '#4D7C0F', bg: '#ECFCCB', soft: '#F7FEE7', glow: 'rgba(77,124,15,0.15)' },    // lime/green
+];
+
+const getColor = (index) => palette[index % palette.length];
+const pageTheme = getColor(0); // purple — matches sidebar Platform Settings nav colour
+
 export default function AdminPlatformSettings() {
   const { sidebarOpen, closeSidebar } = useSidebar();
   const [loading, setLoading] = useState(true);
@@ -147,17 +162,23 @@ export default function AdminPlatformSettings() {
     setShowLogModal(true);
   };
 
+  const tabItems = [
+    { key: 'contact', label: 'Contact', icon: Phone },
+    { key: 'orders', label: 'Orders', icon: Settings2 },
+    { key: 'charges', label: 'Charges', icon: Clock3 },
+  ];
+
   return (
     <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f5f5f0', fontFamily: "'DM Sans', sans-serif" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
-        
+
         .settings-main {
           flex: 1;
           min-width: 0;
           padding: 24px 16px;
         }
-        
+
         .settings-max-width {
           max-width: 800px;
           margin: 0 auto;
@@ -165,7 +186,7 @@ export default function AdminPlatformSettings() {
           flex-direction: column;
           gap: 24px;
         }
-        
+
         .settings-card {
           background: #fff;
           border: 1.5px solid #e4e4de;
@@ -173,38 +194,39 @@ export default function AdminPlatformSettings() {
           box-shadow: 0 8px 40px rgba(0,0,0,0.10);
           padding: 24px;
         }
-        
+
         .settings-header {
           display: flex;
           align-items: center;
           gap: 16px;
           margin-bottom: 8px;
         }
-        
+
         .settings-icon-box {
           width: 46px;
           height: 46px;
-          background: #111;
+          background: ${pageTheme.main};
           border-radius: 8px;
           display: flex;
           align-items: center;
           justify-content: center;
-          color: #f0a500;
+          color: #fff;
+          box-shadow: 0 8px 20px ${pageTheme.glow};
         }
-        
+
         .settings-title {
           font-size: 26px;
           font-weight: 800;
           color: #111;
           margin: 0;
         }
-        
+
         .settings-subtitle {
           font-size: 14px;
           color: #666;
           margin: 4px 0 0 0;
         }
-        
+
         .settings-tabs {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
@@ -214,7 +236,7 @@ export default function AdminPlatformSettings() {
           border-radius: 14px;
           border: 1.5px solid #e4e4de;
         }
-        
+
         .settings-tab-btn {
           padding: 12px;
           border-radius: 7px;
@@ -230,12 +252,13 @@ export default function AdminPlatformSettings() {
           gap: 8px;
           transition: all 0.2s;
         }
-        
+
         .settings-tab-btn.active {
-          background: #111;
+          background: ${pageTheme.main};
           color: #fff;
+          box-shadow: 0 4px 12px ${pageTheme.glow};
         }
-        
+
         .settings-label {
           display: block;
           font-size: 12.5px;
@@ -244,7 +267,7 @@ export default function AdminPlatformSettings() {
           letter-spacing: 0.02em;
           margin-bottom: 8px;
         }
-        
+
         .settings-input {
           width: 100%;
           background: #fafaf7;
@@ -256,23 +279,23 @@ export default function AdminPlatformSettings() {
           transition: all 0.2s;
           box-sizing: border-box;
         }
-        
+
         .settings-input:focus {
           outline: none;
-          border-color: #111;
-          box-shadow: 0 0 0 3px rgba(17,17,17,0.07);
+          border-color: ${pageTheme.main};
+          box-shadow: 0 0 0 3px ${pageTheme.glow};
           background: #fff;
         }
-        
+
         .settings-hint {
           font-size: 11.5px;
           font-weight: 600;
           color: #bbb;
           margin-top: 6px;
         }
-        
+
         .settings-btn-primary {
-          background: #111;
+          background: ${pageTheme.main};
           color: #fff;
           border: none;
           border-radius: 7px;
@@ -285,12 +308,14 @@ export default function AdminPlatformSettings() {
           align-items: center;
           gap: 8px;
           justify-content: center;
+          box-shadow: 0 4px 12px ${pageTheme.glow};
         }
-        
+
         .settings-btn-primary:hover {
-          background: #222;
+          opacity: 0.9;
+          transform: translateY(-1px);
         }
-        
+
         .settings-error-box {
           background: #fff5f5;
           border: 1.5px solid #fecaca;
@@ -303,7 +328,7 @@ export default function AdminPlatformSettings() {
           gap: 8px;
           margin-bottom: 16px;
         }
-        
+
         .settings-success-box {
           background: #f0fdf4;
           border: 1.5px solid #bbf7d0;
@@ -316,20 +341,20 @@ export default function AdminPlatformSettings() {
           gap: 8px;
           margin-bottom: 16px;
         }
-        
+
         .settings-table-wrapper {
           overflow-x: auto;
           margin-top: 16px;
           border: 1.5px solid #e4e4de;
           border-radius: 7px;
         }
-        
+
         .settings-table {
           width: 100%;
           border-collapse: collapse;
           font-size: 12px;
         }
-        
+
         .settings-table th {
           padding: 12px;
           background: #fafaf7;
@@ -337,12 +362,12 @@ export default function AdminPlatformSettings() {
           font-weight: 700;
           text-align: left;
         }
-        
+
         .settings-table td {
           padding: 12px;
           border-bottom: 1px solid #f0f0f0;
         }
-        
+
         .settings-spinner {
           width: 18px;
           height: 18px;
@@ -351,7 +376,7 @@ export default function AdminPlatformSettings() {
           border-radius: 50%;
           animation: settings-spin 0.8s linear infinite;
         }
-        
+
         @keyframes settings-spin {
           to { transform: rotate(360deg); }
         }
@@ -361,13 +386,17 @@ export default function AdminPlatformSettings() {
 
       <main className="settings-main">
         <div className="settings-max-width">
-          
-          <div className="settings-card">
+
+          <div className="settings-card" style={{ background: `linear-gradient(135deg, ${pageTheme.soft} 0%, ${pageTheme.bg} 100%)`, borderColor: `${pageTheme.main}33`, boxShadow: `0 8px 40px ${pageTheme.glow}` }}>
             <div className="settings-header">
               <div className="settings-icon-box">
                 <Globe size={22} />
               </div>
               <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                  <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: pageTheme.main }} />
+                  <span style={{ fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: pageTheme.main }}>Management Center</span>
+                </div>
                 <h1 className="settings-title">Platform Settings</h1>
                 <p className="settings-subtitle">Manage public contact details and order configurations</p>
               </div>
@@ -389,20 +418,20 @@ export default function AdminPlatformSettings() {
 
           {loading ? (
             <div style={{ display: 'flex', justifyContent: 'center', padding: '64px' }}>
-              <div className="settings-spinner" style={{ borderTopColor: '#111', width: '32px', height: '32px' }}></div>
+              <div style={{ width: '32px', height: '32px', border: `3px solid ${pageTheme.soft}`, borderTopColor: pageTheme.main, borderRadius: '50%', animation: 'settings-spin 0.8s linear infinite' }}></div>
             </div>
           ) : (
             <>
               <div className="settings-tabs">
-                <button className={`settings-tab-btn ${activeTab === 'contact' ? 'active' : ''}`} onClick={() => setActiveTab('contact')}>
-                  <Phone size={15} /> Contact
-                </button>
-                <button className={`settings-tab-btn ${activeTab === 'orders' ? 'active' : ''}`} onClick={() => setActiveTab('orders')}>
-                  <Settings2 size={15} /> Orders
-                </button>
-                <button className={`settings-tab-btn ${activeTab === 'charges' ? 'active' : ''}`} onClick={() => setActiveTab('charges')}>
-                  <Clock3 size={15} /> Charges
-                </button>
+                {tabItems.map((tab) => (
+                  <button
+                    key={tab.key}
+                    className={`settings-tab-btn ${activeTab === tab.key ? 'active' : ''}`}
+                    onClick={() => setActiveTab(tab.key)}
+                  >
+                    <tab.icon size={15} /> {tab.label}
+                  </button>
+                ))}
               </div>
 
               <div className="settings-card">
@@ -495,19 +524,22 @@ export default function AdminPlatformSettings() {
                                 </tr>
                               </thead>
                               <tbody>
-                                {webhookLogs.slice(0, 5).map(log => (
-                                  <tr key={log._id}>
-                                    <td>{new Date(log.createdAt || log.receivedAt).toLocaleTimeString()}</td>
-                                    <td style={{ fontWeight: 700 }}>{log.event}</td>
-                                    <td>
-                                      <span style={{ padding: '2px 6px', borderRadius: '4px', background: log.handled ? '#f0fdf4' : '#f8fafc', color: log.handled ? '#166534' : '#666', fontWeight: 700, fontSize: '10px' }}>
-                                        {log.handled ? 'OK' : 'SKIP'}
-                                      </span>
-                                    </td>
-                                    <td>{log.matchedOrderNumber || 'N/A'}</td>
-                                    <td><button style={{ border: 'none', background: 'transparent', cursor: 'pointer' }} onClick={() => handleOpenLogDetails(log)}><Eye size={12} /></button></td>
-                                  </tr>
-                                ))}
+                                {webhookLogs.slice(0, 5).map((log, idx) => {
+                                  const c = getColor(idx);
+                                  return (
+                                    <tr key={log._id}>
+                                      <td>{new Date(log.createdAt || log.receivedAt).toLocaleTimeString()}</td>
+                                      <td style={{ fontWeight: 700, color: c.main }}>{log.event}</td>
+                                      <td>
+                                        <span style={{ padding: '2px 6px', borderRadius: '4px', background: log.handled ? '#f0fdf4' : '#f8fafc', color: log.handled ? '#166534' : '#666', fontWeight: 700, fontSize: '10px' }}>
+                                          {log.handled ? 'OK' : 'SKIP'}
+                                        </span>
+                                      </td>
+                                      <td>{log.matchedOrderNumber || 'N/A'}</td>
+                                      <td><button style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: c.main }} onClick={() => handleOpenLogDetails(log)}><Eye size={12} /></button></td>
+                                    </tr>
+                                  );
+                                })}
                               </tbody>
                             </table>
                           </div>
@@ -556,13 +588,13 @@ export default function AdminPlatformSettings() {
         </div>
       </main>
 
-      <Modal isOpen={showLogModal} onClose={() => setShowLogModal(false)} title="Webhook Log Details">
+      <Modal isOpen={showLogModal} onClose={() => setShowLogModal(false)} title="Webhook Log Details" themeColor={pageTheme}>
         {selectedLog && (
           <div style={{ fontSize: '12px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               <div className="settings-card" style={{ padding: '12px', boxShadow: 'none' }}>
                 <p className="settings-label" style={{ marginBottom: '4px' }}>Event</p>
-                <p style={{ margin: 0, fontWeight: 700 }}>{selectedLog.event}</p>
+                <p style={{ margin: 0, fontWeight: 700, color: pageTheme.main }}>{selectedLog.event}</p>
               </div>
               <div className="settings-card" style={{ padding: '12px', boxShadow: 'none' }}>
                 <p className="settings-label" style={{ marginBottom: '4px' }}>Status</p>

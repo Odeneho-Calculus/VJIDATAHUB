@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Search, Edit2, Ban, Clock, Trash2, Eye, RotateCcw, Users, AlertCircle, CheckCircle, TrendingUp, KeyRound } from 'lucide-react';
 import { formatNumberAbbreviated } from '../utils/formatCurrency';
 import AdminSidebar from '../components/AdminSidebar';
+import Pagination from '../components/Pagination';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { UserViewModal, UserRoleModal, UserBanModal, UserSuspendModal, UserEditModal, UserDeleteModal } from '../components/AdminUserModals';
 import PasswordResetModal from '../components/PasswordResetModal';
@@ -650,17 +651,12 @@ export default function AdminUsers() {
           </div>
 
           {totalPages > 1 && (
-            <div className="usr-pagination">
-              {[...Array(totalPages)].map((_, i) => (
-                <button
-                  key={i}
-                  className={`usr-page-btn ${page === i + 1 ? 'active' : ''}`}
-                  onClick={() => setPage(i + 1)}
-                >
-                  {i + 1}
-                </button>
-              ))}
-            </div>
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              onPageChange={(newPage) => setPage(newPage)}
+              isLoading={loading}
+            />
           )}
         </div>
       </div>
