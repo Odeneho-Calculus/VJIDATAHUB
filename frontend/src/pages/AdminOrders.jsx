@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Eye, Edit2, Trash2, Search, ShoppingCart, CheckCircle, Clock, TrendingUp, Database, CheckCircle2 } from 'lucide-react';
+import { Eye, Edit2, Trash2, Search, ShoppingCart, CheckCircle, Clock, TrendingUp, Database, CheckCircle2, ChevronRight } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { formatNumberAbbreviated } from '../utils/formatCurrency';
 import AdminSidebar from '../components/AdminSidebar';
@@ -12,12 +12,27 @@ import { useSidebar } from '../hooks/useSidebar';
 import { admin as adminAPI } from '../services/api';
 import { useSettings } from '../context/SettingsContext';
 
+/* ── Homepage multi-colour palette ── */
+const palette = [
+  { main: '#7C3AED', bg: '#EDE9FE', soft: '#F5F3FF', glow: 'rgba(124,58,237,0.15)' },   // purple
+  { main: '#0F6E56', bg: '#D1FAE5', soft: '#ECFDF5', glow: 'rgba(15,110,86,0.15)' },    // teal
+  { main: '#1D4ED8', bg: '#DBEAFE', soft: '#EFF6FF', glow: 'rgba(29,78,216,0.15)' },    // blue
+  { main: '#B45309', bg: '#FEF3C7', soft: '#FFFBEB', glow: 'rgba(180,83,9,0.15)' },     // amber
+  { main: '#BE185D', bg: '#FCE7F3', soft: '#FDF2F8', glow: 'rgba(190,24,93,0.15)' },    // pink
+  { main: '#DC2626', bg: '#FEE2E2', soft: '#FFF5F5', glow: 'rgba(220,38,38,0.15)' },    // coral/red
+  { main: '#0369A1', bg: '#E0F2FE', soft: '#F0F9FF', glow: 'rgba(3,105,161,0.15)' },    // sky
+  { main: '#4D7C0F', bg: '#ECFCCB', soft: '#F7FEE7', glow: 'rgba(77,124,15,0.15)' },    // lime/green
+];
+
+const getColor = (index) => palette[index % palette.length];
+
 export default function AdminOrders() {
   const { sidebarOpen, closeSidebar } = useSidebar();
   const { settings } = useSettings();
   const [searchParams] = useSearchParams();
   const scope = searchParams.get('scope') === 'agent' ? 'agent' : '';
   const isAgentScope = scope === 'agent';
+  const pageTheme = getColor(isAgentScope ? 7 : 6);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -366,26 +381,27 @@ export default function AdminOrders() {
           background: #fff;
           border: 1.5px solid #e4e4de;
           border-radius: 14px;
-          box-shadow: 0 8px 40px rgba(0,0,0,0.10);
+          box-shadow: 0 8px 40px rgba(0,0,0,0.06);
           padding: 24px;
+          transition: all 0.2s;
         }
         
         .orders-header {
           display: flex;
           align-items: center;
           gap: 16px;
-          margin-bottom: 8px;
         }
         
         .orders-icon-box {
           width: 46px;
           height: 46px;
-          background: #111;
+          background: ${pageTheme.main};
           border-radius: 8px;
           display: flex;
           align-items: center;
           justify-content: center;
-          color: #f0a500;
+          color: #fff;
+          box-shadow: 0 8px 20px ${pageTheme.glow};
         }
         
         .orders-title {
@@ -393,6 +409,7 @@ export default function AdminOrders() {
           font-weight: 800;
           color: #111;
           margin: 0;
+          letter-spacing: -0.02em;
         }
         
         .orders-subtitle {
@@ -410,35 +427,38 @@ export default function AdminOrders() {
         @media (min-width: 1024px) {
           .orders-stats-grid {
             grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
           }
         }
         
         .orders-stat-card {
-          background: #fff;
-          border: 1.5px solid #e4e4de;
+          background: var(--stat-bg, #fff);
+          border: 1.5px solid var(--stat-border, #e4e4de);
           border-radius: 14px;
           padding: 16px;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
           transition: all 0.2s;
         }
         
         .orders-stat-card:hover {
-          border-color: #111;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+          border-color: var(--stat-color, #d4d4ce);
+          box-shadow: 0 8px 40px var(--stat-glow, rgba(0,0,0,0.06));
         }
         
         .orders-stat-label {
-          font-size: 12.5px;
+          font-size: 11px;
           font-weight: 700;
-          color: #333;
-          letter-spacing: 0.02em;
-          margin-bottom: 4px;
+          color: #999;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
         }
         
         .orders-stat-value {
-          font-size: 24px;
+          font-size: 20px;
           font-weight: 800;
           color: #111;
-          margin: 0;
         }
         
         .orders-input-group {
@@ -463,26 +483,27 @@ export default function AdminOrders() {
           width: 100%;
           background: #fafaf7;
           border: 1.5px solid #e0e0d8;
-          border-radius: 7px;
-          padding: 11px 14px 11px 40px;
+          border-radius: 12px;
+          padding: 12px 14px 12px 40px;
           font-size: 14px;
           color: #111;
           transition: all 0.2s;
           box-sizing: border-box;
+          font-weight: 600;
         }
         
         .orders-input:focus {
           outline: none;
-          border-color: #111;
-          box-shadow: 0 0 0 3px rgba(17,17,17,0.07);
+          border-color: ${pageTheme.main};
+          box-shadow: 0 0 0 4px ${pageTheme.glow};
           background: #fff;
         }
         
         .orders-filter-label {
-          font-size: 12.5px;
-          font-weight: 700;
-          color: #333;
-          letter-spacing: 0.02em;
+          font-size: 10px;
+          font-weight: 800;
+          color: #999;
+          letter-spacing: 0.1em;
           margin-bottom: 8px;
           text-transform: uppercase;
         }
@@ -495,25 +516,31 @@ export default function AdminOrders() {
         
         .orders-chip {
           padding: 8px 16px;
-          border-radius: 7px;
+          border-radius: 10px;
           font-size: 13px;
           font-weight: 700;
           cursor: pointer;
-          border: 1.5px solid #e0e0d8;
-          background: #fafaf7;
-          color: #111;
+          border: 1.5px solid #e4e4de;
+          background: #fff;
+          color: #666;
           transition: all 0.2s;
         }
         
+        .orders-chip:hover {
+          border-color: ${pageTheme.main}88;
+          background: ${pageTheme.soft};
+          color: ${pageTheme.main};
+        }
+        
         .orders-chip.active {
-          background: #111;
+          background: ${pageTheme.main};
           color: #fff;
-          border-color: #111;
+          border-color: ${pageTheme.main};
+          box-shadow: 0 4px 12px ${pageTheme.glow};
         }
         
         .orders-table-container {
           overflow-x: auto;
-          margin-top: 8px;
         }
         
         .orders-table {
@@ -523,75 +550,86 @@ export default function AdminOrders() {
         }
         
         .orders-table th {
-          padding: 16px;
+          padding: 14px 16px;
           background: #fafaf7;
           border-bottom: 1.5px solid #e4e4de;
-          font-size: 12.5px;
-          font-weight: 700;
-          color: #333;
-          letter-spacing: 0.02em;
+          font-size: 10px;
+          font-weight: 800;
+          color: #999;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
         }
         
         .orders-table td {
           padding: 16px;
-          border-bottom: 1.5px solid #f0f0f0;
-          font-size: 14px;
+          border-bottom: 1px solid #f0f0f0;
+          font-size: 13px;
           color: #111;
+        }
+        
+        .orders-table tr {
+          transition: all 0.2s;
+        }
+        
+        .orders-table tr:hover {
+          background: #fafaf7;
         }
         
         .orders-badge {
           padding: 4px 10px;
-          border-radius: 20px;
+          border-radius: 8px;
           font-size: 10px;
-          font-weight: 800;
+          font-weight: 900;
           text-transform: uppercase;
-          letter-spacing: 0.05em;
+          letter-spacing: 0.5px;
           display: inline-block;
         }
         
         .orders-btn-primary {
-          background: #111;
+          background: ${pageTheme.main};
           color: #fff;
           border: none;
-          border-radius: 7px;
+          border-radius: 8px;
           padding: 10px 16px;
-          font-size: 14px;
+          font-size: 13px;
           font-weight: 700;
           cursor: pointer;
           transition: all 0.2s;
           display: flex;
           align-items: center;
           gap: 8px;
+          box-shadow: 0 4px 12px ${pageTheme.glow};
         }
         
         .orders-btn-primary:hover {
-          background: #222;
+          opacity: 0.9;
+          transform: translateY(-1px);
         }
         
         .orders-btn-icon {
-          width: 32px;
-          height: 32px;
-          border-radius: 6px;
+          width: 34px;
+          height: 34px;
+          border-radius: 8px;
           display: flex;
           align-items: center;
           justify-content: center;
           border: 1.5px solid #e4e4de;
           background: #fff;
-          color: #111;
+          color: ${pageTheme.main};
           cursor: pointer;
           transition: all 0.2s;
         }
         
         .orders-btn-icon:hover {
-          background: #fafaf7;
-          border-color: #111;
+          border-color: ${pageTheme.main};
+          background: ${pageTheme.soft};
         }
         
         .orders-spinner {
           width: 18px;
           height: 18px;
-          border: 2.5px solid rgba(0,0,0,0.1);
-          border-top-color: #111;
+          border: 3px solid ${pageTheme.soft};
+          border-top-color: ${pageTheme.main};
           border-radius: 50%;
           animation: orders-spin 0.8s linear infinite;
         }
@@ -608,14 +646,19 @@ export default function AdminOrders() {
           <div className="orders-max-width">
             
             {/* Header */}
-            <div className="orders-card">
-              <div className="orders-header">
-                <div className="orders-icon-box">
-                  <ShoppingCart size={22} />
-                </div>
-                <div>
-                  <h1 className="orders-title">{isAgentScope ? 'Agent Orders' : 'Order Management'}</h1>
-                  <p className="orders-subtitle">{isAgentScope ? 'Track all orders placed by buyers through agent stores' : 'Manage all customer orders and track their status'}</p>
+            <div className="orders-card !p-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="orders-header">
+                  <div className="orders-icon-box" style={{ background: pageTheme.main, boxShadow: `0 8px 20px ${pageTheme.glow}` }}>
+                    <ShoppingCart size={22} strokeWidth={2.5} />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: pageTheme.main }} />
+                      <span className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: pageTheme.main }}>{isAgentScope ? 'Agent Operations' : 'Management Center'}</span>
+                    </div>
+                    <h1 className="orders-title !text-lg sm:!text-2xl">{isAgentScope ? 'Agent Orders' : 'Order Management'}</h1>
+                  </div>
                 </div>
               </div>
             </div>
@@ -623,19 +666,36 @@ export default function AdminOrders() {
             {/* Stats */}
             <div className="orders-stats-grid">
               {[
-                { label: 'Total Orders', value: statsData.total, icon: <ShoppingCart size={16} />, color: '#eff6ff' },
-                { label: 'Completed', value: statsData.completed, icon: <CheckCircle size={16} />, color: '#f0fdf4' },
-                { label: 'Pending', value: statsData.pending, icon: <Clock size={16} />, color: '#fffbeb' },
-                { label: 'Processing', value: statsData.processing, icon: <TrendingUp size={16} />, color: '#eff6ff' }
+                { label: 'Total Orders', value: statsData.total, icon: ShoppingCart, color: getColor(4) }, // Pink
+                { label: 'Completed', value: statsData.completed, icon: CheckCircle, color: getColor(1) }, // Teal
+                { label: 'Pending', value: statsData.pending, icon: Clock, color: getColor(3) }, // Amber
+                { label: 'Processing', value: statsData.processing, icon: TrendingUp, color: getColor(2) } // Blue
               ].map((stat, i) => (
-                <div key={i} className="orders-stat-card">
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: stat.color, display: 'flex', alignItems: 'center', justifyCenter: 'center', padding: '0 8px' }}>
-                      {stat.icon}
+                <div 
+                  key={i} 
+                  className="orders-stat-card"
+                  style={{
+                    '--stat-color': stat.color.main + '66',
+                    '--stat-glow': stat.color.glow,
+                    '--stat-bg': stat.color.soft,
+                    '--stat-border': stat.color.main + '33',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <p className="orders-stat-label" style={{ color: stat.color.main }}>{stat.label}</p>
+                      <p className="orders-stat-value">{stat.value}</p>
+                    </div>
+                    <div style={{
+                      width: 32, height: 32, borderRadius: 8,
+                      background: stat.color.soft,
+                      color: stat.color.main,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      boxShadow: `0 2px 8px ${stat.color.glow}`,
+                    }}>
+                      <stat.icon size={16} strokeWidth={2.5} />
                     </div>
                   </div>
-                  <p className="orders-stat-label">{stat.label}</p>
-                  <p className="orders-stat-value">{stat.value}</p>
                 </div>
               ))}
             </div>
@@ -643,19 +703,22 @@ export default function AdminOrders() {
             {/* Controls */}
             <div className="orders-card">
               <div className="orders-input-group">
-                <div className="orders-search-wrapper">
-                  <Search className="orders-search-icon" size={16} />
-                  <input
-                    type="text"
-                    className="orders-input"
-                    placeholder="Search by order #, user, phone, store..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
+                <div>
+                  <p className="orders-filter-label" style={{ color: pageTheme.main }}>Quick Search</p>
+                  <div className="orders-search-wrapper">
+                    <Search className="orders-search-icon" size={16} />
+                    <input
+                      type="text"
+                      className="orders-input"
+                      placeholder="Search by order #, user, phone, store..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
                 </div>
 
                 <div>
-                  <p className="orders-filter-label">Status Filter</p>
+                  <p className="orders-filter-label" style={{ color: pageTheme.main }}>Status Filter</p>
                   <div className="orders-filter-chips">
                     <div 
                       className={`orders-chip ${statusFilter === '' ? 'active' : ''}`}
@@ -672,7 +735,7 @@ export default function AdminOrders() {
                 </div>
 
                 <div>
-                  <p className="orders-filter-label">Network Filter</p>
+                  <p className="orders-filter-label" style={{ color: pageTheme.main }}>Network Filter</p>
                   <div className="orders-filter-chips">
                     <div 
                       className={`orders-chip ${networkFilter === '' ? 'active' : ''}`}
@@ -692,17 +755,26 @@ export default function AdminOrders() {
 
             {/* Table */}
             <div className="orders-card" style={{ padding: 0 }}>
-              <div style={{ padding: '16px 24px', borderBottom: '1.5px solid #e4e4de', background: '#fafaf7', borderTopLeftRadius: '14px', borderTopRightRadius: '14px' }}>
+              <div style={{ padding: '20px 24px', borderBottom: '1.5px solid #e4e4de', background: '#fafaf7', borderTopLeftRadius: '14px', borderTopRightRadius: '14px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <h2 style={{ margin: 0, fontSize: '14px', fontWeight: 800 }}>Order Records</h2>
-                    <p style={{ margin: '2px 0 0 0', fontSize: '11.5px', color: '#666', fontWeight: 600 }}>{filteredOrders.length} results</p>
+                  <div className="flex items-center gap-3">
+                    <div style={{
+                      width: 32, height: 32, borderRadius: 8,
+                      background: pageTheme.soft, color: pageTheme.main,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <Database size={16} strokeWidth={2.5} />
+                    </div>
+                    <div>
+                      <h2 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#111' }}>Order Records</h2>
+                      <p style={{ margin: 0, fontSize: '11px', color: '#999', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{filteredOrders.length} matching entries</p>
+                    </div>
                   </div>
                   {someSelected && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <span style={{ fontSize: '12px', fontWeight: 700, color: '#111' }}>{selectedIds.size} selected</span>
-                      <button className="orders-btn-primary" style={{ padding: '6px 12px', fontSize: '12px', background: '#991b1b' }} onClick={() => setShowBulkDeleteConfirm(true)}>
-                        <Trash2 size={13} /> Delete
+                      <span style={{ fontSize: '12px', fontWeight: 800, color: pageTheme.main }}>{selectedIds.size} selected</span>
+                      <button className="orders-btn-primary" style={{ padding: '6px 12px', fontSize: '12px', background: '#DC2626', boxShadow: '0 4px 12px rgba(220,38,38,0.2)' }} onClick={() => setShowBulkDeleteConfirm(true)}>
+                        <Trash2 size={13} strokeWidth={2.5} /> Delete
                       </button>
                     </div>
                   )}
@@ -711,13 +783,16 @@ export default function AdminOrders() {
 
               <div className="orders-table-container">
                 {loading ? (
-                  <div style={{ padding: '64px', display: 'flex', justifyContent: 'center' }}>
+                  <div style={{ padding: '64px', display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
                     <div className="orders-spinner" style={{ width: '32px', height: '32px' }}></div>
+                    <p style={{ fontSize: '13px', fontWeight: '700', color: '#999' }}>Fetching records...</p>
                   </div>
                 ) : filteredOrders.length === 0 ? (
                   <div style={{ padding: '64px', textAlign: 'center' }}>
-                    <Database size={48} style={{ color: '#e4e4de', marginBottom: '16px' }} />
-                    <p style={{ color: '#666', margin: 0 }}>No orders found matching your criteria</p>
+                    <div style={{ width: 64, height: 64, borderRadius: 20, background: '#fafaf7', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', border: '1.5px dashed #e4e4de' }}>
+                      <Database size={32} style={{ color: '#e4e4de' }} />
+                    </div>
+                    <p style={{ color: '#999', margin: 0, fontWeight: 700, fontSize: '14px' }}>No orders found matching your criteria</p>
                   </div>
                 ) : (
                   <table className="orders-table">
@@ -733,73 +808,113 @@ export default function AdminOrders() {
                         <th>Payment Status</th>
                         <th>Order Status</th>
                         <th>Date</th>
-                        <th>Actions</th>
+                        <th className="text-right">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredOrders.map(order => {
+                      {filteredOrders.map((order, idx) => {
                         const orderId = order.id || order._id;
+                        const c = getColor(idx);
+                        const isSelected = selectedIds.has(orderId);
+                        
                         return (
-                          <tr key={orderId} style={{ background: selectedIds.has(orderId) ? '#fafaf7' : 'transparent' }}>
+                          <tr key={orderId} style={{ background: isSelected ? pageTheme.soft : 'transparent' }}>
                             <td>
-                              <input type="checkbox" checked={selectedIds.has(orderId)} onChange={() => toggleSelectOne(orderId)} />
+                              <input type="checkbox" checked={isSelected} onChange={() => toggleSelectOne(orderId)} />
                             </td>
                             <td>
-                              <div style={{ fontWeight: 700 }}>#{order.orderNumber?.slice(-8) || order._id?.slice(-8)}</div>
-                              <div style={{ fontSize: '11px', color: '#666', fontWeight: 700 }}>{order.network}</div>
+                              <div className="flex items-center gap-3">
+                                <div style={{ 
+                                  width: 32, height: 32, borderRadius: 8, 
+                                  background: c.soft, color: c.main, 
+                                  display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                                  fontWeight: 800, fontSize: 10, 
+                                  border: `1.5px solid ${c.main}22`, 
+                                  boxShadow: `0 2px 8px ${c.glow}` 
+                                }}>
+                                  {order.network?.charAt(0).toUpperCase() || 'O'}
+                                </div>
+                                <div className="flex flex-col">
+                                  <span className="font-black text-[#111]">#{order.orderNumber?.slice(-8).toUpperCase() || order._id?.slice(-8).toUpperCase()}</span>
+                                  <span className="text-[10px] text-slate-400 font-bold uppercase">{order.network || 'Generic'}</span>
+                                </div>
+                              </div>
                             </td>
                             <td>
                               {order.storeId?.name ? (
-                                <>
-                                  <div style={{ fontSize: '13px', fontWeight: 700 }}>
-                                    {order.storeId.owner?.name || 'Agent'}
-                                    <span style={{ color: '#888', fontWeight: 500 }}> → {order.storeId.name}</span>
+                                <div className="flex flex-col">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="font-bold text-[#111]">{order.storeId.owner?.name || 'Agent'}</span>
+                                    <ChevronRight size={10} className="text-slate-300" />
+                                    <span className="text-[11px] font-black uppercase tracking-tight" style={{ color: pageTheme.main }}>{order.storeId.name}</span>
                                   </div>
-                                  <div style={{ fontSize: '11px', color: '#999' }}>
-                                    Customer: {order.guestInfo?.name || order.userId?.name || order.phoneNumber || 'N/A'}
-                                  </div>
-                                </>
+                                  <span className="text-[10px] text-slate-400 font-bold uppercase">Buyer: {order.guestInfo?.name || order.userId?.name || order.phoneNumber || 'N/A'}</span>
+                                </div>
                               ) : (
-                                <>
-                                  <div style={{ fontSize: '13px', fontWeight: 700 }}>{order.isGuest ? (order.guestInfo?.name || 'Guest') : (order.userId?.name || 'User')}</div>
-                                  <div style={{ fontSize: '11px', color: '#999' }}>{order.isGuest ? order.guestInfo?.email : order.userId?.email}</div>
-                                </>
+                                <div className="flex flex-col">
+                                  <span className="font-bold text-[#111]">{order.isGuest ? (order.guestInfo?.name || 'Guest User') : (order.userId?.name || 'Direct User')}</span>
+                                  <span className="text-[10px] text-slate-400 font-bold uppercase">{order.isGuest ? order.guestInfo?.email : order.userId?.email || 'No Email'}</span>
+                                </div>
                               )}
                             </td>
                             <td>
-                              <div style={{ fontSize: '13px', fontWeight: 700 }}>{getPlanDisplayValue(order)}</div>
-                              <div style={{ fontSize: '11px', color: '#666' }}>{order.phoneNumber}</div>
+                              <div className="flex flex-col">
+                                <span className="font-bold text-[#111]">{getPlanDisplayValue(order)}</span>
+                                <span className="text-[10px] text-slate-400 font-bold">{order.phoneNumber}</span>
+                              </div>
                             </td>
-                            <td style={{ fontWeight: 800 }}>GHS {formatNumberAbbreviated(order.amount)}</td>
                             <td>
-                              <span className="orders-badge" style={getPaymentStatusStyle(order.paymentStatus)}>
+                              <span className="font-black" style={{ color: c.main }}>GHS {formatNumberAbbreviated(order.amount)}</span>
+                            </td>
+                            <td>
+                              <span className={`orders-badge ${order.paymentStatus === 'completed' ? 'badge-success' : order.paymentStatus === 'pending' ? 'badge-pending' : 'badge-failed'}`}
+                                    style={{
+                                      background: order.paymentStatus === 'completed' ? '#ecfdf5' : order.paymentStatus === 'pending' ? '#fffbeb' : '#fef2f2',
+                                      color: order.paymentStatus === 'completed' ? '#059669' : order.paymentStatus === 'pending' ? '#d97706' : '#dc2626',
+                                      border: `1px solid ${order.paymentStatus === 'completed' ? '#d1fae5' : order.paymentStatus === 'pending' ? '#fef3c7' : '#fee2e2'}`
+                                    }}>
                                 {order.paymentStatus || 'pending'}
                               </span>
                             </td>
                             <td>
                               <div className="flex flex-col gap-1">
-                                <span className="orders-badge" style={getOrderStatusStyle(order.status)}>
+                                <span className={`orders-badge ${order.status === 'completed' ? 'badge-success' : (order.status === 'pending' || order.status === 'processing') ? 'badge-pending' : 'badge-failed'}`}
+                                      style={{
+                                        background: order.status === 'completed' ? '#ecfdf5' : (order.status === 'pending' || order.status === 'processing') ? '#fffbeb' : '#fef2f2',
+                                        color: order.status === 'completed' ? '#059669' : (order.status === 'pending' || order.status === 'processing') ? '#d97706' : '#dc2626',
+                                        border: `1px solid ${order.status === 'completed' ? '#d1fae5' : (order.status === 'pending' || order.status === 'processing') ? '#fef3c7' : '#fee2e2'}`
+                                      }}>
                                   {order.providerStatus || order.status}
                                 </span>
                                 {order.isRefunded && (
-                                  <span className="orders-badge" style={{ backgroundColor: '#fff7ed', color: '#c2410c', fontSize: '9px' }}>
+                                  <span className="orders-badge" style={{ backgroundColor: '#fff7ed', color: '#c2410c', fontSize: '8px', border: '1px solid #ffedd5' }}>
                                     REFUNDED
                                   </span>
                                 )}
                               </div>
                             </td>
                             <td>
-                              <div style={{ fontSize: '12px', fontWeight: 700 }}>{new Date(order.date || order.createdAt).toLocaleDateString()}</div>
-                              <div style={{ fontSize: '10px', color: '#999' }}>{new Date(order.date || order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                              <div className="flex flex-col">
+                                <span className="font-bold text-[#111] text-[11px]">{new Date(order.date || order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                <span className="text-[10px] text-slate-400 font-bold">{new Date(order.date || order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                              </div>
                             </td>
-                            <td>
-                              <div style={{ display: 'flex', gap: '4px' }}>
-                                <button className="orders-btn-icon" onClick={() => handleViewDetails(order)}><Eye size={14} /></button>
+                            <td className="text-right">
+                              <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
+                                <button className="orders-btn-icon" onClick={() => handleViewDetails(order)} title="View Details">
+                                  <Eye size={15} strokeWidth={2.5} />
+                                </button>
                                 {canVerifyPendingPayment(order) && (
-                                  <button className="orders-btn-icon" style={{ borderColor: '#f0a500', color: '#f0a500' }} onClick={() => handleVerifyPendingPayment(order)} title="Verify Payment"><CheckCircle size={14} /></button>
+                                  <button className="orders-btn-icon" style={{ borderColor: '#d97706', color: '#d97706', background: '#fffbeb' }} onClick={() => handleVerifyPendingPayment(order)} title="Verify Payment">
+                                    <CheckCircle size={15} strokeWidth={2.5} />
+                                  </button>
                                 )}
-                                <button className="orders-btn-icon" onClick={() => handleEditStatus(order)}><Edit2 size={14} /></button>
-                                <button className="orders-btn-icon" onClick={() => handleOpenDelete(order)} style={{ color: '#b91c1c' }}><Trash2 size={14} /></button>
+                                <button className="orders-btn-icon" onClick={() => handleEditStatus(order)} title="Edit Status">
+                                  <Edit2 size={15} strokeWidth={2.5} />
+                                </button>
+                                <button className="orders-btn-icon" onClick={() => handleOpenDelete(order)} style={{ color: '#dc2626', borderColor: '#fec2c2', background: '#fff5f5' }} title="Delete Order">
+                                  <Trash2 size={15} strokeWidth={2.5} />
+                                </button>
                               </div>
                             </td>
                           </tr>
@@ -807,7 +922,7 @@ export default function AdminOrders() {
                       })}
                     </tbody>
                   </table>
-                )}
+                ) }
               </div>
 
               {/* Pagination */}
@@ -833,6 +948,7 @@ export default function AdminOrders() {
         }}
         order={selectedOrder}
         onRefund={handleRefund}
+        themeColor={pageTheme}
       />
 
       <OrderStatusModal
@@ -848,6 +964,7 @@ export default function AdminOrders() {
         setAdminNotes={setAdminNotes}
         onUpdate={handleUpdateStatus}
         loading={updateLoading}
+        themeColor={pageTheme}
       />
 
       <ConfirmDialog
@@ -857,6 +974,7 @@ export default function AdminOrders() {
         onConfirm={confirmRefund}
         onCancel={() => setShowRefundConfirm(false)}
         loading={updateLoading}
+        themeColor={pageTheme}
       />
 
       <ConfirmDialog
@@ -866,6 +984,7 @@ export default function AdminOrders() {
         onConfirm={confirmDelete}
         onCancel={() => setShowDeleteConfirm(false)}
         loading={updateLoading}
+        themeColor={pageTheme}
       />
 
       <ConfirmDialog
@@ -875,13 +994,15 @@ export default function AdminOrders() {
         onConfirm={confirmBulkDelete}
         onCancel={() => setShowBulkDeleteConfirm(false)}
         loading={updateLoading}
+        themeColor={pageTheme}
       />
 
-      <VerifyingPaymentModal isOpen={showVerifyingModal} />
+      <VerifyingPaymentModal isOpen={showVerifyingModal} themeColor={pageTheme} />
       <VerifiedPaymentModal
         isOpen={showVerifiedModal}
         message={verifiedMessage}
         onClose={() => setShowVerifiedModal(false)}
+        themeColor={pageTheme}
       />
     </div>
   );

@@ -1,48 +1,57 @@
 import { CheckCircle2, Loader2, Sparkles } from 'lucide-react';
 import Modal from './Modal';
 
-export function VerifyingPaymentModal({ isOpen }) {
+export function VerifyingPaymentModal({ isOpen, themeColor }) {
+  const defaultTheme = { main: '#7C3AED', bg: '#EDE9FE', soft: '#F5F3FF', glow: 'rgba(124,58,237,0.15)' };
+  const c = themeColor || defaultTheme;
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={() => {}}
-      title="Verifying Payment"
+      title="Verifying"
       icon={Sparkles}
       maxWidth="max-w-sm"
+      themeColor={c}
       footer={null}
     >
       <div className="text-center space-y-4 py-2">
-        <div className="mx-auto w-16 h-16 rounded-3xl bg-amber-50 border border-amber-100 flex items-center justify-center">
-          <Loader2 size={28} className="text-amber-600 animate-spin" />
+        <div className="mx-auto w-16 h-16 rounded-3xl flex items-center justify-center border border-slate-100" style={{ background: c.soft }}>
+          <Loader2 size={28} className="animate-spin" style={{ color: c.main }} />
         </div>
         <div>
-          <p className="text-sm font-bold text-slate-900">Checking payment with Paystack...</p>
-          <p className="text-xs text-slate-500 mt-1">Please wait a moment while we verify this transaction.</p>
+          <p className="text-sm font-black text-[#111] uppercase tracking-tight">Checking payment...</p>
+          <p className="text-xs font-bold text-slate-400 mt-1">Please wait while we verify this transaction.</p>
         </div>
         <div className="flex justify-center gap-1">
-          <span className="w-2 h-2 rounded-full bg-amber-400 animate-bounce [animation-delay:-0.2s]" />
-          <span className="w-2 h-2 rounded-full bg-amber-500 animate-bounce [animation-delay:-0.1s]" />
-          <span className="w-2 h-2 rounded-full bg-amber-600 animate-bounce" />
+          <span className="w-2 h-2 rounded-full animate-bounce [animation-delay:-0.2s]" style={{ background: c.main + '88' }} />
+          <span className="w-2 h-2 rounded-full animate-bounce [animation-delay:-0.1s]" style={{ background: c.main + 'BB' }} />
+          <span className="w-2 h-2 rounded-full animate-bounce" style={{ background: c.main }} />
         </div>
       </div>
     </Modal>
   );
 }
 
-export function VerifiedPaymentModal({ isOpen, onClose, message = 'Payment verified successfully.' }) {
+export function VerifiedPaymentModal({ isOpen, onClose, message = 'Payment verified successfully.', themeColor }) {
+  const defaultTheme = { main: '#7C3AED', bg: '#EDE9FE', soft: '#F5F3FF', glow: 'rgba(124,58,237,0.15)' };
+  const c = themeColor || defaultTheme;
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Payment Verified"
+      title="Verified"
       icon={CheckCircle2}
       maxWidth="max-w-sm"
+      themeColor={c}
       footer={
         <button
           onClick={onClose}
-          className="w-full px-4 py-2.5 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition text-sm"
+          className="w-full px-4 py-2.5 text-white rounded-xl font-black uppercase tracking-widest text-xs transition-all active:scale-95"
+          style={{ background: c.main, boxShadow: `0 4px 12px ${c.glow}` }}
         >
-          Nice!
+          Close Feedback
         </button>
       }
     >
@@ -51,8 +60,8 @@ export function VerifiedPaymentModal({ isOpen, onClose, message = 'Payment verif
           <CheckCircle2 size={30} className="text-emerald-600" />
         </div>
         <div>
-          <p className="text-sm font-bold text-slate-900">Verification completed</p>
-          <p className="text-xs text-slate-500 mt-1">{message}</p>
+          <p className="text-base font-black text-[#111] uppercase tracking-tight">Success!</p>
+          <p className="text-xs font-bold text-slate-400 mt-1">{message}</p>
         </div>
       </div>
     </Modal>
