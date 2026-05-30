@@ -738,7 +738,7 @@ export default function TopUp() {
         isOpen={showPaymentModal}
         onClose={() => setShowPaymentModal(false)}
         onSuccess={handlePaymentSuccess}
-        accessCode={paymentData?.access_code}
+        accessCode={paymentData?.accessCode}
         reference={paymentData?.reference}
         amount={Number.parseFloat(amount)}
         themeColor={getColor(6)}

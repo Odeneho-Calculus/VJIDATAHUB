@@ -722,7 +722,9 @@ export default function AgentWallet() {
         <PaymentModal
           isOpen={showPaymentModal}
           onClose={() => setShowPaymentModal(false)}
-          paymentData={paymentData}
+          accessCode={paymentData?.accessCode}
+          reference={paymentData?.reference}
+          amount={Number.parseFloat(amount)}
           onSuccess={handlePaymentSuccess}
         />
       </div>
