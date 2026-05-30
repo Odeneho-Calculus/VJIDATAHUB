@@ -27,6 +27,21 @@ import { useSidebar } from '../hooks/useSidebar';
 // import { useSettings } from '../context/SettingsContext';
 import { admin as adminAPI } from '../services/api';
 
+/* ── Homepage multi-colour palette ── */
+const palette = [
+  { main: '#7C3AED', bg: '#EDE9FE', soft: '#F5F3FF', glow: 'rgba(124,58,237,0.15)' },   // purple
+  { main: '#0F6E56', bg: '#D1FAE5', soft: '#ECFDF5', glow: 'rgba(15,110,86,0.15)' },    // teal
+  { main: '#1D4ED8', bg: '#DBEAFE', soft: '#EFF6FF', glow: 'rgba(29,78,216,0.15)' },    // blue
+  { main: '#B45309', bg: '#FEF3C7', soft: '#FFFBEB', glow: 'rgba(180,83,9,0.15)' },     // amber
+  { main: '#BE185D', bg: '#FCE7F3', soft: '#FDF2F8', glow: 'rgba(190,24,93,0.15)' },    // pink
+  { main: '#DC2626', bg: '#FEE2E2', soft: '#FFF5F5', glow: 'rgba(220,38,38,0.15)' },    // coral/red
+  { main: '#0369A1', bg: '#E0F2FE', soft: '#F0F9FF', glow: 'rgba(3,105,161,0.15)' },    // sky
+  { main: '#4D7C0F', bg: '#ECFCCB', soft: '#F7FEE7', glow: 'rgba(77,124,15,0.15)' },    // lime/green
+];
+
+const getColor = (index) => palette[index % palette.length];
+const pageTheme = getColor(0); // purple
+
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
   .dash-wrapper { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
@@ -34,11 +49,11 @@ const styles = `
   .dash-content { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
   
   .dash-header { 
-    background: linear-gradient(135deg, #F5F3FF 0%, #EDE9FE 100%); 
-    border: 1.5px solid #DDD6FE; 
+    background: linear-gradient(135deg, ${pageTheme.soft} 0%, ${pageTheme.bg} 100%); 
+    border: 1.5px solid ${pageTheme.main}33; 
     border-radius: 14px; 
     padding: 24px; 
-    box-shadow: 0 8px 40px rgba(124,58,237,0.08); 
+    box-shadow: 0 8px 40px ${pageTheme.glow}; 
     margin-bottom: 24px; 
   }
   
@@ -143,21 +158,6 @@ const styles = `
     gap: 4px;
   }
 `;
-
-/* ── Homepage multi-colour palette ── */
-const palette = [
-  { main: '#7C3AED', bg: '#EDE9FE', soft: '#F5F3FF', glow: 'rgba(124,58,237,0.15)' },   // purple
-  { main: '#0F6E56', bg: '#D1FAE5', soft: '#ECFDF5', glow: 'rgba(15,110,86,0.15)' },    // teal
-  { main: '#1D4ED8', bg: '#DBEAFE', soft: '#EFF6FF', glow: 'rgba(29,78,216,0.15)' },    // blue
-  { main: '#B45309', bg: '#FEF3C7', soft: '#FFFBEB', glow: 'rgba(180,83,9,0.15)' },     // amber
-  { main: '#BE185D', bg: '#FCE7F3', soft: '#FDF2F8', glow: 'rgba(190,24,93,0.15)' },    // pink
-  { main: '#DC2626', bg: '#FEE2E2', soft: '#FFF5F5', glow: 'rgba(220,38,38,0.15)' },    // coral/red
-  { main: '#0369A1', bg: '#E0F2FE', soft: '#F0F9FF', glow: 'rgba(3,105,161,0.15)' },    // sky
-  { main: '#4D7C0F', bg: '#ECFCCB', soft: '#F7FEE7', glow: 'rgba(77,124,15,0.15)' },    // lime/green
-];
-
-const getColor = (index) => palette[index % palette.length];
-
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -320,10 +320,10 @@ export default function AdminDashboard() {
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                   <div className="flex items-center gap-4">
                     <div style={{
-                      width: 46, height: 46, background: '#7C3AED', borderRadius: 8,
+                      width: 46, height: 46, background: pageTheme.main, borderRadius: 8,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       color: '#fff', flexShrink: 0,
-                      boxShadow: '0 4px 16px rgba(124,58,237,0.25)',
+                      boxShadow: `0 4px 16px ${pageTheme.glow}`,
                     }}>
                       <ShieldCheck size={24} />
                     </div>
@@ -336,7 +336,7 @@ export default function AdminDashboard() {
                       </p>
                     </div>
                   </div>
-                  <div className="inline-flex items-center gap-2 rounded-xl border border-[#DDD6FE] bg-white/50 px-3 py-2 text-xs sm:text-sm text-indigo-700 font-bold backdrop-blur-sm">
+                  <div className="inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-xs sm:text-sm font-bold backdrop-blur-sm" style={{ borderColor: pageTheme.main + '33', background: 'rgba(255,255,255,0.5)', color: pageTheme.main }}>
                     <Clock size={16} />
                     {todayLabel}
                   </div>

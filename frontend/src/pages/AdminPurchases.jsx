@@ -8,6 +8,21 @@ import { PurchaseDetailsModal } from '../components/AdminPurchaseModals';
 import { useSidebar } from '../hooks/useSidebar';
 import { admin as adminAPI } from '../services/api';
 
+/* ── Homepage multi-colour palette ── */
+const palette = [
+  { main: '#7C3AED', bg: '#EDE9FE', soft: '#F5F3FF', glow: 'rgba(124,58,237,0.15)' },   // purple
+  { main: '#0F6E56', bg: '#D1FAE5', soft: '#ECFDF5', glow: 'rgba(15,110,86,0.15)' },    // teal
+  { main: '#1D4ED8', bg: '#DBEAFE', soft: '#EFF6FF', glow: 'rgba(29,78,216,0.15)' },    // blue
+  { main: '#B45309', bg: '#FEF3C7', soft: '#FFFBEB', glow: 'rgba(180,83,9,0.15)' },     // amber
+  { main: '#BE185D', bg: '#FCE7F3', soft: '#FDF2F8', glow: 'rgba(190,24,93,0.15)' },    // pink
+  { main: '#DC2626', bg: '#FEE2E2', soft: '#FFF5F5', glow: 'rgba(220,38,38,0.15)' },    // coral/red
+  { main: '#0369A1', bg: '#E0F2FE', soft: '#F0F9FF', glow: 'rgba(3,105,161,0.15)' },    // sky
+  { main: '#4D7C0F', bg: '#ECFCCB', soft: '#F7FEE7', glow: 'rgba(77,124,15,0.15)' },    // lime/green
+];
+
+const getColor = (index) => palette[index % palette.length];
+const pageTheme = getColor(4); // pink
+
 export default function AdminPurchases() {
   const { sidebarOpen, closeSidebar } = useSidebar();
   const [purchases, setPurchases] = useState([]);
@@ -183,12 +198,13 @@ export default function AdminPurchases() {
         .purchases-icon-box {
           width: 46px;
           height: 46px;
-          background: #111;
+          background: ${pageTheme.main};
           border-radius: 8px;
           display: flex;
           align-items: center;
           justify-content: center;
-          color: #f0a500;
+          color: #fff;
+          box-shadow: 0 4px 16px ${pageTheme.glow};
         }
         
         .purchases-title {
@@ -408,7 +424,7 @@ export default function AdminPurchases() {
         <div className="purchases-scrollable">
           <div className="purchases-max-width">
 
-            <div className="purchases-card">
+            <div className="purchases-card" style={{ background: `linear-gradient(135deg, ${pageTheme.soft} 0%, ${pageTheme.bg} 100%)`, borderColor: `${pageTheme.main}33`, boxShadow: `0 8px 40px ${pageTheme.glow}` }}>
               <div className="purchases-header">
                 <div className="purchases-icon-box">
                   <ShoppingCart size={22} />

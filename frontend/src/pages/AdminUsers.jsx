@@ -22,6 +22,7 @@ const palette = [
 ];
 
 const getColor = (index) => palette[index % palette.length];
+const pageTheme = getColor(1); // teal
 
 export default function AdminUsers() {
   const { sidebarOpen, closeSidebar } = useSidebar();
@@ -266,11 +267,11 @@ export default function AdminUsers() {
         }
 
         .usr-header { 
-          background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%); 
-          border: 1.5px solid #A7F3D0; 
+          background: linear-gradient(135deg, ${pageTheme.soft} 0%, ${pageTheme.bg} 100%); 
+          border: 1.5px solid ${pageTheme.main}33; 
           border-radius: 14px; 
           padding: 24px; 
-          box-shadow: 0 8px 40px rgba(15,110,86,0.08); 
+          box-shadow: 0 8px 40px ${pageTheme.glow}; 
           width: 100%;
           max-width: 1000px;
           display: flex;
@@ -281,14 +282,14 @@ export default function AdminUsers() {
         .usr-icon-box {
           width: 46px;
           height: 46px;
-          background: #0F6E56;
+          background: ${pageTheme.main};
           border-radius: 8px;
           display: flex;
           align-items: center;
           justify-content: center;
           color: #fff;
           flex-shrink: 0;
-          box-shadow: 0 4px 16px rgba(15,110,86,0.25);
+          box-shadow: 0 4px 16px ${pageTheme.glow};
         }
 
         .usr-h2 {

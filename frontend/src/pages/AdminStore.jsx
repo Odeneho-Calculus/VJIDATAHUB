@@ -28,6 +28,7 @@ const palette = [
 ];
 
 const getColor = (index) => palette[index % palette.length];
+const pageTheme = getColor(1); // teal
 
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
@@ -48,11 +49,11 @@ const styles = `
   }
 
   .dash-header {
-    background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
-    border: 1.5px solid #A7F3D0;
+    background: linear-gradient(135deg, ${pageTheme.soft} 0%, ${pageTheme.bg} 100%);
+    border: 1.5px solid ${pageTheme.main}33;
     border-radius: 14px;
     padding: 16px;
-    box-shadow: 0 8px 40px rgba(15,110,86,0.08);
+    box-shadow: 0 8px 40px ${pageTheme.glow};
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -74,14 +75,14 @@ const styles = `
   .dash-icon-box {
     width: 40px;
     height: 40px;
-    background: #0F6E56;
+    background: ${pageTheme.main};
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #fff;
     flex-shrink: 0;
-    box-shadow: 0 4px 16px rgba(15,110,86,0.25);
+    box-shadow: 0 4px 16px ${pageTheme.glow};
   }
 
   .dash-h2 {
@@ -1601,13 +1602,13 @@ function OrdersTab() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="dash-header">
+      <div className="dash-header" style={{ background: '#fff', borderColor: '#e4e4de', boxShadow: '0 8px 40px rgba(0,0,0,0.06)' }}>
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-lg font-bold text-black">Sales History</h3>
             <p className="text-sm text-black mt-1">Track all orders coming through your storefront.</p>
           </div>
-          <div className="dash-icon-box !w-10 !h-10">
+          <div className="dash-icon-box !w-10 !h-10" style={{ background: '#0F6E56', boxShadow: '0 4px 16px rgba(15,110,86,0.25)' }}>
             <ShoppingBag size={20} />
           </div>
         </div>

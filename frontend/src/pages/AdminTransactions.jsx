@@ -23,6 +23,7 @@ const palette = [
 ];
 
 const getColor = (index) => palette[index % palette.length];
+const pageTheme = getColor(5); // coral/red
 
 export default function AdminTransactions() {
   const { sidebarOpen, closeSidebar } = useSidebar();
@@ -483,8 +484,8 @@ export default function AdminTransactions() {
               </div>
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-red-600/80">Management Console</span>
+                  <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: pageTheme.main }} />
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: pageTheme.main, opacity: 0.8 }}>Management Console</span>
                 </div>
                 <h2 className="tx-h2">{isAgentScope ? 'Agent Histories' : 'Manage Transactions'}</h2>
               </div>

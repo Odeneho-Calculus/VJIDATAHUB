@@ -9,12 +9,27 @@ import { useSidebar } from '../hooks/useSidebar';
 import { dataplans } from '../services/api';
 import { useSettings } from '../context/SettingsContext';
 
+/* ── Homepage multi-colour palette ── */
+const palette = [
+  { main: '#7C3AED', bg: '#EDE9FE', soft: '#F5F3FF', glow: 'rgba(124,58,237,0.15)' },   // purple
+  { main: '#0F6E56', bg: '#D1FAE5', soft: '#ECFDF5', glow: 'rgba(15,110,86,0.15)' },    // teal
+  { main: '#1D4ED8', bg: '#DBEAFE', soft: '#EFF6FF', glow: 'rgba(29,78,216,0.15)' },    // blue
+  { main: '#B45309', bg: '#FEF3C7', soft: '#FFFBEB', glow: 'rgba(180,83,9,0.15)' },     // amber
+  { main: '#BE185D', bg: '#FCE7F3', soft: '#FDF2F8', glow: 'rgba(190,24,93,0.15)' },    // pink
+  { main: '#DC2626', bg: '#FEE2E2', soft: '#FFF5F5', glow: 'rgba(220,38,38,0.15)' },    // coral/red
+  { main: '#0369A1', bg: '#E0F2FE', soft: '#F0F9FF', glow: 'rgba(3,105,161,0.15)' },    // sky
+  { main: '#4D7C0F', bg: '#ECFCCB', soft: '#F7FEE7', glow: 'rgba(77,124,15,0.15)' },    // lime/green
+];
+
+const getColor = (index) => palette[index % palette.length];
+const pageTheme = getColor(3); // amber
+
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
   .plan-wrapper { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
   .plan-container { background-color: #ffffff; }
   .plan-content { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
-  .plan-header { background-color: #fff; border: 1.5px solid #e4e4de; border-radius: 14px; padding: 20px; box-shadow: 0 8px 40px rgba(0,0,0,0.10); margin-bottom: 24px; }
+  .plan-header { background: linear-gradient(135deg, ${pageTheme.soft} 0%, ${pageTheme.bg} 100%); border: 1.5px solid ${pageTheme.main}33; border-radius: 14px; padding: 20px; box-shadow: 0 8px 40px ${pageTheme.glow}; margin-bottom: 24px; }
   .plan-title { font-size: 26px; font-weight: 800; color: #111; margin: 0; }
   .plan-subtitle { font-size: 14px; color: #000; margin: 8px 0 0 0; }
   .plan-error { background-color: #fff5f5; border: 1.5px solid #fecaca; border-radius: 7px; color: #b91c1c; padding: 14px 16px; font-size: 14px; display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }

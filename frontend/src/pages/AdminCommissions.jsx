@@ -20,6 +20,7 @@ const palette = [
 ];
 
 const getColor = (index) => palette[index % palette.length];
+const pageTheme = getColor(2); // blue
 
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
@@ -41,11 +42,11 @@ const styles = `
   }
 
   .comm-header {
-    background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
-    border: 1.5px solid #BFDBFE;
+    background: linear-gradient(135deg, ${pageTheme.soft} 0%, ${pageTheme.bg} 100%);
+    border: 1.5px solid ${pageTheme.main}33;
     border-radius: 14px;
     padding: 24px;
-    box-shadow: 0 8px 40px rgba(29,78,216,0.08);
+    box-shadow: 0 8px 40px ${pageTheme.glow};
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -62,14 +63,14 @@ const styles = `
   .comm-icon-box {
     width: 46px;
     height: 46px;
-    background: #1D4ED8;
+    background: ${pageTheme.main};
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #fff;
     flex-shrink: 0;
-    box-shadow: 0 4px 16px rgba(29,78,216,0.25);
+    box-shadow: 0 4px 16px ${pageTheme.glow};
   }
 
   .comm-heading-row {
@@ -94,8 +95,8 @@ const styles = `
   }
 
   .comm-btn-outline:hover {
-    border-color: #1D4ED8;
-    background: #EFF6FF;
+    border-color: ${pageTheme.main};
+    background: ${pageTheme.soft};
   }
 
   .comm-stat-grid {
@@ -506,7 +507,7 @@ export default function AdminCommissions() {
                 </div>
                 <div>
                   <h2 className="comm-h2">Agent Withdrawals</h2>
-                  <p className="text-sm text-blue-600 font-medium">Review and process agent commission payout requests</p>
+                  <p className="text-sm font-medium" style={{ color: pageTheme.main }}>Review and process agent commission payout requests</p>
                 </div>
               </div>
 
