@@ -614,7 +614,9 @@ export default function PublicStore() {
                                     {isAvailable ? 'Available' : 'Low/Out of stock'}
                                   </span>
                                 </div>
-                                <p className="text-xs text-black mt-1">{checker.checkerType} checker</p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <p className="text-xs text-black">{checker.checkerType} checker</p>
+                                </div>
                                 <p className="text-lg font-black text-black mt-2">{formatCurrencyAbbreviated(checker.sellingPrice)}</p>
                                 <Link
                                   to={`/store/${slug}/catalog`}

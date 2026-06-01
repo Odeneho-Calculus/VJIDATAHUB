@@ -200,6 +200,7 @@ export const checkers = {
     api.get(`/checkers/offers?status=${status}&search=${search}&page=${page}&limit=${limit}`),
   updatePrices: (id, data) => api.patch(`/checkers/${id}/prices`, data),
   toggleStatus: (id) => api.patch(`/checkers/${id}/toggle-status`),
+  toggleSms: (id) => api.patch(`/checkers/${id}/toggle-sms`),
   updateLockStatus: (enabled) => api.patch('/checkers/lock', { enabled }),
 
   getStoreCheckers: () => api.get('/checkers/store/my-store/checkers'),

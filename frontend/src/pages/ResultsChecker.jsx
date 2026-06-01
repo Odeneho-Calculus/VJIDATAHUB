@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { CheckCircle, AlertCircle, RefreshCw, CreditCard, History, Layout as LayoutIcon, Smartphone, Loader2, ChevronRight, ShoppingBag, Wallet, Clock, CheckCircle2 } from 'lucide-react';
+import { CheckCircle, AlertCircle, RefreshCw, CreditCard, History, Layout as LayoutIcon, Smartphone, Loader2, ChevronRight, ShoppingBag, Wallet, Clock, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { checkers as checkersAPI, publicAPI } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
 import UserLayout from '../components/UserLayout';
@@ -280,17 +280,21 @@ export default function ResultsChecker() {
   const [buyingId, setBuyingId] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('wallet');
-  const [skipSms, setSkipSms] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [paymentData, setPaymentData] = useState(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [transactionCharges, setTransactionCharges] = useState(parseTransactionCharges());
+  const [visiblePins, setVisiblePins] = useState({});
 
   const Layout = user?.role === 'agent' ? AgentLayout : UserLayout;
 
   const showMessage = (type, text) => {
     setMessage({ type, text });
     setTimeout(() => setMessage({ type: '', text: '' }), 3500);
+  };
+
+  const togglePinVisibility = (id) => {
+    setVisiblePins(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
   const fetchData = useCallback(async () => {
@@ -331,7 +335,6 @@ export default function ResultsChecker() {
         checkerType: product.checkerType,
         phoneNumber: phoneNumber.trim(),
         paymentMethod,
-        skipSms,
       });
 
       if (paymentMethod === 'paystack') {
@@ -437,16 +440,6 @@ export default function ResultsChecker() {
                     style={{ focusBorderColor: pageTheme.main }}
                   />
                 </div>
-                <label className="flex items-center gap-2 text-[10px] font-black text-black cursor-pointer uppercase tracking-wide">
-                  <input
-                    type="checkbox"
-                    checked={skipSms}
-                    onChange={(e) => setSkipSms(e.target.checked)}
-                    className="w-4 h-4 rounded border-[#e4e4de]"
-                    style={{ accentColor: pageTheme.main }}
-                  />
-                  Skip SMS Alert
-                </label>
               </div>
             </div>
           </div>
@@ -520,7 +513,9 @@ export default function ResultsChecker() {
                         </div>
                         <div className="min-w-0">
                           <h4 className="font-black text-[#111] truncate uppercase text-sm tracking-tight">{product.displayName || product.checkerType}</h4>
-                          <p className="text-[10px] font-bold uppercase tracking-[0.2em] mt-0.5" style={{ color: c.main }}>{product.checkerType}</p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: c.main }}>{product.checkerType}</p>
+                          </div>
                         </div>
                       </div>
 
@@ -577,6 +572,7 @@ export default function ResultsChecker() {
                     <th className="dash-th">Transaction ID</th>
                     <th className="dash-th">Checker Type</th>
                     <th className="dash-th">Beneficiary</th>
+                    <th className="dash-th">Pin / Serial</th>
                     <th className="dash-th">Amount</th>
                     <th className="dash-th">Status</th>
                   </tr>
@@ -594,6 +590,25 @@ export default function ResultsChecker() {
                           <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase" style={{ background: c.soft, color: c.main }}>{row.checkerType}</span>
                         </td>
                         <td className="dash-td font-bold text-black">{row.phoneNumber}</td>
+                        <td className="dash-td">
+                          {row.status === 'completed' ? (
+                            <div className="flex flex-col gap-1">
+                              <div className="flex items-center gap-2">
+                                <span className="font-black text-xs tracking-tight">
+                                  {visiblePins[row._id] ? row.pin : '•••• •••• ••••'}
+                                </span>
+                                <button onClick={() => togglePinVisibility(row._id)} className="p-1 hover:bg-slate-100 rounded transition-colors">
+                                  {visiblePins[row._id] ? <EyeOff size={14} /> : <Eye size={14} />}
+                                </button>
+                              </div>
+                              {row.serialNumber && (
+                                <span className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">SN: {row.serialNumber}</span>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">—</span>
+                          )}
+                        </td>
                         <td className="dash-td font-black" style={{ color: c.main }}>{formatCurrencyAbbreviated(row.price)}</td>
                         <td className="dash-td">
                           <span className={`dash-badge ${

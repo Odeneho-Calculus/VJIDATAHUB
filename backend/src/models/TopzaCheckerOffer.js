@@ -79,6 +79,10 @@ const topzaCheckerOfferSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    smsEnabled: {
+      type: Boolean,
+      default: true,
+    },
     rawProviderData: {
       type: mongoose.Schema.Types.Mixed,
       default: null,

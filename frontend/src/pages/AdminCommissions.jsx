@@ -859,6 +859,7 @@ export default function AdminCommissions() {
   );
 }
 
+// eslint-disable-next-line no-unused-vars
 function StatCard({ title, value, icon: Icon, index }) {
   const c = getColor(index);
   return (

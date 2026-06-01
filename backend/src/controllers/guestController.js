@@ -750,6 +750,7 @@ exports.trackGuestOrders = async (req, res) => {
       completedAt: order.completedAt,
       errorMessage: order.errorMessage,
       providerMessage: order.providerMessage,
+      checkerDetails: order.checkerDetails,
     }));
 
     res.json({

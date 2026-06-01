@@ -321,7 +321,9 @@ export default function PublicCatalog() {
                                                 {isAvailable ? 'Available' : 'Out of stock'}
                                             </span>
                                         </div>
-                                        <p className="text-xs text-black">{checker.checkerType}</p>
+                                        <div className="flex items-center gap-2">
+                                            <p className="text-xs text-black">{checker.checkerType}</p>
+                                        </div>
                                         <p className="text-xl font-bold text-black mt-2">{formatCurrencyAbbreviated(checker.sellingPrice)}</p>
                                         <button
                                             onClick={() => {
@@ -894,7 +896,7 @@ function GuestCheckoutModal({ plan, store, primaryColor, transactionCharges, onC
 }
 
 function GuestCheckerCheckoutModal({ checker, store, primaryColor, transactionCharges, onClose }) {
-    const [formData, setFormData] = useState({ phone: '', skipSms: false });
+    const [formData, setFormData] = useState({ phone: '' });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
@@ -939,7 +941,6 @@ function GuestCheckerCheckoutModal({ checker, store, primaryColor, transactionCh
                 email: generatedEmail,
                 phone: formData.phone,
                 name: generatedName,
-                skipSms: Boolean(formData.skipSms),
             });
 
             const accessCode = initRes?.data?.accessCode;
@@ -1045,14 +1046,6 @@ function GuestCheckerCheckoutModal({ checker, store, primaryColor, transactionCh
                             }}
                             required
                         />
-                        <label className="flex items-center gap-2 text-xs text-black">
-                            <input
-                                type="checkbox"
-                                checked={formData.skipSms}
-                                onChange={(e) => setFormData({ ...formData, skipSms: e.target.checked })}
-                            />
-                            Skip SMS notification
-                        </label>
                     </div>
 
                     <button

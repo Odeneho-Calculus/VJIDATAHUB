@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { formatCurrencyAbbreviated } from '../utils/formatCurrency';
 import {
     Search, ArrowLeft, Clock, CheckCircle2, XCircle, AlertCircle,
-    ShoppingBag, Globe2, Phone, Calendar, Database, Sparkles, ChevronRight
+    ShoppingBag, Globe2, Phone, Calendar, Database, Sparkles, ChevronRight, Eye, EyeOff
 } from 'lucide-react';
 import { store as storeAPI } from '../services/api';
 
@@ -16,11 +16,16 @@ export default function PublicTrackOrder() {
     const [fetchingStore, setFetchingStore] = useState(true);
     const [error, setError] = useState('');
     const [searched, setSearched] = useState(false);
+    const [visiblePins, setVisiblePins] = useState({});
 
     const getSocialValue = (value) => {
         if (typeof value === 'string') return value.trim();
         if (typeof value?.value === 'string') return value.value.trim();
         return '';
+    };
+
+    const togglePinVisibility = (id) => {
+        setVisiblePins(prev => ({ ...prev, [id]: !prev[id] }));
     };
 
     useEffect(() => {
@@ -292,6 +297,33 @@ export default function PublicTrackOrder() {
                                                         {formatCurrencyAbbreviated(order.amount)}
                                                     </div>
                                                 </div>
+                                                
+                                                {order.status === 'completed' && order.checkerDetails && (order.checkerDetails.pin || order.checkerDetails.serialNumber) && (
+                                                    <div className="mt-3 p-3 bg-slate-50 rounded-xl border border-slate-200 inline-block">
+                                                        <div className="flex flex-col gap-1">
+                                                            <div className="flex items-center gap-3">
+                                                                <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Pin Code:</span>
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="font-black text-sm tracking-tight text-slate-900">
+                                                                        {visiblePins[order._id] ? order.checkerDetails.pin : '•••• •••• ••••'}
+                                                                    </span>
+                                                                    <button 
+                                                                        onClick={() => togglePinVisibility(order._id)}
+                                                                        className="p-1 hover:bg-slate-200 rounded transition-colors text-slate-500"
+                                                                    >
+                                                                        {visiblePins[order._id] ? <EyeOff size={14} /> : <Eye size={14} />}
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                            {order.checkerDetails.serialNumber && (
+                                                                <div className="flex items-center gap-3">
+                                                                    <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Serial:</span>
+                                                                    <span className="text-[10px] text-slate-600 font-bold uppercase tracking-wider">{order.checkerDetails.serialNumber}</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
 
                                             <div className="flex items-center gap-2 w-full sm:w-auto">

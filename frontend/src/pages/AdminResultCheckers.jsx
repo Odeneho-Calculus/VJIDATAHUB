@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { RefreshCw, Search, Edit2, CheckCircle, AlertCircle, Save, X, Lock, Unlock, CreditCard, Info } from 'lucide-react';
+import { RefreshCw, Search, Edit2, CheckCircle, AlertCircle, Save, X, Lock, Unlock, CreditCard, Info, MessageSquare } from 'lucide-react';
 import AdminSidebar from '../components/AdminSidebar';
 import { useSidebar } from '../hooks/useSidebar';
 import { checkers as checkersAPI } from '../services/api';
@@ -88,6 +88,16 @@ export default function AdminResultCheckers() {
       showMessage('success', `Checker ${res.offer?.status === 'active' ? 'activated' : 'deactivated'}`);
     } catch (err) {
       showMessage('error', err.message || 'Failed to toggle checker status');
+    }
+  };
+
+  const handleToggleSms = async (offer) => {
+    try {
+      const res = await checkersAPI.toggleSms(offer._id);
+      setOffers((prev) => prev.map((row) => (row._id === offer._id ? { ...row, smsEnabled: res.offer?.smsEnabled } : row)));
+      showMessage('success', res.message || 'SMS status updated');
+    } catch (err) {
+      showMessage('error', err.message || 'Failed to toggle SMS status');
     }
   };
 
@@ -487,6 +497,14 @@ export default function AdminResultCheckers() {
                           <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                             <button className="chk-btn-icon" onClick={() => openEdit(offer)} title="Edit Prices">
                               <Edit2 size={16} strokeWidth={2.5} />
+                            </button>
+                            <button 
+                              className="chk-btn-icon" 
+                              onClick={() => handleToggleSms(offer)}
+                              style={{ color: offer.smsEnabled !== false ? '#7C3AED' : '#bbb' }}
+                              title={offer.smsEnabled !== false ? 'SMS Enabled' : 'SMS Disabled'}
+                            >
+                              <MessageSquare size={16} strokeWidth={2.5} />
                             </button>
                             <button 
                               className="chk-btn-icon" 

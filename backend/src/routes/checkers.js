@@ -29,6 +29,7 @@ router.get('/offers', adminOnly, checkerController.getCheckerOffers);
 router.patch('/lock', adminOnly, checkerController.updateCheckerLockStatus);
 router.patch('/:id/prices', adminOnly, checkerController.updateCheckerPrices);
 router.patch('/:id/toggle-status', adminOnly, checkerController.toggleCheckerStatus);
+router.patch('/:id/toggle-sms', adminOnly, checkerController.toggleSmsStatus);
 router.get('/:id', checkerController.getCheckerById);
 
 module.exports = router;

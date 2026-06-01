@@ -279,7 +279,10 @@ exports.getCheckerOffers = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      offers,
+      offers: offers.map(o => ({
+        ...o.toObject(),
+        smsEnabled: o.smsEnabled !== false
+      })),
       pagination: {
         total,
         page: Math.max(1, Number(page)),
@@ -348,6 +351,27 @@ exports.toggleCheckerStatus = async (req, res) => {
     return res.status(200).json({ success: true, message: `Checker offer ${offer.status}`, offer });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message || 'Failed to toggle checker status' });
+  }
+};
+
+exports.toggleSmsStatus = async (req, res) => {
+  try {
+    const offer = await TopzaCheckerOffer.findById(req.params.id);
+
+    if (!offer) {
+      return res.status(404).json({ success: false, message: 'Checker offer not found' });
+    }
+
+    offer.smsEnabled = !offer.smsEnabled;
+    await offer.save();
+
+    return res.status(200).json({ 
+      success: true, 
+      message: `SMS alerts ${offer.smsEnabled ? 'enabled' : 'disabled'} for ${offer.displayName || offer.checkerType}`, 
+      offer 
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message || 'Failed to toggle SMS status' });
   }
 };
 
@@ -454,6 +478,7 @@ exports.getCheckerProductsList = async (req, res) => {
           available: Boolean(offer.available),
           stockCount: Number(offer.stockCount || 0),
           status: offer.status,
+          smsEnabled: offer.smsEnabled !== false,
           inStock: Boolean(offer.available),
           lastCheckedAt: offer.lastCheckedAt,
         };
@@ -473,7 +498,7 @@ exports.buyChecker = async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    const { checkerType, phoneNumber, paymentMethod = 'wallet', skipSms = false } = req.body || {};
+    const { checkerType, phoneNumber, paymentMethod = 'wallet' } = req.body || {};
     const normalizedCheckerType = normalizeCheckerType(checkerType);
 
     if (!normalizedCheckerType || !allowedCheckerTypes.includes(normalizedCheckerType) || !phoneNumber) {
@@ -499,6 +524,8 @@ exports.buyChecker = async (req, res) => {
     if (!offer) {
       return res.status(404).json({ success: false, message: `${normalizedCheckerType} checker is unavailable` });
     }
+
+    const effectiveSkipSms = !offer.smsEnabled;
 
     if (!offer.available || Number(offer.stockCount || 0) <= 0) {
       return res.status(400).json({ success: false, message: `${normalizedCheckerType} checker is currently unavailable` });
@@ -530,7 +557,7 @@ exports.buyChecker = async (req, res) => {
       adminBasePrice: Number(offer.costPrice || 0),
       checkerDetails: {
         checkerType: offer.checkerType,
-        skipSms: Boolean(skipSms),
+        skipSms: Boolean(effectiveSkipSms),
       },
     });
 
@@ -543,7 +570,7 @@ exports.buyChecker = async (req, res) => {
         order,
         offer,
         phoneNumber,
-        skipSms,
+        skipSms: effectiveSkipSms,
       });
 
       if (!executeResult.success) {
@@ -1050,6 +1077,7 @@ exports.getPublicStoreCheckers = async (req, res) => {
         available: Boolean(row.checkerId.available),
         sellingPrice: Number(row.customPrice || 0),
         status: row.checkerId.status,
+        smsEnabled: row.checkerId.smsEnabled !== false,
       }))
       .filter((row) => row.sellingPrice > 0)
       .sort((a, b) => String(a.checkerType || '').localeCompare(String(b.checkerType || '')));
@@ -1063,7 +1091,7 @@ exports.getPublicStoreCheckers = async (req, res) => {
 exports.initializePublicStoreCheckerPurchase = async (req, res) => {
   try {
     const { slug } = req.params;
-    const { checkerId, email, phone, name, skipSms = false } = req.body || {};
+    const { checkerId, email, phone, name } = req.body || {};
 
     if (!checkerId || !email || !phone || !name) {
       return res.status(400).json({ success: false, message: 'Missing required fields' });
@@ -1104,6 +1132,8 @@ exports.initializePublicStoreCheckerPurchase = async (req, res) => {
     if (!checker.available || Number(checker.stockCount || 0) <= 0) {
       return res.status(400).json({ success: false, message: `${checker.checkerType} checker is currently unavailable` });
     }
+
+    const effectiveSkipSms = !checker.smsEnabled;
 
     const baseCost = resolvePlanPrice(checker, { userRole: 'agent', agentFeeStatus: 'paid' });
     if (baseCost <= 0) {
@@ -1149,7 +1179,7 @@ exports.initializePublicStoreCheckerPurchase = async (req, res) => {
       agentCommission: Math.max(0, customPrice - baseCost),
       checkerDetails: {
         checkerType: checker.checkerType,
-        skipSms: Boolean(skipSms),
+        skipSms: Boolean(effectiveSkipSms),
       },
     });
 
