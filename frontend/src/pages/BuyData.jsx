@@ -23,6 +23,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { publicAPI } from '../services/api';
+import { getNetworkStyles } from '../utils/networkStyles';
 import PurchaseModal from '../components/PurchaseModal';
 import PurchaseVerificationModal from '../components/PurchaseVerificationModal';
 import UserLayout from '../components/UserLayout';
@@ -652,14 +653,21 @@ export default function BuyData() {
             <div className="grid grid-cols-3 gap-3">
               {availableNetworks.map(network => {
                 const isSelected = selectedNetwork === network;
+                const netStyles = getNetworkStyles(network);
+                const c = netStyles.palette;
                 return (
                   <button
                     key={network}
                     onClick={() => setSelectedNetwork(network)}
                     className={`dash-network-btn group ${isSelected ? 'active' : ''}`}
+                    style={isSelected ? {
+                      background: c.isGradient ? c.gradient : c.main,
+                      borderColor: c.isGradient ? 'transparent' : c.main,
+                      boxShadow: `0 10px 20px ${c.glow}`
+                    } : {}}
                   >
-                    <Wifi size={24} className={isSelected ? 'text-white' : 'text-black group-hover:text-[#0F6E56]'} />
-                    <span className="font-black text-[10px] uppercase tracking-widest">{network}</span>
+                    <Wifi size={24} className={isSelected ? 'text-white' : `text-black group-hover:text-[${c.main}]`} style={!isSelected ? { '--hover-color': c.main } : {}} />
+                    <span className="font-black text-[10px] uppercase tracking-widest" style={isSelected ? { color: '#fff' } : {}}>{network}</span>
                   </button>
                 );
               })}
@@ -712,7 +720,8 @@ export default function BuyData() {
                     || (bundle?.dataSizeMB ? `${bundle.dataSizeMB}GB` : '')
                     || (bundle?.name?.match(/\d+(?:\.\d+)?\s*GB/i)?.[0] ?? '')
                     || 'Data';
-                  const c = getColor(idx);
+                  const netStyles = getNetworkStyles(bundle.network || selectedNetwork);
+                  const c = netStyles.palette;
 
                   return (
                     <div
@@ -722,32 +731,33 @@ export default function BuyData() {
                       style={{
                         '--plan-color': c.main + '66',
                         '--plan-glow': c.glow,
+                        background: c.gradient || c.main
                       }}
                     >
                       <div className="flex justify-between items-start mb-3">
-                        <span className="px-2 py-0.5 rounded-md text-[9px] font-black uppercase border" style={{ background: c.soft, color: c.main, borderColor: c.main + '22' }}>{bundle.network}</span>
+                        <span className="px-2 py-0.5 rounded-md text-[9px] font-black uppercase border" style={{ background: 'rgba(255,255,255,0.2)', color: c.text, borderColor: 'rgba(255,255,255,0.3)' }}>{bundle.network}</span>
                         {!bundle.inStock && (
                            <span className="text-[9px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-2 py-0.5 rounded-md border border-rose-100">OUT OF STOCK</span>
                         )}
                       </div>
 
                       <div className="mb-4">
-                        <h4 className="text-xl font-black text-[#111] leading-tight mb-1">{displayDataSize}</h4>
-                        <p className="text-[10px] font-bold text-black uppercase tracking-wider flex items-center gap-1.5">
+                        <h4 className="text-xl font-black leading-tight mb-1" style={{ color: c.text }}>{displayDataSize}</h4>
+                        <p className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5" style={{ color: c.text === '#ffffff' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.6)' }}>
                           <Clock size={10} strokeWidth={3} />
                           {bundle.validity || 'Instantly Active'}
                         </p>
                       </div>
 
-                      <div className="mt-auto pt-4 border-t border-[#f5f5f0]">
+                      <div className="mt-auto pt-4 border-t" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
                         <div className="flex items-center justify-between mb-4">
                           <div className="flex flex-col">
-                            <span className="text-xs font-black" style={{ color: c.main }}>{formatCurrencyAbbreviated(getDisplayPrice(bundle))}</span>
+                            <span className="text-xs font-black" style={{ color: c.text }}>{formatCurrencyAbbreviated(getDisplayPrice(bundle))}</span>
                             {isQualifiedAgent() && bundle.agentPrice && (
-                              <span className="text-[8px] font-bold uppercase tracking-widest mt-0.5" style={{ color: c.main }}>Agent Rate</span>
+                              <span className="text-[8px] font-bold uppercase tracking-widest mt-0.5" style={{ color: c.text === '#ffffff' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.5)' }}>Agent Rate</span>
                             )}
                           </div>
-                          <div className="w-6 h-6 rounded-full flex items-center justify-center transition-all" style={{ background: c.soft, color: c.main }}>
+                          <div className="w-6 h-6 rounded-full flex items-center justify-center transition-all" style={{ background: 'rgba(255,255,255,0.2)', color: c.text }}>
                             <ChevronRight size={12} strokeWidth={3} />
                           </div>
                         </div>
@@ -756,7 +766,7 @@ export default function BuyData() {
                           disabled={!bundle.inStock}
                           className="w-full py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all"
                           style={bundle.inStock
-                            ? { background: c.main, color: '#fff', boxShadow: `0 4px 12px ${c.glow}` }
+                            ? { background: c.text === '#ffffff' ? '#ffffff' : '#000000', color: c.text === '#ffffff' ? c.main : '#ffffff', boxShadow: `0 4px 12px ${c.glow}` }
                             : { background: '#f1f5f9', color: '#000' }
                           }
                         >
@@ -779,7 +789,7 @@ export default function BuyData() {
           userBalance={user?.balance || 0}
           user={user}
           onPurchaseSuccess={handlePurchaseSuccess}
-          planColor={selectedBundle ? getColor(sortedCurrentBundles.findIndex(b => b._id === selectedBundle._id)) : null}
+          planColor={selectedBundle ? getNetworkStyles(selectedBundle.network).palette : null}
         />
 
         {/* Verification Modal */}

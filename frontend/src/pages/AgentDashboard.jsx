@@ -30,6 +30,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { store as storeAPI } from '../services/api';
+import { getNetworkStyles } from '../utils/networkStyles';
 import AgentLayout from '../components/AgentLayout';
 import Modal from '../components/Modal';
 import { useAuth } from '../hooks/useAuth';
@@ -599,9 +600,9 @@ export default function AgentDashboard() {
               </h3>
               <div className="space-y-4">
                 {[
-                  { net: 'MTN Ghana', load: '12%', color: '#fbbf24', barBg: '#FEF3C7' },
-                  { net: 'Telecel', load: '24%', color: '#ef4444', barBg: '#FEE2E2' },
-                  { net: 'AirtelTigo', load: '18%', color: '#22c55e', barBg: '#ECFDF5' }
+                  { net: 'MTN Ghana', load: '12%', color: '#FFCB05', barBg: '#FFF9E5' },
+                  { net: 'Telecel', load: '24%', color: '#E60000', barBg: '#FEE2E2' },
+                  { net: 'AirtelTigo', load: '18%', color: 'linear-gradient(to right, #ED1C24, #0054A6)', barBg: '#DBEAFE' }
                 ].map((n, i) => (
                   <div key={i} style={{ marginBottom: '12px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
@@ -667,10 +668,16 @@ export default function AgentDashboard() {
                         ? { background: '#fffbeb', color: '#d97706', border: '1px solid #fef3c7' }
                         : { background: '#fff5f5', color: '#b91c1c', border: '1px solid #fecaca' };
 
+                      const netPalette = getNetworkStyles(order.network).palette;
+
                       return (
                         <tr key={order._id}>
                           <td className="dash-td">
-                            <span className="dash-badge" style={{ background: '#fafaf7', color: '#111', border: '1px solid #e4e4de' }}>
+                            <span className="dash-badge" style={{ 
+                              background: netPalette.isGradient ? netPalette.gradient : netPalette.bg, 
+                              color: netPalette.isGradient ? '#fff' : netPalette.main, 
+                              border: `1px solid ${netPalette.main}33` 
+                            }}>
                               {order.network}
                             </span>
                           </td>
