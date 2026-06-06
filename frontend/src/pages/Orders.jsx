@@ -712,7 +712,7 @@ export default function Orders() {
                 <div className="p-4 bg-[#fafaf7] rounded-2xl border border-[#e4e4de] space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-xs font-bold text-black">{isAfaOrder(selectedOrder) ? 'Applicant' : 'Beneficiary'}</span>
-                    <span className="text-sm font-black text-[#111]">{isAfaOrder(selectedOrder) ? selectedOrder.afaRegistration?.name : (selectedOrder.beneficiary || 'N/A')}</span>
+                    <span className="text-sm font-black text-[#111]">{isAfaOrder(selectedOrder) ? selectedOrder.afaRegistration?.name : (selectedOrder.phoneNumber || selectedOrder.beneficiary || 'N/A')}</span>
                   </div>
                   {isAfaOrder(selectedOrder) && selectedOrder.afaRegistration && (
                     <>

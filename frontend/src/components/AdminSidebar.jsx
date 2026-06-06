@@ -19,7 +19,8 @@ import {
   Globe,
   User,
 } from 'lucide-react';
-// import { useSettings } from '../context/SettingsContext';
+import { useSettings } from '../context/SettingsContext';
+import { isSkdataplug } from '../utils/providerMap';
 
 /* ── Homepage multi-colour palette ── */
 const palette = [
@@ -83,8 +84,11 @@ const styles = `
 
 export default function AdminSidebar({ isOpen, onClose }) {
   const location = useLocation();
-  // const { settings } = useSettings();
-  const offersNavItem = { path: '/admin/topza-plans', label: 'Topza Offers', icon: Tag };
+  const { settings } = useSettings();
+  const activeProvider = settings?.vtuProvider || 'tp';
+  const offersNavItem = isSkdataplug(activeProvider)
+    ? { path: '/admin/skdataplug-plans', label: 'SKDataPlug Offers', icon: Tag }
+    : { path: '/admin/topza-plans', label: 'Topza Offers', icon: Tag };
 
   const navItems = [
     { path: '/admin',                          label: 'Dashboard',         icon: LayoutDashboard },

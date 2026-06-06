@@ -1,0 +1,84 @@
+
+
+Your API Token
+1cc062c434f1a6fa83295430602e064889b0a90868b1f030e49b51705d006f3d
+
+Base URL
+https://skdataplug.com/api/v1/
+
+Authentication
+
+Include your token in every request header:
+
+Authorization: Bearer YOUR_TOKEN
+
+POST /api/v1/order/ – Place Order
+
+{
+  "recipient": "0557581711",
+  "network": "MTN",
+  "gb_size": "5"
+}
+
+GET /api/v1/orders/ – List My Orders
+
+Returns all orders placed via API.
+
+GET /api/v1/bundles/ – List Available Bundles
+
+Returns all active bundle packages.
+
+GET /api/v1/status/{order_id}/ – Check Order Status
+
+Returns the current status of a specific order.
+
+// Request
+GET /api/v1/status/SKP36648705/
+Authorization: Bearer YOUR_TOKEN
+
+// Response
+{
+  "order_id": "SKP36648705",
+  "status": "delivered"
+}
+
+// Possible status values:
+// pending    – Order received, awaiting processing
+// processing – Sent to network, delivery in progress
+// delivered  – Data delivered successfully
+// failed     – Delivery failed
+
+🔔 Delivery Notifications (Webhook)
+
+Instead of polling for order status, register a URL on your server. We will automatically send a POST request to that URL whenever an admin marks your order as delivered.
+
+GET /api/v1/callback/ – Get Registered Callback URL
+
+Returns your currently registered callback URL.
+
+// Response
+{
+  "callback_url": "https://yourserver.com/webhook"
+}
+
+POST /api/v1/callback/ – Register Callback URL
+
+Register the URL on your server that should receive delivery notifications. Only needs to be done once.
+
+// Request body
+{
+  "callback_url": "https://yourserver.com/your-webhook-endpoint"
+}
+
+// Success response
+{
+  "message": "Callback URL registered successfully.",
+  "callback_url": "https://yourserver.com/your-webhook-endpoint",
+  "note": "We will POST to this URL when your orders are delivered."
+}
+
+⚠️ Every notification we send includes an X-SKPlug-Signature header. Verify this on your server to confirm the request is genuinely from us.
+
+🧪 API Test Console
+
+Test your API directly from here.

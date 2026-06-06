@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { AlertCircle, RefreshCw, CheckCircle, DollarSign, X, Settings, Activity, Globe, Clock, Phone, Wifi, Eye, Wallet } from 'lucide-react';
+import { AlertCircle, RefreshCw, CheckCircle, DollarSign, X, Settings, Activity, Globe, Clock, Phone, Wifi, Eye, Wallet, ToggleLeft, ToggleRight } from 'lucide-react';
 import Pagination from '../components/Pagination';
 import { toast } from 'react-hot-toast';
 import { formatCurrencyAbbreviated } from '../utils/formatCurrency';
 import AdminSidebar from '../components/AdminSidebar';
 import { OrderDetailsModal } from '../components/AdminOrderModals';
 import { useSidebar } from '../hooks/useSidebar';
-import { admin as adminAPI, topza as topzaAPI } from '../services/api';
+import { admin as adminAPI, topza as topzaAPI, skdataplug as skdataplugAPI } from '../services/api';
 import { useSettings } from '../context/SettingsContext';
+import { isSkdataplug, getProviderDisplayName } from '../utils/providerMap';
 
 /* ── Homepage multi-colour palette ── */
 const palette = [
@@ -266,14 +267,18 @@ const styles = `
 `;
 
 export default function AdminVtuSettings() {
-  const TOPZA_WALLET_URL = 'https://www.topzagh.com/wallet';
+  const PROVIDER_WALLET_URLS = {
+    topza: 'https://www.topzagh.com/wallet',
+    skdataplug: 'https://skdataplug.com',
+  };
   const { sidebarOpen, closeSidebar } = useSidebar();
-  const { settings: globalSettings } = useSettings();
+  const { settings: globalSettings, updateVtuProvider } = useSettings();
+  const activeProvider = globalSettings?.vtuProvider || 'tp';
   const [walletData, setWalletData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [syncing, setSyncing] = useState(false);
-  const [, setSystemSettings] = useState(globalSettings || { vtuProvider: 'topza' });
+  const [, setSystemSettings] = useState(globalSettings || { vtuProvider: 'tp' });
   const [updatingSettings, setUpdatingSettings] = useState(false);
   const [networkCatalog, setNetworkCatalog] = useState([]);
   const networkCatalogRef = useRef(networkCatalog);
@@ -282,18 +287,19 @@ export default function AdminVtuSettings() {
     networkCatalogRef.current = networkCatalog;
   }, [networkCatalog]);
 
-  const [topzaNetworks, setTopzaNetworks] = useState([]);
-  const [topzaNetworksLoading, setTopzaNetworksLoading] = useState(false);
+  const [providerNetworks, setProviderNetworks] = useState([]);
+  const [providerNetworksLoading, setProviderNetworksLoading] = useState(false);
   const [transactions, setTransactions] = useState([]);
   const [transactionsLoading, setTransactionsLoading] = useState(false);
   const [transactionsError, setTransactionsError] = useState('');
   const [transactionPage, setTransactionPage] = useState(1);
   const TRANSACTIONS_PER_PAGE = 10;
-  const [pollingTopza, setPollingTopza] = useState(false);
+  const [pollingProvider, setPollingProvider] = useState(false);
   const [showOrderDetailsModal, setShowOrderDetailsModal] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [showRefundConfirm, setShowRefundConfirm] = useState(false);
   const [refundLoading, setRefundLoading] = useState(false);
+  const [switchingProvider, setSwitchingProvider] = useState(false);
 
   const showMessage = (msg, isError = false) => {
     if (isError) {
@@ -318,10 +324,15 @@ export default function AdminVtuSettings() {
     return `${sign}${whole}.${(fraction + '00').slice(0, 2)}`;
   };
 
-  const fetchTopzaNetworks = useCallback(async (catalog) => {
+  const getProviderCatalogKey = useCallback(() => {
+    return isSkdataplug(activeProvider) ? 'skdataplugNetworkCatalog' : 'topzaNetworkCatalog';
+  }, [activeProvider]);
+
+  const fetchProviderNetworks = useCallback(async (catalog) => {
     try {
-      setTopzaNetworksLoading(true);
-      const response = await topzaAPI.getNetworks();
+      setProviderNetworksLoading(true);
+      const api = isSkdataplug(activeProvider) ? skdataplugAPI : topzaAPI;
+      const response = await api.getNetworks();
       if (response.success && Array.isArray(response.networks)) {
         const existing = catalog || networkCatalogRef.current;
         const merged = response.networks
@@ -336,38 +347,40 @@ export default function AdminVtuSettings() {
               logoUrl: saved?.logoUrl || '',
             };
           });
-        setTopzaNetworks(merged);
+        setProviderNetworks(merged);
       }
     } catch (err) {
-      console.error('Failed to fetch Topza networks:', err);
+      console.error(`Failed to fetch ${activeProvider} networks:`, err);
     } finally {
-      setTopzaNetworksLoading(false);
+      setProviderNetworksLoading(false);
     }
-  }, []);
+  }, [activeProvider]);
 
   const fetchSystemSettings = useCallback(async () => {
     try {
       const response = await adminAPI.getSystemSettings();
       if (response.success) {
         setSystemSettings(response.settings);
-        const catalog = response.settings?.networkCatalog || [];
+        const providerKey = getProviderCatalogKey();
+        const catalog = response.settings?.[providerKey] || response.settings?.networkCatalog || [];
         setNetworkCatalog(catalog);
-        fetchTopzaNetworks(catalog);
+        fetchProviderNetworks(catalog);
       }
     } catch (err) {
       console.error('Failed to fetch system settings', err);
     }
-  }, [fetchTopzaNetworks]);
+  }, [fetchProviderNetworks, getProviderCatalogKey]);
 
   const fetchWalletSettings = useCallback(async ({ silent = false } = {}) => {
     try {
       if (!silent) setLoading(true);
       setError('');
-      const response = await adminAPI.getTopzaWalletSettings();
+      const api = isSkdataplug(activeProvider) ? skdataplugAPI : topzaAPI;
+      const response = await api.getWalletSettings();
       if (response.success) {
         setWalletData(response.data);
         if (response.data?.error) {
-          setError(`Topza API Error: ${response.data.error}`);
+          setError(`${activeProvider} API Error: ${response.data.error}`);
         }
       } else {
         setError(response.message || 'Failed to fetch wallet settings');
@@ -377,48 +390,51 @@ export default function AdminVtuSettings() {
     } finally {
       if (!silent) setLoading(false);
     }
-  }, []);
+  }, [activeProvider]);
 
-  const fetchTopzaTransactions = async ({ silent = false } = {}) => {
+  const fetchProviderTransactions = useCallback(async ({ silent = false } = {}) => {
     try {
       if (!silent) setTransactionsLoading(true);
       setTransactionsError('');
-      const response = await adminAPI.getTopzaWalletTransactions(1, 500);
+      const response = isSkdataplug(activeProvider)
+        ? await adminAPI.getSkdataplugWalletTransactions(1, 500)
+        : await adminAPI.getTopzaWalletTransactions(1, 500);
       if (response.success) {
         setTransactions(Array.isArray(response.transactions) ? response.transactions : []);
       } else {
         setTransactions([]);
-        setTransactionsError(response.message || 'Failed to fetch Topza transactions');
+        setTransactionsError(response.message || `Failed to fetch ${activeProvider} transactions`);
       }
     } catch (err) {
-      setTransactionsError(err?.message || 'Failed to fetch Topza transactions');
+      setTransactionsError(err?.message || `Failed to fetch ${activeProvider} transactions`);
     } finally {
       if (!silent) setTransactionsLoading(false);
     }
-  };
+  }, [activeProvider]);
 
   useEffect(() => { fetchSystemSettings(); }, [fetchSystemSettings]);
   useEffect(() => { fetchWalletSettings(); }, [fetchWalletSettings]);
+  useEffect(() => { fetchProviderTransactions(); }, [fetchProviderTransactions]);
   useEffect(() => {
     if (globalSettings) {
       setSystemSettings(globalSettings);
-      setNetworkCatalog(globalSettings?.networkCatalog || []);
+      const providerKey = isSkdataplug(activeProvider) ? 'skdataplugNetworkCatalog' : 'topzaNetworkCatalog';
+      setNetworkCatalog(globalSettings?.[providerKey] || globalSettings?.networkCatalog || []);
     }
-  }, [globalSettings]);
+  }, [globalSettings, activeProvider]);
 
   useEffect(() => {
-    fetchTopzaNetworks();
-    fetchTopzaTransactions();
-  }, [fetchTopzaNetworks]);
+    fetchProviderNetworks();
+  }, [fetchProviderNetworks, activeProvider]);
 
   useEffect(() => {
     let cancelled = false;
-    setPollingTopza(true);
-    const pollTopza = async () => {
+    setPollingProvider(true);
+    const pollProvider = async () => {
       try {
         await Promise.all([
           fetchWalletSettings({ silent: true }),
-          fetchTopzaTransactions({ silent: true }),
+          fetchProviderTransactions({ silent: true }),
         ]);
       } catch {
         // Ignore background polling errors
@@ -426,22 +442,23 @@ export default function AdminVtuSettings() {
     };
     const intervalId = setInterval(async () => {
       if (cancelled) return;
-      await pollTopza();
+      await pollProvider();
     }, 20000);
     return () => {
       cancelled = true;
       clearInterval(intervalId);
-      setPollingTopza(false);
+      setPollingProvider(false);
     };
-  }, [fetchWalletSettings, transactionPage]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetchWalletSettings, transactionPage, activeProvider]);
 
-  const handleTopzaRefresh = async () => {
+  const handleProviderRefresh = async () => {
     try {
       setSyncing(true);
       setTransactionPage(1);
       await Promise.all([
         fetchWalletSettings({ silent: false }),
-        fetchTopzaTransactions({ silent: false }),
+        fetchProviderTransactions({ silent: false }),
       ]);
     } finally {
       setSyncing(false);
@@ -453,13 +470,13 @@ export default function AdminVtuSettings() {
     const statusValue = item.status || txn.status || txn.transaction_status || '';
     const normalized = {
       ...txn,
-      orderNumber: txn.orderNumber || txn.orderId || txn.reference || txn.id || 'N/A',
+      orderNumber: txn.orderNumber || txn.orderId || txn.order_number || txn.order_id || txn.reference || txn.id || 'N/A',
       status: String(statusValue || 'pending').toLowerCase(),
-      phoneNumber: item.beneficiary_number || txn.phoneNumber || txn.recipient_msisdn || txn.phone || txn.recipient || 'N/A',
-      network: item.network || txn.network || txn.network_name || 'N/A',
-      dataAmount: item.volume || txn.dataAmount || 'N/A',
-      planName: txn.planName || item.volume || txn.dataAmount || 'N/A',
-      amount: Number(txn.amount || 0),
+      phoneNumber: item.beneficiary_number || txn.phoneNumber || txn.recipient_msisdn || txn.phone || txn.recipient || txn.recipient_number || 'N/A',
+      network: item.network || txn.network || txn.network_name || txn.isp || 'N/A',
+      dataAmount: item.volume || txn.dataAmount || txn.gb_size || txn.volume || 'N/A',
+      planName: txn.planName || item.volume || txn.dataAmount || txn.gb_size || txn.volume || 'N/A',
+      amount: Number(txn.amount || txn.price || 0),
       createdAt: txn.createdAt || txn.created_at || txn.lastUpdated || txn.date || txn.timestamp || null,
     };
     setSelectedTransaction(normalized);
@@ -492,7 +509,7 @@ export default function AdminVtuSettings() {
           setSelectedTransaction(updatedTransaction);
           setShowOrderDetailsModal(true);
         }
-        await fetchTopzaTransactions();
+        await fetchProviderTransactions();
       } else {
         showMessage(response.message || 'Failed to refund order', true);
       }
@@ -506,14 +523,14 @@ export default function AdminVtuSettings() {
   const formatDate = (ds) => new Date(ds).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
   const formatTime = (ds) => new Date(ds).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
-  const handleTopzaLogoChange = (networkId, logoUrl) => {
-    setTopzaNetworks((prev) => prev.map((n) => n.networkId === networkId ? { ...n, logoUrl } : n));
+  const handleProviderLogoChange = (networkId, logoUrl) => {
+    setProviderNetworks((prev) => prev.map((n) => n.networkId === networkId ? { ...n, logoUrl } : n));
   };
 
-  const handleSaveTopzaNetworks = async () => {
+  const handleSaveProviderNetworks = async () => {
     try {
       setUpdatingSettings(true);
-      const payload = topzaNetworks
+      const payload = providerNetworks
         .filter((n) => n && n.networkId !== undefined && n.name !== undefined)
         .map((n) => ({
           name: n.name,
@@ -522,25 +539,52 @@ export default function AdminVtuSettings() {
           isActive: true,
         }));
       if (payload.length === 0) {
-        setError('No valid Topza networks to save');
+        setError(`No valid ${activeProvider} networks to save`);
         setUpdatingSettings(false);
         return;
       }
-      await adminAPI.updateSystemSettings({ networkCatalog: payload });
+      const providerKey = isSkdataplug(activeProvider) ? 'skdataplugNetworkCatalog' : 'topzaNetworkCatalog';
+      await adminAPI.updateSystemSettings({ [providerKey]: payload });
       setNetworkCatalog(payload);
     } catch (err) {
-      setError(err?.message || 'Failed to save Topza network logos');
+      setError(err?.message || `Failed to save ${activeProvider} network logos`);
     } finally {
       setUpdatingSettings(false);
     }
   };
 
+  const providerDisplayName = getProviderDisplayName(activeProvider);
+
+  const handleSwitchProvider = async () => {
+    const newProvider = isSkdataplug(activeProvider) ? 'tp' : 'sk';
+    const newProviderName = getProviderDisplayName(newProvider);
+    try {
+      setSwitchingProvider(true);
+      const response = await adminAPI.updateSystemSettings({ vtuProvider: newProvider });
+      if (response.success) {
+        updateVtuProvider(newProvider);
+        showMessage(`Switched to ${newProviderName}`, false);
+        // Refresh data for the new provider
+        await Promise.all([
+          fetchWalletSettings({ silent: false }),
+          fetchProviderTransactions({ silent: false }),
+        ]);
+      } else {
+        showMessage(response.message || 'Failed to switch provider', true);
+      }
+    } catch (err) {
+      showMessage(err?.message || 'Failed to switch provider', true);
+    } finally {
+      setSwitchingProvider(false);
+    }
+  };
+
   const statItems = [
-    { label: 'Wallet Balance', value: walletData?.balance ? `GHS ${formatCurrencyAbbreviated(walletData.balance)}` : 'GHS 0.00', icon: DollarSign, color: getColor(0) },
+    { label: 'Wallet Balance', value: walletData?.balance ? `GHS ${formatCurrencyAbbreviated(walletData.balance)}` : 'GHS 0.00', icon: DollarSign, color: getColor(0), hidden: isSkdataplug(activeProvider) },
     { label: 'Last Sync Date', value: walletData?.lastSync ? formatDate(walletData.lastSync) : '—', subvalue: walletData?.lastSync ? formatTime(walletData.lastSync) : null, icon: Clock, color: getColor(1) },
-    { label: 'Active Provider', value: 'Topza', icon: Activity, color: getColor(2) },
+    { label: 'Active Provider', value: providerDisplayName, icon: Activity, color: getColor(2) },
     { label: 'Sync Status', value: 'Operational', icon: CheckCircle, color: getColor(3) },
-  ];
+  ].filter(item => !item.hidden);
 
   return (
     <div className="vtu-page-container">
@@ -608,6 +652,63 @@ export default function AdminVtuSettings() {
               ))}
             </div>
 
+            {/* Provider Switcher */}
+            <div className="vtu-main-card" style={{
+              background: `linear-gradient(135deg, ${getColor(1).soft} 0%, ${getColor(1).bg} 100%)`,
+              border: `1.5px solid ${getColor(1).main}33`,
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              <div style={{
+                position: 'absolute',
+                top: '-20px',
+                right: '-20px',
+                width: '100px',
+                height: '100px',
+                background: getColor(1).glow,
+                borderRadius: '50%',
+              }}></div>
+
+              <div className="vtu-banner-flex">
+                <div>
+                  <h3 style={{ fontSize: '20px', fontWeight: '800', margin: 0, color: '#111', letterSpacing: '-0.01em' }}>
+                    VTU Provider Switch
+                  </h3>
+                  <p style={{ fontSize: '14px', color: '#444', marginTop: '6px', fontWeight: '500' }}>
+                    Currently using <span style={{ color: getColor(1).main, fontWeight: 700 }}>{providerDisplayName}</span>. Toggle to switch between providers.
+                  </p>
+                </div>
+                <button
+                  onClick={handleSwitchProvider}
+                  disabled={switchingProvider}
+                  className="vtu-btn-primary"
+                  style={{
+                    background: !isSkdataplug(activeProvider) ? getColor(1).main : pageTheme.main,
+                    color: '#fff',
+                    boxShadow: `0 4px 15px ${getColor(1).glow}`,
+                    minWidth: '180px'
+                  }}
+                >
+                  {switchingProvider ? (
+                    <>
+                      <RefreshCw size={18} className="animate-spin" />
+                      Switching...
+                    </>
+                  ) : !isSkdataplug(activeProvider) ? (
+                    <>
+                      <ToggleRight size={18} />
+                      Switch to SKDataPlug
+                    </>
+                  ) : (
+                    <>
+                      <ToggleLeft size={18} />
+                      Switch to Topza
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
             {/* Provider Specific Banner Actions */}
             <div className="vtu-main-card" style={{
               background: `linear-gradient(135deg, ${pageTheme.soft} 0%, ${pageTheme.bg} 100%)`,
@@ -629,15 +730,15 @@ export default function AdminVtuSettings() {
               <div className="vtu-banner-flex">
                 <div>
                   <h3 style={{ fontSize: '20px', fontWeight: '800', margin: 0, color: '#111', letterSpacing: '-0.01em' }}>
-                    Topza Integration
+                    {providerDisplayName} Integration
                   </h3>
                   <p style={{ fontSize: '14px', color: '#444', marginTop: '6px', fontWeight: '500' }}>
-                    Real-time connection with <span style={{ color: pageTheme.main, fontWeight: 700 }}>Topza</span> is active and healthy.
+                    Real-time connection with <span style={{ color: pageTheme.main, fontWeight: 700 }}>{providerDisplayName}</span> is active and healthy.
                   </p>
                 </div>
                 <div className="flex gap-3">
                   <a
-                    href={TOPZA_WALLET_URL}
+                    href={PROVIDER_WALLET_URLS[activeProvider] || '#'}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="vtu-btn-primary"
@@ -651,7 +752,7 @@ export default function AdminVtuSettings() {
                     Top Up Wallet
                   </a>
                   <button
-                    onClick={handleTopzaRefresh}
+                    onClick={handleProviderRefresh}
                     disabled={syncing || transactionsLoading}
                     className="vtu-btn-primary"
                     style={{
@@ -675,7 +776,7 @@ export default function AdminVtuSettings() {
                   <p className="vtu-p">Manage display logos for available networks</p>
                 </div>
                 <button
-                  onClick={handleSaveTopzaNetworks}
+                  onClick={handleSaveProviderNetworks}
                   disabled={updatingSettings}
                   className="vtu-btn-primary"
                 >
@@ -684,7 +785,7 @@ export default function AdminVtuSettings() {
                 </button>
               </div>
 
-              {topzaNetworksLoading ? (
+              {providerNetworksLoading ? (
                 <div style={{ textAlign: 'center', padding: '40px' }}>
                   <RefreshCw size={24} className="animate-spin" style={{ margin: '0 auto 12px', color: pageTheme.main }} />
                   <p style={{ fontSize: '13px', color: '#000' }}>Fetching networks...</p>
@@ -702,7 +803,7 @@ export default function AdminVtuSettings() {
                       </tr>
                     </thead>
                     <tbody>
-                      {topzaNetworks.map((n, idx) => {
+                      {providerNetworks.map((n, idx) => {
                         const c = getColor(idx);
                         return (
                           <tr key={n.networkId || n.code || idx}>
@@ -712,7 +813,7 @@ export default function AdminVtuSettings() {
                               <input
                                 type="text"
                                 value={n.logoUrl || ''}
-                                onChange={(e) => handleTopzaLogoChange(n.networkId, e.target.value)}
+                                onChange={(e) => handleProviderLogoChange(n.networkId, e.target.value)}
                                 placeholder="https://example.com/logo.png"
                                 className="vtu-input"
                                 style={{ height: '36px' }}
@@ -741,10 +842,10 @@ export default function AdminVtuSettings() {
             <div className="vtu-main-card">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                 <div>
-                  <h3 style={{ fontSize: '18px', fontWeight: '800', margin: 0 }}>Recent API Transactions</h3>
+                  <h3 style={{ fontSize: '18px', fontWeight: '800', margin: 0 }}>Recent API {isSkdataplug(activeProvider) ? 'Orders' : 'Transactions'}</h3>
                   <p className="vtu-p">Monitor real-time purchase activity from your provider</p>
                 </div>
-                {pollingTopza && (
+                {pollingProvider && (
                   <div className="vtu-badge" style={{ background: '#ecfdf5', color: '#059669', border: '1px solid #d1fae5' }}>
                     <RefreshCw size={10} className="animate-spin" />
                     Live Polling
@@ -763,7 +864,7 @@ export default function AdminVtuSettings() {
                 </div>
               ) : transactions.length === 0 ? (
                 <div style={{ padding: '40px', textAlign: 'center', color: '#000', border: '1.5px dashed #e4e4de', borderRadius: '14px' }}>
-                  No recent transactions found
+                  No recent {isSkdataplug(activeProvider) ? 'orders' : 'transactions'} found
                 </div>
               ) : (
                 <>
@@ -773,8 +874,8 @@ export default function AdminVtuSettings() {
                         <tr>
                           <th className="vtu-th">ID</th>
                           <th className="vtu-th">Recipient</th>
-                          <th className="vtu-th">Details</th>
-                          <th className="vtu-th">Amount</th>
+                          {!isSkdataplug(activeProvider) && <th className="vtu-th">Details</th>}
+                          {!isSkdataplug(activeProvider) && <th className="vtu-th">Amount</th>}
                           <th className="vtu-th">Status</th>
                           <th className="vtu-th">Date</th>
                           <th className="vtu-th">Action</th>
@@ -786,11 +887,11 @@ export default function AdminVtuSettings() {
                           .map((txn, i) => {
                           const item = txn.order_items?.[0] || {};
                           const providerOrder = txn.order || txn.data?.order || {};
-                          const txnId = txn.orderNumber || txn.orderId || txn.transaction_code || txn.transaction_id || txn.trx_ref || txn.id || txn.reference || providerOrder.orderNumber || providerOrder.orderId || '-';
-                          const recipient = item.beneficiary_number || txn.phoneNumber || txn.recipient_msisdn || txn.phone || txn.recipient || providerOrder.phoneNumber || '-';
-                          const network = item.network || txn.network || txn.network_name || providerOrder.network || (txn.network_id ? `Network ${txn.network_id}` : '-');
-                          const bundle = item.volume || txn.planName || providerOrder.planName || providerOrder.dataAmount || txn.dataAmount || (txn.shared_bundle ? `${(txn.shared_bundle / 1000).toFixed(1)}GB` : '-');
-                          const amount = Number.isFinite(Number(txn.amount)) ? `GHS ${formatPrice2dpNoRound(txn.amount)}` : '-';
+                          const txnId = txn.orderNumber || txn.orderId || txn.order_number || txn.order_id || txn.transaction_code || txn.transaction_id || txn.trx_ref || txn.id || txn.reference || providerOrder.orderNumber || providerOrder.orderId || '-';
+                          const recipient = item.beneficiary_number || txn.phoneNumber || txn.recipient_msisdn || txn.phone || txn.recipient || txn.recipient_number || providerOrder.phoneNumber || '-';
+                          const network = item.network || txn.network || txn.network_name || txn.isp || providerOrder.network || (txn.network_id ? `Network ${txn.network_id}` : '-');
+                          const bundle = item.volume || txn.planName || providerOrder.planName || providerOrder.dataAmount || txn.dataAmount || txn.gb_size || (txn.shared_bundle ? `${(txn.shared_bundle / 1000).toFixed(1)}GB` : '-');
+                          const amount = Number.isFinite(Number(txn.amount || txn.price)) ? `GHS ${formatPrice2dpNoRound(txn.amount || txn.price)}` : '-';
                           const status = item.status || txn.status || txn.transaction_status || '-';
                           const date = txn.createdAt || txn.created_at || txn.lastUpdated || txn.date || txn.timestamp;
 
@@ -823,13 +924,15 @@ export default function AdminVtuSettings() {
                                   <span style={{ fontWeight: '700' }}>{recipient}</span>
                                 </div>
                               </td>
-                              <td className="vtu-td">
-                                <div style={{ fontSize: '12px' }}>
-                                  <div style={{ fontWeight: '600', color: c.main }}>{network}</div>
-                                  <div style={{ color: '#000' }}>{bundle}</div>
-                                </div>
-                              </td>
-                              <td className="vtu-td font-bold" style={{ color: '#059669' }}>{amount}</td>
+                              {!isSkdataplug(activeProvider) && (
+                                <td className="vtu-td">
+                                  <div style={{ fontSize: '12px' }}>
+                                    <div style={{ fontWeight: '600', color: c.main }}>{network}</div>
+                                    <div style={{ color: '#000' }}>{bundle}</div>
+                                  </div>
+                                </td>
+                              )}
+                              {!isSkdataplug(activeProvider) && <td className="vtu-td font-bold" style={{ color: '#059669' }}>{amount}</td>}
                               <td className="vtu-td">
                                 <span className="vtu-badge" style={badgeStyles}>{status}</span>
                               </td>

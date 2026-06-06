@@ -1,10 +1,12 @@
 const axios = require('axios');
 const User = require('../models/User');
 const Order = require('../models/Order');
-const TopzaOffer = require('../models/TopzaOffer');
+const _TopzaOffer = require('../models/TopzaOffer');
+const _SkdataplugOffer = require('../models/SkdataplugOffer');
 const Transaction = require('../models/Transaction');
 const SystemSettings = require('../models/SystemSettings');
 const topzaApi = require('../utils/topzaApi');
+const skdataplugApi = require('../utils/skdataplugApi');
 const { createNotification } = require('./notificationController');
 const { isValidNetworkNumber } = require('../utils/validation');
 const { validatePhoneNumber } = require('../utils/phoneValidation');
@@ -79,6 +81,24 @@ const normalizeTopzaProviderStatus = (status) => {
   return 'Pending';
 };
 
+const getActiveOfferModel = async () => {
+  const settings = await SystemSettings.getSettings();
+  const provider = settings?.vtuProvider || 'topza';
+  if (provider === 'skdataplug') {
+    return { model: require('../models/SkdataplugOffer'), provider: 'skdataplug', planType: 'SkdataplugOffer' };
+  }
+  return { model: require('../models/TopzaOffer'), provider: 'topza', planType: 'TopzaOffer' };
+};
+
+const getActiveApi = async () => {
+  const settings = await SystemSettings.getSettings();
+  const provider = settings?.vtuProvider || 'topza';
+  if (provider === 'skdataplug') {
+    return { api: skdataplugApi, provider: 'skdataplug' };
+  }
+  return { api: topzaApi, provider: 'topza' };
+};
+
 exports.buyDataBundle = async (req, res) => {
   try {
     const { dataPlanId, phoneNumber, paymentMethod } = req.body;
@@ -113,33 +133,34 @@ exports.buyDataBundle = async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    const topzaOffer = await TopzaOffer.findById(dataPlanId);
-    if (!topzaOffer) {
+    const { model: OfferModel, provider: activeProvider, planType: activePlanType } = await getActiveOfferModel();
+    const offer = await OfferModel.findById(dataPlanId);
+    if (!offer) {
       return res.status(404).json({ success: false, message: 'Plan not found' });
     }
 
-    const topzaUnavailable =
-      topzaOffer.status !== 'active' ||
-      (topzaOffer.stockOverriddenByAdmin === true && topzaOffer.inStock === false);
-    if (topzaUnavailable) {
+    const offerUnavailable =
+      offer.status !== 'active' ||
+      (offer.stockOverriddenByAdmin === true && offer.inStock === false);
+    if (offerUnavailable) {
       return res.status(400).json({ success: false, message: 'This data plan is currently unavailable' });
     }
 
-    const price = resolvePlanPrice(topzaOffer, { userRole: user.role, agentFeeStatus: user.agentFeeStatus });
+    const price = resolvePlanPrice(offer, { userRole: user.role, agentFeeStatus: user.agentFeeStatus });
     if (price <= 0) {
       return res.status(400).json({ success: false, message: 'This data plan does not have a valid price yet' });
     }
 
     const plan = {
-      ...topzaOffer.toObject(),
-      planName: topzaOffer.name,
-      apiPlanId: topzaOffer.providerPlanId,
-      network: topzaOffer.isp,
-      dataSize: `${topzaOffer.volume}GB`,
-      provider: 'topza',
+      ...offer.toObject(),
+      planName: offer.name,
+      apiPlanId: offer.providerPlanId,
+      network: offer.isp,
+      dataSize: `${offer.volume}GB`,
+      provider: activeProvider,
       sellingPrice: price,
-      costPrice: topzaOffer.costPrice || 0,
-      planType: 'TopzaOffer',
+      costPrice: offer.costPrice || 0,
+      planType: activePlanType,
     };
 
     // Validate phone number and network match
@@ -186,7 +207,7 @@ exports.buyDataBundle = async (req, res) => {
       paymentMethod,
       status: 'pending',
       paymentStatus: 'pending',
-      provider: 'topza',
+      provider: plan.provider,
       adminBasePrice: plan.costPrice || plan.sellingPrice,
       agentCommission: ((user.agentFeeStatus === 'paid' || user.agentFeeStatus === 'protocol') && plan.sellingPrice && plan.costPrice) ? (plan.sellingPrice - plan.costPrice) : 0,
     });
@@ -232,14 +253,15 @@ const handleWalletPayment = async (req, res, user, plan, order) => {
     }
 
     // Check provider balance
-    const balanceCheck = await topzaApi.getWalletBalance();
+    const { api: activeApi } = await getActiveApi();
+    const balanceCheck = await activeApi.getWalletBalance();
 
     if (!balanceCheck.success || (!balanceCheck.isPlaceholder && balanceCheck.balance < plan.costPrice)) {
       order.status = 'failed';
       order.paymentStatus = 'failed';
       order.errorMessage = 'Data purchase currently unavailable';
       await order.save();
-      console.error(`[Wallet Payment] topza balance check failed:`, balanceCheck);
+      console.error(`[Wallet Payment] ${plan.provider} balance check failed:`, balanceCheck);
       return res.status(503).json({
         success: false,
         message: 'Data purchase currently unavailable',
@@ -266,8 +288,8 @@ const handleWalletPayment = async (req, res, user, plan, order) => {
       });
     }
 
-    const idempotencyKey = 'TPZ' + order.orderNumber;
-    const purchaseResponse = await topzaApi.purchaseDataBundle(plan.apiPlanId, order.phoneNumber, order.network, null, idempotencyKey);
+    const idempotencyKey = (plan.provider === 'skdataplug' ? 'SKP' : 'TPZ') + order.orderNumber;
+    const purchaseResponse = await activeApi.purchaseDataBundle(plan.apiPlanId, order.phoneNumber, order.network, plan.volume || null, idempotencyKey);
 
     if (!purchaseResponse.success) {
       order.status = 'failed';
@@ -427,7 +449,8 @@ const handlePaystackPayment = async (req, res, user, plan, order, charge = 0) =>
       });
     }
 
-    const balanceCheck = await topzaApi.getWalletBalance();
+    const { api: activeApiPaystack } = await getActiveApi();
+    const balanceCheck = await activeApiPaystack.getWalletBalance();
 
     if (!balanceCheck.success || (!balanceCheck.isPlaceholder && balanceCheck.balance < plan.costPrice)) {
       order.status = 'failed';
@@ -466,7 +489,7 @@ const handlePaystackPayment = async (req, res, user, plan, order, charge = 0) =>
         type: 'data_purchase',
         dataPlanId: plan._id.toString(),
         phoneNumber: order.phoneNumber,
-        provider: 'topza',
+        provider: plan.provider,
         transactionCharge: charge,
       },
     };
@@ -583,8 +606,9 @@ exports.verifyDataPurchase = async (req, res) => {
       });
     }
 
-    const idempotencyKey = 'TPZ' + order.orderNumber;
-    const purchaseResponse = await topzaApi.purchaseDataBundle(order.apiPlanId, order.phoneNumber, order.network, null, idempotencyKey);
+    const idempotencyKey = (order.provider === 'skdataplug' ? 'SKP' : 'TPZ') + order.orderNumber;
+    const { api: activeApiVerify } = await getActiveApi();
+    const purchaseResponse = await activeApiVerify.purchaseDataBundle(order.apiPlanId, order.phoneNumber, order.network, order.dataAmount ? order.dataAmount.replace('GB','') : null, idempotencyKey);
 
     if (!purchaseResponse.success) {
       order.status = 'failed';

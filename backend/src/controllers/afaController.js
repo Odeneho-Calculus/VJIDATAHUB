@@ -300,6 +300,7 @@ exports.registerAfa = async (req, res) => {
           amount: price,
           type: 'refund',
           status: 'completed',
+          paymentStatus: 'completed',
           reference: `REF${orderNumber}`,
           description: `Refund for failed AFA Registration: ${phoneNumber}`,
           metadata: { orderId: order._id }

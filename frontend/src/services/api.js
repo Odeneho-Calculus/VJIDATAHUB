@@ -142,6 +142,18 @@ export const admin = {
     return api.get(`/topza/webhook/logs?${params.toString()}`);
   },
   clearTopzaWebhookLogs: () => api.delete('/topza/webhook/logs'),
+  getSkdataplugWalletSettings: () => api.get('/admin/skdataplug/settings'),
+  getSkdataplugWalletTransactions: (page = 1, limit = 25) =>
+    api.get(`/admin/skdataplug/transactions?page=${page}&limit=${limit}`),
+  getSkdataplugWebhookLogs: (page = 1, limit = 25, filters = {}) => {
+    const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+    if (filters.handled !== undefined) params.set('handled', String(filters.handled));
+    if (filters.signatureValid !== undefined) params.set('signatureValid', String(filters.signatureValid));
+    if (filters.event) params.set('event', String(filters.event));
+    if (filters.reason) params.set('reason', String(filters.reason));
+    return api.get(`/skdataplug/webhook/logs?${params.toString()}`);
+  },
+  clearSkdataplugWebhookLogs: () => api.delete('/skdataplug/webhook/logs'),
   getSystemSettings: () => api.get('/admin/settings'),
   updateSystemSettings: (data) => api.patch('/admin/settings', data),
   getNotifications: (page = 1, limit = 20, type = '', isRead = '', search = '') =>
@@ -180,6 +192,21 @@ export const topza = {
   updateStock: (ids, inStock, resetOverride = false) =>
     api.patch('/topza/offers/stock', { ids, inStock, resetOverride }),
   getWalletSettings: () => api.get('/topza/wallet'),
+};
+
+export const skdataplug = {
+  list: (network = '', status = 'active', page = 1, limit = 50) =>
+    api.get(`/skdataplug/offers?network=${network}&status=${status}&page=${page}&limit=${limit}`),
+  getStats: (network = 'all') => api.get(`/skdataplug/stats?network=${network}`),
+  getNetworks: () => api.get('/skdataplug/networks'),
+  sync: () => api.post('/skdataplug/sync'),
+  updatePrices: (id, prices) => api.patch(`/skdataplug/${id}/prices`, prices),
+  toggleStatus: (id) => api.patch(`/skdataplug/${id}/toggle-status`),
+  delete: (id) => api.delete(`/skdataplug/${id}`),
+  bulkDelete: (ids) => api.delete('/skdataplug/offers', { data: { ids } }),
+  updateStock: (ids, inStock, resetOverride = false) =>
+    api.patch('/skdataplug/offers/stock', { ids, inStock, resetOverride }),
+  getWalletSettings: () => api.get('/skdataplug/wallet'),
 };
 
 export const checkers = {

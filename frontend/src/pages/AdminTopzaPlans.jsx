@@ -51,7 +51,7 @@ export default function AdminTopzaPlans() {
 
   useEffect(() => {
     adminAPI.getSystemSettings().then((res) => {
-      const catalog = res?.settings?.networkCatalog || [];
+      const catalog = res?.settings?.topzaNetworkCatalog || res?.settings?.networkCatalog || [];
       setNetworkCatalog(catalog.filter((n) => n?.isActive !== false));
     }).catch(() => {});
   }, []);
@@ -87,8 +87,8 @@ export default function AdminTopzaPlans() {
   }, [page, selectedNetwork, fetchPlans, fetchStats]);
 
   useEffect(() => {
-    const provider = settings?.vtuProvider || 'topza';
-    if (provider !== 'topza') navigate('/admin/topza-plans', { replace: true });
+    const provider = settings?.vtuProvider || 'tp';
+    if (provider !== 'tp') navigate('/admin/skdataplug-plans', { replace: true });
   }, [settings?.vtuProvider, navigate]);
 
   const showMessage = (msg, isError = false) => {

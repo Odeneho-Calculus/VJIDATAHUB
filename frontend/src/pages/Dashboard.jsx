@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { formatCurrencyAbbreviated } from '../utils/formatCurrency';
+import { getNetworkStyles } from '../utils/networkStyles';
 import {
   Check,
   Copy,
@@ -32,6 +33,7 @@ import {
 import { wallet, purchases, publicAPI } from '../services/api';
 import UserLayout from '../components/UserLayout';
 
+
 /* ── Homepage multi-colour palette ── */
 const palette = [
   { main: '#7C3AED', bg: '#EDE9FE', soft: '#F5F3FF', glow: 'rgba(124,58,237,0.15)' },   // purple
@@ -45,6 +47,8 @@ const palette = [
 ];
 
 const getColor = (index) => palette[index % palette.length];
+
+
 
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
@@ -625,25 +629,53 @@ export default function Dashboard() {
                 <Loader2 className="w-8 h-8 text-[#7C3AED] animate-spin" />
               </div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                {dataBundles.map((bundle, idx) => {
-                  const c = getColor(idx);
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                {dataBundles.map((bundle) => {
+                  const netStyles = getNetworkStyles(bundle.network);
+                  const c = netStyles.palette;
                   return (
                     <Link
                       key={bundle._id}
                       to={`/buy-data?planId=${bundle._id}&planName=${encodeURIComponent(bundle.planName)}&dataSize=${encodeURIComponent(bundle.dataSize)}&price=${bundle.sellingPrice}&network=${bundle.network}`}
-                      className="dash-bundle-card"
+                      className="dash-bundle-card group"
                       style={{
                         '--bundle-color': c.main + '66',
                         '--bundle-glow': c.glow,
+                        background: c.gradient || c.main,
+                        border: 'none',
+                        padding: '16px'
                       }}
                     >
-                      <span className="text-[9px] font-black uppercase mb-1" style={{ color: c.main }}>{bundle.network}</span>
-                      <span className="text-lg font-black text-[#111]">{bundle.dataSize}</span>
-                      <span className="text-[10px] font-bold text-black mb-3">{bundle.validity}</span>
-                      <div className="mt-auto pt-2 border-t border-[#f0f0f0] flex items-center justify-between">
-                        <span className="text-sm font-black" style={{ color: c.main }}>{formatCurrencyAbbreviated(bundle.sellingPrice)}</span>
-                        <ChevronRight size={14} style={{ color: c.main }} />
+                      <div className="flex justify-between items-start mb-3">
+                        <span className="px-2 py-0.5 rounded-md text-[9px] font-black uppercase border" style={{ background: 'rgba(255,255,255,0.2)', color: c.text, borderColor: 'rgba(255,255,255,0.3)' }}>{bundle.network}</span>
+                      </div>
+
+                      <div className="mb-4">
+                        <h4 className="text-xl font-black leading-tight mb-1" style={{ color: c.text }}>{bundle.dataSize}</h4>
+                        <p className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5" style={{ color: c.text === '#ffffff' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.6)' }}>
+                          <Clock size={10} strokeWidth={3} />
+                          {bundle.validity || 'Instantly Active'}
+                        </p>
+                      </div>
+
+                      <div className="mt-auto pt-4 border-t" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+                        <div className="flex items-center justify-between mb-4">
+                          <span className="text-xs font-black" style={{ color: c.text }}>{formatCurrencyAbbreviated(bundle.sellingPrice)}</span>
+                          <div className="w-6 h-6 rounded-full flex items-center justify-center transition-all" style={{ background: 'rgba(255,255,255,0.2)', color: c.text }}>
+                            <ChevronRight size={12} strokeWidth={3} />
+                          </div>
+                        </div>
+
+                        <div
+                          className="w-full py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all text-center"
+                          style={{ 
+                            background: c.text === '#ffffff' ? '#ffffff' : '#000000', 
+                            color: c.text === '#ffffff' ? c.main : '#ffffff', 
+                            boxShadow: `0 4px 12px ${c.glow}` 
+                          }}
+                        >
+                          Buy Bundle
+                        </div>
                       </div>
                     </Link>
                   );

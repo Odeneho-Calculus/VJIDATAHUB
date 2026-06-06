@@ -2,13 +2,14 @@ import React, { createContext, useState, useEffect, useContext, useCallback, use
 import { io } from 'socket.io-client';
 import { publicAPI } from '../services/api';
 import { getSocketBaseUrl } from '../utils/apiBaseUrl';
+import { toAbbreviation } from '../utils/providerMap';
 
 const SettingsContext = createContext();
 
 const SOCKET_URL = getSocketBaseUrl();
 
 export function SettingsProvider({ children }) {
-  const [settings, setSettings] = useState({ vtuProvider: 'topza' });
+  const [settings, setSettings] = useState({ vtuProvider: 'tp' });
   const [loading, setLoading] = useState(true);
   const socketRef = useRef(null);
 
@@ -16,7 +17,12 @@ export function SettingsProvider({ children }) {
     try {
       const response = await publicAPI.getSystemSettings();
       if (response.success) {
-        setSettings(response.settings);
+        // Normalize provider to abbreviation
+        const normalized = {
+          ...response.settings,
+          vtuProvider: toAbbreviation(response.settings?.vtuProvider || 'tp'),
+        };
+        setSettings(normalized);
       }
     } catch (err) {
       console.error('Failed to fetch system settings:', err);
@@ -39,7 +45,7 @@ export function SettingsProvider({ children }) {
     });
 
     socket.on('vtu_provider_changed', ({ provider }) => {
-      setSettings(prev => ({ ...prev, vtuProvider: provider }));
+      setSettings(prev => ({ ...prev, vtuProvider: toAbbreviation(provider) }));
     });
 
     return () => {

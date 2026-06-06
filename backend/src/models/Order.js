@@ -15,7 +15,7 @@ const orderSchema = new mongoose.Schema(
     },
     planType: {
       type: String,
-      enum: ['DataPlan', 'TopzaOffer', 'TopzaCheckerOffer', 'AfaOffer'],
+      enum: ['DataPlan', 'TopzaOffer', 'SkdataplugOffer', 'TopzaCheckerOffer', 'AfaOffer'],
       default: 'DataPlan',
     },
     apiPlanId: {
@@ -104,7 +104,7 @@ const orderSchema = new mongoose.Schema(
     },
     provider: {
       type: String,
-      enum: ['topza'],
+      enum: ['topza', 'skdataplug'],
       default: 'topza',
     },
     externalOrderId: {

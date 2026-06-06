@@ -1,12 +1,14 @@
 const DataPlan = require('../models/DataPlan');
 const TopzaOffer = require('../models/TopzaOffer');
-// const SystemSettings = require('../models/SystemSettings');
+const SkdataplugOffer = require('../models/SkdataplugOffer');
+const SystemSettings = require('../models/SystemSettings');
 const { resolvePlanPrice } = require('../utils/planPricing');
+const { toAbbreviation } = require('../utils/providerMap');
 
 exports.syncDataPlans = async (req, res) => {
   return res.status(410).json({
     success: false,
-    message: 'Legacy sync is no longer available. Use Topza sync instead.',
+    message: 'Legacy sync is no longer available. Use the active provider sync instead.',
   });
 };
 
@@ -285,12 +287,23 @@ exports.getPublicActivePlans = async (req, res) => {
       }
     }
 
-    const topzaOffers = await TopzaOffer.find({
-      status: 'active',
-      inStock: true,
-    }).sort({ isp: 1, volume: 1 });
+    const settings = await SystemSettings.getSettings();
+    const activeProvider = settings?.vtuProvider || 'topza';
 
-    const plans = topzaOffers
+    let offers = [];
+    if (activeProvider === 'skdataplug') {
+      offers = await SkdataplugOffer.find({
+        status: 'active',
+        inStock: true,
+      }).sort({ isp: 1, volume: 1 });
+    } else {
+      offers = await TopzaOffer.find({
+        status: 'active',
+        inStock: true,
+      }).sort({ isp: 1, volume: 1 });
+    }
+
+    const plans = offers
       .map((p) => {
         const price = resolvePlanPrice(p, { userRole, agentFeeStatus });
 
@@ -305,7 +318,7 @@ exports.getPublicActivePlans = async (req, res) => {
             vendorPrice: p.vendorPrice,
             validity: p.validity || '30 Days',
             inStock: p.inStock,
-            provider: 'topza',
+            provider: toAbbreviation(activeProvider),
             networkId: p.providerPlanId,
             dataSizeMB: p.volume,
           }
@@ -327,7 +340,7 @@ exports.getPublicActivePlans = async (req, res) => {
       plans: paginatedPlans,
       grouped: groupedByNetwork,
       total: plans.length,
-      provider: 'topza',
+      provider: toAbbreviation(activeProvider),
     });
   } catch (error) {
     res.status(500).json({

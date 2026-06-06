@@ -510,6 +510,10 @@ exports.syncOffers = async (req, res) => {
             existing.status = 'active';
             existing.isActive = true;
           }
+        } else {
+          // costPrice is 0 — force plan to inactive regardless of provider status
+          existing.status = 'inactive';
+          existing.isActive = false;
         }
         // Only auto-deactivate if no prices are configured AND provider also deactivated it
         if (!hasAnyConfiguredPrice(existing) && !providerIsActive) {

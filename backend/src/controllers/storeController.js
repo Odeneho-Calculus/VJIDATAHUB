@@ -9,11 +9,20 @@ const SellerCommission = require('../models/SellerCommission');
 const SystemSettings = require('../models/SystemSettings');
 const DataPlan = require('../models/DataPlan');
 const TopzaOffer = require('../models/TopzaOffer');
+const SkdataplugOffer = require('../models/SkdataplugOffer');
 const AfaOffer = require('../models/AfaOffer');
 const Transaction = require('../models/Transaction');
 const { getOrCreateLedger, moveToPending, creditCommissionForOrder } = require('../services/commissionService');
 const { isPositivePrice, resolvePlanPrice } = require('../utils/planPricing');
 const { calculateDataPurchaseCharge } = require('../utils/transactionCharges');
+const { toAbbreviation } = require('../utils/providerMap');
+const topzaApi = require('../utils/topzaApi');
+const skdataplugApi = require('../utils/skdataplugApi');
+
+const getApiByPlanType = (planType) => {
+  if (planType === 'SkdataplugOffer') return { api: skdataplugApi, provider: 'skdataplug' };
+  return { api: topzaApi, provider: 'topza' };
+};
 
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 const PAYSTACK_BASE_URL = process.env.PAYSTACK_BASE_URL || 'https://api.paystack.co';
@@ -145,11 +154,11 @@ exports.getMyStore = async (req, res) => {
       await store.save();
     }
 
-    // Filter out store plans whose underlying TopzaOffer/DataPlan is inactive or out of stock
+    // Filter out store plans whose underlying offer/DataPlan is inactive or out of stock
     const availablePlans = (store.plans || []).filter((p) => {
       const basePlan = p.planId;
       if (!basePlan) return false;
-      if (p.planType === 'TopzaOffer') {
+      if (p.planType === 'TopzaOffer' || p.planType === 'SkdataplugOffer') {
         return basePlan.status === 'active' && basePlan.inStock === true;
       }
       // DataPlan
@@ -233,8 +242,13 @@ exports.updateMyStore = async (req, res) => {
 // GET /my-store/available-plans - Get unified plans based on active provider
 exports.getAvailablePlans = async (req, res) => {
   try {
-    const topzaOffers = await TopzaOffer.find({ status: 'active', inStock: true }).sort({ isp: 1, volume: 1 });
-    const availablePlans = topzaOffers
+    const settings = await SystemSettings.getSettings();
+    const activeProvider = settings?.vtuProvider || 'topza';
+    const OfferModel = activeProvider === 'skdataplug' ? require('../models/SkdataplugOffer') : TopzaOffer;
+    const planType = activeProvider === 'skdataplug' ? 'SkdataplugOffer' : 'TopzaOffer';
+
+    const offers = await OfferModel.find({ status: 'active', inStock: true }).sort({ isp: 1, volume: 1 });
+    const availablePlans = offers
       .map((p) => {
         const agentBasePrice = resolvePlanPrice(p, { userRole: 'agent', agentFeeStatus: 'paid' });
         return agentBasePrice > 0
@@ -246,8 +260,8 @@ exports.getAvailablePlans = async (req, res) => {
             agentPrice: agentBasePrice,
             publicPrice: p.sellingPrice,
             validity: p.validity,
-            provider: 'topza',
-            planType: 'TopzaOffer',
+            provider: toAbbreviation(activeProvider),
+            planType,
           }
           : null;
       })
@@ -256,7 +270,7 @@ exports.getAvailablePlans = async (req, res) => {
     res.status(200).json({
       success: true,
       plans: availablePlans,
-      provider: 'topza',
+      provider: toAbbreviation(activeProvider),
     });
   } catch (error) {
     console.error('getAvailablePlans error:', error);
@@ -285,6 +299,8 @@ exports.addPlanToStore = async (req, res) => {
     let planData;
     if (planType === 'TopzaOffer') {
       planData = await TopzaOffer.findById(planId);
+    } else if (planType === 'SkdataplugOffer') {
+      planData = await SkdataplugOffer.findById(planId);
     } else {
       planData = await DataPlan.findById(planId);
     }
@@ -293,7 +309,7 @@ exports.addPlanToStore = async (req, res) => {
       return res.status(404).json({ success: false, message: `${planType} not found` });
     }
 
-    const minPrice = (planType === 'TopzaOffer')
+    const minPrice = (planType === 'TopzaOffer' || planType === 'SkdataplugOffer')
       ? resolvePlanPrice(planData, { userRole: 'agent', agentFeeStatus: 'paid' })
       : planData.sellingPrice;
     if (!isPositivePrice(minPrice)) {
@@ -319,8 +335,8 @@ exports.addPlanToStore = async (req, res) => {
       planType,
       customPrice,
       isActive: true,
-      network: (planType === 'TopzaOffer') ? planData.isp : planData.network,
-      dataSize: (planType === 'TopzaOffer') ? `${planData.volume}GB` : planData.dataSize,
+      network: (planType === 'TopzaOffer' || planType === 'SkdataplugOffer') ? planData.isp : planData.network,
+      dataSize: (planType === 'TopzaOffer' || planType === 'SkdataplugOffer') ? `${planData.volume}GB` : planData.dataSize,
     });
 
     await store.save();
@@ -374,6 +390,8 @@ exports.updateStorePlan = async (req, res) => {
     let planData;
     if (effectivePlanType === 'TopzaOffer') {
       planData = await TopzaOffer.findById(effectivePlanId);
+    } else if (effectivePlanType === 'SkdataplugOffer') {
+      planData = await SkdataplugOffer.findById(effectivePlanId);
     } else {
       planData = await DataPlan.findById(effectivePlanId);
     }
@@ -382,7 +400,7 @@ exports.updateStorePlan = async (req, res) => {
       return res.status(404).json({ success: false, message: `${effectivePlanType} not found` });
     }
 
-    const minPrice = (effectivePlanType === 'TopzaOffer') ? (planData.agentPrice || planData.sellingPrice) : planData.sellingPrice;
+    const minPrice = (effectivePlanType === 'TopzaOffer' || effectivePlanType === 'SkdataplugOffer') ? (planData.agentPrice || planData.sellingPrice) : planData.sellingPrice;
     if (customPrice < minPrice) {
       return res.status(400).json({
         success: false,
@@ -458,7 +476,7 @@ exports.getAvailableAfaProducts = async (req, res) => {
         serviceName: p.serviceName,
         agentPrice: agentBasePrice,
         publicPrice: p.sellingPrice,
-        provider: 'topza',
+        provider: toAbbreviation('topza'),
         planType: 'AfaOffer'
       };
     });
@@ -1203,11 +1221,11 @@ exports.getPublicStore = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Store not found' });
     }
 
-    // Filter out store plans whose underlying TopzaOffer/DataPlan is inactive or out of stock
+    // Filter out store plans whose underlying offer/DataPlan is inactive or out of stock
     const availablePlans = (store.plans || []).filter((p) => {
       const basePlan = p.planId;
       if (!basePlan) return false;
-      if (p.planType === 'TopzaOffer') {
+      if (p.planType === 'TopzaOffer' || p.planType === 'SkdataplugOffer') {
         return basePlan.status === 'active' && basePlan.inStock === true;
       }
       // DataPlan
@@ -1251,11 +1269,11 @@ exports.getPublicPlans = async (req, res) => {
 
     let plans = store.plans.filter(p => p.isActive);
 
-    // Filter out plans whose underlying TopzaOffer/DataPlan is inactive or out of stock
+    // Filter out plans whose underlying offer/DataPlan is inactive or out of stock
     plans = plans.filter((p) => {
       const basePlan = p.planId;
       if (!basePlan) return false;
-      if (p.planType === 'TopzaOffer') {
+      if (p.planType === 'TopzaOffer' || p.planType === 'SkdataplugOffer') {
         return basePlan.status === 'active' && basePlan.inStock === true;
       }
       // DataPlan
@@ -1330,6 +1348,8 @@ exports.purchasePublicBundle = async (req, res) => {
     let planData;
     if (storePlan.planType === 'TopzaOffer') {
       planData = await TopzaOffer.findById(storePlan.planId);
+    } else if (storePlan.planType === 'SkdataplugOffer') {
+      planData = await SkdataplugOffer.findById(storePlan.planId);
     } else {
       planData = await DataPlan.findById(storePlan.planId);
     }
@@ -1345,6 +1365,15 @@ exports.purchasePublicBundle = async (req, res) => {
       (planData.stockOverriddenByAdmin === true && planData.inStock === false);
     if (isUnavailable) {
       return res.status(400).json({ success: false, message: 'This data plan is currently unavailable' });
+    }
+
+    // Check provider balance for the plan's specific provider (skip for SKDataPlug — no balance API)
+    if (storePlan.planType !== 'SkdataplugOffer') {
+      const { api: planApi } = getApiByPlanType(storePlan.planType);
+      const balanceCheck = await planApi.getWalletBalance();
+      if (!balanceCheck.success || (!balanceCheck.isPlaceholder && balanceCheck.balance < (planData.costPrice || 0))) {
+        return res.status(400).json({ success: false, message: 'Data purchase currently unavailable' });
+      }
     }
 
     const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
@@ -1378,7 +1407,7 @@ exports.purchasePublicBundle = async (req, res) => {
       paymentMethod: 'paystack',
       status: 'pending',
       paymentStatus: 'pending',
-      provider: 'topza',
+      provider: storePlan.planType === 'SkdataplugOffer' ? 'skdataplug' : 'topza',
       source: 'store',
     });
 
@@ -1498,27 +1527,36 @@ exports.verifyPublicPayment = async (req, res) => {
     order.paidAt = new Date();
     await order.save();
 
-    // Place the order with the provider (Topza)
-    const topzaApi = require('../utils/topzaApi');
+    // Place the order with the correct provider API based on the plan type
     const { createNotification } = require('./notificationController');
     const Store = require('../models/Store');
     const TopzaOffer = require('../models/TopzaOffer');
+    const SkdataplugOffer = require('../models/SkdataplugOffer');
     const DataPlan = require('../models/DataPlan');
 
-    // Resolve the correct provider plan ID for Topza API
-    let topzaPlanId = order.apiPlanId;
-    if (!topzaPlanId && order.dataPlanId) {
-      const planDoc = order.planType === 'TopzaOffer'
-        ? await TopzaOffer.findById(order.dataPlanId).select('providerPlanId')
-        : await DataPlan.findById(order.dataPlanId).select('providerPlanId');
-      topzaPlanId = planDoc?.providerPlanId || order.dataPlanId;
+    // Resolve the correct provider plan ID
+    let providerPlanId = order.apiPlanId;
+    if (!providerPlanId && order.dataPlanId) {
+      let planDoc;
+      if (order.planType === 'TopzaOffer') {
+        planDoc = await TopzaOffer.findById(order.dataPlanId).select('providerPlanId');
+      } else if (order.planType === 'SkdataplugOffer') {
+        planDoc = await SkdataplugOffer.findById(order.dataPlanId).select('providerPlanId');
+      } else {
+        planDoc = await DataPlan.findById(order.dataPlanId).select('providerPlanId');
+      }
+      providerPlanId = planDoc?.providerPlanId || order.dataPlanId;
     }
 
-    const providerResponse = await topzaApi.purchaseDataBundle(
-      topzaPlanId,
+    const { api: planApi, provider: planProvider } = getApiByPlanType(order.planType);
+    const purchaseVolume = planProvider === 'skdataplug'
+      ? (order.dataAmount ? order.dataAmount.replace('GB', '') : null)
+      : order.dataAmount;
+    const providerResponse = await planApi.purchaseDataBundle(
+      providerPlanId,
       order.phoneNumber,
       order.network,
-      order.dataAmount,
+      purchaseVolume,
       order.orderNumber
     );
 
@@ -1531,7 +1569,7 @@ exports.verifyPublicPayment = async (req, res) => {
       order.statusHistory.push({
         status: 'processing',
         updatedAt: new Date(),
-        source: 'topza_api',
+        source: 'provider_api',
         notes: providerResponse.data?.message || 'Order placed successfully',
       });
       await order.save();
@@ -1557,7 +1595,7 @@ exports.verifyPublicPayment = async (req, res) => {
       order.statusHistory.push({
         status: 'failed',
         updatedAt: new Date(),
-        source: 'topza_api',
+        source: 'provider_api',
         notes: providerResponse.error || 'Provider purchase failed',
       });
       await order.save();
@@ -1625,17 +1663,14 @@ exports.trackGuestOrdersByStore = async (req, res) => {
       });
     }
 
-    const guest = await Guest.findOne({
-      phone: phone,
-      store: store._id,
-    })
-      .populate({
-        path: 'orders',
-        match: { storeId: store._id },
-        options: { sort: { createdAt: -1 } },
-      });
+    // Query orders directly — store purchases don't always create a Guest document
+    const orders = await Order.find({
+      storeId: store._id,
+      phoneNumber: phone,
+      isGuest: true,
+    }).sort({ createdAt: -1 });
 
-    if (!guest || guest.orders.length === 0) {
+    if (!orders || orders.length === 0) {
       return res.json({
         success: true,
         data: {
@@ -1646,7 +1681,8 @@ exports.trackGuestOrdersByStore = async (req, res) => {
       });
     }
 
-    const orders = guest.orders.map((order) => ({
+    const formattedOrders = orders.map((order) => ({
+      _id: order._id,
       orderNumber: order.orderNumber,
       network: order.network,
       phoneNumber: order.phoneNumber,
@@ -1666,15 +1702,8 @@ exports.trackGuestOrdersByStore = async (req, res) => {
     res.json({
       success: true,
       data: {
-        orders: orders,
-        totalOrders: orders.length,
-        guestInfo: {
-          email: guest.email,
-          name: guest.name,
-          phone: guest.phone,
-          totalPurchases: guest.totalPurchases,
-          lastPurchaseAt: guest.lastPurchaseAt,
-        },
+        orders: formattedOrders,
+        totalOrders: formattedOrders.length,
       },
     });
   } catch (error) {

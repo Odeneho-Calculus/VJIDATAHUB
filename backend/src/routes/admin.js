@@ -92,6 +92,9 @@ router.patch('/referrals/:referralId/status', updateReferralStatus);
 router.get('/topza/settings', (req, res) => require('../controllers/topzaController').getWalletSettings(req, res));
 router.get('/topza/transactions', (req, res) => require('../controllers/topzaController').getWalletTransactions(req, res));
 
+router.get('/skdataplug/settings', (req, res) => require('../controllers/skdataplugController').getWalletSettings(req, res));
+router.get('/skdataplug/transactions', (req, res) => require('../controllers/skdataplugController').getWalletTransactions(req, res));
+
 router.get('/settings', getSystemSettings);
 router.patch('/settings', updateSystemSettings);
 

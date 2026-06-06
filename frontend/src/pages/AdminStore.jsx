@@ -266,15 +266,16 @@ const styles = `
   .tab-button {
     flex-shrink: 0;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
-    padding: 12px;
-    border-radius: 12px;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 10px;
     transition: all 0.2s;
     border: 1.5px solid #e4e4de;
     background: #fff;
-    min-width: 100px;
+    min-width: auto;
   }
 
   .tab-button.active {
@@ -442,7 +443,7 @@ export default function AdminStore() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
                 >
-                  <tab.icon size={20} className="mb-1" />
+                  <tab.icon size={16} />
                   <span className="text-[10px] font-bold uppercase tracking-wider">{tab.label}</span>
                 </button>
               ))}
@@ -463,7 +464,6 @@ export default function AdminStore() {
             {activeTab === 'plans' && (
               <InventoryTab
                 plans={storeData.plans || []}
-                activeProvider='topza'
                 onRefresh={fetchStore}
                 showAlert={showAlert}
               />
@@ -887,12 +887,14 @@ function OverviewTab({ data, onRefresh, showAlert }) {
 function InventoryTab({ plans, onRefresh, showAlert }) {
   const [showAdd, setShowAdd] = useState(false);
   const [globalPlans, setGlobalPlans] = useState([]);
+  const [activeProvider, setActiveProvider] = useState('tp');
   const [loadingGlobal, setLoadingGlobal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [networkFilter, setNetworkFilter] = useState('all');
   const [selectedPlanForPrice, setSelectedPlanForPrice] = useState(null);
   const [selectedPlanForEdit, setSelectedPlanForEdit] = useState(null);
 
+  const providerToPlanType = (provider) => (provider === 'sk' ? 'SkdataplugOffer' : 'TopzaOffer');
 
   useEffect(() => {
     if (showAdd) fetchGlobalPlans();
@@ -903,6 +905,7 @@ function InventoryTab({ plans, onRefresh, showAlert }) {
       setLoadingGlobal(true);
       const res = await storeAPI.getAvailablePlans();
       setGlobalPlans(res.plans || []);
+      setActiveProvider(res.provider || 'tp');
     } catch (err) {
       console.error(err);
     } finally {
@@ -1048,7 +1051,7 @@ function InventoryTab({ plans, onRefresh, showAlert }) {
           submitLabel="Add Plan"
           onClose={() => setSelectedPlanForPrice(null)}
           onConfirm={async (price) => {
-            const planType = selectedPlanForPrice.planType || 'TopzaOffer';
+            const planType = selectedPlanForPrice.planType || providerToPlanType(activeProvider);
             await storeAPI.addPlan({ planId: selectedPlanForPrice._id, customPrice: price, planType });
             onRefresh();
             setSelectedPlanForPrice(null);

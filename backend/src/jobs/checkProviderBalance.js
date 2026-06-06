@@ -1,5 +1,7 @@
 const cron = require('node-cron');
 const topzaApi = require('../utils/topzaApi');
+const skdataplugApi = require('../utils/skdataplugApi');
+const SystemSettings = require('../models/SystemSettings');
 const { createNotification } = require('../controllers/notificationController');
 
 let isChecking = false;
@@ -10,10 +12,20 @@ const checkProviderBalance = async () => {
         if (isChecking) return;
         isChecking = true;
 
-        const result = await topzaApi.getWalletBalance();
+        const settings = await SystemSettings.getSettings();
+        const activeProvider = settings?.vtuProvider || 'topza';
+
+        let result;
+        let providerName = 'Topza';
+        if (activeProvider === 'skdataplug') {
+            result = await skdataplugApi.getWalletBalance();
+            providerName = 'SKDataPlug';
+        } else {
+            result = await topzaApi.getWalletBalance();
+        }
 
         if (!result.success) {
-            console.warn(`[Provider Balance] Failed to fetch Topza balance:`, result.error);
+            console.warn(`[Provider Balance] Failed to fetch ${providerName} balance:`, result.error);
             isChecking = false;
             return;
         }
@@ -37,14 +49,14 @@ const checkProviderBalance = async () => {
             if (timeSinceLastNotification >= notificationInterval) {
                 const notificationResult = await createNotification({
                     type: 'low_balance',
-                    title: `Low Topza Wallet Balance`,
-                    message: `Your Topza wallet balance is low (${balance.toFixed(2)} GHS)`,
+                    title: `Low ${providerName} Wallet Balance`,
+                    message: `Your ${providerName} wallet balance is low (${balance.toFixed(2)} GHS)`,
                     description: `Current balance is below the threshold of ${threshold} GHS. Please top up your provider wallet to ensure uninterrupted service.`,
                     severity: 'warning',
                     data: {
                         balance,
                         threshold,
-                        provider: 'topza',
+                        provider: activeProvider,
                         metadata: { timestamp: now, source: 'cron-job' },
                     },
                     actionUrl: '/admin/vtu-settings',
@@ -52,7 +64,7 @@ const checkProviderBalance = async () => {
 
                 if (notificationResult.success) {
                     lastNotificationTime = now;
-                    console.log(`[Provider Balance] Low balance notification sent for Topza`);
+                    console.log(`[Provider Balance] Low balance notification sent for ${providerName}`);
                 } else {
                     console.error('[Provider Balance] Failed to create notification:', notificationResult.error);
                 }

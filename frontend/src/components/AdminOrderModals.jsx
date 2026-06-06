@@ -65,17 +65,19 @@ export const OrderDetailsModal = ({ isOpen, onClose, order, onRefund, themeColor
             <p className="text-[9px] font-black uppercase tracking-widest mb-0.5" style={{ color: c.main }}>Order ID</p>
             <p className="text-xs font-black text-[#111] break-all">#{order.orderNumber?.toUpperCase() || 'N/A'}</p>
           </div>
-          <div className="p-3 rounded-xl border border-slate-100" style={{ background: c.soft }}>
-            <p className="text-[9px] font-black uppercase tracking-widest mb-1" style={{ color: c.main }}>Payment Status</p>
-            <span className={`inline-block px-2 py-0.5 rounded-lg text-[9px] font-black uppercase ${order.paymentStatus === 'completed'
-                ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
-                : order.paymentStatus === 'pending'
-                  ? 'bg-amber-100 text-amber-700 border border-amber-200'
-                  : 'bg-red-100 text-red-700 border border-red-200'
-              }`}>
-              {order.paymentStatus || 'pending'}
-            </span>
-          </div>
+          {order.paymentStatus && (
+            <div className="p-3 rounded-xl border border-slate-100" style={{ background: c.soft }}>
+              <p className="text-[9px] font-black uppercase tracking-widest mb-1" style={{ color: c.main }}>Payment Status</p>
+              <span className={`inline-block px-2 py-0.5 rounded-lg text-[9px] font-black uppercase ${order.paymentStatus === 'completed'
+                  ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                  : order.paymentStatus === 'pending'
+                    ? 'bg-amber-100 text-amber-700 border border-amber-200'
+                    : 'bg-red-100 text-red-700 border border-red-200'
+                }`}>
+                {order.paymentStatus || 'pending'}
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 gap-3">
@@ -110,26 +112,28 @@ export const OrderDetailsModal = ({ isOpen, onClose, order, onRefund, themeColor
           </div>
         )}
 
-        <div>
-          <h3 className="text-[10px] font-black text-black uppercase tracking-widest mb-2 flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full" style={{ background: c.main }}></div>
-            Customer Info
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <div className="p-2.5 bg-[#fafaf7] border border-slate-100 rounded-xl">
-              <p className="text-[9px] font-bold text-black uppercase">Name</p>
-              <p className="text-xs font-black text-[#111]">{order.user?.name || order.userId?.name || 'Unknown'}</p>
-            </div>
-            <div className="p-2.5 bg-[#fafaf7] border border-slate-100 rounded-xl">
-              <p className="text-[9px] font-bold text-black uppercase">Email</p>
-              <p className="text-xs font-black text-[#111] truncate">{order.user?.email || order.userId?.email || 'N/A'}</p>
-            </div>
-            <div className="p-2.5 bg-[#fafaf7] border border-slate-100 rounded-xl sm:col-span-2">
-              <p className="text-[9px] font-bold text-black uppercase">Phone</p>
-              <p className="text-xs font-black text-[#111]">{order.phoneNumber || 'N/A'}</p>
+        {(order.user?.name || order.userId?.name || (order.user?.email || order.userId?.email)) && (
+          <div>
+            <h3 className="text-[10px] font-black text-black uppercase tracking-widest mb-2 flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full" style={{ background: c.main }}></div>
+              Customer Info
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="p-2.5 bg-[#fafaf7] border border-slate-100 rounded-xl">
+                <p className="text-[9px] font-bold text-black uppercase">Name</p>
+                <p className="text-xs font-black text-[#111]">{order.user?.name || order.userId?.name || 'Unknown'}</p>
+              </div>
+              <div className="p-2.5 bg-[#fafaf7] border border-slate-100 rounded-xl">
+                <p className="text-[9px] font-bold text-black uppercase">Email</p>
+                <p className="text-xs font-black text-[#111] truncate">{order.user?.email || order.userId?.email || 'N/A'}</p>
+              </div>
+              <div className="p-2.5 bg-[#fafaf7] border border-slate-100 rounded-xl sm:col-span-2">
+                <p className="text-[9px] font-bold text-black uppercase">Phone</p>
+                <p className="text-xs font-black text-[#111]">{order.phoneNumber || 'N/A'}</p>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {order.store && (
           <div>
@@ -191,18 +195,24 @@ export const OrderDetailsModal = ({ isOpen, onClose, order, onRefund, themeColor
             Plan Information
           </h3>
           <div className="grid grid-cols-2 gap-2">
-            <div className="p-2.5 bg-[#fafaf7] border border-slate-100 rounded-xl">
-              <p className="text-[9px] font-bold text-black uppercase">Network</p>
-              <p className="text-xs font-black text-[#111] uppercase">{order.network || 'N/A'}</p>
-            </div>
-            <div className="p-2.5 bg-[#fafaf7] border border-slate-100 rounded-xl">
-              <p className="text-[9px] font-bold text-black uppercase">{planAmountLabel}</p>
-              <p className="text-xs font-black text-[#111]">{planAmountValue}</p>
-            </div>
-            <div className="p-3 border rounded-xl col-span-2 flex justify-between items-center" style={{ background: c.soft, borderColor: c.main + '22' }}>
-              <p className="text-[10px] font-black text-black uppercase">Total Amount</p>
-              <p className="text-lg font-black" style={{ color: c.main }}>GHS {formatNumberAbbreviated(order.amount) || '0'}</p>
-            </div>
+            {order.network && order.network !== 'N/A' && (
+              <div className="p-2.5 bg-[#fafaf7] border border-slate-100 rounded-xl">
+                <p className="text-[9px] font-bold text-black uppercase">Network</p>
+                <p className="text-xs font-black text-[#111] uppercase">{order.network}</p>
+              </div>
+            )}
+            {planAmountValue && planAmountValue !== 'N/A' && (
+              <div className="p-2.5 bg-[#fafaf7] border border-slate-100 rounded-xl">
+                <p className="text-[9px] font-bold text-black uppercase">{planAmountLabel}</p>
+                <p className="text-xs font-black text-[#111]">{planAmountValue}</p>
+              </div>
+            )}
+            {order.amount > 0 && (
+              <div className="p-3 border rounded-xl col-span-2 flex justify-between items-center" style={{ background: c.soft, borderColor: c.main + '22' }}>
+                <p className="text-[10px] font-black text-black uppercase">Total Amount</p>
+                <p className="text-lg font-black" style={{ color: c.main }}>GHS {formatNumberAbbreviated(order.amount) || '0'}</p>
+              </div>
+            )}
           </div>
         </div>
 

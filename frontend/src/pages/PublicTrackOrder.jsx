@@ -17,6 +17,7 @@ export default function PublicTrackOrder() {
     const [error, setError] = useState('');
     const [searched, setSearched] = useState(false);
     const [visiblePins, setVisiblePins] = useState({});
+    const [expandedOrder, setExpandedOrder] = useState(null);
 
     const getSocialValue = (value) => {
         if (typeof value === 'string') return value.trim();
@@ -26,6 +27,10 @@ export default function PublicTrackOrder() {
 
     const togglePinVisibility = (id) => {
         setVisiblePins(prev => ({ ...prev, [id]: !prev[id] }));
+    };
+
+    const toggleOrderExpand = (id) => {
+        setExpandedOrder(prev => prev === id ? null : id);
     };
 
     useEffect(() => {
@@ -55,7 +60,7 @@ export default function PublicTrackOrder() {
             setError('');
             const response = await storeAPI.trackGuestOrders(slug, phoneNumber);
             if (response.success) {
-                setOrders(response.orders);
+                setOrders(response.data?.orders || []);
                 setSearched(true);
             } else {
                 setError(response.message || 'Failed to fetch orders');
@@ -250,11 +255,11 @@ export default function PublicTrackOrder() {
                 {searched && (
                     <div className="space-y-4">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-1">
-                            <h3 className="text-sm font-semibold text-black">Purchase History ({orders.length})</h3>
-                            {orders.length > 0 && <span className="text-xs text-black">Showing records for {phoneNumber}</span>}
+                            <h3 className="text-sm font-semibold text-black">Purchase History ({orders?.length || 0})</h3>
+                            {orders?.length > 0 && <span className="text-xs text-black">Showing records for {phoneNumber}</span>}
                         </div>
 
-                        {orders.length === 0 ? (
+                        {orders?.length === 0 ? (
                             <div className="bg-white rounded-2xl p-12 text-center border border-slate-200 space-y-3">
                                 <div className="w-14 h-14 bg-slate-50 rounded-xl flex items-center justify-center mx-auto text-black">
                                     <Database size={32} />
@@ -268,76 +273,125 @@ export default function PublicTrackOrder() {
                             <div className="grid grid-cols-1 gap-4">
                                 {orders.map((order) => {
                                     const StatusIcon = statusIcons[order.status] || Clock;
+                                    const isExpanded = expandedOrder === order._id;
                                     return (
                                         <div
                                             key={order._id}
-                                            className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all group flex flex-col sm:flex-row items-center gap-4"
+                                            onClick={() => toggleOrderExpand(order._id)}
+                                            className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all group cursor-pointer overflow-hidden"
                                         >
-                                            <div className="w-11 h-11 rounded-xl flex items-center justify-center text-black font-bold text-sm uppercase flex-shrink-0" style={{ color: primaryColor, backgroundColor: hexToRgba(primaryColor, 0.12) }}>
-                                                {order.network?.charAt(0)}
-                                            </div>
+                                            <div className="p-4 sm:p-5 flex flex-col sm:flex-row items-center gap-4">
+                                                <div className="w-11 h-11 rounded-xl flex items-center justify-center text-black font-bold text-sm uppercase flex-shrink-0" style={{ color: primaryColor, backgroundColor: hexToRgba(primaryColor, 0.12) }}>
+                                                    {order.network?.charAt(0)}
+                                                </div>
 
-                                            <div className="flex-1 text-center sm:text-left space-y-1.5">
-                                                <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2">
-                                                    <h4 className="font-bold text-black text-base">{order.planName}</h4>
-                                                    <span className="text-xs text-black hidden sm:inline">•</span>
-                                                    <span className="text-xs font-medium text-black">{order.phoneNumber}</span>
-                                                </div>
-                                                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 text-[11px] text-black">
-                                                    <div className="flex items-center gap-1.5">
-                                                        <Calendar size={12} />
-                                                        {new Date(order.createdAt).toLocaleDateString()}
+                                                <div className="flex-1 text-center sm:text-left space-y-1.5">
+                                                    <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2">
+                                                        <h4 className="font-bold text-black text-base">{order.planName}</h4>
+                                                        <span className="text-xs text-black hidden sm:inline">•</span>
+                                                        <span className="text-xs font-medium text-black">{order.phoneNumber}</span>
                                                     </div>
-                                                    <div className="flex items-center gap-1.5">
-                                                        <Clock size={12} />
-                                                        {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                    </div>
-                                                    <div className="flex items-center gap-1.5">
-                                                        <Sparkles size={12} style={{ color: primaryColor }} />
-                                                        {formatCurrencyAbbreviated(order.amount)}
-                                                    </div>
-                                                </div>
-                                                
-                                                {order.status === 'completed' && order.checkerDetails && (order.checkerDetails.pin || order.checkerDetails.serialNumber) && (
-                                                    <div className="mt-3 p-3 bg-slate-50 rounded-xl border border-slate-200 inline-block">
-                                                        <div className="flex flex-col gap-1">
-                                                            <div className="flex items-center gap-3">
-                                                                <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Pin Code:</span>
-                                                                <div className="flex items-center gap-2">
-                                                                    <span className="font-black text-sm tracking-tight text-slate-900">
-                                                                        {visiblePins[order._id] ? order.checkerDetails.pin : '•••• •••• ••••'}
-                                                                    </span>
-                                                                    <button 
-                                                                        onClick={() => togglePinVisibility(order._id)}
-                                                                        className="p-1 hover:bg-slate-200 rounded transition-colors text-slate-500"
-                                                                    >
-                                                                        {visiblePins[order._id] ? <EyeOff size={14} /> : <Eye size={14} />}
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                            {order.checkerDetails.serialNumber && (
-                                                                <div className="flex items-center gap-3">
-                                                                    <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Serial:</span>
-                                                                    <span className="text-[10px] text-slate-600 font-bold uppercase tracking-wider">{order.checkerDetails.serialNumber}</span>
-                                                                </div>
-                                                            )}
+                                                    <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 text-[11px] text-black">
+                                                        <div className="flex items-center gap-1.5">
+                                                            <Calendar size={12} />
+                                                            {new Date(order.createdAt).toLocaleDateString()}
+                                                        </div>
+                                                        <div className="flex items-center gap-1.5">
+                                                            <Clock size={12} />
+                                                            {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                        </div>
+                                                        <div className="flex items-center gap-1.5">
+                                                            <Sparkles size={12} style={{ color: primaryColor }} />
+                                                            {formatCurrencyAbbreviated(order.amount)}
                                                         </div>
                                                     </div>
-                                                )}
+                                                </div>
+
+                                                <div className="flex items-center gap-2 w-full sm:w-auto">
+                                                    <div className={`flex-1 sm:flex-none px-3.5 py-2 rounded-lg border text-[11px] font-semibold capitalize flex items-center justify-center gap-1.5 ${paymentStatusColors[order.paymentStatus] || 'bg-slate-100 text-black border-slate-200'}`}>
+                                                        Pay: {order.paymentStatus || 'pending'}
+                                                    </div>
+                                                    <div className={`flex-1 sm:flex-none px-3.5 py-2 rounded-lg border text-[11px] font-semibold capitalize flex items-center justify-center gap-1.5 ${statusColors[order.status] || 'bg-slate-100 text-black border-slate-200'}`}>
+                                                        <StatusIcon size={14} />
+                                                        {order.status}
+                                                    </div>
+                                                    <div className={`hidden sm:flex w-8 h-8 rounded-full border border-slate-200 items-center justify-center text-black group-hover:bg-slate-50 transition-all ${isExpanded ? 'rotate-90' : ''}`}>
+                                                        <ChevronRight size={14} />
+                                                    </div>
+                                                </div>
                                             </div>
 
-                                            <div className="flex items-center gap-2 w-full sm:w-auto">
-                                                <div className={`flex-1 sm:flex-none px-3.5 py-2 rounded-lg border text-[11px] font-semibold capitalize flex items-center justify-center gap-1.5 ${paymentStatusColors[order.paymentStatus] || 'bg-slate-100 text-black border-slate-200'}`}>
-                                                    Pay: {order.paymentStatus || 'pending'}
+                                            {isExpanded && (
+                                                <div className="px-4 sm:px-5 pb-4 sm:pb-5 border-t border-slate-100">
+                                                    <div className="pt-4 flex flex-wrap gap-x-6 gap-y-2">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[11px] text-black">Order:</span>
+                                                            <span className="text-[11px] font-semibold text-black">{order.orderNumber}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[11px] text-black">Network:</span>
+                                                            <span className="text-[11px] font-semibold text-black capitalize">{order.network}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[11px] text-black">Data:</span>
+                                                            <span className="text-[11px] font-semibold text-black">{order.dataAmount || 'N/A'}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[11px] text-black">Payment:</span>
+                                                            <span className="text-[11px] font-semibold text-black capitalize">{order.paymentMethod}</span>
+                                                        </div>
+                                                    </div>
+
+                                                    {order.providerMessage && (
+                                                        <div className="mt-3 bg-green-50 border border-green-200 rounded-xl p-3">
+                                                            <p className="text-[11px] text-green-700 leading-relaxed">
+                                                                <span className="font-semibold">Message:</span> {order.providerMessage}
+                                                            </p>
+                                                        </div>
+                                                    )}
+
+                                                    {order.errorMessage && (
+                                                        <div className="mt-3 bg-rose-50 border border-rose-200 rounded-xl p-3">
+                                                            <p className="text-[11px] text-rose-700 leading-relaxed">
+                                                                <span className="font-semibold">Error:</span> {order.errorMessage}
+                                                            </p>
+                                                        </div>
+                                                    )}
+
+                                                    {order.completedAt && (
+                                                        <div className="mt-3 text-[11px] text-black">
+                                                            <span className="font-semibold">Completed:</span> {new Date(order.completedAt).toLocaleString()}
+                                                        </div>
+                                                    )}
+
+                                                    {order.status === 'completed' && order.checkerDetails && (order.checkerDetails.pin || order.checkerDetails.serialNumber) && (
+                                                        <div className="mt-3 p-3 bg-slate-50 rounded-xl border border-slate-200 inline-block">
+                                                            <div className="flex flex-col gap-1">
+                                                                <div className="flex items-center gap-3">
+                                                                    <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Pin Code:</span>
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className="font-black text-sm tracking-tight text-slate-900">
+                                                                            {visiblePins[order._id] ? order.checkerDetails.pin : '•••• •••• ••••'}
+                                                                        </span>
+                                                                        <button
+                                                                            onClick={(e) => { e.stopPropagation(); togglePinVisibility(order._id); }}
+                                                                            className="p-1 hover:bg-slate-200 rounded transition-colors text-slate-500"
+                                                                        >
+                                                                            {visiblePins[order._id] ? <EyeOff size={14} /> : <Eye size={14} />}
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                                {order.checkerDetails.serialNumber && (
+                                                                    <div className="flex items-center gap-3">
+                                                                        <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Serial:</span>
+                                                                        <span className="text-[10px] text-slate-600 font-bold uppercase tracking-wider">{order.checkerDetails.serialNumber}</span>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </div>
-                                                <div className={`flex-1 sm:flex-none px-3.5 py-2 rounded-lg border text-[11px] font-semibold capitalize flex items-center justify-center gap-1.5 ${statusColors[order.status] || 'bg-slate-100 text-black border-slate-200'}`}>
-                                                    <StatusIcon size={14} />
-                                                    {order.status}
-                                                </div>
-                                                <div className="hidden sm:flex w-8 h-8 rounded-full border border-slate-200 items-center justify-center text-black group-hover:text-black group-hover:bg-slate-50 transition-all">
-                                                    <ChevronRight size={14} />
-                                                </div>
-                                            </div>
+                                            )}
                                         </div>
                                     );
                                 })}

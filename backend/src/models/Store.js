@@ -54,7 +54,7 @@ const storeSchema = new mongoose.Schema(
         },
         planType: {
           type: String,
-          enum: ['DataPlan', 'TopzaOffer'],
+          enum: ['DataPlan', 'TopzaOffer', 'SkdataplugOffer'],
           default: 'DataPlan',
         },
         customPrice: {

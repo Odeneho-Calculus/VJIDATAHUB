@@ -54,15 +54,15 @@ const styles = `
     border: 1.5px solid transparent;
   }
   .usb-link-active {
-    background: var(--active-bg, #111);
+    background: var(--active-bg, #4F46E5);
     color: #fff;
   }
   .usb-link-inactive {
     color: #374151;
   }
   .usb-link-inactive:hover {
-    background: #f5f5f0;
-    color: #111;
+    background: #F5F3FF;
+    color: #4F46E5;
   }
 
   .usb-switch-btn {
@@ -72,17 +72,21 @@ const styles = `
     gap: 10px;
     padding: 10px 12px;
     border-radius: 7px;
-    border: 1.5px dashed #e0e0d8;
-    background: none;
+    border: 1.5px dashed #DDD6FE;
+    background: #F5F3FF;
     font-family: inherit;
     font-size: 14px;
     font-weight: 600;
-    color: #374151;
+    color: #4F46E5;
     cursor: pointer;
-    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    transition: all 0.2s;
     margin-top: 4px;
   }
-  .usb-switch-btn:hover { background: #f5f5f0; color: #111; border-color: #6b7280; }
+  .usb-switch-btn:hover { 
+    background: #EDE9FE; 
+    color: #4338CA; 
+    border-color: #7C3AED; 
+  }
 
   .usb-logout-btn {
     width: 100%;
@@ -108,7 +112,8 @@ const styles = `
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    color: #6b7280;
+    color: #4F46E5;
+    opacity: 0.7;
     padding: 18px 12px 7px;
   }
 
@@ -185,15 +190,16 @@ export default function UserSidebar({ isOpen, onClose }) {
         <div style={{ padding: '20px', borderBottom: '1.5px solid #e4e4de', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{
-              width: 40, height: 40, background: '#7C3AED', borderRadius: 8,
+              width: 40, height: 40, background: '#4F46E5', borderRadius: 8,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               color: '#fff', flexShrink: 0,
+              boxShadow: '0 4px 12px rgba(79, 70, 229, 0.25)'
             }}>
               <ShieldCheck size={20} />
             </div>
             <div>
-              <p style={{ fontSize: 14, fontWeight: 800, color: '#111', margin: 0 }}>User Account</p>
-              <p style={{ fontSize: 10, fontWeight: 700, color: '#bbb', textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0 }}>Personal Hub</p>
+              <p style={{ fontSize: 14, fontWeight: 800, color: '#1E1B4B', margin: 0 }}>User Account</p>
+              <p style={{ fontSize: 10, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0 }}>Personal Hub</p>
             </div>
           </div>
           <button
@@ -262,13 +268,17 @@ export default function UserSidebar({ isOpen, onClose }) {
               to="/become-agent"
               onClick={onClose}
               className={`usb-link ${isActive('/become-agent') ? 'usb-link-active' : 'usb-link-inactive'}`}
-              style={{ border: '1.5px dashed #e0e0d8', marginTop: 4 }}
+              style={{ 
+                border: '1.5px dashed #e0e0d8', 
+                marginTop: 4,
+                ...(isActive('/become-agent') ? { '--active-bg': '#4F46E5', borderStyle: 'solid', borderColor: '#4F46E5' } : {})
+              }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <div style={{
                   width: 28, height: 28, borderRadius: 6,
-                  background: isActive('/become-agent') ? '#7C3AED' : '#F5F3FF',
-                  color: isActive('/become-agent') ? '#fff' : '#7C3AED',
+                  background: isActive('/become-agent') ? '#fff' : '#F5F3FF',
+                  color: isActive('/become-agent') ? '#4F46E5' : '#7C3AED',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   flexShrink: 0,
                 }}>
@@ -276,7 +286,7 @@ export default function UserSidebar({ isOpen, onClose }) {
                 </div>
                 <span>Become an Agent</span>
               </div>
-              <ChevronRight size={13} style={{ color: isActive('/become-agent') ? '#7C3AED' : '#ccc', flexShrink: 0 }} />
+              <ChevronRight size={13} style={{ color: isActive('/become-agent') ? '#fff' : '#ccc', flexShrink: 0 }} />
             </Link>
           ) : null}
         </nav>
@@ -292,17 +302,17 @@ export default function UserSidebar({ isOpen, onClose }) {
           }}>
             <div style={{
               width: 34, height: 34, borderRadius: 6,
-              background: '#7C3AED', color: '#fff',
+              background: '#4F46E5', color: '#fff',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontWeight: 800, fontSize: 12, flexShrink: 0,
             }}>
               {user?.name?.slice(0, 2).toUpperCase() || 'US'}
             </div>
             <div style={{ minWidth: 0 }}>
-              <p style={{ fontSize: 13, fontWeight: 700, color: '#111', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <p style={{ fontSize: 13, fontWeight: 700, color: '#1E1B4B', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {user?.name || 'User'}
               </p>
-              <p style={{ fontSize: 10, fontWeight: 700, color: '#bbb', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
+              <p style={{ fontSize: 10, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
                 Verified Member
               </p>
             </div>

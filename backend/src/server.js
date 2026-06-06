@@ -7,6 +7,7 @@ const helmet = require('helmet');
 const connectDB = require('./config/database');
 const { startProviderBalanceCheckJob } = require('./jobs/checkProviderBalance');
 const { startTopzaOrderStatusSyncJob } = require('./jobs/syncTopzaOrderStatus');
+const { startSkdataplugOrderStatusSyncJob } = require('./jobs/syncSkdataplugOrderStatus');
 
 const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
@@ -60,6 +61,12 @@ try {
   console.error('Failed to initialize Topza status sync job:', error.message);
 }
 
+try {
+  startSkdataplugOrderStatusSyncJob();
+} catch (error) {
+  console.error('Failed to initialize SKDataPlug status sync job:', error.message);
+}
+
 app.use(cors({
   origin: allowedOrigins,
   credentials: true
@@ -103,6 +110,7 @@ app.use('/api/upgrade', require('./routes/upgrade'));
 app.use('/api/admin/notifications', require('./routes/notifications'));
 
 app.use('/api/topza', require('./routes/topza'));
+app.use('/api/skdataplug', require('./routes/skdataplug'));
 app.use('/api/checkers', require('./routes/checkers'));
 app.use('/api/afa', require('./routes/afa'));
 

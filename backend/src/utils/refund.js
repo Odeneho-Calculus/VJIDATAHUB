@@ -43,6 +43,7 @@ const processRefund = async (order, reason = 'Data purchase failed') => {
       amount: amountToRefund,
       reference,
       status: 'completed',
+      paymentStatus: 'completed',
       description: `Refund for failed order ${order.orderNumber}: ${reason}${commissionReversed ? ` (Commission of GHS ${reversedAmount} reversed)` : ''}`,
     });
 
@@ -139,6 +140,7 @@ const processStoreOrderRefund = async (order, reason = 'Store order failed') => 
       amount: adminBasePrice,
       reference,
       status: 'completed',
+      paymentStatus: 'completed',
       description: `Store order refund for failed order ${order.orderNumber}: ${reason}. Admin base price GHS ${adminBasePrice} credited to agent wallet.${commissionReversed ? ` Commission of GHS ${reversedAmount} reversed.` : ''}`,
     });
 

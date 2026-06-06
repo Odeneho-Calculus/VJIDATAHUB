@@ -125,7 +125,8 @@ exports.getReferralSettings = async (req, res) => {
     const settings = await ReferralSettings.findOne() || await ReferralSettings.create({});
     res.status(200).json({
       success: true,
-      data: settings
+      data: settings,
+      settings: settings // Added for compatibility
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -134,7 +135,7 @@ exports.getReferralSettings = async (req, res) => {
 
 exports.updateReferralSettings = async (req, res) => {
   try {
-    const { amountPerReferral, description, isEnabled } = req.body;
+    const { amountPerReferral, description, isEnabled, minimumWithdrawalAmount, maxReferralsPerUser } = req.body;
     let settings = await ReferralSettings.findOne();
     
     if (!settings) {
@@ -144,13 +145,16 @@ exports.updateReferralSettings = async (req, res) => {
     if (amountPerReferral !== undefined) settings.amountPerReferral = amountPerReferral;
     if (description !== undefined) settings.description = description;
     if (isEnabled !== undefined) settings.isEnabled = isEnabled;
+    if (minimumWithdrawalAmount !== undefined) settings.minimumWithdrawalAmount = minimumWithdrawalAmount;
+    if (maxReferralsPerUser !== undefined) settings.maxReferralsPerUser = maxReferralsPerUser;
 
     await settings.save();
 
     res.status(200).json({
       success: true,
       message: 'Referral settings updated successfully',
-      data: settings
+      data: settings,
+      settings: settings // Added for compatibility
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

@@ -252,23 +252,25 @@ const styles = `
   }
 
   .dash-network-btn {
-    padding: 16px;
-    border-radius: 14px;
+    padding: 10px 20px;
+    border-radius: 12px;
     border: 1.5px solid #e4e4de;
     background: #fafaf7;
     transition: all 0.2s;
     display: flex;
-    flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .dash-network-btn.active {
     background: #0F6E56;
     border-color: #0F6E56;
     color: #fff;
-    box-shadow: 0 10px 20px rgba(15,110,86,0.2);
+    box-shadow: 0 4px 12px rgba(15,110,86,0.2);
   }
 
   .dash-network-btn:not(.active):hover {
@@ -334,9 +336,9 @@ export default function BuyData() {
     return [];
   };
 
-  const fetchDataPlans = useCallback(async () => {
+  const fetchDataPlans = useCallback(async (isSilent = false) => {
     try {
-      setLoading(true);
+      if (!isSilent) setLoading(true);
       const response = await publicAPI.getActivePlans(500, 0);
       if (response.success) {
         const grouped = response.grouped || {};
@@ -344,18 +346,20 @@ export default function BuyData() {
 
         const networks = Object.keys(grouped);
         if (networks.length > 0) {
-          if (!grouped[selectedNetwork]) {
-            setSelectedNetwork(networks[0]);
-          }
+          // If current selectedNetwork is not in new data, or not set yet, pick first
+          setSelectedNetwork(prev => {
+             if (!prev || !grouped[prev]) return networks[0];
+             return prev;
+          });
         }
       }
     } catch (error) {
-      setError('Failed to load data plans');
+      if (!isSilent) setError('Failed to load data plans');
       console.error(error);
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
-  }, [selectedNetwork]);
+  }, []); // No dependencies for the fetch function itself
 
   useEffect(() => {
     fetchDataPlans();
@@ -650,7 +654,7 @@ export default function BuyData() {
               </div>
               Select Network
             </h3>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="flex flex-nowrap sm:flex-wrap gap-2 overflow-x-auto sm:overflow-x-visible pb-2 sm:pb-0 scrollbar-hide">
               {availableNetworks.map(network => {
                 const isSelected = selectedNetwork === network;
                 const netStyles = getNetworkStyles(network);
@@ -666,7 +670,7 @@ export default function BuyData() {
                       boxShadow: `0 10px 20px ${c.glow}`
                     } : {}}
                   >
-                    <Wifi size={24} className={isSelected ? 'text-white' : `text-black group-hover:text-[${c.main}]`} style={!isSelected ? { '--hover-color': c.main } : {}} />
+                    <Wifi size={18} className={isSelected ? 'text-white' : `text-black`} style={!isSelected ? { '--hover-color': c.main } : {}} />
                     <span className="font-black text-[10px] uppercase tracking-widest" style={isSelected ? { color: '#fff' } : {}}>{network}</span>
                   </button>
                 );
@@ -714,7 +718,7 @@ export default function BuyData() {
               </div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                {sortedCurrentBundles.map((bundle, idx) => {
+                {sortedCurrentBundles.map((bundle) => {
                   const displayDataSize = bundle?.dataSize
                     || bundle?.dataAmount
                     || (bundle?.dataSizeMB ? `${bundle.dataSizeMB}GB` : '')

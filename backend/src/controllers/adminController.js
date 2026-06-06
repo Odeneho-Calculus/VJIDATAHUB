@@ -29,7 +29,15 @@ const paystackAPI = axios.create({
   },
 });
 
+const skdataplugApi = require('../utils/skdataplugApi');
+const { toAbbreviation, fromAbbreviation } = require('../utils/providerMap');
+
 const getActiveApi = async () => {
+  const settings = await SystemSettings.getSettings();
+  const provider = settings?.vtuProvider || 'topza';
+  if (provider === 'skdataplug') {
+    return { api: skdataplugApi, provider: 'skdataplug' };
+  }
   return { api: topzaApi, provider: 'topza' };
 };
 
@@ -1621,18 +1629,21 @@ exports.updateReferralStatus = async (req, res) => {
 
 exports.getReferralSettings = async (req, res) => {
   try {
-    const settings = await ReferralSettings.findOne();
+    let settings = await ReferralSettings.findOne();
 
     if (!settings) {
-      return res.status(404).json({
-        success: false,
-        message: 'Referral settings not found',
+      settings = await ReferralSettings.create({
+        amountPerReferral: 1,
+        minimumWithdrawalAmount: 10,
+        isEnabled: true,
+        description: 'Earn GHS per successful referral',
       });
     }
 
     res.status(200).json({
       success: true,
       settings,
+      data: settings, // Added for compatibility
     });
   } catch (error) {
     console.error('getReferralSettings error:', error);
@@ -1645,7 +1656,7 @@ exports.getReferralSettings = async (req, res) => {
 
 exports.updateReferralSettings = async (req, res) => {
   try {
-    const { enabled, commissionRate, minPurchaseAmount } = req.body;
+    const { isEnabled, amountPerReferral, description, minimumWithdrawalAmount, maxReferralsPerUser } = req.body;
 
     let settings = await ReferralSettings.findOne();
 
@@ -1653,9 +1664,11 @@ exports.updateReferralSettings = async (req, res) => {
       settings = new ReferralSettings();
     }
 
-    if (enabled !== undefined) settings.enabled = enabled;
-    if (commissionRate !== undefined) settings.commissionRate = commissionRate;
-    if (minPurchaseAmount !== undefined) settings.minPurchaseAmount = minPurchaseAmount;
+    if (isEnabled !== undefined) settings.isEnabled = isEnabled;
+    if (amountPerReferral !== undefined) settings.amountPerReferral = amountPerReferral;
+    if (description !== undefined) settings.description = description;
+    if (minimumWithdrawalAmount !== undefined) settings.minimumWithdrawalAmount = minimumWithdrawalAmount;
+    if (maxReferralsPerUser !== undefined) settings.maxReferralsPerUser = maxReferralsPerUser;
 
     await settings.save();
 
@@ -1663,6 +1676,7 @@ exports.updateReferralSettings = async (req, res) => {
       success: true,
       message: 'Referral settings updated successfully',
       settings,
+      data: settings, // Compatibility
     });
   } catch (error) {
     console.error('updateReferralSettings error:', error);
@@ -1677,9 +1691,26 @@ exports.getSystemSettings = async (req, res) => {
   try {
     const settings = await SystemSettings.getSettings();
 
+    // Migrate legacy networkCatalog to per-provider catalogs if needed
+    if (Array.isArray(settings.networkCatalog) && settings.networkCatalog.length > 0) {
+      if (!Array.isArray(settings.topzaNetworkCatalog) || settings.topzaNetworkCatalog.length === 0) {
+        settings.topzaNetworkCatalog = settings.networkCatalog;
+      }
+      if (!Array.isArray(settings.skdataplugNetworkCatalog) || settings.skdataplugNetworkCatalog.length === 0) {
+        settings.skdataplugNetworkCatalog = settings.networkCatalog;
+      }
+      await settings.save();
+    }
+
+    // Return a sanitized copy with abbreviated provider names
+    const sanitizedSettings = settings.toObject ? settings.toObject() : { ...settings };
+    if (sanitizedSettings.vtuProvider) {
+      sanitizedSettings.vtuProvider = toAbbreviation(sanitizedSettings.vtuProvider);
+    }
+
     res.status(200).json({
       success: true,
-      settings,
+      settings: sanitizedSettings,
     });
   } catch (error) {
     console.error('getSystemSettings error:', error);
@@ -1701,11 +1732,13 @@ exports.updateSystemSettings = async (req, res) => {
       commissionSettings,
       transactionCharges,
       networkCatalog,
+      topzaNetworkCatalog,
+      skdataplugNetworkCatalog,
       contactDetails,
       orderSettings,
     } = req.body;
 
-    if (vtuProvider !== undefined) settings.vtuProvider = vtuProvider;
+    if (vtuProvider !== undefined) settings.vtuProvider = fromAbbreviation(vtuProvider);
     if (recruitNewAgents !== undefined) settings.recruitNewAgents = recruitNewAgents;
     if (agentFeeSettings !== undefined) {
       settings.agentFeeSettings = { ...settings.agentFeeSettings, ...agentFeeSettings };
@@ -1716,8 +1749,24 @@ exports.updateSystemSettings = async (req, res) => {
     if (transactionCharges !== undefined) {
       settings.transactionCharges = { ...settings.transactionCharges, ...transactionCharges };
     }
-    if (networkCatalog !== undefined) {
+    // Save network catalog to the correct provider-specific field
+    if (topzaNetworkCatalog !== undefined) {
+      settings.topzaNetworkCatalog = topzaNetworkCatalog;
+      settings.networkCatalog = topzaNetworkCatalog;
+    }
+    if (skdataplugNetworkCatalog !== undefined) {
+      settings.skdataplugNetworkCatalog = skdataplugNetworkCatalog;
+      settings.networkCatalog = skdataplugNetworkCatalog;
+    }
+    // Legacy fallback: if frontend sends networkCatalog without provider prefix
+    if (networkCatalog !== undefined && topzaNetworkCatalog === undefined && skdataplugNetworkCatalog === undefined) {
       settings.networkCatalog = networkCatalog;
+      const provider = settings.vtuProvider || 'topza';
+      if (provider === 'skdataplug') {
+        settings.skdataplugNetworkCatalog = networkCatalog;
+      } else {
+        settings.topzaNetworkCatalog = networkCatalog;
+      }
     }
     if (contactDetails !== undefined) {
       settings.contactDetails = { ...settings.contactDetails, ...contactDetails };
@@ -1728,10 +1777,16 @@ exports.updateSystemSettings = async (req, res) => {
 
     await settings.save();
 
+    // Return sanitized copy with abbreviated provider names
+    const sanitizedSettings = settings.toObject ? settings.toObject() : { ...settings };
+    if (sanitizedSettings.vtuProvider) {
+      sanitizedSettings.vtuProvider = toAbbreviation(sanitizedSettings.vtuProvider);
+    }
+
     res.status(200).json({
       success: true,
       message: 'System settings updated successfully',
-      settings,
+      settings: sanitizedSettings,
     });
   } catch (error) {
     console.error('updateSystemSettings error:', error);

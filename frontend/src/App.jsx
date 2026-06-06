@@ -32,6 +32,7 @@ import AdminTransactions from './pages/AdminTransactions';
 import AdminVtuSettings from './pages/AdminVtuSettings';
 import AdminNotifications from './pages/AdminNotifications';
 import AdminTopzaPlans from './pages/AdminTopzaPlans';
+import AdminSkdataplugPlans from './pages/AdminSkdataplugPlans';
 import AdminResultCheckers from './pages/AdminResultCheckers';
 import AdminAfaSettings from './pages/AdminAfaSettings';
 import AdminStore from './pages/AdminStore';
@@ -261,6 +262,14 @@ function AppContent() {
           element={
             <AdminProtectedRoute>
               <AdminTopzaPlans />
+            </AdminProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/skdataplug-plans"
+          element={
+            <AdminProtectedRoute>
+              <AdminSkdataplugPlans />
             </AdminProtectedRoute>
           }
         />

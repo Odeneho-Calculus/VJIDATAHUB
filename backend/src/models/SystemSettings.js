@@ -4,7 +4,7 @@ const systemSettingsSchema = new mongoose.Schema(
   {
     vtuProvider: {
       type: String,
-      enum: ['topza'],
+      enum: ['topza', 'skdataplug'],
       default: 'topza',
     },
     recruitNewAgents: {
@@ -63,6 +63,28 @@ const systemSettingsSchema = new mongoose.Schema(
       },
     },
     networkCatalog: [
+      {
+        name: String,
+        slug: String,
+        logoUrl: String,
+        isActive: {
+          type: Boolean,
+          default: true,
+        },
+      },
+    ],
+    topzaNetworkCatalog: [
+      {
+        name: String,
+        slug: String,
+        logoUrl: String,
+        isActive: {
+          type: Boolean,
+          default: true,
+        },
+      },
+    ],
+    skdataplugNetworkCatalog: [
       {
         name: String,
         slug: String,
@@ -139,7 +161,7 @@ systemSettingsSchema.statics.getSettings = async function () {
     settings = await this.create({ vtuProvider: 'topza' });
   }
   // Migrate old values if needed
-  if (settings.vtuProvider !== 'topza') {
+  if (!['topza', 'skdataplug'].includes(settings.vtuProvider)) {
     settings.vtuProvider = 'topza';
   }
   if (!settings.orderSettings) {

@@ -2,13 +2,16 @@ const axios = require('axios');
 const Guest = require('../models/Guest');
 const Order = require('../models/Order');
 const TopzaOffer = require('../models/TopzaOffer');
+const SkdataplugOffer = require('../models/SkdataplugOffer');
 const Transaction = require('../models/Transaction');
 const SystemSettings = require('../models/SystemSettings');
 const topzaApi = require('../utils/topzaApi');
+const skdataplugApi = require('../utils/skdataplugApi');
 const { isValidNetworkNumber } = require('../utils/validation');
 const { validatePhoneNumber } = require('../utils/phoneValidation');
 const { isPositivePrice } = require('../utils/planPricing');
 const { calculateDataPurchaseCharge } = require('../utils/transactionCharges');
+const { toAbbreviation } = require('../utils/providerMap');
 
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 const PAYSTACK_BASE_URL = process.env.PAYSTACK_BASE_URL || 'https://api.paystack.co';
@@ -50,6 +53,24 @@ const normalizeTopzaProviderStatus = (status) => {
   if (normalized === 'failed' || normalized === 'error') return 'Failed';
   if (normalized === 'processing' || normalized === 'in_progress' || normalized === 'in-progress') return 'Processing';
   return 'Pending';
+};
+
+const getActiveOfferModel = async () => {
+  const settings = await SystemSettings.getSettings();
+  const provider = settings?.vtuProvider || 'topza';
+  if (provider === 'skdataplug') {
+    return { model: SkdataplugOffer, provider: 'skdataplug', planType: 'SkdataplugOffer' };
+  }
+  return { model: TopzaOffer, provider: 'topza', planType: 'TopzaOffer' };
+};
+
+const getActiveApi = async () => {
+  const settings = await SystemSettings.getSettings();
+  const provider = settings?.vtuProvider || 'topza';
+  if (provider === 'skdataplug') {
+    return { api: skdataplugApi, provider: 'skdataplug' };
+  }
+  return { api: topzaApi, provider: 'topza' };
 };
 
 const getFrontendBaseUrl = (req) => {
@@ -99,6 +120,8 @@ exports.getGuestDataPlans = async (req, res) => {
   try {
     const { network } = req.query;
 
+    const { model: OfferModel, provider: activeProvider } = await getActiveOfferModel();
+
     const query = {
       status: 'active',
       isActive: true,
@@ -108,7 +131,7 @@ exports.getGuestDataPlans = async (req, res) => {
       query.isp = network;
     }
 
-    let plans = await TopzaOffer.find(query)
+    let plans = await OfferModel.find(query)
       .select('name isp volume validity sellingPrice costPrice providerPlanId inStock status stockOverriddenByAdmin')
       .sort({ isp: 1, volume: 1 })
       .lean();
@@ -129,13 +152,13 @@ exports.getGuestDataPlans = async (req, res) => {
       sellingPrice: plan.sellingPrice,
       costPrice: plan.costPrice,
       inStock: plan.inStock,
-      provider: 'topza',
+      provider: toAbbreviation(activeProvider),
     }));
 
     res.json({
       success: true,
       data: plans,
-      provider: 'topza',
+      provider: toAbbreviation(activeProvider),
     });
   } catch (error) {
     console.error('Error fetching guest data plans:', error);
@@ -211,9 +234,11 @@ exports.initializeGuestPurchase = async (req, res) => {
 
     const normalizedPhone = phoneValidation.normalized;
 
-    const topzaOffer = await TopzaOffer.findById(dataPlanId);
-    if (!topzaOffer || topzaOffer.status !== 'active' || !isPositivePrice(topzaOffer.sellingPrice)) {
-      log('plan_error', { reason: 'topza_offer_not_found_or_inactive', dataPlanId });
+    const { model: OfferModel, provider: activeProvider, planType: activePlanType } = await getActiveOfferModel();
+
+    const offer = await OfferModel.findById(dataPlanId);
+    if (!offer || offer.status !== 'active' || !isPositivePrice(offer.sellingPrice)) {
+      log('plan_error', { reason: 'offer_not_found_or_inactive', dataPlanId, provider: activeProvider });
       return res.status(404).json({
         success: false,
         message: 'Data plan not found or inactive',
@@ -222,10 +247,10 @@ exports.initializeGuestPurchase = async (req, res) => {
       });
     }
 
-    const topzaUnavailable =
-      topzaOffer.stockOverriddenByAdmin === true && topzaOffer.inStock === false;
-    if (topzaUnavailable) {
-      log('plan_error', { reason: 'topza_offer_unavailable', dataPlanId });
+    const offerUnavailable =
+      offer.stockOverriddenByAdmin === true && offer.inStock === false;
+    if (offerUnavailable) {
+      log('plan_error', { reason: 'offer_unavailable', dataPlanId, provider: activeProvider });
       return res.status(400).json({
         success: false,
         message: 'This data plan is currently unavailable',
@@ -235,16 +260,16 @@ exports.initializeGuestPurchase = async (req, res) => {
     }
 
     const plan = {
-      ...topzaOffer.toObject(),
-      planName: topzaOffer.name,
-      dataAmount: `${topzaOffer.volume}GB`,
-      apiPlanId: topzaOffer.providerPlanId,
-      provider: 'topza',
-      sellingPrice: topzaOffer.sellingPrice,
-      costPrice: topzaOffer.costPrice || 0,
-      network: normalizeNetwork(topzaOffer.isp),
+      ...offer.toObject(),
+      planName: offer.name,
+      dataAmount: `${offer.volume}GB`,
+      apiPlanId: offer.providerPlanId,
+      provider: activeProvider,
+      sellingPrice: offer.sellingPrice,
+      costPrice: offer.costPrice || 0,
+      network: normalizeNetwork(offer.isp),
     };
-    const planType = 'TopzaOffer';
+    const planType = activePlanType;
 
     // Validate phone number
     const isNetworkNumberValid = isValidNetworkNumber(normalizedPhone, plan.network);
@@ -333,6 +358,7 @@ exports.initializeGuestPurchase = async (req, res) => {
       status: 'pending',
       paymentStatus: 'pending',
       provider: plan.provider,
+      adminBasePrice: plan.costPrice || plan.sellingPrice,
       source: 'direct',
       statusHistory: [
         {
@@ -623,12 +649,13 @@ exports.verifyGuestPayment = async (req, res) => {
 
     // Process data purchase
     try {
-      const idempotencyKey = 'TPZ' + order.orderNumber;
-      const providerResponse = await topzaApi.purchaseDataBundle(
+      const { api: activeApi } = await getActiveApi();
+      const idempotencyKey = (order.provider === 'skdataplug' ? 'SKP' : 'TPZ') + order.orderNumber;
+      const providerResponse = await activeApi.purchaseDataBundle(
         order.apiPlanId,
         order.phoneNumber,
         order.network,
-        null,
+        order.dataAmount ? order.dataAmount.replace('GB','') : null,
         idempotencyKey
       );
 
@@ -639,13 +666,13 @@ exports.verifyGuestPayment = async (req, res) => {
         order.completedBy = null;
         order.externalOrderId = providerResponse?.data?.orderId || providerResponse?.data?.reference || null;
         order.externalOrderNumber = providerResponse?.data?.orderNumber || providerResponse?.data?.raw?.data?.order?.orderNumber || order.externalOrderNumber;
-        order.providerMessage = providerResponse?.data?.message || 'Topza order accepted and awaiting webhook update';
+        order.providerMessage = providerResponse?.data?.message || 'Order accepted and awaiting webhook update';
         order.providerStatus = normalizeTopzaProviderStatus(providerResponse?.data?.status || 'Processing');
         order.statusHistory.push({
           status: 'processing',
           updatedAt: new Date(),
-          source: 'topza_api',
-          notes: providerResponse?.data?.message || 'Topza order accepted; waiting for webhook status update',
+          source: 'provider_api',
+          notes: providerResponse?.data?.message || 'Order accepted; waiting for webhook status update',
         });
       } else {
         throw new Error(providerResponse?.error || providerResponse?.message || 'Provider purchase failed');
@@ -678,7 +705,7 @@ exports.verifyGuestPayment = async (req, res) => {
       order.statusHistory.push({
         status: 'failed',
         updatedAt: new Date(),
-        source: 'topza_api',
+        source: 'provider_api',
         notes: providerError.message || 'Failed to deliver data',
       });
       await order.save();

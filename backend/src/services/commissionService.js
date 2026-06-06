@@ -3,6 +3,7 @@ const SellerCommission = require('../models/SellerCommission');
 const CommissionLedger = require('../models/CommissionLedger');
 const Store = require('../models/Store');
 const TopzaOffer = require('../models/TopzaOffer');
+const SkdataplugOffer = require('../models/SkdataplugOffer');
 const TopzaCheckerOffer = require('../models/TopzaCheckerOffer');
 const AfaOffer = require('../models/AfaOffer');
 const DataPlan = require('../models/DataPlan');
@@ -37,6 +38,12 @@ const resolveAdminPriceForOrder = async (order) => {
   let planDoc = null;
   if (order.planType === 'TopzaOffer') {
     planDoc = await TopzaOffer.findById(order.dataPlanId).select('agentPrice sellingPrice costPrice');
+    if (!planDoc) return toNumber(order.adminBasePrice) || 0;
+    return toNumber(planDoc.agentPrice) || toNumber(planDoc.sellingPrice) || toNumber(planDoc.costPrice) || 0;
+  }
+
+  if (order.planType === 'SkdataplugOffer') {
+    planDoc = await SkdataplugOffer.findById(order.dataPlanId).select('agentPrice sellingPrice costPrice');
     if (!planDoc) return toNumber(order.adminBasePrice) || 0;
     return toNumber(planDoc.agentPrice) || toNumber(planDoc.sellingPrice) || toNumber(planDoc.costPrice) || 0;
   }
