@@ -77,7 +77,8 @@ export default function AdminOrders() {
     return getNetworkFamily(normalizedLeft) === getNetworkFamily(normalizedRight);
   };
 
-  const networkCatalog = (settings?.networkCatalog || []).filter((n) => n?.isActive !== false);
+  // Derive network options dynamically from actual orders
+  // This ensures filters always match the active VTU provider's networks
   const dynamicNetworks = Array.from(
     new Set(
       orders
@@ -85,9 +86,7 @@ export default function AdminOrders() {
         .filter(Boolean)
     )
   );
-  const networkOptions = networkCatalog.length > 0
-    ? networkCatalog.map((network) => network.name)
-    : dynamicNetworks;
+  const networkOptions = dynamicNetworks;
 
   useEffect(() => {
     setPage(1);
@@ -117,6 +116,14 @@ export default function AdminOrders() {
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
+
+  // When VTU provider changes, clear network filter and refresh orders
+  useEffect(() => {
+    setNetworkFilter('');
+    setPage(1);
+    fetchOrders({ silent: true });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [settings?.vtuProvider]);
 
   useEffect(() => {
     setSelectedIds(new Set());

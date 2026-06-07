@@ -21,6 +21,7 @@ export default function PublicStore() {
   const socketRef = useRef(null);
   const fabRef = useRef(null);
   const [networkCatalog, setNetworkCatalog] = useState([]);
+  const [networks, setNetworks] = useState([]);
   const [checkers, setCheckers] = useState([]);
   const [afaProducts, setAfaProducts] = useState([]);
 
@@ -55,6 +56,7 @@ export default function PublicStore() {
 
     socketRef.current.on('connect', () => {
       socketRef.current.emit('join_store', slug);
+      socketRef.current.emit('join_vtu_updates');
     });
 
     socketRef.current.on('store_updated', (data) => {
@@ -64,6 +66,12 @@ export default function PublicStore() {
       } else {
         fetchStoreData(false);
       }
+      setTimeout(() => setIsUpdating(false), 2000);
+    });
+
+    socketRef.current.on('vtu_provider_changed', () => {
+      setIsUpdating(true);
+      fetchStoreData(false);
       setTimeout(() => setIsUpdating(false), 2000);
     });
   };
@@ -78,6 +86,11 @@ export default function PublicStore() {
 
       setStore(storeData.store);
 
+      // Use networks derived from actual plans (respects active VTU provider)
+      const planNetworks = storeData.networks || [];
+      setNetworks(planNetworks);
+
+      // Keep networkCatalog for logo lookups only
       const catalog = systemSettings?.settings?.networkCatalog || [];
       const normalize = (v = '') => v.toString().trim().toLowerCase().replace(/\s+/g, '');
       const normalizedCatalog = catalog
@@ -556,32 +569,40 @@ export default function PublicStore() {
                   </Link>
                 </div>
 
-                {networkCatalog.length > 0 ? (
+                {networks.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-                    {networkCatalog.map((net) => (
-                      <button
-                        key={net.name}
-                        onClick={() => handleNetworkClick(net.name)}
-                        className="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-all text-left bg-white"
-                      >
-                        <div className="w-11 h-11 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center overflow-hidden flex-shrink-0">
-                          {net.logoUrl ? (
-                            <img src={net.logoUrl} alt={`${net.name} logo`} className="w-full h-full object-contain" />
-                          ) : (
-                            <Smartphone size={20} className="text-black" />
-                          )}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-sm font-semibold text-black truncate">{net.name}</p>
-                          <p className="text-xs text-black">Open plans</p>
-                        </div>
-                        <ChevronRight size={16} className="text-black ml-auto" />
-                      </button>
-                    ))}
+                    {networks.map((netName) => {
+                      // Look up logo from networkCatalog if available
+                      const normalize = (v = '') => v.toString().trim().toLowerCase().replace(/\s+/g, '');
+                      const catalogEntry = networkCatalog.find(
+                        (n) => normalize(n.name) === normalize(netName) || normalize(n.slug) === normalize(netName)
+                      );
+                      const logoUrl = catalogEntry?.logoUrl;
+                      return (
+                        <button
+                          key={netName}
+                          onClick={() => handleNetworkClick(netName)}
+                          className="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-all text-left bg-white"
+                        >
+                          <div className="w-11 h-11 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+                            {logoUrl ? (
+                              <img src={logoUrl} alt={`${netName} logo`} className="w-full h-full object-contain" />
+                            ) : (
+                              <Smartphone size={20} className="text-black" />
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-black truncate">{netName}</p>
+                            <p className="text-xs text-black">Open plans</p>
+                          </div>
+                          <ChevronRight size={16} className="text-black ml-auto" />
+                        </button>
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center">
-                    <p className="text-sm text-black">No active network catalog available right now.</p>
+                    <p className="text-sm text-black">No active plans available for the current provider right now.</p>
                   </div>
                 )}
 

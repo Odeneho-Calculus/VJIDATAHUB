@@ -1777,6 +1777,13 @@ exports.updateSystemSettings = async (req, res) => {
 
     await settings.save();
 
+    // Emit VTU provider change event if it was updated
+    if (vtuProvider !== undefined && global.io) {
+      global.io.to('vtu_updates').emit('vtu_provider_changed', {
+        provider: toAbbreviation(settings.vtuProvider),
+      });
+    }
+
     // Return sanitized copy with abbreviated provider names
     const sanitizedSettings = settings.toObject ? settings.toObject() : { ...settings };
     if (sanitizedSettings.vtuProvider) {

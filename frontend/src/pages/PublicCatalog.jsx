@@ -115,8 +115,13 @@ export default function PublicCatalog() {
         socketRef.current = io(socketUrl, { withCredentials: true });
         socketRef.current.on('connect', () => {
             socketRef.current.emit('join_store', slug);
+            socketRef.current.emit('join_vtu_updates');
         });
         socketRef.current.on('store_updated', () => {
+            fetchStoreData(false);
+        });
+        socketRef.current.on('vtu_provider_changed', () => {
+            setSelectedNetwork('');
             fetchStoreData(false);
         });
     }, [slug, fetchStoreData]);

@@ -9,8 +9,10 @@ import {
   RefreshCw, Save, X, Palette, Smartphone, CreditCard, Search, Filter,
   TrendingUp, Wallet, Send, ChevronRight, Loader2, ShoppingBag, CheckCircle, CheckCircle2, Clock, User
 } from 'lucide-react';
+import { io } from 'socket.io-client';
 import { store as storeAPI, wallet as walletAPI, afa as afaAPI } from '../services/api';
 import { checkers as checkersAPI } from '../services/api';
+import { getSocketBaseUrl } from '../utils/apiBaseUrl';
 import AgentLayout from '../components/AgentLayout';
 import AlertModal from '../components/AlertModal';
 // import { useSettings } from '../context/SettingsContext';
@@ -299,6 +301,7 @@ export default function AdminStore() {
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('general');
   const [alertConfig, setAlertConfig] = useState({ isOpen: false, type: 'info', title: '', message: '' });
+  const socketRef = useRef(null);
 
   const showAlert = (type, message, title = '') => {
     setAlertConfig({ isOpen: true, type, message, title });
@@ -306,6 +309,28 @@ export default function AdminStore() {
 
   useEffect(() => {
     fetchStore();
+  }, []);
+
+  // Real-time VTU provider switching via socket
+  useEffect(() => {
+    const socketUrl = getSocketBaseUrl();
+    socketRef.current = io(socketUrl, { withCredentials: true });
+
+    socketRef.current.on('connect', () => {
+      socketRef.current.emit('join_vtu_updates');
+    });
+
+    socketRef.current.on('vtu_provider_changed', () => {
+      fetchStore();
+      showAlert('info', 'VTU provider changed. Store inventory has been updated.', 'Provider Switched');
+    });
+
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+      }
+    };
+   
   }, []);
 
   const navigate = useNavigate();
@@ -318,6 +343,7 @@ export default function AdminStore() {
         ...data.store,
         accessStatus: data.accessStatus || null,
         adminContact: data.adminContact || null,
+        activeProvider: data.activeProvider || 'tp',
       });
       setError('');
     } catch (err) {
@@ -464,6 +490,7 @@ export default function AdminStore() {
             {activeTab === 'plans' && (
               <InventoryTab
                 plans={storeData.plans || []}
+                activeProvider={storeData.activeProvider || 'tp'}
                 onRefresh={fetchStore}
                 showAlert={showAlert}
               />
@@ -884,10 +911,10 @@ function OverviewTab({ data, onRefresh, showAlert }) {
   );
 }
 
-function InventoryTab({ plans, onRefresh, showAlert }) {
+function InventoryTab({ plans, activeProvider, onRefresh, showAlert }) {
   const [showAdd, setShowAdd] = useState(false);
   const [globalPlans, setGlobalPlans] = useState([]);
-  const [activeProvider, setActiveProvider] = useState('tp');
+  const [modalActiveProvider, setModalActiveProvider] = useState('tp');
   const [loadingGlobal, setLoadingGlobal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [networkFilter, setNetworkFilter] = useState('all');
@@ -900,12 +927,24 @@ function InventoryTab({ plans, onRefresh, showAlert }) {
     if (showAdd) fetchGlobalPlans();
   }, [showAdd]);
 
+  // Refresh global plans when active VTU provider changes (while modal is open)
+  useEffect(() => {
+    if (showAdd) {
+      fetchGlobalPlans();
+      // Reset selections when provider changes
+      setSelectedPlanForPrice(null);
+      setNetworkFilter('all');
+      setSearchTerm('');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeProvider]);
+
   const fetchGlobalPlans = async () => {
     try {
       setLoadingGlobal(true);
       const res = await storeAPI.getAvailablePlans();
       setGlobalPlans(res.plans || []);
-      setActiveProvider(res.provider || 'tp');
+      setModalActiveProvider(res.provider || 'tp');
     } catch (err) {
       console.error(err);
     } finally {
@@ -1051,7 +1090,7 @@ function InventoryTab({ plans, onRefresh, showAlert }) {
           submitLabel="Add Plan"
           onClose={() => setSelectedPlanForPrice(null)}
           onConfirm={async (price) => {
-            const planType = selectedPlanForPrice.planType || providerToPlanType(activeProvider);
+            const planType = selectedPlanForPrice.planType || providerToPlanType(modalActiveProvider);
             await storeAPI.addPlan({ planId: selectedPlanForPrice._id, customPrice: price, planType });
             onRefresh();
             setSelectedPlanForPrice(null);

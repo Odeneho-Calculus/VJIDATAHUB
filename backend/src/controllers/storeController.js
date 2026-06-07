@@ -154,10 +154,18 @@ exports.getMyStore = async (req, res) => {
       await store.save();
     }
 
+    // Get active VTU provider to filter plans
+    const settings = await SystemSettings.getSettings();
+    const activeProvider = settings?.vtuProvider || 'topza';
+    const activePlanType = activeProvider === 'skdataplug' ? 'SkdataplugOffer' : 'TopzaOffer';
+
     // Filter out store plans whose underlying offer/DataPlan is inactive or out of stock
+    // AND only show plans from the active VTU provider
     const availablePlans = (store.plans || []).filter((p) => {
       const basePlan = p.planId;
       if (!basePlan) return false;
+      // Only show plans matching the active VTU provider
+      if (p.planType !== activePlanType) return false;
       if (p.planType === 'TopzaOffer' || p.planType === 'SkdataplugOffer') {
         return basePlan.status === 'active' && basePlan.inStock === true;
       }
@@ -175,6 +183,7 @@ exports.getMyStore = async (req, res) => {
       success: true,
       store: store.toObject(),
       accessStatus,
+      activeProvider: toAbbreviation(activeProvider),
       adminContact: adminContact
         ? {
           name: adminContact.name,
@@ -1221,10 +1230,18 @@ exports.getPublicStore = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Store not found' });
     }
 
+    // Get active VTU provider to filter plans
+    const settings = await SystemSettings.getSettings();
+    const activeProvider = settings?.vtuProvider || 'topza';
+    const activePlanType = activeProvider === 'skdataplug' ? 'SkdataplugOffer' : 'TopzaOffer';
+
     // Filter out store plans whose underlying offer/DataPlan is inactive or out of stock
+    // AND only show plans from the active VTU provider
     const availablePlans = (store.plans || []).filter((p) => {
       const basePlan = p.planId;
       if (!basePlan) return false;
+      // Only show plans matching the active VTU provider
+      if (p.planType !== activePlanType) return false;
       if (p.planType === 'TopzaOffer' || p.planType === 'SkdataplugOffer') {
         return basePlan.status === 'active' && basePlan.inStock === true;
       }
@@ -1233,12 +1250,21 @@ exports.getPublicStore = async (req, res) => {
     });
     store.plans = availablePlans;
 
+    // Derive unique networks from the actual available plans
+    const uniqueNetworks = [...new Set(
+      availablePlans
+        .map((p) => p.network || p.planId?.isp || p.planId?.network)
+        .filter(Boolean)
+    )];
+
     const accessStatus = computeAccessStatus(null, store);
 
     res.status(200).json({
       success: true,
       store: store.toObject(),
       accessStatus,
+      activeProvider: toAbbreviation(activeProvider),
+      networks: uniqueNetworks,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -1267,12 +1293,20 @@ exports.getPublicPlans = async (req, res) => {
       });
     }
 
+    // Get active VTU provider to filter plans
+    const settings = await SystemSettings.getSettings();
+    const activeProvider = settings?.vtuProvider || 'topza';
+    const activePlanType = activeProvider === 'skdataplug' ? 'SkdataplugOffer' : 'TopzaOffer';
+
     let plans = store.plans.filter(p => p.isActive);
 
     // Filter out plans whose underlying offer/DataPlan is inactive or out of stock
+    // AND only show plans from the active VTU provider
     plans = plans.filter((p) => {
       const basePlan = p.planId;
       if (!basePlan) return false;
+      // Only show plans matching the active VTU provider
+      if (p.planType !== activePlanType) return false;
       if (p.planType === 'TopzaOffer' || p.planType === 'SkdataplugOffer') {
         return basePlan.status === 'active' && basePlan.inStock === true;
       }
@@ -1299,9 +1333,18 @@ exports.getPublicPlans = async (req, res) => {
       };
     });
 
+    // Derive unique networks from the actual filtered plans
+    const uniqueNetworks = [...new Set(
+      plans
+        .map((p) => p.network || p.planId?.isp || p.planId?.network)
+        .filter(Boolean)
+    )];
+
     res.status(200).json({
       success: true,
       plans: mappedPlans,
+      activeProvider: toAbbreviation(activeProvider),
+      networks: uniqueNetworks,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -1336,6 +1379,17 @@ exports.purchasePublicBundle = async (req, res) => {
 
     if (!storePlan || !storePlan.isActive) {
       return res.status(404).json({ success: false, message: 'Plan not found or inactive' });
+    }
+
+    // Validate that the plan matches the active VTU provider
+    const vtuSettings = await SystemSettings.getSettings();
+    const activeProvider = vtuSettings?.vtuProvider || 'topza';
+    const activePlanType = activeProvider === 'skdataplug' ? 'SkdataplugOffer' : 'TopzaOffer';
+    if (storePlan.planType !== activePlanType) {
+      return res.status(400).json({
+        success: false,
+        message: `This plan is not available with the current provider (${toAbbreviation(activeProvider)}). Please refresh and try again.`,
+      });
     }
 
     const phoneValidation = { isValid: true, normalized: phoneNumber.replace(/\D/g, '') };
