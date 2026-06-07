@@ -9,6 +9,7 @@ import { io } from 'socket.io-client';
 import { formatCurrencyAbbreviated } from '../utils/formatCurrency';
 import { store as storeAPI, publicAPI, checkers as checkersAPI, afa as afaAPI } from '../services/api';
 import { getSocketBaseUrl } from '../utils/apiBaseUrl';
+import { getActiveNetworkCatalog } from '../utils/providerMap';
 
 export default function PublicStore() {
   const { slug } = useParams();
@@ -86,15 +87,14 @@ export default function PublicStore() {
 
       setStore(storeData.store);
 
-      // Use networks derived from actual plans (respects active VTU provider)
-      const planNetworks = storeData.networks || [];
-      setNetworks(planNetworks);
+      // Use the active VTU provider's full network catalog for filter chips
+      // This shows ALL networks from the active provider, not just ones the agent added
+      const activeCatalog = getActiveNetworkCatalog(systemSettings?.settings).filter((n) => n?.isActive !== false);
+      setNetworks(activeCatalog.map((n) => n.name));
 
-      // Keep networkCatalog for logo lookups only
-      const catalog = systemSettings?.settings?.networkCatalog || [];
+      // Keep networkCatalog for logo lookups
       const normalize = (v = '') => v.toString().trim().toLowerCase().replace(/\s+/g, '');
-      const normalizedCatalog = catalog
-        .filter((n) => n && n.isActive !== false)
+      const normalizedCatalog = activeCatalog
         .map((n) => ({
           name: n.name,
           slug: n.slug || n.name,

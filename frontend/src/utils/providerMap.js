@@ -66,3 +66,23 @@ export const isTopza = (value) => {
   const v = String(value).toLowerCase();
   return v === 'tp' || v === 'topza';
 };
+
+/**
+ * Get the active network catalog from system settings based on the active VTU provider.
+ * Falls back to legacy networkCatalog if provider-specific catalog is not available.
+ * @param {Object} settings - system settings object from SettingsContext
+ * @returns {Array} array of network objects { name, slug, logoUrl, isActive }
+ */
+export const getActiveNetworkCatalog = (settings) => {
+  if (!settings) return [];
+  const provider = settings.vtuProvider || 'tp';
+  if (isSkdataplug(provider)) {
+    const catalog = settings.skdataplugNetworkCatalog;
+    if (Array.isArray(catalog) && catalog.length > 0) return catalog;
+  } else {
+    const catalog = settings.topzaNetworkCatalog;
+    if (Array.isArray(catalog) && catalog.length > 0) return catalog;
+  }
+  // Fallback to legacy networkCatalog
+  return settings.networkCatalog || [];
+};

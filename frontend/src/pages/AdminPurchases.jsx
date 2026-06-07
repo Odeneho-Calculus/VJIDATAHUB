@@ -7,6 +7,8 @@ import ConfirmDialog from '../components/ConfirmDialog';
 import { PurchaseDetailsModal } from '../components/AdminPurchaseModals';
 import { useSidebar } from '../hooks/useSidebar';
 import { admin as adminAPI } from '../services/api';
+import { useSettings } from '../context/SettingsContext';
+import { getActiveNetworkCatalog } from '../utils/providerMap';
 
 /* ── Homepage multi-colour palette ── */
 const palette = [
@@ -25,6 +27,7 @@ const pageTheme = getColor(4); // pink
 
 export default function AdminPurchases() {
   const { sidebarOpen, closeSidebar } = useSidebar();
+  const { settings } = useSettings();
   const [purchases, setPurchases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -495,9 +498,15 @@ export default function AdminPurchases() {
                     <p className="purchases-stat-label" style={{ textTransform: 'uppercase' }}>Network</p>
                     <div className="purchases-filter-chips">
                       <div className={`purchases-chip ${networkFilter === '' ? 'active' : ''}`} onClick={() => setNetworkFilter('')}>All</div>
-                      {['MTN', 'TELECEL', 'AIRTELTIGO'].map(n => (
-                        <div key={n} className={`purchases-chip ${networkFilter === n ? 'active' : ''}`} onClick={() => setNetworkFilter(n)}>{n}</div>
-                      ))}
+                      {(() => {
+                        const catalog = getActiveNetworkCatalog(settings).filter((n) => n?.isActive !== false);
+                        const networks = catalog.length > 0
+                          ? catalog.map((n) => n.name)
+                          : ['MTN', 'TELECEL', 'AIRTELTIGO'];
+                        return networks.map(n => (
+                          <div key={n} className={`purchases-chip ${networkFilter === n ? 'active' : ''}`} onClick={() => setNetworkFilter(n)}>{n}</div>
+                        ));
+                      })()}
                     </div>
                   </div>
                 </div>

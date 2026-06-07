@@ -13,9 +13,10 @@ import { io } from 'socket.io-client';
 import { store as storeAPI, wallet as walletAPI, afa as afaAPI } from '../services/api';
 import { checkers as checkersAPI } from '../services/api';
 import { getSocketBaseUrl } from '../utils/apiBaseUrl';
+import { getActiveNetworkCatalog } from '../utils/providerMap';
 import AgentLayout from '../components/AgentLayout';
 import AlertModal from '../components/AlertModal';
-// import { useSettings } from '../context/SettingsContext';
+import { useSettings } from '../context/SettingsContext';
 
 /* ── Multi-colour palette ── */
 const palette = [
@@ -918,6 +919,7 @@ function InventoryTab({ plans, activeProvider, onRefresh, showAlert }) {
   const [loadingGlobal, setLoadingGlobal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [networkFilter, setNetworkFilter] = useState('all');
+  const [storeNetworkFilter, setStoreNetworkFilter] = useState('');
   const [selectedPlanForPrice, setSelectedPlanForPrice] = useState(null);
   const [selectedPlanForEdit, setSelectedPlanForEdit] = useState(null);
 
@@ -977,6 +979,19 @@ function InventoryTab({ plans, activeProvider, onRefresh, showAlert }) {
     return matchesSearch && matchesNetwork;
   });
 
+  // Get active VTU provider's network catalog for store inventory filters
+  const { settings } = useSettings();
+  const storeNetworkCatalog = getActiveNetworkCatalog(settings).filter((n) => n?.isActive !== false);
+  const storeNetworkOptions = storeNetworkCatalog.map((n) => n.name);
+
+  // Filter displayed store plans by selected network
+  const displayedPlans = storeNetworkFilter
+    ? plans.filter((p) => {
+        const planNetwork = p?.network || p?.planId?.isp || p?.planId?.network || '';
+        return planNetwork.toLowerCase() === storeNetworkFilter.toLowerCase();
+      })
+    : plans;
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -994,8 +1009,37 @@ function InventoryTab({ plans, activeProvider, onRefresh, showAlert }) {
         </button>
       </div>
 
+      {/* Network Filter Chips */}
+      {storeNetworkOptions.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setStoreNetworkFilter('')}
+            className={`px-3.5 py-2 rounded-lg text-xs font-bold border transition ${
+              !storeNetworkFilter
+                ? 'bg-[#0F6E56] text-white border-[#0F6E56]'
+                : 'bg-white text-black border-[#e4e4de] hover:bg-slate-50'
+            }`}
+          >
+            All Networks
+          </button>
+          {storeNetworkOptions.map((n) => (
+            <button
+              key={n}
+              onClick={() => setStoreNetworkFilter(n)}
+              className={`px-3.5 py-2 rounded-lg text-xs font-bold border transition ${
+                storeNetworkFilter === n
+                  ? 'bg-[#0F6E56] text-white border-[#0F6E56]'
+                  : 'bg-white text-black border-[#e4e4de] hover:bg-slate-50'
+              }`}
+            >
+              {n}
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {plans.map((p) => (
+        {displayedPlans.map((p) => (
           <InventoryCard
             key={p._id}
             plan={p}
@@ -1003,13 +1047,19 @@ function InventoryTab({ plans, activeProvider, onRefresh, showAlert }) {
             onRemove={() => handleRemove(p._id)}
           />
         ))}
-        {plans.length === 0 && (
+        {displayedPlans.length === 0 && (
           <div className="col-span-full py-20 text-center border-2 border-dashed border-[#e4e4de] rounded-2xl bg-white/50">
             <div className="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-black">
               <Smartphone size={28} />
             </div>
-            <h3 className="text-base font-bold text-black">Empty Inventory</h3>
-            <p className="text-sm text-black mt-1 mb-6">You haven't added any data plans to your store yet.</p>
+            <h3 className="text-base font-bold text-black">
+              {storeNetworkFilter ? 'No Plans for This Network' : 'Empty Inventory'}
+            </h3>
+            <p className="text-sm text-black mt-1 mb-6">
+              {storeNetworkFilter
+                ? `You haven't added any ${storeNetworkFilter} plans to your store yet.`
+                : "You haven't added any data plans to your store yet."}
+            </p>
             <button onClick={() => setShowAdd(true)} className="dash-btn-outline mx-auto">
               Browse Available Plans
             </button>

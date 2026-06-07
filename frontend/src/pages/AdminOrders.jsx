@@ -11,6 +11,7 @@ import { VerifyingPaymentModal, VerifiedPaymentModal } from '../components/Admin
 import { useSidebar } from '../hooks/useSidebar';
 import { admin as adminAPI } from '../services/api';
 import { useSettings } from '../context/SettingsContext';
+import { getActiveNetworkCatalog } from '../utils/providerMap';
 
 /* ── Homepage multi-colour palette ── */
 const palette = [
@@ -78,8 +79,11 @@ export default function AdminOrders() {
     return getNetworkFamily(normalizedLeft) === getNetworkFamily(normalizedRight);
   };
 
-  // Use networks from API response (all unique networks across all orders, not just current page)
-  const networkOptions = networks;
+  // Use networks from the active VTU provider's catalog
+  const networkCatalog = getActiveNetworkCatalog(settings).filter((n) => n?.isActive !== false);
+  const networkOptions = networkCatalog.length > 0
+    ? networkCatalog.map((network) => network.name)
+    : networks;
 
   useEffect(() => {
     setPage(1);

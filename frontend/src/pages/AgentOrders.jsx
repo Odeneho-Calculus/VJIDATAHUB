@@ -5,6 +5,7 @@ import AgentLayout from '../components/AgentLayout';
 import Pagination from '../components/Pagination';
 import Modal from '../components/Modal';
 import { useSettings } from '../context/SettingsContext';
+import { getActiveNetworkCatalog } from '../utils/providerMap';
 
 /* ── Homepage multi-colour palette ── */
 const palette = [
@@ -303,7 +304,7 @@ export default function AgentOrders() {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
 
-  const networkCatalog = (settings?.networkCatalog || []).filter((n) => n?.isActive !== false);
+  const networkCatalog = getActiveNetworkCatalog(settings).filter((n) => n?.isActive !== false);
   const normalizeNetwork = (val = '') => val.toString().trim().toLowerCase().replace(/\s+/g, '');
   const getNetworkFamily = (n = '') => {
     if (!n) return '';

@@ -5,6 +5,8 @@ import { purchases, dataplans } from '../services/api';
 import UserLayout from '../components/UserLayout';
 import Modal from '../components/Modal';
 import AlertModal from '../components/AlertModal';
+import { useSettings } from '../context/SettingsContext';
+import { getActiveNetworkCatalog } from '../utils/providerMap';
 
 
 /* ── Homepage multi-colour palette ── */
@@ -262,6 +264,7 @@ const styles = `
 `;
 
 export default function Orders() {
+  const { settings } = useSettings();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [, setError] = useState('');
@@ -369,6 +372,12 @@ export default function Orders() {
   };
 
   const getUniqueNetworks = () => {
+    // Use active VTU provider's network catalog first
+    const catalog = getActiveNetworkCatalog(settings).filter((n) => n?.isActive !== false);
+    if (catalog.length > 0) {
+      return catalog.map((n) => n.name);
+    }
+    // Fallback: merge from orders and plans
     const fromOrders = new Set(orders.map(o => o.network).filter(Boolean));
     const fromPlans = new Set(availableNetworksFromPlans.filter(Boolean));
     const merged = new Set([...fromOrders, ...fromPlans]);
