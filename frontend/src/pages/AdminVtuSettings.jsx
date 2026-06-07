@@ -96,6 +96,7 @@ const styles = `
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
     width: 100%;
+    max-width: 1000px;
     margin-bottom: 24px;
   }
 
@@ -115,6 +116,8 @@ const styles = `
     flex-direction: column;
     gap: 4px;
     transition: all 0.2s;
+    min-width: 0;
+    overflow: hidden;
   }
 
   .vtu-stat-card:hover {
@@ -134,6 +137,9 @@ const styles = `
     font-size: 20px;
     font-weight: 800;
     color: #111;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    min-width: 0;
   }
 
   .vtu-input {
@@ -633,8 +639,8 @@ export default function AdminVtuSettings() {
                     '--stat-border': stat.color.main + '33',
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', minWidth: 0, gap: '8px' }}>
+                    <div style={{ minWidth: 0, flex: 1 }}>
                       <p className="vtu-stat-label" style={{ color: stat.color.main }}>{stat.label}</p>
                       <p className="vtu-stat-value">{stat.value}</p>
                       {stat.subvalue && <p style={{ fontSize: '10px', color: '#000' }}>{stat.subvalue}</p>}
