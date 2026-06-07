@@ -1469,6 +1469,16 @@ exports.getOrders = async (req, res) => {
       Order.countDocuments({ ...statsQuery, status: 'processing' }),
     ]);
 
+    // Get unique networks from all orders matching the scope (not paginated)
+    // This ensures filter chips show all available networks
+    const networkAggregation = await Order.aggregate([
+      { $match: statsQuery },
+      { $group: { _id: '$network' } },
+      { $match: { _id: { $ne: null } } },
+      { $sort: { _id: 1 } },
+    ]);
+    const networks = networkAggregation.map((n) => n._id).filter(Boolean);
+
     res.status(200).json({
       success: true,
       orders,
@@ -1484,6 +1494,7 @@ exports.getOrders = async (req, res) => {
         pending,
         processing,
       },
+      networks,
     });
   } catch (error) {
     console.error('getOrders error:', error);

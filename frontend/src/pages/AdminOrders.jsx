@@ -39,6 +39,7 @@ export default function AdminOrders() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [stats, setStats] = useState({ total: 0, completed: 0, pending: 0, processing: 0 });
+  const [networks, setNetworks] = useState([]);
   const [statusFilter, setStatusFilter] = useState('');
   const [networkFilter, setNetworkFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -77,16 +78,8 @@ export default function AdminOrders() {
     return getNetworkFamily(normalizedLeft) === getNetworkFamily(normalizedRight);
   };
 
-  // Derive network options dynamically from actual orders
-  // This ensures filters always match the active VTU provider's networks
-  const dynamicNetworks = Array.from(
-    new Set(
-      orders
-        .map((order) => order?.network)
-        .filter(Boolean)
-    )
-  );
-  const networkOptions = dynamicNetworks;
+  // Use networks from API response (all unique networks across all orders, not just current page)
+  const networkOptions = networks;
 
   useEffect(() => {
     setPage(1);
@@ -100,6 +93,7 @@ export default function AdminOrders() {
       if (response.success) {
         setOrders(response.data?.orders || response.orders || []);
         setTotalPages(response.data?.pagination?.pages || response.pagination?.pages || 0);
+        setNetworks(response.networks || []);
         if (response.stats) {
           setStats(response.stats);
         }
