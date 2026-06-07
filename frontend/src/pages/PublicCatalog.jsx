@@ -9,6 +9,7 @@ import {
 import { io } from 'socket.io-client';
 import { store as storeAPI, publicAPI, checkers as checkersAPI, afa as afaAPI } from '../services/api';
 import { getSocketBaseUrl } from '../utils/apiBaseUrl';
+import { getActiveNetworkCatalog } from '../utils/providerMap';
 import {
     formatChargeDescriptor,
     getDataPurchaseChargeAmount,
@@ -41,6 +42,7 @@ export default function PublicCatalog() {
     const [afaLockStatus, setAfaLockStatus] = useState({ enabled: true, message: '', registrationFee: 0 });
     const [networkLogos, setNetworkLogos] = useState({});
     const [transactionCharges, setTransactionCharges] = useState(parseTransactionCharges());
+    const [systemSettings, setSystemSettings] = useState(null);
     const socketRef = useRef(null);
 
     const getSocialValue = (value) => {
@@ -64,8 +66,11 @@ export default function PublicCatalog() {
                 setPlans(plansData.plans || []);
             }
 
-            const catalog = systemSettings?.settings?.networkCatalog || [];
-            const mapped = catalog.reduce((acc, entry) => {
+            setSystemSettings(systemSettings?.settings || null);
+
+            // Use active VTU provider's catalog for logos
+            const activeCatalog = getActiveNetworkCatalog(systemSettings?.settings).filter((n) => n?.isActive !== false);
+            const mapped = activeCatalog.reduce((acc, entry) => {
                 const key = (entry.slug || entry.name || '').toString().trim().toLowerCase().replace(/\s+/g, '');
                 if (key) acc[key] = entry.logoUrl;
                 return acc;
@@ -139,7 +144,12 @@ export default function PublicCatalog() {
 
     const primaryColor = store?.theme?.primaryColor || '#2563eb';
     const phoneContact = getSocialValue(store?.socialLinks?.phone);
-    const uniqueNetworks = [...new Set(plans.map(p => p.network))];
+    // Use active VTU provider's full network catalog for filter tabs
+    // (not just networks from the agent's added plans)
+    const activeCatalog = getActiveNetworkCatalog(systemSettings).filter((n) => n?.isActive !== false);
+    const uniqueNetworks = activeCatalog.length > 0
+        ? activeCatalog.map((n) => n.name)
+        : [...new Set(plans.map(p => p.network))];
     const normalizedSelected = selectedNetwork ? normalizeNetwork(selectedNetwork) : '';
     const filteredPlans = selectedNetwork
         ? plans.filter(p => normalizeNetwork(p.network) === normalizedSelected)
