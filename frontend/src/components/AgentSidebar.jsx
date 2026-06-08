@@ -233,10 +233,10 @@ export default function AgentSidebar({ isOpen, onClose }) {
             );
           })}
 
-          <button onClick={handleSwitchToUser} className="agb-switch-btn">
+          {/* <button onClick={handleSwitchToUser} className="agb-switch-btn">
             <ArrowRightLeft size={15} style={{ flexShrink: 0 }} />
             Switch to User Dashboard
-          </button>
+          </button> */}
         </nav>
 
         {/* ── Footer ── */}

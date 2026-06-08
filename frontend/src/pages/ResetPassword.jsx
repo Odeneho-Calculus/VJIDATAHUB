@@ -2,8 +2,8 @@ import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react'
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { auth } from '../services/api';
-import { 
-  KeyRound, Lock, Loader2, ArrowLeft, ShieldCheck, 
+import {
+  KeyRound, Lock, Loader2, ArrowLeft, ShieldCheck,
   CheckCircle, Wallet, Activity, ChevronRight, Eye, EyeOff, XCircle
 } from 'lucide-react';
 
@@ -20,6 +20,20 @@ export default function ResetPassword() {
 
   const params = new URLSearchParams(location.search);
   const token = params.get('token');
+
+  const fetchResetStatus = useCallback(async () => {
+    try {
+      const res = await auth.getPasswordResetStatus({ token });
+      if (res.success) {
+        setAttemptsRemaining(res.attemptsRemaining);
+        if (res.cooldownSeconds > 0) {
+          setTimer(res.cooldownSeconds);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch reset status:', err);
+    }
+  }, [token]);
 
   useEffect(() => {
     if (token) {
@@ -51,20 +65,6 @@ export default function ResetPassword() {
     const s = seconds % 60;
     return `${h}h ${m}m ${s}s`;
   };
-
-  const fetchResetStatus = useCallback(async () => {
-    try {
-      const res = await auth.getPasswordResetStatus({ token });
-      if (res.success) {
-        setAttemptsRemaining(res.attemptsRemaining);
-        if (res.cooldownSeconds > 0) {
-          setTimer(res.cooldownSeconds);
-        }
-      }
-    } catch (err) {
-      console.error('Failed to fetch reset status:', err);
-    }
-  }, [token]);
 
   const strength = useMemo(() => {
     let score = 0;
@@ -120,6 +120,7 @@ export default function ResetPassword() {
   };
 
   const level = strengthLevels[strength];
+  const locked = attemptsRemaining === 0 && timer > 0;
 
   return (
     <div style={{ fontFamily: "'DM Sans', 'Nunito', sans-serif", minHeight: '100vh', background: 'linear-gradient(135deg, #e0e7ff 0%, #fce7f3 40%, #fef3c7 70%, #dbeafe 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 16px' }}>
@@ -250,6 +251,30 @@ export default function ResetPassword() {
           margin: 0;
         }
 
+        .login-left-footer {
+          border: 1.5px solid rgba(255,255,255,0.08);
+          border-radius: 8px;
+          padding: 14px 16px;
+          background: rgba(255,255,255,0.04);
+          margin-top: 20px;
+          position: relative;
+          z-index: 1;
+        }
+        .login-left-footer p:first-child {
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: #c4b5fd;
+          margin: 0 0 6px;
+        }
+        .login-left-footer p:last-child {
+          font-size: 12.5px;
+          color: #ddd6fe;
+          line-height: 1.55;
+          margin: 0;
+        }
+
         /* RIGHT PANEL */
         .login-right {
           display: flex;
@@ -266,6 +291,46 @@ export default function ResetPassword() {
           max-width: 380px;
         }
 
+        /* Mobile top bar */
+        .login-mobile-top {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 28px;
+        }
+        @media (min-width: 1024px) {
+          .login-mobile-top { display: none; }
+        }
+        .login-mobile-back {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 13px;
+          font-weight: 600;
+          color: #555;
+          text-decoration: none;
+          transition: color 0.15s;
+        }
+        .login-mobile-back:hover { color: #111; }
+
+        /* Form heading */
+        .login-heading-row {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          margin-bottom: 6px;
+        }
+        .login-icon-box {
+          width: 46px;
+          height: 46px;
+          background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          color: #fff;
+        }
         .login-title {
           font-size: 26px;
           font-weight: 800;
@@ -275,24 +340,11 @@ export default function ResetPassword() {
         .login-subtitle {
           font-size: 13px;
           color: #4b5563;
-          margin: 12px 0 24px;
+          margin: 0 0 24px;
           line-height: 1.5;
-          text-align: center;
         }
 
-        .login-icon-box {
-          width: 64px;
-          height: 64px;
-          background: #fafaf7;
-          border: 1.5px solid #e4e4de;
-          border-radius: 14px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin: 0 auto 20px;
-          color: #111;
-        }
-
+        /* Inputs */
         .login-label {
           display: block;
           font-size: 12.5px;
@@ -300,7 +352,6 @@ export default function ResetPassword() {
           color: #333;
           margin-bottom: 7px;
           letter-spacing: 0.02em;
-          text-align: left;
         }
         .login-input {
           width: 100%;
@@ -308,7 +359,6 @@ export default function ResetPassword() {
           border-radius: 7px;
           background: #fafaf7;
           padding: 11px 14px;
-          padding-left: 40px;
           font-size: 14px;
           font-family: inherit;
           color: #111;
@@ -316,34 +366,41 @@ export default function ResetPassword() {
           transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
           box-sizing: border-box;
         }
+        .login-input::placeholder { color: #bbb; }
         .login-input:focus {
           border-color: #7c3aed;
           background: #fff;
           box-shadow: 0 0 0 3px rgba(124,58,237,0.12);
         }
+        .login-input:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .login-field { margin-bottom: 16px; position: relative; }
-        .login-field-icon {
+        .login-pw-wrap { position: relative; }
+        .login-pw-toggle {
           position: absolute;
-          left: 14px;
-          top: 36px;
-          color: #aaa;
-          pointer-events: none;
-        }
-        .password-toggle {
-          position: absolute;
-          right: 14px;
-          top: 36px;
-          color: #888;
-          cursor: pointer;
+          right: 13px;
+          top: 50%;
+          transform: translateY(-50%);
           background: none;
           border: none;
           padding: 0;
+          cursor: pointer;
+          color: #aaa;
           display: flex;
           align-items: center;
-          justify-content: center;
+          transition: color 0.15s;
+        }
+        .login-pw-toggle:hover { color: #555; }
+        .login-pw-toggle:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .login-field { margin-bottom: 16px; }
+        .login-field-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 7px;
         }
 
+        /* Submit btn */
         .login-submit {
           width: 100%;
           display: flex;
@@ -360,11 +417,24 @@ export default function ResetPassword() {
           border-radius: 10px;
           cursor: pointer;
           transition: opacity 0.15s, transform 0.15s;
-          margin-top: 16px;
+          margin-top: 4px;
         }
         .login-submit:hover:not(:disabled) { opacity: 0.92; transform: translateY(-1px); }
         .login-submit:disabled { opacity: 0.55; cursor: not-allowed; }
 
+        /* Spinner */
+        @keyframes login-spin { to { transform: rotate(360deg); } }
+        .login-spinner {
+          width: 18px;
+          height: 18px;
+          border: 2.5px solid rgba(255,255,255,0.3);
+          border-top-color: #fff;
+          border-radius: 50%;
+          animation: login-spin 0.7s linear infinite;
+          flex-shrink: 0;
+        }
+
+        /* Footer box */
         .login-footer-box {
           border: 1.5px solid #e4e4de;
           border-radius: 7px;
@@ -384,6 +454,85 @@ export default function ResetPassword() {
         }
         .login-footer-box a:hover { color: #7c3aed; }
 
+        .login-secure-note {
+          text-align: center;
+          font-size: 11.5px;
+          font-weight: 600;
+          color: #9ca3af;
+          margin-top: 14px;
+          letter-spacing: 0.03em;
+        }
+
+        /* Reset-specific */
+        .reset-alert {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          border-radius: 10px;
+          padding: 14px 16px;
+          margin-bottom: 20px;
+          font-size: 13px;
+          text-align: left;
+        }
+        .reset-alert.locked { background: #fee2e2; border: 1.5px solid #ef4444; color: #991b1b; }
+        .reset-alert.warning { background: #fef3c7; border: 1.5px solid #f59e0b; color: #92400e; }
+        .reset-alert-title {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-weight: 700;
+        }
+        .reset-alert-countdown {
+          margin-top: 8px;
+          padding: 8px 12px;
+          border-radius: 6px;
+          font-weight: 600;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        .reset-alert-countdown.locked { background: rgba(239, 68, 68, 0.1); }
+        .reset-alert-countdown.warning { background: rgba(245, 158, 11, 0.1); }
+        .reset-alert-countdown code {
+          color: #fff;
+          padding: 2px 8px;
+          border-radius: 4px;
+          font-family: monospace;
+          font-size: 12px;
+        }
+
+        .strength-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 8px;
+        }
+        .strength-label {
+          font-size: 12px;
+          font-weight: 700;
+          color: #444;
+        }
+        .strength-value {
+          font-size: 12px;
+          font-weight: 800;
+        }
+        .strength-track {
+          height: 6px;
+          background: #fafaf7;
+          border: 1px solid #e4e4de;
+          border-radius: 10px;
+          overflow: hidden;
+        }
+        .strength-fill {
+          height: 100%;
+          transition: width 0.4s ease;
+        }
+        .strength-badges {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          margin-top: 12px;
+        }
         .strength-badge {
           padding: 4px 10px;
           border-radius: 100px;
@@ -399,27 +548,28 @@ export default function ResetPassword() {
           border-color: #10b981;
           color: #059669;
         }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .animate-spin { animation: spin 1s linear infinite; }
       `}</style>
 
       <div className="login-wrap">
         {/* ── LEFT PANEL ── */}
         <section className="login-left">
           <div className="login-left-noise" />
+
           <Link to="/login" className="login-back-link">
             <ArrowLeft size={15} />
             Back to login
           </Link>
+
           <div className="login-left-tag">
             <ShieldCheck style={{ width: 11, height: 11 }} />
             Security Shield
           </div>
+
           <h1>Create a strong password</h1>
           <p className="login-left-sub">
             A strong password keeps your account safe. Use the strength meter to guide you.
           </p>
+
           <div className="login-feature-list">
             {[
               { icon: Lock, title: 'Encrypted Storage', desc: 'Your password is always encrypted. No one can read it.' },
@@ -437,71 +587,70 @@ export default function ResetPassword() {
               </div>
             ))}
           </div>
+
+          <div className="login-left-footer">
+            <p>Need help?</p>
+            <p>If you did not request a reset, ignore this link or contact support.</p>
+          </div>
         </section>
 
         {/* ── RIGHT PANEL ── */}
         <section className="login-right">
           <div className="login-form-wrap">
+
+            {/* Mobile top bar */}
+            <div className="login-mobile-top">
+              <Link to="/login" className="login-mobile-back">
+                <ArrowLeft size={15} />
+                Login
+              </Link>
+              <div style={{ textAlign: 'right' }}>
+                <p style={{ fontSize: 14, fontWeight: 800, color: '#111', margin: 0 }}>VJI DATA HUB</p>
+                <p style={{ fontSize: 11, color: '#999', margin: 0 }}>Secure access</p>
+              </div>
+            </div>
+
             {!token ? (
-              <div style={{ textAlign: 'center' }}>
-                <div className="login-icon-box" style={{ borderColor: '#f59e0b', color: '#f59e0b', background: '#fffbeb' }}>
-                  <XCircle size={32} />
+              <>
+                <div className="login-heading-row">
+                  <div className="login-icon-box" style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)' }}>
+                    <XCircle style={{ width: 22, height: 22 }} />
+                  </div>
+                  <h2 className="login-title">Invalid Link</h2>
                 </div>
-                <h2 className="login-title">Invalid Link</h2>
                 <p className="login-subtitle">
                   We couldn't find a valid reset token. Please request a new link from the login page.
                 </p>
                 <Link to="/forgot-password" className="login-submit">
                   Request New Link
+                  <ChevronRight size={16} />
                 </Link>
-              </div>
+              </>
             ) : (
               <>
-                <div className="login-icon-box">
-                  <KeyRound size={32} />
+                <div className="login-heading-row">
+                  <div className="login-icon-box">
+                    <KeyRound style={{ width: 22, height: 22 }} />
+                  </div>
+                  <h2 className="login-title">Reset Password</h2>
                 </div>
-                <h2 className="login-title" style={{ textAlign: 'center' }}>Reset Password</h2>
                 <p className="login-subtitle">Create a new, strong password for your account.</p>
 
                 {attemptsRemaining < 3 && (
-                  <div style={{
-                    background: attemptsRemaining === 0 ? '#fee2e2' : '#fef3c7',
-                    border: `1.5px solid ${attemptsRemaining === 0 ? '#ef4444' : '#f59e0b'}`,
-                    borderRadius: '10px',
-                    padding: '16px',
-                    marginBottom: '20px',
-                    fontSize: '14px',
-                    color: attemptsRemaining === 0 ? '#991b1b' : '#92400e',
-                    textAlign: 'left'
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '700', marginBottom: '4px' }}>
+                  <div className={`reset-alert ${attemptsRemaining === 0 ? 'locked' : 'warning'}`}>
+                    <div className="reset-alert-title">
                       {attemptsRemaining === 0 ? <XCircle size={18} /> : <ShieldCheck size={18} />}
                       {attemptsRemaining === 0 ? 'Account Recovery Locked' : 'Recovery Attempts'}
                     </div>
                     <div>
-                      {attemptsRemaining === 0 
+                      {attemptsRemaining === 0
                         ? 'You have exhausted all password reset attempts. For security reasons, your account recovery is locked for 24 hours.'
                         : `You have ${attemptsRemaining} attempt${attemptsRemaining !== 1 ? 's' : ''} remaining before a 24-hour lockout.`}
                     </div>
                     {timer > 0 && (
-                      <div style={{ 
-                        marginTop: '12px', 
-                        padding: '8px 12px', 
-                        background: attemptsRemaining === 0 ? 'rgba(239, 68, 68, 0.1)' : 'rgba(245, 158, 11, 0.1)', 
-                        borderRadius: '6px',
-                        fontWeight: '600',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center'
-                      }}>
+                      <div className={`reset-alert-countdown ${attemptsRemaining === 0 ? 'locked' : 'warning'}`}>
                         <span>{attemptsRemaining === 0 ? 'Restoration starts in:' : 'Reset available in:'}</span>
-                        <code style={{ 
-                          background: attemptsRemaining === 0 ? '#ef4444' : '#f59e0b', 
-                          color: '#fff', 
-                          padding: '2px 8px', 
-                          borderRadius: '4px',
-                          fontFamily: 'monospace'
-                        }}>
+                        <code style={{ background: attemptsRemaining === 0 ? '#ef4444' : '#f59e0b' }}>
                           {formatCountdown(timer)}
                         </code>
                       </div>
@@ -511,50 +660,66 @@ export default function ResetPassword() {
 
                 <form onSubmit={handleReset}>
                   <div className="login-field">
-                    <label className="login-label">New Password</label>
-                    <Lock size={18} className="login-field-icon" />
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="login-input"
-                      placeholder="At least 8 characters"
-                      disabled={loading || (attemptsRemaining === 0 && timer > 0)}
-                      required
-                    />
-                    <button 
-                      type="button" 
-                      className="password-toggle" 
-                      onClick={() => setShowPassword(!showPassword)}
-                      disabled={loading || (attemptsRemaining === 0 && timer > 0)}
-                    >
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
+                    <label htmlFor="password" className="login-label">New Password</label>
+                    <div className="login-pw-wrap">
+                      <input
+                        id="password"
+                        type={showPassword ? 'text' : 'password'}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="login-input"
+                        style={{ paddingRight: 44 }}
+                        placeholder="At least 8 characters"
+                        disabled={loading || locked}
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="login-pw-toggle"
+                        disabled={loading || locked}
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      >
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
                   </div>
 
                   <div className="login-field">
-                    <label className="login-label">Confirm Password</label>
-                    <ShieldCheck size={18} className="login-field-icon" />
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      value={confirm}
-                      onChange={(e) => setConfirm(e.target.value)}
-                      className="login-input"
-                      placeholder="Repeat new password"
-                      disabled={loading || (attemptsRemaining === 0 && timer > 0)}
-                      required
-                    />
+                    <label htmlFor="confirm" className="login-label">Confirm Password</label>
+                    <div className="login-pw-wrap">
+                      <input
+                        id="confirm"
+                        type={showPassword ? 'text' : 'password'}
+                        value={confirm}
+                        onChange={(e) => setConfirm(e.target.value)}
+                        className="login-input"
+                        style={{ paddingRight: 44 }}
+                        placeholder="Repeat new password"
+                        disabled={loading || locked}
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="login-pw-toggle"
+                        disabled={loading || locked}
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      >
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
                   </div>
 
                   <div style={{ marginBottom: 20 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                      <span style={{ fontSize: 12, fontWeight: 700, color: '#444' }}>Password Strength</span>
-                      <span style={{ fontSize: 12, fontWeight: 800, color: level.color }}>{level.label}</span>
+                    <div className="strength-row">
+                      <span className="strength-label">Password Strength</span>
+                      <span className="strength-value" style={{ color: level.color }}>{level.label}</span>
                     </div>
-                    <div style={{ height: 6, background: '#fafaf7', border: '1px solid #e4e4de', borderRadius: 10, overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${(strength / 4) * 100}%`, background: level.color, transition: 'width 0.4s ease' }} />
+                    <div className="strength-track">
+                      <div className="strength-fill" style={{ width: `${(strength / 4) * 100}%`, background: level.color }} />
                     </div>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 12 }}>
+                    <div className="strength-badges">
                       <Badge active={password.length >= 8}>8+ chars</Badge>
                       <Badge active={/[A-Z]/.test(password) && /[a-z]/.test(password)}>Mix Case</Badge>
                       <Badge active={/\d/.test(password)}>Number</Badge>
@@ -562,13 +727,18 @@ export default function ResetPassword() {
                     </div>
                   </div>
 
-                  <button type="submit" disabled={loading || (attemptsRemaining === 0 && timer > 0)} className="login-submit">
-                    {loading ? <Loader2 className="animate-spin" size={18} /> : null}
-                    {loading 
-                      ? 'Updating Password...' 
-                      : (attemptsRemaining === 0 && timer > 0)
-                        ? `Locked: ${formatCountdown(timer)}`
-                        : 'Reset Password Securely'}
+                  <button type="submit" disabled={loading || locked} className="login-submit">
+                    {loading ? (
+                      <>
+                        <span className="login-spinner" />
+                        Updating Password...
+                      </>
+                    ) : (
+                      <>
+                        {locked ? `Locked: ${formatCountdown(timer)}` : 'Reset Password Securely'}
+                        {!locked && <ChevronRight size={16} />}
+                      </>
+                    )}
                   </button>
                 </form>
               </>
@@ -576,14 +746,11 @@ export default function ResetPassword() {
 
             <div className="login-footer-box" style={{ textAlign: 'center' }}>
               <p>
-                Need help? <Link to="/">Contact Support</Link>
+                Remember your password? <Link to="/login">Sign in</Link>
               </p>
             </div>
-            
-            <Link to="/login" className="login-back-link" style={{ marginTop: 24, justifyContent: 'center', color: '#666' }}>
-              <ArrowLeft size={15} />
-              Back to Login
-            </Link>
+
+            <p className="login-secure-note">Protected by enterprise-grade security.</p>
           </div>
         </section>
       </div>
