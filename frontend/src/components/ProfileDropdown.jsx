@@ -179,7 +179,7 @@ export default function ProfileDropdown() {
                   My Earnings
                 </Link>
                 <Link
-                  to="/profile"
+                  to="/agent-profile"
                   className="flex items-center gap-3 px-4 py-3 text-xs font-black text-black hover:text-[#111] hover:bg-[#fafaf7] rounded-xl transition-all group"
                   onClick={() => setIsOpen(false)}
                 >

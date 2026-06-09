@@ -45,6 +45,7 @@ import AgentCommissions from './pages/AgentCommissions';
 import AgentDashboard from './pages/AgentDashboard';
 import AgentOrders from './pages/AgentOrders';
 import AgentWallet from './pages/AgentWallet';
+import AgentProfile from './pages/AgentProfile';
 import PublicStore from './pages/PublicStore';
 import PublicCatalog from './pages/PublicCatalog';
 import PublicTrackOrder from './pages/PublicTrackOrder';
@@ -200,6 +201,14 @@ function AppContent() {
           element={
             <AgentProtectedRoute>
               <ResultsChecker />
+            </AgentProtectedRoute>
+          }
+        />
+        <Route
+          path="/agent-profile"
+          element={
+            <AgentProtectedRoute>
+              <AgentProfile />
             </AgentProtectedRoute>
           }
         />

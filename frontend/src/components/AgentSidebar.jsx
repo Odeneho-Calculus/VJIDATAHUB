@@ -121,7 +121,7 @@ export default function AgentSidebar({ isOpen, onClose }) {
     { path: '/agent/orders',          label: 'Customer Orders',  icon: ShoppingBag },
     { path: '/agent/wallet',          label: 'My Wallet',        icon: Wallet },
     { path: '/agent/commissions',     label: 'My Earnings',      icon: Wallet },
-    { path: '/profile',               label: 'Profile',          icon: User },
+    { path: '/agent-profile',         label: 'Profile',          icon: User },
   ];
 
   const handleLogout = () => {
@@ -233,10 +233,10 @@ export default function AgentSidebar({ isOpen, onClose }) {
             );
           })}
 
-          {/* <button onClick={handleSwitchToUser} className="agb-switch-btn">
+          <button onClick={handleSwitchToUser} className="agb-switch-btn">
             <ArrowRightLeft size={15} style={{ flexShrink: 0 }} />
             Switch to User Dashboard
-          </button> */}
+          </button>
         </nav>
 
         {/* ── Footer ── */}
