@@ -6,6 +6,8 @@ import { guest, publicAPI } from '../services/api';
 // import { formatCurrencyAbbreviated } from '../utils/formatCurrency';
 import { getNetworkStyles } from '../utils/networkStyles';
 import { validatePhoneNumber } from '../utils/phoneValidation';
+import { useSettings } from '../context/SettingsContext';
+import { toAbbreviation } from '../utils/providerMap';
 import {
   // formatChargeDescriptor,
   getDataPurchaseChargeAmount,
@@ -309,6 +311,7 @@ const styles = `
 `;
 
 export default function GuestPurchase() {
+  const { settings } = useSettings();
   const [grouped, setGrouped] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -322,6 +325,10 @@ export default function GuestPurchase() {
   const [transactionCharges, setTransactionCharges] = useState(parseTransactionCharges());
 
   const [selectedOfferType, setSelectedOfferType] = useState('All');
+
+  const activeProviderAbbr = settings?.vtuProvider
+    ? String(settings.vtuProvider).toUpperCase()
+    : 'TP';
 
   const [formData, setFormData] = useState({
     phoneNumber: '',
@@ -736,6 +743,17 @@ export default function GuestPurchase() {
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-[10px] font-black px-2 py-0.5 bg-[#0F6E56] text-white rounded-full uppercase tracking-widest">
                     Guest Mode
+                  </span>
+                  <span
+                    className="text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border"
+                    style={{
+                      background: '#FEF3C7',
+                      color: '#B45309',
+                      borderColor: '#FDE68A',
+                    }}
+                    title="Active VTU Provider"
+                  >
+                    {activeProviderAbbr}
                   </span>
                 </div>
               </div>

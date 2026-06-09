@@ -267,7 +267,7 @@ exports.initializeGuestPurchase = async (req, res) => {
       provider: activeProvider,
       sellingPrice: offer.sellingPrice,
       costPrice: offer.costPrice || 0,
-      network: normalizeNetwork(offer.isp),
+      network: offer.isp,
     };
     const planType = activePlanType;
 
