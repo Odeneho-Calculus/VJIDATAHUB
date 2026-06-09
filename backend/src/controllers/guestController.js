@@ -11,7 +11,7 @@ const { isValidNetworkNumber } = require('../utils/validation');
 const { validatePhoneNumber } = require('../utils/phoneValidation');
 const { isPositivePrice } = require('../utils/planPricing');
 const { calculateDataPurchaseCharge } = require('../utils/transactionCharges');
-const { toAbbreviation } = require('../utils/providerMap');
+const { toAbbreviation, planTypeToAbbreviation } = require('../utils/providerMap');
 
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 const PAYSTACK_BASE_URL = process.env.PAYSTACK_BASE_URL || 'https://api.paystack.co';
@@ -692,7 +692,11 @@ exports.verifyGuestPayment = async (req, res) => {
         success: true,
         message: 'Payment verified and data delivered successfully',
         data: {
-          order: order,
+          order: {
+            ...order.toObject(),
+            provider: toAbbreviation(order.provider),
+            planType: planTypeToAbbreviation(order.planType),
+          },
           transaction: lockedTransaction,
         },
       });
@@ -714,7 +718,11 @@ exports.verifyGuestPayment = async (req, res) => {
         success: false,
         message: 'Payment successful but data delivery failed. Please contact support with your order number: ' + order.orderNumber,
         data: {
-          order: order,
+          order: {
+            ...order.toObject(),
+            provider: toAbbreviation(order.provider),
+            planType: planTypeToAbbreviation(order.planType),
+          },
           transaction: lockedTransaction,
         },
       });
@@ -778,6 +786,8 @@ exports.trackGuestOrders = async (req, res) => {
       errorMessage: order.errorMessage,
       providerMessage: order.providerMessage,
       checkerDetails: order.checkerDetails,
+      provider: toAbbreviation(order.provider),
+      planType: planTypeToAbbreviation(order.planType),
     }));
 
     res.json({

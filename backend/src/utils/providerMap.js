@@ -35,3 +35,16 @@ exports.fromAbbreviation = (code) => {
   if (!code) return code;
   return REVERSE_MAP[String(code).toLowerCase()] || code;
 };
+
+/**
+ * Convert internal planType to abbreviated code for API responses.
+ * @param {string} planType - internal planType (e.g. 'TopzaOffer', 'SkdataplugOffer')
+ * @returns {string} abbreviated code (e.g. 'tp', 'sk')
+ */
+exports.planTypeToAbbreviation = (planType) => {
+  if (!planType) return planType;
+  const lower = String(planType).toLowerCase();
+  if (lower.includes('topza')) return 'tp';
+  if (lower.includes('skdataplug')) return 'sk';
+  return planType;
+};

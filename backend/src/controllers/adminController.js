@@ -30,7 +30,7 @@ const paystackAPI = axios.create({
 });
 
 const skdataplugApi = require('../utils/skdataplugApi');
-const { toAbbreviation, fromAbbreviation } = require('../utils/providerMap');
+const { toAbbreviation, fromAbbreviation, planTypeToAbbreviation } = require('../utils/providerMap');
 
 const getActiveApi = async () => {
   const settings = await SystemSettings.getSettings();
@@ -1018,7 +1018,11 @@ exports.verifyPendingPayment = async (req, res) => {
             success: true,
             message: 'Payment already verified and order already processed',
             transaction: refreshedTransaction,
-            order: refreshedOrder,
+            order: {
+              ...refreshedOrder.toObject(),
+              provider: toAbbreviation(refreshedOrder.provider),
+              planType: planTypeToAbbreviation(refreshedOrder.planType),
+            },
           });
         }
 
@@ -1046,7 +1050,11 @@ exports.verifyPendingPayment = async (req, res) => {
             success: false,
             message: fulfillmentResult.message,
             transaction: refreshedTransaction,
-            order: refreshedOrder,
+            order: {
+              ...refreshedOrder.toObject(),
+              provider: toAbbreviation(refreshedOrder.provider),
+              planType: planTypeToAbbreviation(refreshedOrder.planType),
+            },
           });
         }
 
@@ -1054,7 +1062,11 @@ exports.verifyPendingPayment = async (req, res) => {
           success: true,
           message: 'Payment verified and data purchase processing initiated',
           transaction: refreshedTransaction,
-          order: refreshedOrder,
+          order: {
+            ...refreshedOrder.toObject(),
+            provider: toAbbreviation(refreshedOrder.provider),
+            planType: planTypeToAbbreviation(refreshedOrder.planType),
+          },
         });
       }
 
@@ -1088,7 +1100,11 @@ exports.verifyPendingPayment = async (req, res) => {
       return res.status(200).json({
         success: true,
         message: 'Payment already verified and order already processed',
-        order: refreshedOrder,
+        order: {
+          ...refreshedOrder.toObject(),
+          provider: toAbbreviation(refreshedOrder.provider),
+          planType: planTypeToAbbreviation(refreshedOrder.planType),
+        },
       });
     }
 
@@ -1159,14 +1175,22 @@ exports.verifyPendingPayment = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: fulfillmentResult.message,
-        order: refreshedOrder,
+        order: {
+          ...refreshedOrder.toObject(),
+          provider: toAbbreviation(refreshedOrder.provider),
+          planType: planTypeToAbbreviation(refreshedOrder.planType),
+        },
       });
     }
 
     return res.status(200).json({
       success: true,
       message: 'Payment verified and order processing started',
-      order: refreshedOrder,
+      order: {
+        ...refreshedOrder.toObject(),
+        provider: toAbbreviation(refreshedOrder.provider),
+        planType: planTypeToAbbreviation(refreshedOrder.planType),
+      },
     });
   } catch (error) {
     console.error('verifyPendingPayment error:', error.response?.data || error.message);
@@ -1481,7 +1505,11 @@ exports.getOrders = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      orders,
+      orders: orders.map(order => ({
+        ...order.toObject(),
+        provider: toAbbreviation(order.provider),
+        planType: planTypeToAbbreviation(order.planType),
+      })),
       pagination: {
         total,
         page: parseInt(page),
@@ -1544,7 +1572,11 @@ exports.updateOrderStatus = async (req, res) => {
     res.status(200).json({
       success: true,
       message: 'Order status updated successfully',
-      order,
+      order: {
+        ...order.toObject(),
+        provider: toAbbreviation(order.provider),
+        planType: planTypeToAbbreviation(order.planType),
+      },
     });
   } catch (error) {
     console.error('updateOrderStatus error:', error);
@@ -1964,7 +1996,11 @@ exports.getAgentStoreDetails = async (req, res) => {
         pendingPayouts,
         commissionRecords,
       },
-      orders,
+      orders: orders.map(order => ({
+        ...order,
+        provider: toAbbreviation(order.provider),
+        planType: planTypeToAbbreviation(order.planType),
+      })),
       transactions,
       commissions,
       payouts,
@@ -2543,7 +2579,11 @@ exports.refundOrder = async (req, res) => {
       success: true,
       message: 'Order refunded successfully',
       data: refundResult,
-      order: updatedOrder
+      order: {
+        ...updatedOrder.toObject(),
+        provider: toAbbreviation(updatedOrder.provider),
+        planType: planTypeToAbbreviation(updatedOrder.planType),
+      },
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

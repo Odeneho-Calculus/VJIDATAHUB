@@ -13,6 +13,7 @@ const { validatePhoneNumber } = require('../utils/phoneValidation');
 const { processRefund } = require('../utils/refund');
 const { resolvePlanPrice } = require('../utils/planPricing');
 const { calculateDataPurchaseCharge } = require('../utils/transactionCharges');
+const { toAbbreviation, planTypeToAbbreviation } = require('../utils/providerMap');
 
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 const PAYSTACK_BASE_URL = process.env.PAYSTACK_BASE_URL || 'https://api.paystack.co';
@@ -386,6 +387,8 @@ const handleWalletPayment = async (req, res, user, plan, order) => {
           planName: order.planName,
           amount: order.amount,
           date: order.createdAt,
+          provider: toAbbreviation(order.provider),
+          planType: planTypeToAbbreviation(order.planType),
         },
         transaction: {
           id: transaction._id,
@@ -687,7 +690,13 @@ exports.verifyDataPurchase = async (req, res) => {
     res.status(200).json({
       success: true,
       message: 'Payment successful. Your order is now processing and will be updated manually by admin.',
-      data: { order },
+      data: {
+        order: {
+          ...order.toObject(),
+          provider: toAbbreviation(order.provider),
+          planType: planTypeToAbbreviation(order.planType),
+        },
+      },
     });
   } catch (error) {
     console.error('[Verify Purchase] Error:', error);
@@ -731,6 +740,8 @@ exports.getOrders = async (req, res) => {
           paymentStatus: order.paymentStatus,
           transactionReference: order.transactionReference,
           paystackReference: order.paystackReference,
+          provider: toAbbreviation(order.provider),
+          planType: planTypeToAbbreviation(order.planType),
         })),
         pagination: {
           total,
@@ -775,6 +786,8 @@ exports.getOrderById = async (req, res) => {
           date: order.createdAt,
           transactionReference: order.transactionReference,
           errorMessage: order.errorMessage,
+          provider: toAbbreviation(order.provider),
+          planType: planTypeToAbbreviation(order.planType),
         }
       },
     });
