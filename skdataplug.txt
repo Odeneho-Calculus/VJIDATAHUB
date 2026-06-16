@@ -79,6 +79,6 @@ Register the URL on your server that should receive delivery notifications. Only
 
 ⚠️ Every notification we send includes an X-SKPlug-Signature header. Verify this on your server to confirm the request is genuinely from us.
 
-🧪 API Test Console
+🧪 API Test Console v1
 
 Test your API directly from here.
