@@ -119,6 +119,8 @@ const processOrderAfterVerifiedPayment = async (order, paystackReference = null)
   return { success: true, message: 'Payment verified and order moved to processing', order };
 };
 
+exports.processOrderAfterVerifiedPayment = processOrderAfterVerifiedPayment;
+
 exports.getDashboardStats = async (req, res) => {
   try {
     const userQuery = { $or: [{ role: 'user' }, { role: { $exists: false } }, { role: 'agent' }] };

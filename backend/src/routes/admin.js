@@ -53,6 +53,12 @@ const {
   rejectCommissionPayout,
 } = require('../controllers/adminController');
 
+const {
+  getAutonomousVerificationSettings,
+  updateAutonomousVerificationSettings,
+  triggerAutonomousVerification,
+} = require('../controllers/autoVerifyController');
+
 router.use(protect, adminOnly);
 
 router.get('/stats', getDashboardStats);
@@ -114,5 +120,10 @@ router.get('/agent-commission-payouts', getCommissionPayouts);
 router.patch('/agent-commission-payouts/:payoutId/approve', approveMobileMoneyPayout);
 router.patch('/agent-commission-payouts/:payoutId/paid', markPayoutAsPaid);
 router.patch('/agent-commission-payouts/:payoutId/reject', rejectCommissionPayout);
+
+// Autonomous Paystack verification
+router.get('/autonomous-verification/settings', getAutonomousVerificationSettings);
+router.patch('/autonomous-verification/settings', updateAutonomousVerificationSettings);
+router.post('/autonomous-verification/trigger', triggerAutonomousVerification);
 
 module.exports = router;

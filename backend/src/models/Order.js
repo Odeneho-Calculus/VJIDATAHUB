@@ -204,6 +204,14 @@ const orderSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    autoVerifiedAt: {
+      type: Date,
+      default: null,
+    },
+    autoVerifiedBy: {
+      type: String,
+      default: null,
+    },
     isRefunded: {
       type: Boolean,
       default: false,
@@ -256,5 +264,6 @@ orderSchema.index({ externalOrderId: 1 });
 orderSchema.index({ externalOrderNumber: 1 });
 orderSchema.index({ storeId: 1, createdAt: -1 });
 orderSchema.index({ guestInfo: 1 });
+orderSchema.index({ autoVerifiedAt: 1 });
 
 module.exports = mongoose.model('Order', orderSchema);

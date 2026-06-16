@@ -156,6 +156,9 @@ export const admin = {
   clearSkdataplugWebhookLogs: () => api.delete('/skdataplug/webhook/logs'),
   getSystemSettings: () => api.get('/admin/settings'),
   updateSystemSettings: (data) => api.patch('/admin/settings', data),
+  getAutonomousVerificationSettings: () => api.get('/admin/autonomous-verification/settings'),
+  updateAutonomousVerificationSettings: (data) => api.patch('/admin/autonomous-verification/settings', data),
+  triggerAutonomousVerification: () => api.post('/admin/autonomous-verification/trigger'),
   getNotifications: (page = 1, limit = 20, type = '', isRead = '', search = '') =>
     api.get(`/admin/notifications?page=${page}&limit=${limit}&type=${type}&isRead=${isRead}&search=${search}`),
   getNotificationStats: () => api.get('/admin/notifications/stats'),

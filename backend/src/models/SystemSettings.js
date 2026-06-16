@@ -149,6 +149,36 @@ const systemSettingsSchema = new mongoose.Schema(
         type: Boolean,
         default: false,
       },
+      autonomousPaystackVerification: {
+        enabled: {
+          type: Boolean,
+          default: false,
+        },
+        intervalMinutes: {
+          type: Number,
+          default: 2,
+          min: 1,
+          max: 60,
+        },
+        minAgeMinutes: {
+          type: Number,
+          default: 5,
+          min: 1,
+        },
+        lastRunAt: {
+          type: Date,
+          default: null,
+        },
+        lastRunStats: {
+          transactionsProcessed: { type: Number, default: 0 },
+          ordersProcessed: { type: Number, default: 0 },
+          duplicateRefsSkipped: { type: Number, default: 0 },
+          skippedTooNew: { type: Number, default: 0 },
+          skippedMissingReference: { type: Number, default: 0 },
+          skippedDuplicateReference: { type: Number, default: 0 },
+          status: { type: String, default: 'idle' },
+        },
+      },
     },
   },
   { timestamps: true }
@@ -200,6 +230,30 @@ systemSettingsSchema.statics.getSettings = async function () {
   }
   if (typeof settings.orderSettings.afaSalesLocked !== 'boolean') {
     settings.orderSettings.afaSalesLocked = false;
+  }
+  if (!settings.orderSettings.autonomousPaystackVerification) {
+    settings.orderSettings.autonomousPaystackVerification = {};
+  }
+  const autoVerify = settings.orderSettings.autonomousPaystackVerification;
+  if (typeof autoVerify.enabled !== 'boolean') autoVerify.enabled = false;
+  const autoVerifyInterval = Number(autoVerify.intervalMinutes);
+  if (Number.isNaN(autoVerifyInterval) || autoVerifyInterval < 1 || autoVerifyInterval > 60) {
+    autoVerify.intervalMinutes = 2;
+  }
+  const minAge = Number(autoVerify.minAgeMinutes);
+  if (Number.isNaN(minAge) || minAge < 1) {
+    autoVerify.minAgeMinutes = 5;
+  }
+  if (!autoVerify.lastRunStats || typeof autoVerify.lastRunStats !== 'object') {
+    autoVerify.lastRunStats = {
+      transactionsProcessed: 0,
+      ordersProcessed: 0,
+      duplicateRefsSkipped: 0,
+      skippedTooNew: 0,
+      skippedMissingReference: 0,
+      skippedDuplicateReference: 0,
+      status: 'idle',
+    };
   }
   return settings;
 };

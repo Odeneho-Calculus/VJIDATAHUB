@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Eye, Edit2, Trash2, Search, ShoppingCart, CheckCircle, Clock, TrendingUp, Database, CheckCircle2 } from 'lucide-react';
+import { Eye, Edit2, Trash2, Search, ShoppingCart, CheckCircle, Clock, TrendingUp, Database, CheckCircle2, RefreshCw, Shield } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { formatNumberAbbreviated } from '../utils/formatCurrency';
 import AdminSidebar from '../components/AdminSidebar';
@@ -60,6 +60,14 @@ export default function AdminOrders() {
   const [showVerifiedModal, setShowVerifiedModal] = useState(false);
   const [verifiedMessage, setVerifiedMessage] = useState('Payment verified successfully.');
 
+  // Autonomous Paystack verification state
+  const [autoVerifySettings, setAutoVerifySettings] = useState(null);
+  const [autoVerifyEnabled, setAutoVerifyEnabled] = useState(false);
+  const [autoVerifyInterval, setAutoVerifyInterval] = useState(2);
+  const [autoVerifyLoading, setAutoVerifyLoading] = useState(false);
+  const [autoVerifySaving, setAutoVerifySaving] = useState(false);
+  const [autoVerifyStats24h, setAutoVerifyStats24h] = useState({ transactions: 0, orders: 0 });
+
   const normalizeNetwork = (val = '') => val.toString().trim().toLowerCase().replace(/\s+/g, '');
   const getNetworkFamily = (n = '') => {
     if (!n) return '';
@@ -114,6 +122,51 @@ export default function AdminOrders() {
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
+
+  const fetchAutonomousSettings = useCallback(async ({ silent = false } = {}) => {
+    try {
+      if (!silent) setAutoVerifyLoading(true);
+      const response = await adminAPI.getAutonomousVerificationSettings();
+      if (response.success) {
+        setAutoVerifySettings(response.settings);
+        setAutoVerifyEnabled(response.settings.enabled);
+        setAutoVerifyInterval(response.settings.intervalMinutes);
+        setAutoVerifyStats24h(response.stats24h || { transactions: 0, orders: 0 });
+      }
+    } catch (err) {
+      console.error('Failed to fetch autonomous verification settings:', err);
+    } finally {
+      if (!silent) setAutoVerifyLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchAutonomousSettings();
+    const interval = setInterval(() => {
+      fetchAutonomousSettings({ silent: true });
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [fetchAutonomousSettings]);
+
+  const handleSaveAutonomousSettings = async () => {
+    try {
+      setAutoVerifySaving(true);
+      const response = await adminAPI.updateAutonomousVerificationSettings({
+        enabled: autoVerifyEnabled,
+        intervalMinutes: autoVerifyInterval,
+      });
+      if (response.success) {
+        setAutoVerifySettings(response.settings);
+        showMessage('Autonomous verification settings saved');
+      } else {
+        showMessage(response.message || 'Failed to save settings', true);
+      }
+    } catch (err) {
+      showMessage(err?.message || 'Failed to save settings', true);
+    } finally {
+      setAutoVerifySaving(false);
+    }
+  };
 
   // When VTU provider changes, clear network filter and refresh orders
   useEffect(() => {
@@ -714,6 +767,135 @@ export default function AdminOrders() {
                 </div>
               ))}
             </div>
+
+            {/* Autonomous Paystack Verification */}
+            {!isAgentScope && (
+              <div className="orders-card">
+                <div className="flex flex-col gap-5">
+                  {/* Header row */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-start gap-3">
+                      <div style={{
+                        width: 44, height: 44, borderRadius: 10,
+                        background: 'linear-gradient(135deg, #0F6E56 0%, #047857 100%)',
+                        color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        boxShadow: '0 8px 20px rgba(15,110,86,0.25)',
+                        flexShrink: 0,
+                      }}>
+                        <Shield size={22} strokeWidth={2.5} />
+                      </div>
+                      <div>
+                        <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#111' }}>Autonomous Paystack Verification</h2>
+                        <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#555' }}>Global setting for admin transactions and orders pending payment verification.</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 flex-wrap">
+                      {/* Enable toggle */}
+                      <button
+                        onClick={() => setAutoVerifyEnabled((v) => !v)}
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg border font-bold text-sm transition-all"
+                        style={{
+                          borderColor: autoVerifyEnabled ? '#0F6E56' : '#e4e4de',
+                          background: autoVerifyEnabled ? '#ECFDF5' : '#fff',
+                          color: autoVerifyEnabled ? '#0F6E56' : '#444',
+                        }}
+                      >
+                        {autoVerifyEnabled ? <CheckCircle size={16} /> : <div style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid currentColor' }} />}
+                        Enable
+                      </button>
+
+                      {/* Interval input */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold text-gray-700">Interval</span>
+                        <input
+                          type="number"
+                          min={1}
+                          max={60}
+                          value={autoVerifyInterval}
+                          onChange={(e) => setAutoVerifyInterval(Math.max(1, Math.min(60, parseInt(e.target.value, 10) || 1)))}
+                          className="orders-input"
+                          style={{ width: 64, padding: '8px 10px', textAlign: 'center' }}
+                        />
+                        <span className="text-sm font-bold text-gray-700">min</span>
+                      </div>
+
+                      <button
+                        onClick={handleSaveAutonomousSettings}
+                        disabled={autoVerifySaving}
+                        className="orders-btn-primary"
+                        style={{ padding: '8px 18px', fontSize: '13px' }}
+                      >
+                        {autoVerifySaving ? (
+                          <span className="orders-spinner" style={{ width: 14, height: 14, borderWidth: 2 }} />
+                        ) : (
+                          <>
+                            <RefreshCw size={14} strokeWidth={2.5} /> Save
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Divider */}
+                  <div style={{ height: 1, background: '#e4e4de' }} />
+
+                  {/* Activity */}
+                  <div>
+                    <h3 style={{ margin: '0 0 12px 0', fontSize: '14px', fontWeight: 800, color: '#111' }}>Autonomous Verification Activity</h3>
+                    {autoVerifyLoading && !autoVerifySettings ? (
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <div className="orders-spinner" style={{ width: 14, height: 14, borderWidth: 2 }} />
+                        Loading settings...
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-3">
+                        <div className="flex flex-wrap items-center gap-3">
+                          <span style={{
+                            padding: '4px 10px', borderRadius: 20, fontSize: '11px', fontWeight: 800,
+                            background: '#1e3a8a', color: '#fff',
+                          }}>
+                            24h Verified: {autoVerifyStats24h.transactions || 0} tx / {autoVerifyStats24h.orders || 0} orders
+                          </span>
+                          <span style={{
+                            padding: '4px 10px', borderRadius: 20, fontSize: '11px', fontWeight: 800,
+                            background: autoVerifyEnabled ? '#ECFDF5' : '#F3F4F6',
+                            color: autoVerifyEnabled ? '#047857' : '#6B7280',
+                            border: `1px solid ${autoVerifyEnabled ? '#A7F3D0' : '#E5E7EB'}`,
+                          }}>
+                            {autoVerifyEnabled ? 'Enabled' : 'Disabled'} / {(autoVerifySettings?.lastRunStats?.status === 'running' ? 'Running' : 'Idle')}
+                          </span>
+                        </div>
+
+                        <p style={{ margin: 0, fontSize: '13px', color: '#555' }}>
+                          {autoVerifySettings?.lastRunStats?.status === 'running'
+                            ? 'Active verification task in progress...'
+                            : 'No active verification task right now.'}
+                        </p>
+
+                        {autoVerifySettings?.lastRunAt && (
+                          <p style={{ margin: 0, fontSize: '13px', color: '#555' }}>
+                            Last cycle: {autoVerifySettings.lastRunStats?.transactionsProcessed || 0} transactions, {autoVerifySettings.lastRunStats?.ordersProcessed || 0} orders, {autoVerifySettings.lastRunStats?.duplicateRefsSkipped || 0} duplicate refs skipped.
+                          </p>
+                        )}
+
+                        <p style={{ margin: 0, fontSize: '13px', color: '#555' }}>
+                          Skipped reasons: {autoVerifySettings?.lastRunStats?.skippedTooNew || 0} too new, {autoVerifySettings?.lastRunStats?.skippedMissingReference || 0} missing reference, {autoVerifySettings?.lastRunStats?.skippedDuplicateReference || 0} duplicate reference.
+                        </p>
+
+                        <p style={{ margin: 0, fontSize: '12px', color: '#000', fontWeight: 600 }}>
+                          Server time: {new Date().toLocaleString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' })}
+                        </p>
+
+                        <p style={{ margin: '4px 0 0 0', fontSize: '12px', fontWeight: 700, color: '#B45309' }}>
+                          Eligibility rule: only pending records older than {autoVerifySettings?.minAgeMinutes || 5} minutes are auto-verified.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Controls */}
             <div className="orders-card">

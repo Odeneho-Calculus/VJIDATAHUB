@@ -8,6 +8,7 @@ const connectDB = require('./config/database');
 const { startProviderBalanceCheckJob } = require('./jobs/checkProviderBalance');
 const { startTopzaOrderStatusSyncJob } = require('./jobs/syncTopzaOrderStatus');
 const { startSkdataplugOrderStatusSyncJob } = require('./jobs/syncSkdataplugOrderStatus');
+const { startAutoVerifyPaystackJob } = require('./jobs/autoVerifyPaystackPayments');
 
 const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
@@ -65,6 +66,12 @@ try {
   startSkdataplugOrderStatusSyncJob();
 } catch (error) {
   console.error('Failed to initialize SKDataPlug status sync job:', error.message);
+}
+
+try {
+  startAutoVerifyPaystackJob();
+} catch (error) {
+  console.error('Failed to initialize autonomous Paystack verification job:', error.message);
 }
 
 app.use(cors({

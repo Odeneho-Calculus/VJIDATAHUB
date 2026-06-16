@@ -76,6 +76,14 @@ const transactionSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    autoVerifiedAt: {
+      type: Date,
+      default: null,
+    },
+    autoVerifiedBy: {
+      type: String,
+      default: null,
+    },
   },
   { timestamps: true }
 );
@@ -84,5 +92,6 @@ transactionSchema.index({ userId: 1, createdAt: -1 });
 transactionSchema.index({ status: 1 });
 transactionSchema.index({ type: 1 });
 transactionSchema.index({ isAPI: 1 });
+transactionSchema.index({ autoVerifiedAt: 1 });
 
 module.exports = mongoose.model('Transaction', transactionSchema);

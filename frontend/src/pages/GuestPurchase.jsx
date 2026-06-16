@@ -7,7 +7,6 @@ import { guest, publicAPI } from '../services/api';
 import { getNetworkStyles } from '../utils/networkStyles';
 import { validatePhoneNumber } from '../utils/phoneValidation';
 import { useSettings } from '../context/SettingsContext';
-import { toAbbreviation } from '../utils/providerMap';
 import {
   // formatChargeDescriptor,
   getDataPurchaseChargeAmount,

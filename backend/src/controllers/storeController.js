@@ -2,7 +2,6 @@ const axios = require('axios');
 const Store = require('../models/Store');
 const User = require('../models/User');
 const Order = require('../models/Order');
-const Guest = require('../models/Guest');
 const AgentFeePayment = require('../models/AgentFeePayment');
 const AgentCommissionPayout = require('../models/AgentCommissionPayout');
 const SellerCommission = require('../models/SellerCommission');
