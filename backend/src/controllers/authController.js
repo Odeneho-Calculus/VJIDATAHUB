@@ -5,8 +5,9 @@ const SystemSettings = require('../models/SystemSettings');
 const Store = require('../models/Store');
 const jwt = require('jsonwebtoken');
 const { createNotification } = require('./notificationController');
-const { validatePhoneNumber } = require('../utils/phoneValidation');
+const { validatePhoneNumber, toInternationalFormat } = require('../utils/phoneValidation');
 const crypto = require('crypto');
+const axios = require('axios');
 const { sendVerificationEmail, sendPasswordResetEmail } = require('../utils/emailService');
 
 const generateToken = (id) => {
@@ -413,6 +414,29 @@ exports.register = async (req, res) => {
       });
     }
 
+    // Verify MoMo phone number via DataCore API
+    let momoData = null;
+    try {
+      const internationalPhone = toInternationalFormat(phoneValidation.normalized);
+      const momoResponse = await axios.post(
+        'https://www.datacoregh.com/api/auth/verify-phone',
+        { phoneNumber: internationalPhone },
+        { timeout: 15000, headers: { 'Content-Type': 'application/json' } }
+      );
+      if (momoResponse.data?.success && momoResponse.data?.data) {
+        momoData = momoResponse.data.data;
+      }
+    } catch (momoError) {
+      console.error('[Register] MoMo verification failed:', momoError?.response?.data || momoError.message);
+    }
+
+    if (!momoData) {
+      return res.status(400).json({
+        success: false,
+        message: 'Phone number could not be verified. Please ensure it is a valid active MoMo number.'
+      });
+    }
+
     const userExists = await User.findOne({ 
       $or: [
         { email: email.toLowerCase() },
@@ -459,6 +483,10 @@ exports.register = async (req, res) => {
       emailVerificationExpires: verificationExpires,
       emailVerificationAttempts: 1,
       lastEmailVerificationAttempt: new Date(),
+      momoVerified: true,
+      momoVerifiedName: momoData.fullName || null,
+      momoNetworkProvider: momoData.networkProvider || null,
+      momoVerifiedAt: new Date(),
     });
 
     await user.save();
@@ -522,12 +550,57 @@ exports.register = async (req, res) => {
         dataUsed: user.dataUsed,
         referralEarnings: user.referralEarnings,
         isEmailVerified: user.isEmailVerified,
+        momoVerified: user.momoVerified,
+        momoVerifiedName: user.momoVerifiedName,
+        momoNetworkProvider: user.momoNetworkProvider,
       },
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       message: error.message
+    });
+  }
+};
+
+exports.verifyPhone = async (req, res) => {
+  try {
+    const { phone } = req.body;
+
+    if (!phone) {
+      return res.status(400).json({ success: false, message: 'Phone number is required' });
+    }
+
+    const phoneValidation = validatePhoneNumber(phone);
+    if (!phoneValidation.isValid) {
+      return res.status(400).json({ success: false, message: phoneValidation.error });
+    }
+
+    const internationalPhone = toInternationalFormat(phoneValidation.normalized);
+
+    const response = await axios.post(
+      'https://www.datacoregh.com/api/auth/verify-phone',
+      { phoneNumber: internationalPhone },
+      { timeout: 15000, headers: { 'Content-Type': 'application/json' } }
+    );
+
+    if (response.data?.success && response.data?.data) {
+      return res.json({
+        success: true,
+        data: {
+          fullName: response.data.data.fullName,
+          phoneNumber: response.data.data.phoneNumber,
+          networkProvider: response.data.data.networkProvider,
+        }
+      });
+    }
+
+    return res.status(400).json({ success: false, message: 'Phone verification failed. Number may not be registered on MoMo.' });
+  } catch (error) {
+    console.error('[VerifyPhone] Error:', error?.response?.data || error.message);
+    return res.status(500).json({
+      success: false,
+      message: 'Unable to verify phone number at this time. Please try again later.'
     });
   }
 };
@@ -619,6 +692,9 @@ exports.login = async (req, res) => {
         dataUsed: user.dataUsed,
         referralEarnings: user.referralEarnings,
         isEmailVerified: user.isEmailVerified,
+        momoVerified: user.momoVerified,
+        momoVerifiedName: user.momoVerifiedName,
+        momoNetworkProvider: user.momoNetworkProvider,
       },
     });
   } catch (error) {
@@ -652,6 +728,9 @@ exports.getProfile = async (req, res) => {
         dataUsed: user.dataUsed,
         referralEarnings: user.referralEarnings,
         isEmailVerified: user.isEmailVerified,
+        momoVerified: user.momoVerified,
+        momoVerifiedName: user.momoVerifiedName,
+        momoNetworkProvider: user.momoNetworkProvider,
       },
     });
   } catch (error) {

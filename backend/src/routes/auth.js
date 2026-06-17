@@ -10,12 +10,14 @@ const {
   resendVerificationEmail,
   forgotPassword,
   getVerificationStatus,
-  getPasswordResetStatus
+  getPasswordResetStatus,
+  verifyPhone
 } = require('../controllers/authController');
 const { protect } = require('../middleware/auth');
 
 router.post('/register', register);
 router.post('/login', login);
+router.post('/verify-phone', verifyPhone);
 router.get('/verify-email', verifyEmail);
 router.get('/verification-status', getVerificationStatus);
 router.get('/password-reset-status', getPasswordResetStatus);

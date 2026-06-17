@@ -27,6 +27,22 @@ const userSchema = new mongoose.Schema(
       sparse: true,
       match: [/^\d{10}$/, 'Phone number must be exactly 10 digits and contain only numeric characters'],
     },
+    momoVerified: {
+      type: Boolean,
+      default: false,
+    },
+    momoVerifiedName: {
+      type: String,
+      default: null,
+    },
+    momoNetworkProvider: {
+      type: String,
+      default: null,
+    },
+    momoVerifiedAt: {
+      type: Date,
+      default: null,
+    },
     balance: {
       type: Number,
       default: 0,

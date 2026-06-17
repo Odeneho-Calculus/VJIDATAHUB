@@ -47,6 +47,19 @@ const validatePhoneNumber = (phone) => {
 };
 
 /**
+ * Convert local Ghana phone format (0XXXXXXXXX) to international format (233XXXXXXXXX)
+ * @param {string} phone - Phone number in local format
+ * @returns {string} International format without +
+ */
+const toInternationalFormat = (phone) => {
+  const validation = validatePhoneNumber(phone);
+  if (!validation.isValid) {
+    throw new Error(validation.error);
+  }
+  return '233' + validation.normalized.slice(1);
+};
+
+/**
  * Normalize phone number to standard format
  * @param {string} phone - Phone number to normalize
  * @returns {string} Normalized number (0XXXXXXXXX) or throws error if invalid
@@ -71,5 +84,6 @@ const isValidPhoneNumber = (phone) => {
 module.exports = {
   validatePhoneNumber,
   normalizePhoneNumber,
-  isValidPhoneNumber
+  isValidPhoneNumber,
+  toInternationalFormat
 };

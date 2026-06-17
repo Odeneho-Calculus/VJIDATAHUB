@@ -7,7 +7,7 @@ import {
   AlertCircle, Eye, EyeOff, UserPlus, Store, Lock,
   ArrowLeft, ShieldCheck, ChevronRight, Wallet, Activity,
 } from 'lucide-react';
-import { publicAPI } from '../services/api';
+import { publicAPI, auth } from '../services/api';
 import { validatePhoneNumber } from '../utils/phoneValidation';
 
 export default function Register() {
@@ -17,6 +17,9 @@ export default function Register() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [phone, setPhone] = useState('');
   const [phoneError, setPhoneError] = useState('');
+  const [phoneVerifying, setPhoneVerifying] = useState(false);
+  const [phoneVerified, setPhoneVerified] = useState(false);
+  const [phoneVerifiedData, setPhoneVerifiedData] = useState(null);
   const [referralCode, setReferralCode] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -69,6 +72,13 @@ export default function Register() {
         return;
       }
 
+      if (!phoneVerified) {
+        setPhoneError('Please verify your phone number before creating an account');
+        toast.error('Please verify your phone number before creating an account', { duration: 5000 });
+        setLoading(false);
+        return;
+      }
+
       if (password !== confirmPassword) {
         setError('Passwords do not match');
         setLoading(false);
@@ -101,6 +111,38 @@ export default function Register() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const verifyPhoneNumber = async () => {
+    if (!phone) return;
+    const v = validatePhoneNumber(phone);
+    if (!v.isValid) {
+      setPhoneError(v.error);
+      return;
+    }
+    setPhoneVerifying(true);
+    setPhoneError('');
+    try {
+      const res = await auth.verifyPhone(v.formatted);
+      if (res?.success && res?.data) {
+        setPhoneVerified(true);
+        setPhoneVerifiedData(res.data);
+        toast.success('Phone number verified successfully', { duration: 4000 });
+      } else {
+        setPhoneVerified(false);
+        setPhoneVerifiedData(null);
+        setPhoneError(res?.message || 'Phone verification failed');
+        toast.error(res?.message || 'Phone verification failed', { duration: 5000 });
+      }
+    } catch (err) {
+      setPhoneVerified(false);
+      setPhoneVerifiedData(null);
+      const msg = err?.message || 'Unable to verify phone number. Please try again.';
+      setPhoneError(msg);
+      toast.error(msg, { duration: 5000 });
+    } finally {
+      setPhoneVerifying(false);
     }
   };
 
@@ -537,19 +579,66 @@ export default function Register() {
               {/* Phone */}
               <div className="reg-field">
                 <label htmlFor="phone" className="reg-label">Phone Number</label>
-                <input
-                  id="phone" type="tel" value={phone}
-                  onChange={(e) => { setPhone(e.target.value); setPhoneError(''); }}
-                  onBlur={() => {
-                    if (phone) {
-                      const v = validatePhoneNumber(phone);
-                      if (!v.isValid) setPhoneError(v.error);
-                    }
-                  }}
-                  className={`reg-input${phoneError ? ' error' : ''}`}
-                  placeholder="e.g. 0244123456" disabled={loading}
-                />
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <input
+                    id="phone" type="tel" value={phone}
+                    onChange={(e) => { setPhone(e.target.value); setPhoneError(''); setPhoneVerified(false); setPhoneVerifiedData(null); }}
+                    onBlur={() => {
+                      if (phone) {
+                        const v = validatePhoneNumber(phone);
+                        if (!v.isValid) setPhoneError(v.error);
+                      }
+                    }}
+                    className={`reg-input${phoneError ? ' error' : ''}`}
+                    placeholder="e.g. 0244123456" disabled={loading || phoneVerifying}
+                    style={{ flex: 1 }}
+                  />
+                  <button
+                    type="button"
+                    onClick={verifyPhoneNumber}
+                    disabled={phoneVerifying || !phone || loading}
+                    style={{
+                      whiteSpace: 'nowrap',
+                      padding: '11px 14px',
+                      borderRadius: 7,
+                      border: '1.5px solid #e0e0d8',
+                      background: phoneVerified ? '#dcfce7' : '#fafaf7',
+                      color: phoneVerified ? '#166534' : '#333',
+                      fontWeight: 700,
+                      fontSize: 13,
+                      cursor: (phoneVerifying || !phone || loading) ? 'not-allowed' : 'pointer',
+                      opacity: (phoneVerifying || !phone || loading) ? 0.6 : 1,
+                    }}
+                  >
+                    {phoneVerifying ? 'Verifying...' : phoneVerified ? 'Verified' : 'Verify'}
+                  </button>
+                </div>
                 {phoneError && <p className="reg-field-error">{phoneError}</p>}
+
+                {phoneVerified && phoneVerifiedData && (
+                  <div style={{
+                    marginTop: 12,
+                    border: '1.5px solid #22c55e',
+                    borderRadius: 10,
+                    background: '#f0fdf4',
+                    padding: '14px 16px',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                      <div style={{
+                        width: 20, height: 20, borderRadius: '50%',
+                        background: '#22c55e', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        color: '#fff', fontSize: 12, fontWeight: 700,
+                      }}>✓</div>
+                      <span style={{ fontSize: 14, fontWeight: 700, color: '#166534' }}>MoMo Verified</span>
+                    </div>
+                    <p style={{ fontSize: 13, color: '#15803d', margin: '4px 0' }}>
+                      <strong>Name:</strong> {phoneVerifiedData.fullName}
+                    </p>
+                    <p style={{ fontSize: 13, color: '#15803d', margin: '4px 0' }}>
+                      <strong>Network:</strong> {phoneVerifiedData.networkProvider}
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Password row */}
@@ -606,7 +695,16 @@ export default function Register() {
               {/* Submit */}
               <button
                 type="submit"
-                disabled={loading || (userType === 'agent' && agentDisabled)}
+                disabled={
+                  loading ||
+                  (userType === 'agent' && agentDisabled) ||
+                  !name ||
+                  !email ||
+                  !password ||
+                  !confirmPassword ||
+                  !phone ||
+                  !phoneVerified
+                }
                 className="reg-submit"
               >
                 {loading ? (

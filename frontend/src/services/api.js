@@ -38,6 +38,7 @@ export const auth = {
   register: (data) => api.post('/auth/register', data),
   login: (data) => api.post('/auth/login', { email: data.email, password: data.password }),
   getProfile: () => api.get('/auth/profile'),
+  verifyPhone: (phone) => api.post('/auth/verify-phone', { phone }),
   verifyEmail: (token) => api.get(`/auth/verify-email?token=${token}`),
   getVerificationStatus: (email) => api.get(`/auth/verification-status?email=${email}`),
   getPasswordResetStatus: (params) => {
