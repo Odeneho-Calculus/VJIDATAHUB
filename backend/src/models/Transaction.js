@@ -57,6 +57,11 @@ const transactionSchema = new mongoose.Schema(
       unique: true,
       required: true,
     },
+    orderNumber: {
+      type: String,
+      default: null,
+      sparse: true,
+    },
     paystackReference: {
       type: String,
       default: null,
@@ -93,5 +98,6 @@ transactionSchema.index({ status: 1 });
 transactionSchema.index({ type: 1 });
 transactionSchema.index({ isAPI: 1 });
 transactionSchema.index({ autoVerifiedAt: 1 });
+transactionSchema.index({ orderNumber: 1 }, { sparse: true });
 
 module.exports = mongoose.model('Transaction', transactionSchema);

@@ -71,6 +71,7 @@ exports.initializePayment = async (req, res) => {
     }
 
     const reference = 'TXN' + Date.now() + Math.random().toString(36).substr(2, 9);
+    const orderNumber = 'WAL-' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substr(2, 4).toUpperCase();
 
     const sysSettings = await SystemSettings.getSettings();
     const walletFundingCharge = calculateWalletFundingCharge({
@@ -86,6 +87,7 @@ exports.initializePayment = async (req, res) => {
       type: 'wallet_topup',
       amount: normalizedAmount,
       reference,
+      orderNumber,
       status: 'pending',
       paymentStatus: 'pending',
       description: `Wallet top-up of ${normalizedAmount.toFixed(2)}`,
@@ -116,6 +118,7 @@ exports.initializePayment = async (req, res) => {
       success: true,
       data: {
         reference,
+        orderNumber,
         authorizationUrl: response.data.data.authorization_url,
         accessCode: response.data.data.access_code,
         transactionId: transaction._id,
@@ -216,6 +219,7 @@ exports.verifyPayment = async (req, res) => {
         id: transaction._id,
         amount: transaction.amount,
         reference: transaction.reference,
+        orderNumber: transaction.orderNumber,
         status: transaction.status,
         createdAt: transaction.createdAt,
       },
@@ -268,7 +272,7 @@ exports.verifyTransactionStatus = async (req, res) => {
     }
 
     const transaction = await Transaction.findOne({
-      reference,
+      $or: [{ reference }, { orderNumber: reference }],
       userId: req.userId,
     });
 
@@ -285,7 +289,51 @@ exports.verifyTransactionStatus = async (req, res) => {
         id: transaction._id,
         amount: transaction.amount,
         reference: transaction.reference,
+        orderNumber: transaction.orderNumber,
         status: transaction.status,
+        createdAt: transaction.createdAt,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+exports.getTransactionByReference = async (req, res) => {
+  try {
+    const { reference } = req.params;
+
+    if (!reference) {
+      return res.status(400).json({
+        success: false,
+        message: 'Reference is required',
+      });
+    }
+
+    const transaction = await Transaction.findOne({
+      $or: [{ reference }, { orderNumber: reference }],
+      userId: req.userId,
+    });
+
+    if (!transaction) {
+      return res.status(404).json({
+        success: false,
+        message: 'Transaction not found',
+      });
+    }
+
+    res.json({
+      success: true,
+      transaction: {
+        id: transaction._id,
+        type: transaction.type,
+        amount: transaction.amount,
+        reference: transaction.reference,
+        orderNumber: transaction.orderNumber,
+        paystackReference: transaction.paystackReference,
+        status: transaction.status,
+        paymentStatus: transaction.paymentStatus,
+        description: transaction.description,
         createdAt: transaction.createdAt,
       },
     });

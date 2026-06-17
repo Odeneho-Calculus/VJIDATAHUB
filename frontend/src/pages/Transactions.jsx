@@ -382,6 +382,7 @@ export default function Transactions() {
             status: tx.status.charAt(0).toUpperCase() + tx.status.slice(1),
             statusRaw: tx.status,
             reference: tx.reference,
+            orderNumber: tx.orderNumber,
             paystackReference: tx.paystackReference,
             paymentStatus: tx.paymentStatus,
             txType: tx.type,
@@ -538,6 +539,7 @@ export default function Transactions() {
         tx.description?.toLowerCase().includes(query) ||
         tx.type?.toLowerCase().includes(query) ||
         tx.reference?.toLowerCase().includes(query) ||
+        tx.orderNumber?.toLowerCase().includes(query) ||
         tx.amount.toString().includes(query);
       
       if (!matchesSearch) return false;
@@ -795,7 +797,12 @@ export default function Transactions() {
                             </td>
                             <td className="dash-td min-w-[200px]">
                               <p className="text-sm font-bold text-black truncate">{tx.description}</p>
-                              <p className="text-[10px] font-mono text-black uppercase tracking-tighter mt-0.5">Ref: {tx.reference || 'N/A'}</p>
+                              <p className="text-[10px] font-mono text-black uppercase tracking-tighter mt-0.5">
+                                Ref: {tx.reference || 'N/A'}
+                                {tx.orderNumber && (
+                                  <span style={{ marginLeft: 8, color: '#0369A1' }}>Order: {tx.orderNumber}</span>
+                                )}
+                              </p>
                             </td>
                             <td className="dash-td text-center whitespace-nowrap">
                               <p className={`text-base font-black tracking-tight ${tx.amount >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
@@ -945,18 +952,20 @@ export default function Transactions() {
                 <div className="space-y-1">
                   {[
                     { label: 'Reference', value: selectedTx.reference || 'N/A', mono: true, icon: Hash },
+                    selectedTx.orderNumber ? { label: 'Order Number', value: selectedTx.orderNumber, mono: true, icon: Hash, highlight: true } : null,
+                    selectedTx.paystackReference ? { label: 'Paystack Ref', value: selectedTx.paystackReference, mono: true, icon: Hash } : null,
                     { label: 'Description', value: selectedTx.description },
                     { label: 'Date', value: formatDate(selectedTx.date), icon: Calendar },
                     { label: 'Time', value: formatTime(selectedTx.date), icon: RotateCw },
                     { label: 'Balance After', value: `GH₵ ${formatCurrencyAbbreviated(selectedTx.balanceAfter)}`, bold: true, icon: Wallet },
                     { label: 'Method', value: selectedTx.paymentMethod || 'Wallet', icon: CreditCard }
-                  ].map((item, i) => (
+                  ].filter(Boolean).map((item, i) => (
                     <div key={i} className="flex items-center justify-between py-3 border-b border-slate-50 last:border-0 group">
                       <div className="flex items-center gap-2 text-black">
                         {item.icon && <item.icon size={12} className="group-hover:text-red-500 transition-colors" style={{ color: i === 4 ? getColor(5).main : undefined }} />}
                         <span className="text-[10px] font-black uppercase tracking-widest">{item.label}</span>
                       </div>
-                      <span className={`text-[11px] font-bold text-right max-w-[60%] truncate ${item.mono ? 'font-mono' : ''} ${item.bold ? 'text-sm font-black' : 'text-black'}`} style={{ color: item.bold ? getColor(5).main : undefined }}>
+                      <span className={`text-[11px] font-bold text-right max-w-[60%] truncate ${item.mono ? 'font-mono' : ''} ${item.bold ? 'text-sm font-black' : 'text-black'}`} style={{ color: item.bold ? getColor(5).main : (item.highlight ? '#0369A1' : undefined) }}>
                         {item.value}
                       </span>
                     </div>

@@ -7,6 +7,7 @@ const {
   verifyPayment,
   getTransactions,
   verifyTransactionStatus,
+  getTransactionByReference,
   deleteTransaction,
 } = require('../controllers/walletController');
 
@@ -17,6 +18,8 @@ router.post('/initialize-payment', protect, initializePayment);
 router.post('/verify-payment', protect, verifyPayment);
 
 router.get('/transactions', protect, getTransactions);
+
+router.get('/transactions/:reference', protect, getTransactionByReference);
 
 router.delete('/transactions/:id', protect, adminOnly, deleteTransaction);
 

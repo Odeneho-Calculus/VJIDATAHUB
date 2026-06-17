@@ -30,7 +30,7 @@ import {
   Wallet,
   Store
 } from 'lucide-react';
-import { wallet, purchases, publicAPI } from '../services/api';
+import { wallet, purchases, publicAPI, user as userAPI } from '../services/api';
 import UserLayout from '../components/UserLayout';
 
 
@@ -314,6 +314,7 @@ export default function Dashboard() {
   const [loadingBundles, setLoadingBundles] = useState(true);
   const [recentTransactions, setRecentTransactions] = useState([]);
   const [stats, setStats] = useState([]);
+  const [monthlySpending, setMonthlySpending] = useState(null);
   const [loadingData, setLoadingData] = useState(true);
   const [referralSettings, setReferralSettings] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -393,6 +394,16 @@ export default function Dashboard() {
       ];
 
       setStats(statColors);
+
+      // Fetch monthly spending
+      try {
+        const spendingRes = await userAPI.getMonthlySpending();
+        if (spendingRes?.success) {
+          setMonthlySpending(spendingRes);
+        }
+      } catch (spendErr) {
+        console.error('Failed to fetch monthly spending:', spendErr);
+      }
     } catch (err) {
       console.error('Failed to fetch transactions and stats:', err);
       setRecentTransactions([]);
@@ -541,6 +552,51 @@ export default function Dashboard() {
               </div>
             ))}
           </div>
+
+          {/* Monthly Spending Banner */}
+          {monthlySpending && (
+            <div style={{
+              background: 'linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%)',
+              border: '1.5px solid #22C55E',
+              borderRadius: 14,
+              padding: '16px 20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 16,
+              flexWrap: 'wrap',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{
+                  width: 40, height: 40, borderRadius: 10,
+                  background: '#22C55E',
+                  color: '#fff',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0,
+                }}>
+                  <Target size={20} />
+                </div>
+                <div>
+                  <p style={{ fontSize: 12, fontWeight: 700, color: '#166534', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    This Month's Spending
+                  </p>
+                  <p style={{ fontSize: 22, fontWeight: 800, color: '#14532D', margin: '2px 0 0' }}>
+                    {formatCurrencyAbbreviated(monthlySpending.totalSpent || 0)}
+                  </p>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+                <div style={{ textAlign: 'center' }}>
+                  <p style={{ fontSize: 11, fontWeight: 700, color: '#15803D', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Top-ups</p>
+                  <p style={{ fontSize: 16, fontWeight: 800, color: '#14532D', margin: '2px 0 0' }}>{formatCurrencyAbbreviated(monthlySpending.totalTopUp || 0)}</p>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <p style={{ fontSize: 11, fontWeight: 700, color: '#15803D', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Transactions</p>
+                  <p style={{ fontSize: 16, fontWeight: 800, color: '#14532D', margin: '2px 0 0' }}>{monthlySpending.transactionCount || 0}</p>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Account Details */}

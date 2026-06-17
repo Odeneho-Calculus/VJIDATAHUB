@@ -57,6 +57,7 @@ export const wallet = {
   verifyPayment: (data) => api.post('/wallet/verify-payment', data),
   getTransactions: (limit = 50, offset = 0) =>
     api.get(`/wallet/transactions?limit=${limit}&offset=${offset}`),
+  getTransactionByReference: (reference) => api.get(`/wallet/transactions/${reference}`),
   verifyTransactionStatus: (data) => api.post('/wallet/verify-transaction-status', data),
   deleteTransaction: (id) => api.delete(`/wallet/transactions/${id}`),
 };
@@ -77,6 +78,8 @@ export const user = {
   updateProfile: (data) => api.put('/user/profile', data),
   getReferralStats: () => api.get('/user/referrals/stats'),
   getReferralLeaderboard: () => api.get('/user/referrals/leaderboard'),
+  getMonthlySpending: (month = '') => api.get(`/user/spending/monthly${month ? `?month=${month}` : ''}`),
+  getSpendingSummary: () => api.get('/user/spending/summary'),
 };
 
 export const publicAPI = {
