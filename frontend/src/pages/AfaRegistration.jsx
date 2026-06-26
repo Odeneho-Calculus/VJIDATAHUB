@@ -275,7 +275,7 @@ export default function AfaRegistration() {
       }
     }
 
-    if (!formData.phoneNumber.match(/^0(24|54|55|59|53|25)\d{7}$/)) {
+    if (!formData.phoneNumber.match(/^0(24|25|53|54|55|59|23)\d{7}$/)) {
         showMessage('error', 'Please enter a valid MTN Ghana phone number');
         return;
     }

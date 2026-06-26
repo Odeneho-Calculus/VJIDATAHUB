@@ -8,7 +8,7 @@ const Guest = require('../models/Guest');
 const topzaApi = require('../utils/topzaApi');
 const { resolvePlanPrice, toPriceNumber } = require('../utils/planPricing');
 const { creditCommissionForOrder } = require('../services/commissionService');
-const { validatePhoneNumber } = require('../utils/phoneValidation');
+const { isValidNetworkNumber } = require('../utils/validation');
 const { calculateDataPurchaseCharge } = require('../utils/transactionCharges');
 const axios = require('axios');
 
@@ -206,8 +206,7 @@ exports.registerAfa = async (req, res) => {
       return res.status(400).json({ success: false, message: 'All fields are required' });
     }
 
-    const phoneValid = validatePhoneNumber(phoneNumber);
-    if (!phoneValid.isValid || phoneValid.network !== 'MTN') {
+    if (!isValidNetworkNumber(phoneNumber, 'MTN')) {
       return res.status(400).json({ success: false, message: 'A valid MTN Ghana number is required' });
     }
 
