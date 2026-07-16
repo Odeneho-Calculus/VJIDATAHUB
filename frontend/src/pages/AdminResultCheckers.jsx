@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
-import { RefreshCw, Search, Edit2, CheckCircle, AlertCircle, Save, X, Lock, Unlock, CreditCard, Info, MessageSquare } from 'lucide-react';
+import { RefreshCw, Search, Edit2, CheckCircle, AlertCircle, Save, X, Lock, Unlock, CreditCard, Info, MessageSquare, History, Eye, EyeOff, ChevronLeft, ChevronRight } from 'lucide-react';
 import AdminSidebar from '../components/AdminSidebar';
 import { useSidebar } from '../hooks/useSidebar';
-import { checkers as checkersAPI } from '../services/api';
+import { checkers as checkersAPI, admin as adminAPI } from '../services/api';
 
 /* ── Homepage multi-colour palette ── */
 const palette = [
@@ -30,6 +30,19 @@ export default function AdminResultCheckers() {
   const [editing, setEditing] = useState(null);
   const [prices, setPrices] = useState({ sellingPrice: '', agentPrice: '', vendorPrice: '' });
 
+  // Checker purchase history state
+  const [history, setHistory] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyPage, setHistoryPage] = useState(1);
+  const [historyPages, setHistoryPages] = useState(1);
+  const [historyTotal, setHistoryTotal] = useState(0);
+  const [historySearchInput, setHistorySearchInput] = useState('');
+  const [historySearch, setHistorySearch] = useState('');
+  const [historyStatus, setHistoryStatus] = useState('');
+  const [historyCheckerType, setHistoryCheckerType] = useState('');
+  const [historyStats, setHistoryStats] = useState({ total: 0, completed: 0, pending: 0, processing: 0, failed: 0 });
+  const [visiblePins, setVisiblePins] = useState({});
+
   const showMessage = (type, text) => {
     setMessage({ type, text });
     setTimeout(() => setMessage({ type: '', text: '' }), 3500);
@@ -51,9 +64,42 @@ export default function AdminResultCheckers() {
     }
   }, [search]);
 
+  const fetchHistory = useCallback(async () => {
+    try {
+      setHistoryLoading(true);
+      const res = await adminAPI.getCheckerOrders(
+        historyPage,
+        10,
+        historyStatus,
+        historyCheckerType,
+        historySearch
+      );
+      setHistory(res.data || []);
+      setHistoryTotal(res.pagination?.total || 0);
+      setHistoryPages(res.pagination?.pages || 1);
+      setHistoryStats(res.stats || { total: 0, completed: 0, pending: 0, processing: 0, failed: 0 });
+    } catch (err) {
+      showMessage('error', err.message || 'Failed to load checker purchase history');
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, [historyPage, historyStatus, historyCheckerType, historySearch]);
+
   useEffect(() => {
     fetchOffers();
   }, [fetchOffers]);
+
+  useEffect(() => {
+    fetchHistory();
+  }, [fetchHistory]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setHistorySearch(historySearchInput);
+      setHistoryPage(1);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [historySearchInput]);
 
   const handleSync = async () => {
     try {
@@ -128,6 +174,54 @@ export default function AdminResultCheckers() {
   };
 
   const formatAmount = (value) => `GHc ${Number(value || 0).toFixed(2)}`;
+
+  const togglePinVisibility = (id) => {
+    setVisiblePins((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const getCustomerDisplay = (row) => {
+    if (row.source === 'store' || row.store) {
+      const storeName = row.store?.name || 'Store';
+      return { name: storeName, sub: row.store?.owner?.name || row.store?.owner?.email || 'Agent store' };
+    }
+    if (row.user?.name || row.user?.email) {
+      return { name: row.user.name || row.user.email, sub: row.user.phone || row.user.email || 'Registered user' };
+    }
+    if (row.guestInfo?.name || row.guestInfo?.email || row.guestInfo?.phone) {
+      return { name: row.guestInfo.name || 'Guest', sub: row.guestInfo.phone || row.guestInfo.email || '' };
+    }
+    return { name: row.phoneNumber || 'Unknown', sub: 'Direct purchase' };
+  };
+
+  const statusBadge = (status) => {
+    const styles = {
+      completed: { bg: '#ECFDF5', color: '#059669', border: '#05966933' },
+      failed: { bg: '#FFF1F2', color: '#DC2626', border: '#DC262633' },
+      pending: { bg: '#FEF3C7', color: '#D97706', border: '#D9770633' },
+      processing: { bg: '#DBEAFE', color: '#2563EB', border: '#2563EB33' },
+    };
+    const s = status || 'pending';
+    const style = styles[s] || styles.pending;
+    return { background: style.bg, color: style.color, border: `1px solid ${style.border}` };
+  };
+
+  const paymentStatusBadge = (status) => {
+    const isCompleted = status === 'completed';
+    return {
+      background: isCompleted ? '#ECFDF5' : '#FEF3C7',
+      color: isCompleted ? '#059669' : '#D97706',
+      border: `1px solid ${isCompleted ? '#05966933' : '#D9770633'}`,
+    };
+  };
+
+  const checkerTypeOptions = ['all', 'WAEC', 'NECO', 'JAMB', 'BECE'];
+  const statusOptions = [
+    { value: '', label: 'All' },
+    { value: 'pending', label: 'Pending' },
+    { value: 'processing', label: 'Processing' },
+    { value: 'completed', label: 'Completed' },
+    { value: 'failed', label: 'Failed' },
+  ];
 
   const pageTheme = getColor(3); // Amber
   const syncColor = getColor(2); // Blue
@@ -523,6 +617,217 @@ export default function AdminResultCheckers() {
               </table>
             )}
           </div>
+        </div>
+
+        {/* Checker Purchase History */}
+        <div className="chk-main-card">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+            <div style={{ width: 40, height: 40, borderRadius: 8, background: pageTheme.soft, color: pageTheme.main, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <History size={20} strokeWidth={2.5} />
+            </div>
+            <div>
+              <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#111', margin: 0 }}>Checker Purchase History</h3>
+              <p style={{ fontSize: '11px', fontWeight: '700', color: '#000', textTransform: 'uppercase', margin: '4px 0 0' }}>Track result checker orders and deliveries</p>
+            </div>
+          </div>
+
+          {/* Stats */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '12px', marginBottom: '24px' }}>
+            {[
+              { label: 'Total', value: historyStats.total, color: '#111' },
+              { label: 'Completed', value: historyStats.completed, color: '#059669' },
+              { label: 'Pending', value: historyStats.pending, color: '#D97706' },
+              { label: 'Processing', value: historyStats.processing, color: '#2563EB' },
+              { label: 'Failed', value: historyStats.failed, color: '#DC2626' },
+            ].map((stat) => (
+              <div key={stat.label} style={{ background: '#fafaf7', border: '1.5px solid #e4e4de', borderRadius: 10, padding: '14px', textAlign: 'center' }}>
+                <div style={{ fontSize: '20px', fontWeight: '800', color: stat.color }}>{stat.value}</div>
+                <div style={{ fontSize: '10px', fontWeight: '800', color: '#000', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '4px' }}>{stat.label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Filters */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
+            <div className="relative">
+              <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: searchColor.main }} strokeWidth={2.5} />
+              <input
+                className="chk-input"
+                style={{ paddingLeft: '44px' }}
+                placeholder="Search by order ID, phone number, customer..."
+                value={historySearchInput}
+                onChange={(e) => setHistorySearchInput(e.target.value)}
+              />
+            </div>
+
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+              <span style={{ fontSize: '11px', fontWeight: '800', color: '#000', textTransform: 'uppercase' }}>Status:</span>
+              {statusOptions.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => { setHistoryStatus(option.value); setHistoryPage(1); }}
+                  style={{
+                    padding: '6px 12px',
+                    borderRadius: 6,
+                    border: '1.5px solid',
+                    borderColor: historyStatus === option.value ? pageTheme.main : '#e4e4de',
+                    background: historyStatus === option.value ? pageTheme.soft : '#fff',
+                    color: historyStatus === option.value ? pageTheme.main : '#444',
+                    fontSize: '11px',
+                    fontWeight: '800',
+                    textTransform: 'uppercase',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+              <span style={{ fontSize: '11px', fontWeight: '800', color: '#000', textTransform: 'uppercase' }}>Type:</span>
+              {checkerTypeOptions.map((type) => (
+                <button
+                  key={type}
+                  onClick={() => { setHistoryCheckerType(type); setHistoryPage(1); }}
+                  style={{
+                    padding: '6px 12px',
+                    borderRadius: 6,
+                    border: '1.5px solid',
+                    borderColor: historyCheckerType === type ? pageTheme.main : '#e4e4de',
+                    background: historyCheckerType === type ? pageTheme.soft : '#fff',
+                    color: historyCheckerType === type ? pageTheme.main : '#444',
+                    fontSize: '11px',
+                    fontWeight: '800',
+                    textTransform: 'uppercase',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* History Table */}
+          <div className="chk-table-container">
+            {historyLoading ? (
+              <div style={{ padding: '60px', display: 'flex', justifyContent: 'center' }}>
+                <div className="chk-spinner"></div>
+              </div>
+            ) : (
+              <table className="chk-table">
+                <thead>
+                  <tr>
+                    <th className="chk-th">Order / Ref</th>
+                    <th className="chk-th">Customer</th>
+                    <th className="chk-th">Checker Type</th>
+                    <th className="chk-th">Phone</th>
+                    <th className="chk-th">Amount</th>
+                    <th className="chk-th">Payment</th>
+                    <th className="chk-th">Status</th>
+                    <th className="chk-th">PIN / Serial</th>
+                    <th className="chk-th">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {history.map((row, idx) => {
+                    const customer = getCustomerDisplay(row);
+                    const rowColor = getColor(idx);
+                    return (
+                      <tr key={row._id} style={{ transition: 'background 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.background = rowColor.soft + '44'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+                        <td className="chk-td">
+                          <div style={{ fontWeight: '800', color: '#111', fontSize: '13px' }}>#{row.orderNumber}</div>
+                          <div style={{ fontSize: '10px', color: '#666', fontWeight: '600' }}>{row.reference || '—'}</div>
+                        </td>
+                        <td className="chk-td">
+                          <div style={{ fontWeight: '700', color: '#111', fontSize: '13px' }}>{customer.name}</div>
+                          <div style={{ fontSize: '10px', color: '#666', fontWeight: '600' }}>{customer.sub}</div>
+                        </td>
+                        <td className="chk-td">
+                          <span style={{ fontWeight: '800', color: rowColor.main, fontSize: '12px', textTransform: 'uppercase' }}>{row.checkerType}</span>
+                        </td>
+                        <td className="chk-td" style={{ fontWeight: '700', color: '#444' }}>{row.phoneNumber || '—'}</td>
+                        <td className="chk-td" style={{ fontWeight: '800', color: '#111' }}>{formatAmount(row.amount)}</td>
+                        <td className="chk-td">
+                          <span className="chk-badge" style={paymentStatusBadge(row.paymentStatus)}>
+                            {row.paymentMethod} · {row.paymentStatus}
+                          </span>
+                        </td>
+                        <td className="chk-td">
+                          <span className="chk-badge" style={statusBadge(row.status)}>
+                            {row.status}
+                          </span>
+                        </td>
+                        <td className="chk-td">
+                          {row.status === 'completed' && (row.pin || row.serialNumber) ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                              {row.pin && (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                  <span style={{ fontWeight: '800', color: '#111', fontSize: '12px' }}>
+                                    {visiblePins[row._id] ? row.pin : '•••• •••• ••••'}
+                                  </span>
+                                  <button onClick={() => togglePinVisibility(row._id)} className="chk-btn-icon" style={{ width: 26, height: 26 }}>
+                                    {visiblePins[row._id] ? <EyeOff size={12} /> : <Eye size={12} />}
+                                  </button>
+                                </div>
+                              )}
+                              {row.serialNumber && (
+                                <span style={{ fontSize: '10px', color: '#666', fontWeight: '700', textTransform: 'uppercase' }}>SN: {row.serialNumber}</span>
+                              )}
+                            </div>
+                          ) : (
+                            <span style={{ fontSize: '11px', color: '#999', fontWeight: '700' }}>—</span>
+                          )}
+                        </td>
+                        <td className="chk-td">
+                          <div style={{ fontSize: '12px', fontWeight: '700', color: '#444' }}>{new Date(row.createdAt).toLocaleDateString()}</div>
+                          <div style={{ fontSize: '10px', color: '#666', fontWeight: '600' }}>{new Date(row.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {history.length === 0 && (
+                    <tr>
+                      <td colSpan="9" className="chk-td" style={{ textAlign: 'center', padding: '48px 16px', color: '#666', fontWeight: '700' }}>
+                        No checker purchase history found
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            )}
+          </div>
+
+          {/* Pagination */}
+          {historyPages > 1 && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '24px' }}>
+              <div style={{ fontSize: '12px', fontWeight: '700', color: '#666' }}>
+                Showing {history.length} of {historyTotal} orders
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  className="chk-btn-outline"
+                  onClick={() => setHistoryPage((p) => Math.max(1, p - 1))}
+                  disabled={historyPage <= 1}
+                >
+                  <ChevronLeft size={16} />
+                  Previous
+                </button>
+                <div style={{ display: 'flex', alignItems: 'center', padding: '0 16px', background: '#fafaf7', border: '1.5px solid #e4e4de', borderRadius: 8, fontSize: '13px', fontWeight: '800', color: '#111' }}>
+                  Page {historyPage} of {historyPages}
+                </div>
+                <button
+                  className="chk-btn-outline"
+                  onClick={() => setHistoryPage((p) => Math.min(historyPages, p + 1))}
+                  disabled={historyPage >= historyPages}
+                >
+                  Next
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { CheckCircle, AlertCircle, RefreshCw, CreditCard, History, Layout as LayoutIcon, Smartphone, Loader2, ChevronRight, ShoppingBag, Wallet, Clock, CheckCircle2, Eye, EyeOff } from 'lucide-react';
+import { CheckCircle, AlertCircle, RefreshCw, CreditCard, History, Layout as LayoutIcon, Smartphone, Loader2, ChevronRight, ShoppingBag, Wallet, Clock, CheckCircle2, Eye, EyeOff, FileText, Copy } from 'lucide-react';
 import { checkers as checkersAPI, publicAPI } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
 import UserLayout from '../components/UserLayout';
 import AgentLayout from '../components/AgentLayout';
 import PurchasePaymentModal from '../components/PurchasePaymentModal';
+import ResultCheckerDetailModal from '../components/ResultCheckerDetailModal';
 import {
   getDataPurchaseChargeAmount,
   parseTransactionCharges,
@@ -285,6 +286,8 @@ export default function ResultsChecker() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [transactionCharges, setTransactionCharges] = useState(parseTransactionCharges());
   const [visiblePins, setVisiblePins] = useState({});
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [copiedId, setCopiedId] = useState('');
 
   const Layout = user?.role === 'agent' ? AgentLayout : UserLayout;
 
@@ -295,6 +298,32 @@ export default function ResultsChecker() {
 
   const togglePinVisibility = (id) => {
     setVisiblePins(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const buildOrderCopyText = (row) => {
+    const lines = [
+      `Transaction ID: ${row.purchaseId || '—'}`,
+      `Checker Type: ${row.checkerType || '—'}`,
+      `Beneficiary: ${row.phoneNumber || '—'}`,
+      `Amount: ${formatCurrencyAbbreviated(row.price || 0)}`,
+      `Status: ${row.status || '—'}`,
+      `Payment Method: ${row.metadata?.paymentMethod || '—'}`,
+      `Date: ${new Date(row.createdAt).toLocaleString()}`,
+    ];
+    if (row.serialNumber) lines.push(`Serial Number: ${row.serialNumber}`);
+    if (row.pin) lines.push(`PIN: ${row.pin}`);
+    if (row.reference) lines.push(`Reference: ${row.reference}`);
+    return lines.join('\n');
+  };
+
+  const copyOrderDetails = async (row) => {
+    try {
+      await navigator.clipboard.writeText(buildOrderCopyText(row));
+      setCopiedId(row._id);
+      setTimeout(() => setCopiedId(''), 2000);
+    } catch {
+      showMessage('error', 'Failed to copy details');
+    }
   };
 
   const fetchData = useCallback(async () => {
@@ -575,6 +604,7 @@ export default function ResultsChecker() {
                     <th className="dash-th">Pin / Serial</th>
                     <th className="dash-th">Amount</th>
                     <th className="dash-th">Status</th>
+                    <th className="dash-th">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -619,12 +649,30 @@ export default function ResultsChecker() {
                             {row.status}
                           </span>
                         </td>
+                        <td className="dash-td">
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => setSelectedOrder(row)}
+                              className="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                              title="View details"
+                            >
+                              <FileText size={16} strokeWidth={2} />
+                            </button>
+                            <button
+                              onClick={() => copyOrderDetails(row)}
+                              className="p-1.5 rounded-lg text-slate-500 hover:text-green-600 hover:bg-green-50 transition-colors"
+                              title="Copy details"
+                            >
+                              {copiedId === row._id ? <CheckCircle2 size={16} className="text-green-600" /> : <Copy size={16} strokeWidth={2} />}
+                            </button>
+                          </div>
+                        </td>
                       </tr>
                     );
                   })}
                   {history.length === 0 && (
                     <tr>
-                      <td colSpan="5" className="dash-td py-12 text-center text-black font-bold uppercase text-xs">No purchase history found</td>
+                      <td colSpan="7" className="dash-td py-12 text-center text-black font-bold uppercase text-xs">No purchase history found</td>
                     </tr>
                   )}
                 </tbody>
@@ -652,6 +700,13 @@ export default function ResultsChecker() {
           }}
         />
       )}
+
+      <ResultCheckerDetailModal
+        key={selectedOrder?._id || 'closed'}
+        isOpen={Boolean(selectedOrder)}
+        onClose={() => setSelectedOrder(null)}
+        order={selectedOrder}
+      />
     </Layout>
   );
 }

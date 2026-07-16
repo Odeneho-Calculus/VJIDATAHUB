@@ -120,6 +120,8 @@ export const admin = {
     api.post('/admin/transactions/bulk-delete', { status }),
   getOrders: (page = 1, limit = 10, status = '', network = '', scope = '', search = '') =>
     api.get(`/admin/orders?page=${page}&limit=${limit}&status=${status}&network=${network}&scope=${scope}&search=${encodeURIComponent(search)}`),
+  getCheckerOrders: (page = 1, limit = 10, status = '', checkerType = '', search = '') =>
+    api.get(`/admin/checker-orders?page=${page}&limit=${limit}&status=${status}&checkerType=${checkerType}&search=${encodeURIComponent(search)}`),
   updateOrderStatus: (id, status, adminNotes = '') =>
     api.patch(`/admin/orders/${id}/status`, { status, adminNotes }),
   refundOrder: (id, reason = 'Manual admin refund') =>

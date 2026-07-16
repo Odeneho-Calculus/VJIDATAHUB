@@ -117,6 +117,7 @@ const syncSkdataplugOrderStatus = async () => {
       }
 
       const beforeStatus = order.status;
+      const isAdminModified = order.adminModified === true;
 
       order.status = mappedStatus;
       order.providerStatus = normalizedProviderStatus;

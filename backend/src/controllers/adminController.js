@@ -1605,6 +1605,178 @@ exports.getOrders = async (req, res) => {
   }
 };
 
+exports.getCheckerOrders = async (req, res) => {
+  try {
+    const {
+      page = 1,
+      limit = 10,
+      status = '',
+      checkerType = '',
+      search = '',
+    } = req.query;
+
+    const parsedPage = Math.max(1, Number(page));
+    const parsedLimit = Math.min(100, Math.max(1, Number(limit)));
+    const skip = (parsedPage - 1) * parsedLimit;
+
+    const query = { orderKind: 'checker' };
+    const andConditions = [];
+
+    if (status && status !== 'all') {
+      query.status = status;
+    }
+
+    if (checkerType && checkerType !== 'all') {
+      const normalized = String(checkerType).trim().toUpperCase();
+      if (['WAEC', 'NECO', 'JAMB', 'BECE'].includes(normalized)) {
+        andConditions.push({ 'checkerDetails.checkerType': normalized });
+      }
+    }
+
+    if (search && search.trim()) {
+      const term = search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = { $regex: term, $options: 'i' };
+
+      const [matchingUsers, matchingGuests] = await Promise.all([
+        User.find({
+          $or: [
+            { name: regex },
+            { email: regex },
+            { phone: regex },
+          ],
+        }).select('_id').lean(),
+        Guest.find({
+          $or: [
+            { name: regex },
+            { email: regex },
+            { phone: regex },
+          ],
+        }).select('_id').lean(),
+      ]);
+
+      const searchConditions = [
+        { orderNumber: regex },
+        { phoneNumber: regex },
+        { planName: regex },
+        { transactionReference: regex },
+        { paystackReference: regex },
+      ];
+
+      if (matchingUsers.length > 0) {
+        searchConditions.push({ userId: { $in: matchingUsers.map((u) => u._id) } });
+      }
+      if (matchingGuests.length > 0) {
+        searchConditions.push({ guestInfo: { $in: matchingGuests.map((g) => g._id) } });
+      }
+
+      andConditions.push({ $or: searchConditions });
+    }
+
+    if (andConditions.length > 0) {
+      query.$and = andConditions;
+    }
+
+    const [total, rows] = await Promise.all([
+      Order.countDocuments(query),
+      Order.find(query)
+        .populate('userId', 'name email phone')
+        .populate('guestInfo', 'name email phone')
+        .populate({
+          path: 'storeId',
+          select: 'name slug owner',
+          populate: { path: 'owner', select: 'name email phone' },
+        })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(parsedLimit),
+    ]);
+
+    // Refresh pending/processing orders from the provider so admins see up-to-date PIN/serial/status.
+    await Promise.allSettled(
+      rows
+        .filter(
+          (order) =>
+            order.checkerDetails?.resultCheckerId &&
+            !['completed', 'failed'].includes(order.status)
+        )
+        .map(async (order) => {
+          try {
+            const providerRow = await topzaApi.getCheckerById(order.checkerDetails.resultCheckerId);
+            if (providerRow.success) {
+              const checker = providerRow.checker || {};
+              order.providerStatus = checker.status || order.providerStatus;
+              order.status = checker.purchaseStatus === 'success' ? 'completed' : order.status;
+              order.checkerDetails = {
+                ...order.checkerDetails,
+                serialNumber: checker.serialNumber || order.checkerDetails.serialNumber,
+                pin: checker.pin || checker.token || checker.code || order.checkerDetails.pin,
+                smsNotificationSent: Boolean(checker.smsNotificationSent || order.checkerDetails.smsNotificationSent),
+              };
+              await order.save();
+            }
+          } catch (refreshError) {
+            console.error('[getCheckerOrders] Failed to refresh checker status:', refreshError.message);
+          }
+        })
+    );
+
+    const [completedCount, pendingCount, processingCount, failedCount] = await Promise.all([
+      Order.countDocuments({ orderKind: 'checker', status: 'completed' }),
+      Order.countDocuments({ orderKind: 'checker', status: 'pending' }),
+      Order.countDocuments({ orderKind: 'checker', status: 'processing' }),
+      Order.countDocuments({ orderKind: 'checker', status: 'failed' }),
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      data: rows.map((order) => ({
+        _id: order._id,
+        orderNumber: order.orderNumber,
+        reference: order.transactionReference || order.paystackReference || order.orderNumber,
+        checkerType: order.checkerDetails?.checkerType || order.planName,
+        planName: order.planName,
+        phoneNumber: order.phoneNumber,
+        amount: order.amount,
+        adminBasePrice: order.adminBasePrice,
+        status: order.status,
+        paymentStatus: order.paymentStatus,
+        paymentMethod: order.paymentMethod,
+        source: order.source,
+        pin: order.checkerDetails?.pin || null,
+        serialNumber: order.checkerDetails?.serialNumber || null,
+        smsEnabled: order.checkerDetails?.smsEnabled !== false,
+        smsNotificationSent: order.checkerDetails?.smsNotificationSent || false,
+        user: order.userId,
+        guestInfo: order.guestInfo,
+        store: order.storeId,
+        providerStatus: order.providerStatus,
+        providerMessage: order.providerMessage,
+        createdAt: order.createdAt,
+        updatedAt: order.updatedAt,
+      })),
+      pagination: {
+        total,
+        page: parsedPage,
+        limit: parsedLimit,
+        pages: Math.max(1, Math.ceil(total / parsedLimit)),
+      },
+      stats: {
+        total: completedCount + pendingCount + processingCount + failedCount,
+        completed: completedCount,
+        pending: pendingCount,
+        processing: processingCount,
+        failed: failedCount,
+      },
+    });
+  } catch (error) {
+    console.error('getCheckerOrders error:', error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to fetch checker orders',
+    });
+  }
+};
+
 exports.updateOrderStatus = async (req, res) => {
   try {
     const { id } = req.params;

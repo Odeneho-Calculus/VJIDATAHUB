@@ -46,18 +46,24 @@ const executeTopzaCheckerPurchase = async ({ order, offer, phoneNumber, skipSms 
   }
 
   const txReference = topzaResult.data?.reference || `CHKW${Date.now()}`;
+  const providerChecker = topzaResult.data || {};
+  const receivedPin = providerChecker.pin || providerChecker.token || providerChecker.code || null;
+  const receivedSerial = providerChecker.serialNumber || providerChecker.serial || null;
+  const isCompleted = receivedPin || providerChecker.purchaseStatus === 'success';
 
-  order.status = 'processing';
+  order.status = isCompleted ? 'completed' : 'processing';
   order.paymentStatus = 'completed';
-  order.externalOrderId = topzaResult.data?.resultCheckerId || null;
+  order.externalOrderId = providerChecker.resultCheckerId || null;
   order.transactionReference = txReference;
-  order.providerStatus = topzaResult.data?.status || 'pending';
+  order.providerStatus = providerChecker.status || providerChecker.purchaseStatus || 'pending';
   order.providerMessage = topzaResult.message || null;
   order.checkerDetails = {
     ...order.checkerDetails,
-    resultCheckerId: topzaResult.data?.resultCheckerId || null,
+    resultCheckerId: providerChecker.resultCheckerId || null,
     checkerType: offer.checkerType,
     skipSms: Boolean(skipSms),
+    pin: receivedPin,
+    serialNumber: receivedSerial,
   };
   await order.save();
 
@@ -312,6 +318,10 @@ exports.updateCheckerPrices = async (req, res) => {
     if (!hasAnyConfiguredPrice(offer)) {
       offer.status = 'inactive';
       offer.isActive = false;
+    } else if (offer.status !== 'active') {
+      // Auto-activate offers once a valid price is configured so users can see them immediately.
+      offer.status = 'active';
+      offer.isActive = true;
     }
 
     offer.isEdited = true;
@@ -320,7 +330,7 @@ exports.updateCheckerPrices = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: hasAnyConfiguredPrice(offer)
-        ? 'Checker prices updated'
+        ? `Checker prices updated${offer.status === 'active' ? ' and offer activated' : ''}`
         : 'Checker prices cleared. Offer deactivated until a valid price is set.',
       offer,
     });
@@ -455,7 +465,9 @@ exports.getCheckerTypes = async (_req, res) => {
 exports.getCheckerProductsList = async (req, res) => {
   try {
     const user = req.userId ? await User.findById(req.userId).select('role agentFeeStatus') : null;
-    const offers = await TopzaCheckerOffer.find({ status: 'active' }).sort({ checkerType: 1 });
+    const offers = await TopzaCheckerOffer.find({
+      $or: [{ status: 'active' }, { isActive: true }],
+    }).sort({ checkerType: 1 });
 
     const data = offers
       .map((offer) => {
@@ -807,6 +819,36 @@ exports.listMyCheckers = async (req, res) => {
       Order.countDocuments(query),
       Order.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
     ]);
+
+    // Refresh pending/processing orders from the provider so PIN/serial and status are up-to-date.
+    await Promise.allSettled(
+      rows
+        .filter(
+          (order) =>
+            order.checkerDetails?.resultCheckerId &&
+            !['completed', 'failed'].includes(order.status)
+        )
+        .map(async (order) => {
+          try {
+            const providerRow = await topzaApi.getCheckerById(order.checkerDetails.resultCheckerId);
+            if (providerRow.success) {
+              const checker = providerRow.checker || {};
+              order.providerStatus = checker.status || order.providerStatus;
+              order.status = checker.purchaseStatus === 'success' ? 'completed' : order.status;
+              order.checkerDetails = {
+                ...order.checkerDetails,
+                serialNumber: checker.serialNumber || order.checkerDetails.serialNumber,
+                pin: checker.pin || checker.token || checker.code || order.checkerDetails.pin,
+                smsNotificationSent: Boolean(checker.smsNotificationSent || order.checkerDetails.smsNotificationSent),
+              };
+              await order.save();
+            }
+          } catch (refreshError) {
+            // Non-fatal: keep the existing order state if provider lookup fails.
+            console.error('[listMyCheckers] Failed to refresh checker status:', refreshError.message);
+          }
+        })
+    );
 
     return res.status(200).json({
       success: true,
