@@ -158,7 +158,7 @@ const syncSkdataplugOrderStatus = async () => {
 
       await order.save();
 
-      if (mappedStatus === 'failed' && order.paymentStatus === 'completed' && !order.isRefunded) {
+      if (!isAdminModified && mappedStatus === 'failed' && order.paymentStatus === 'completed' && !order.isRefunded) {
         if (order.source === 'store' && order.storeId) {
           const refundResult = await processStoreOrderRefund(order, normalizedProviderStatus || 'Service sync failure');
           console.log(`[Service Status Sync] Store order auto-refund result for order ${order.orderNumber}:`, refundResult);

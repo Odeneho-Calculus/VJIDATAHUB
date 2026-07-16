@@ -29,6 +29,16 @@ const paystackAPI = axios.create({
   },
 });
 
+const statusToProviderStatus = (status = '') => {
+  switch (status) {
+    case 'completed': return 'Completed';
+    case 'failed': return 'Failed';
+    case 'processing': return 'Processing';
+    case 'pending': return 'Pending';
+    default: return status;
+  }
+};
+
 const skdataplugApi = require('../utils/skdataplugApi');
 const { toAbbreviation, fromAbbreviation, planTypeToAbbreviation } = require('../utils/providerMap');
 
@@ -1617,6 +1627,7 @@ exports.updateOrderStatus = async (req, res) => {
     }
 
     order.status = status;
+    order.providerStatus = statusToProviderStatus(status);
     order.adminModified = true;
     order.adminModifiedAt = new Date();
     order.adminModifiedFields = ['status'];
@@ -1624,9 +1635,22 @@ exports.updateOrderStatus = async (req, res) => {
       order.adminNotes = adminNotes;
     }
 
+    if (!Array.isArray(order.statusHistory)) {
+      order.statusHistory = [];
+    }
+    order.statusHistory.push({
+      status,
+      updatedAt: new Date(),
+      source: 'admin',
+      notes: adminNotes || `Status updated to ${status} by admin`,
+    });
+
     if (status === 'completed') {
       order.completedAt = new Date();
       order.completedBy = 'admin';
+    } else if (status === 'failed') {
+      order.completedAt = null;
+      order.completedBy = null;
     }
 
     await order.save();

@@ -1067,7 +1067,7 @@ export default function AdminOrders() {
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                 <span className="orders-badge"
                                       style={getOrderStatusStyle(order.status)}>
-                                  {order.providerStatus || order.status}
+                                  {order.status}
                                 </span>
                                 {order.isRefunded && (
                                   <span className="orders-badge" style={{ backgroundColor: '#fff7ed', color: '#c2410c', fontSize: '9px', border: '1px solid #ffedd5' }}>

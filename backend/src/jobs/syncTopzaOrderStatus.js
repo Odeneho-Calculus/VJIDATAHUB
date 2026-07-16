@@ -119,49 +119,61 @@ const syncTopzaOrderStatus = async () => {
       }
 
       const beforeStatus = order.status;
+      const isAdminModified = order.adminModified === true;
 
-      order.status = mappedStatus;
       order.providerStatus = normalizedProviderStatus;
       order.externalOrderId = nextExternalOrderId || order.externalOrderId;
       order.externalOrderNumber = nextExternalOrderNumber || order.externalOrderNumber;
-      order.providerMessage = `Service sync: ${normalizedProviderStatus}`;
 
       if (!Array.isArray(order.statusHistory)) {
         order.statusHistory = [];
       }
 
-      const lastHistory = order.statusHistory[order.statusHistory.length - 1];
-      const shouldAppendHistory = !lastHistory || lastHistory.status !== mappedStatus;
+      if (!isAdminModified) {
+        order.status = mappedStatus;
+        order.providerMessage = `Service sync: ${normalizedProviderStatus}`;
 
-      if (shouldAppendHistory) {
-        order.statusHistory.push({
-          status: mappedStatus,
-          updatedAt: toDateOrNow(providerOrder?.updatedAt),
-          source: 'service_sync',
-          notes: `Service status: ${normalizedProviderStatus}`,
-        });
-      }
+        const lastHistory = order.statusHistory[order.statusHistory.length - 1];
+        const shouldAppendHistory = !lastHistory || lastHistory.status !== mappedStatus;
 
-      if (mappedStatus === 'completed') {
-        order.completedAt = toDateOrNow(providerOrder?.updatedAt);
-        order.completedBy = 'system';
-        if (order.paymentStatus !== 'failed') {
-          order.paymentStatus = 'completed';
+        if (shouldAppendHistory) {
+          order.statusHistory.push({
+            status: mappedStatus,
+            updatedAt: toDateOrNow(providerOrder?.updatedAt),
+            source: 'service_sync',
+            notes: `Service status: ${normalizedProviderStatus}`,
+          });
         }
-        order.errorMessage = null;
-      } else if (mappedStatus === 'failed') {
-        order.completedAt = null;
-        order.completedBy = null;
-        order.errorMessage = `Service sync reported failed status${order.externalOrderNumber ? ` (${order.externalOrderNumber})` : ''}`;
+
+        if (mappedStatus === 'completed') {
+          order.completedAt = toDateOrNow(providerOrder?.updatedAt);
+          order.completedBy = 'system';
+          if (order.paymentStatus !== 'failed') {
+            order.paymentStatus = 'completed';
+          }
+          order.errorMessage = null;
+        } else if (mappedStatus === 'failed') {
+          order.completedAt = null;
+          order.completedBy = null;
+          order.errorMessage = `Service sync reported failed status${order.externalOrderNumber ? ` (${order.externalOrderNumber})` : ''}`;
+        } else {
+          order.completedAt = null;
+          order.completedBy = null;
+        }
       } else {
-        order.completedAt = null;
-        order.completedBy = null;
+        order.providerMessage = `Service sync: ${normalizedProviderStatus} (status locked by admin)`;
+        order.statusHistory.push({
+          status: order.status,
+          updatedAt: new Date(),
+          source: 'service_sync',
+          notes: `Provider reported ${normalizedProviderStatus}; admin status (${order.status}) preserved`,
+        });
       }
 
       await order.save();
 
       // Trigger refund IF order failed AND was paid AND not already refunded
-      if (mappedStatus === 'failed' && order.paymentStatus === 'completed' && !order.isRefunded) {
+      if (!isAdminModified && mappedStatus === 'failed' && order.paymentStatus === 'completed' && !order.isRefunded) {
         if (order.source === 'store' && order.storeId) {
           const refundResult = await processStoreOrderRefund(order, normalizedProviderStatus || 'Service sync failure');
           console.log(`[Service Status Sync] Store order auto-refund result for order ${order.orderNumber}:`, refundResult);

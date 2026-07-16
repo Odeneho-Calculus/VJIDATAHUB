@@ -180,41 +180,52 @@ exports.handleWebhook = async (req, res) => {
     if (!Array.isArray(order.statusHistory)) {
       order.statusHistory = [];
     }
-    const lastHistory = order.statusHistory[order.statusHistory.length - 1];
-    const shouldAppendHistory = !lastHistory || lastHistory.status !== mappedStatus;
 
-    order.status = mappedStatus;
+    if (!order.adminModified) {
+      order.status = mappedStatus;
 
-    if (mappedStatus === 'completed') {
-      order.completedAt = hasValidUpdatedAt ? updatedAt : new Date();
-      order.completedBy = 'system';
-      if (order.paymentStatus !== 'failed') {
-        order.paymentStatus = 'completed';
+      const lastHistory = order.statusHistory[order.statusHistory.length - 1];
+      const shouldAppendHistory = !lastHistory || lastHistory.status !== mappedStatus;
+
+      if (mappedStatus === 'completed') {
+        order.completedAt = hasValidUpdatedAt ? updatedAt : new Date();
+        order.completedBy = 'system';
+        if (order.paymentStatus !== 'failed') {
+          order.paymentStatus = 'completed';
+        }
+        order.errorMessage = null;
+        order.providerMessage = `Service update: order completed${topzaOrderNumber ? ` (${topzaOrderNumber})` : ''}`;
+      } else if (mappedStatus === 'failed') {
+        order.errorMessage = `Service update reported failed status${topzaOrderNumber ? ` (${topzaOrderNumber})` : ''}`;
+        order.providerMessage = `Service update: order failed${topzaOrderNumber ? ` (${topzaOrderNumber})` : ''}`;
+        order.completedBy = null;
+        order.completedAt = null;
+      } else {
+        order.providerMessage = `Service update: order ${mappedStatus}${topzaOrderNumber ? ` (${topzaOrderNumber})` : ''}`;
+        order.completedBy = null;
+        order.completedAt = null;
       }
-      order.errorMessage = null;
-      order.providerMessage = `Service update: order completed${topzaOrderNumber ? ` (${topzaOrderNumber})` : ''}`;
-    } else if (mappedStatus === 'failed') {
-      order.errorMessage = `Service update reported failed status${topzaOrderNumber ? ` (${topzaOrderNumber})` : ''}`;
-      order.providerMessage = `Service update: order failed${topzaOrderNumber ? ` (${topzaOrderNumber})` : ''}`;
-      order.completedBy = null;
-      order.completedAt = null;
-    } else {
-      order.providerMessage = `Service update: order ${mappedStatus}${topzaOrderNumber ? ` (${topzaOrderNumber})` : ''}`;
-      order.completedBy = null;
-      order.completedAt = null;
-    }
 
-    if (shouldAppendHistory) {
+      if (shouldAppendHistory) {
+        order.statusHistory.push({
+          status: mappedStatus,
+          updatedAt: hasValidUpdatedAt ? updatedAt : new Date(),
+          source: 'service_update',
+          notes: `Service status: ${providerStatus || mappedStatus}`,
+        });
+      }
+    } else {
+      order.providerMessage = `Service update: ${providerStatus || mappedStatus} (status locked by admin)`;
       order.statusHistory.push({
-        status: mappedStatus,
-        updatedAt: hasValidUpdatedAt ? updatedAt : new Date(),
+        status: order.status,
+        updatedAt: new Date(),
         source: 'service_update',
-        notes: `Service status: ${providerStatus || mappedStatus}`,
+        notes: `Provider reported ${providerStatus || mappedStatus}; admin status (${order.status}) preserved`,
       });
     }
 
     // Trigger refund IF order failed AND was paid AND not already refunded
-    if (mappedStatus === 'failed' && order.paymentStatus === 'completed' && !order.isRefunded) {
+    if (!order.adminModified && mappedStatus === 'failed' && order.paymentStatus === 'completed' && !order.isRefunded) {
       let refundResult;
 
       if (order.source === 'store' && order.storeId) {
