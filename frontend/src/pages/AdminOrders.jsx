@@ -44,6 +44,7 @@ export default function AdminOrders() {
   const [statusFilter, setStatusFilter] = useState('');
   const [networkFilter, setNetworkFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
 
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -93,6 +94,14 @@ export default function AdminOrders() {
     ? networkCatalog.map((network) => network.name)
     : networks;
 
+  // Debounce search input so we don't fire a request on every keystroke
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm.trim());
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
   useEffect(() => {
     setPage(1);
   }, [statusFilter, networkFilter, searchTerm]);
@@ -100,7 +109,7 @@ export default function AdminOrders() {
   const fetchOrders = useCallback(async ({ silent = false } = {}) => {
     try {
       if (!silent) setLoading(true);
-      const response = await adminAPI.getOrders(page, 10, statusFilter, networkFilter, scope);
+      const response = await adminAPI.getOrders(page, 10, statusFilter, networkFilter, scope, debouncedSearch);
 
       if (response.success) {
         setOrders(response.data?.orders || response.orders || []);
@@ -117,7 +126,7 @@ export default function AdminOrders() {
     } finally {
       if (!silent) setLoading(false);
     }
-  }, [page, statusFilter, networkFilter, scope]);
+  }, [page, statusFilter, networkFilter, scope, debouncedSearch]);
 
   useEffect(() => {
     fetchOrders();
@@ -178,7 +187,7 @@ export default function AdminOrders() {
 
   useEffect(() => {
     setSelectedIds(new Set());
-  }, [page, statusFilter, networkFilter]);
+  }, [page, statusFilter, networkFilter, debouncedSearch]);
 
   const showMessage = (msg, isError = false) => {
     if (isError) {
@@ -189,22 +198,11 @@ export default function AdminOrders() {
   };
 
   const getFilteredOrders = () => {
-    const term = searchTerm.toLowerCase();
+    // Search is handled server-side; apply only the network filter client-side
+    // as a lightweight secondary guard (the backend already filters by network).
     return orders.filter((order) => {
-      const matchesSearch = !term ||
-        (order.user?.name || order.userId?.name || '').toLowerCase().includes(term) ||
-        (order.user?.email || order.userId?.email || '').toLowerCase().includes(term) ||
-        (order.user?.phone || order.userId?.phone || '').toLowerCase().includes(term) ||
-        (order.phoneNumber || '').toLowerCase().includes(term) ||
-        (order.orderNumber || '').toLowerCase().includes(term) ||
-        (order.planName || '').toLowerCase().includes(term) ||
-        (order.store?.name || '').toLowerCase().includes(term) ||
-        (order.store?.owner?.name || '').toLowerCase().includes(term) ||
-        (order.store?.owner?.email || '').toLowerCase().includes(term) ||
-        (order.store?.owner?.phone || '').toLowerCase().includes(term);
-
       const matchesNetwork = !networkFilter || networksMatch(order.network, networkFilter);
-      return matchesSearch && matchesNetwork;
+      return matchesNetwork;
     });
   };
 

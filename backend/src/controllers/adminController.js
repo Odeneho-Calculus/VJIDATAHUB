@@ -13,7 +13,7 @@ const SellerCommission = require('../models/SellerCommission');
 const AgentCommissionAdjustment = require('../models/AgentCommissionAdjustment');
 const CommissionLedger = require('../models/CommissionLedger');
 const Referral = require('../models/Referral');
-// const Guest = require('../models/Guest');
+const Guest = require('../models/Guest');
 const { creditCommissionForOrder, markAsWithdrawn, returnPendingToEarned } = require('../services/commissionService');
 const topzaApi = require('../utils/topzaApi');
 const { processRefund, processStoreOrderRefund } = require('../utils/refund');
@@ -1447,10 +1447,11 @@ exports.bulkDeleteOrdersByIds = async (req, res) => {
 
 exports.getOrders = async (req, res) => {
   try {
-    const { page = 1, limit = 10, status = '', network = '', scope = '' } = req.query;
+    const { page = 1, limit = 10, status = '', network = '', scope = '', search = '' } = req.query;
     const skip = (page - 1) * limit;
 
     let query = {};
+    const andConditions = [];
 
     if (status) {
       query.status = status;
@@ -1461,10 +1462,69 @@ exports.getOrders = async (req, res) => {
     }
 
     if (scope === 'agent') {
-      query.$or = [
-        { source: 'store' },
-        { storeId: { $ne: null } },
+      andConditions.push({
+        $or: [
+          { source: 'store' },
+          { storeId: { $ne: null } },
+        ],
+      });
+    }
+
+    if (search && search.trim()) {
+      const term = search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = { $regex: term, $options: 'i' };
+
+      const [matchingUsers, matchingGuests] = await Promise.all([
+        User.find({
+          $or: [
+            { name: regex },
+            { email: regex },
+            { phone: regex },
+          ],
+        }).select('_id').lean(),
+        Guest.find({
+          $or: [
+            { name: regex },
+            { email: regex },
+            { phone: regex },
+          ],
+        }).select('_id').lean(),
+      ]);
+
+      const userIds = matchingUsers.map((u) => u._id);
+      const storeQuery = {
+        $or: [
+          { name: regex },
+          { slug: regex },
+        ],
+      };
+      if (userIds.length > 0) {
+        storeQuery.$or.push({ owner: { $in: userIds } });
+      }
+      const matchingStores = await Store.find(storeQuery).select('_id').lean();
+
+      const searchConditions = [
+        { orderNumber: regex },
+        { phoneNumber: regex },
+        { planName: regex },
+        { network: regex },
       ];
+
+      if (matchingUsers.length > 0) {
+        searchConditions.push({ userId: { $in: matchingUsers.map((u) => u._id) } });
+      }
+      if (matchingGuests.length > 0) {
+        searchConditions.push({ guestInfo: { $in: matchingGuests.map((g) => g._id) } });
+      }
+      if (matchingStores.length > 0) {
+        searchConditions.push({ storeId: { $in: matchingStores.map((s) => s._id) } });
+      }
+
+      andConditions.push({ $or: searchConditions });
+    }
+
+    if (andConditions.length > 0) {
+      query.$and = andConditions;
     }
 
     const orders = await Order.find(query)
