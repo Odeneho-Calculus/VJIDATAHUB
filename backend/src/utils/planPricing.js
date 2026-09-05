@@ -24,6 +24,12 @@ const resolvePlanPrice = (plan, { userRole = 'user', agentFeeStatus = null } = {
     return toPriceNumber(plan.sellingPrice);
   }
 
+  // Fallback to costPrice if no role-specific price is set
+  // This ensures the service is never free unless admin explicitly sets all prices to 0
+  if (isPositivePrice(plan?.costPrice)) {
+    return toPriceNumber(plan.costPrice);
+  }
+
   return 0;
 };
 

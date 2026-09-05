@@ -300,9 +300,9 @@ export default function AfaRegistration() {
           dateOfBirth: ''
         });
 
-        // Update balance
-        if (updateBalance) {
-          updateBalance(user.balance - lockStatus.registrationFee);
+        // Update balance with actual registration price from response
+        if (updateBalance && res.data?.registrationPrice) {
+          updateBalance(user.balance - res.data.registrationPrice);
         }
 
         // Refresh history
@@ -514,7 +514,7 @@ export default function AfaRegistration() {
                   <div className="pt-4">
                     <button
                       type="submit"
-                      disabled={registering || !lockStatus.enabled}
+                      disabled={registering || !lockStatus.enabled || (user?.balance || 0) < lockStatus.registrationFee}
                       className="dash-btn-primary w-full py-3 text-base"
                       style={{ background: submitColor.main, boxShadow: `0 4px 16px ${submitColor.glow}` }}
                     >
@@ -525,6 +525,12 @@ export default function AfaRegistration() {
                        <Info size={14} style={{ color: feeColor.main }} />
                        Fee of {formatCurrency(lockStatus.registrationFee)} will be deducted from your wallet
                     </p>
+                    {(user?.balance || 0) < lockStatus.registrationFee && lockStatus.registrationFee > 0 && (
+                      <p className="mt-2 text-center text-xs font-bold text-red-600 flex items-center justify-center gap-2">
+                         <AlertCircle size={14} />
+                         Insufficient balance. Current: {formatCurrency(user?.balance || 0)}, Required: {formatCurrency(lockStatus.registrationFee)}
+                      </p>
+                    )}
                   </div>
                 </form>
               </div>

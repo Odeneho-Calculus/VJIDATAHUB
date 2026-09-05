@@ -227,7 +227,7 @@ exports.registerAfa = async (req, res) => {
 
     const price = resolveRolePrice(afaOffer, user);
 
-    if (user.walletBalance < price) {
+    if (user.balance < price) {
       return res.status(400).json({ success: false, message: 'Insufficient wallet balance' });
     }
 
@@ -261,7 +261,7 @@ exports.registerAfa = async (req, res) => {
 
     // Deduct Wallet
     if (user) {
-      user.walletBalance -= price;
+      user.balance -= price;
       await user.save();
     }
 
@@ -291,7 +291,7 @@ exports.registerAfa = async (req, res) => {
     if (!topzaResult.success) {
       // Refund if it's a wallet transaction (not a guest)
       if (user && !order.isGuest) {
-        user.walletBalance += price;
+        user.balance += price;
         await user.save();
 
         await Transaction.create({
