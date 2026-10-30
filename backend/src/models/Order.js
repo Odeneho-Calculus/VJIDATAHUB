@@ -212,6 +212,10 @@ const orderSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    refundLastAttemptAt: { type: Date, default: null },
+    refundAmount: { type: Number, default: null },
+    refundCommissionRecovery: { type: Number, default: 0 },
+    refundedAt: { type: Date, default: null },
     isRefunded: {
       type: Boolean,
       default: false,
@@ -258,6 +262,9 @@ const orderSchema = new mongoose.Schema(
 );
 
 orderSchema.index({ userId: 1, createdAt: -1 });
+orderSchema.index({ transactionId: 1 });
+orderSchema.index({ transactionReference: 1 });
+orderSchema.index({ paystackReference: 1 });
 orderSchema.index({ status: 1 });
 orderSchema.index({ network: 1 });
 orderSchema.index({ externalOrderId: 1 });

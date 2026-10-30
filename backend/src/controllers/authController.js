@@ -1,3 +1,4 @@
+const { getUserSpending } = require('../services/spendingService');
 const User = require('../models/User');
 const Referral = require('../models/Referral');
 const ReferralSettings = require('../models/ReferralSettings');
@@ -546,7 +547,7 @@ exports.register = async (req, res) => {
         referralCode: user.referralCode,
         role: user.role,
         agentFeeStatus: user.agentFeeStatus,
-        totalSpent: user.totalSpent,
+        totalSpent: (await getUserSpending(user._id)).totalSpent,
         dataUsed: user.dataUsed,
         referralEarnings: user.referralEarnings,
         isEmailVerified: user.isEmailVerified,
@@ -688,7 +689,7 @@ exports.login = async (req, res) => {
         referralCode: user.referralCode,
         role: user.role,
         agentFeeStatus: user.agentFeeStatus,
-        totalSpent: user.totalSpent,
+        totalSpent: (await getUserSpending(user._id)).totalSpent,
         dataUsed: user.dataUsed,
         referralEarnings: user.referralEarnings,
         isEmailVerified: user.isEmailVerified,
@@ -724,7 +725,7 @@ exports.getProfile = async (req, res) => {
         referralCode: user.referralCode,
         role: user.role,
         agentFeeStatus: user.agentFeeStatus,
-        totalSpent: user.totalSpent,
+        totalSpent: (await getUserSpending(user._id)).totalSpent,
         dataUsed: user.dataUsed,
         referralEarnings: user.referralEarnings,
         isEmailVerified: user.isEmailVerified,

@@ -189,3 +189,52 @@ MIT
 ## Support
 
 For detailed implementation information, refer to the documentation files included in the project.
+
+
+### Store order refund accounting
+
+Failed paid store orders refund the original `order.amount` (customer selling price)
+to the store owner's main wallet. Separate payment/transaction fees are excluded.
+The purchase-time `adminBasePrice` snapshot is preserved for commission calculation.
+Refunded/failed orders cannot earn commission through reconciliation.
+
+Earned commission is reversed from the commission ledger. A margin already reserved
+for payout or withdrawn is recovered through a separate negative wallet transaction,
+so it is not paid twice. For example, a GHS5 order with GHS1 still earned credits
+GHS5 to the main wallet and removes GHS1 from earned commission. If that GHS1 is
+already reserved/paid, the refund journal records +GHS5 and a separate -GHS1 recovery;
+the net wallet credit is GHS4 while the existing payout remains intact. Partial
+payout allocations are recorded and legacy allocations are reconstructed in order.
+Refund records retain gross refund, recovery, and net credit in their descriptions.
+
+**Deployment:** MongoDB must support transactions (replica set or sharded cluster,
+including Atlas). Refunds and commission credits deliberately fail rather than
+fall back to non-atomic writes on standalone MongoDB. The database user needs the
+usual application write permissions. No migration or historical balance adjustment
+is automatically applied. A five-minute job retries paid, failed store orders that
+remain unrefunded, excluding orders locked by an administrator.
+
+From `backend/`:
+
+- `npm run test:store-refunds`: isolated MongoDB replica-set integration tests.
+  The test dependency downloads a MongoDB binary on first use; an existing binary
+  can be supplied using `MONGOMS_SYSTEM_BINARY`.
+- `npm run report-store-refund-shortfalls`: read-only JSON report using configured
+  `MONGODB_URI`. No wallet writes, index creation, or automatic top-ups. Review the
+  original payments, refund records, and commission/payout history before approving
+  historical adjustments; missing/multiple refund records are explicitly flagged.
+
+### Account spending reports and agent withdrawals
+
+Admin user lists/details and user login/profile responses use the same live
+spending calculation. Store sales revenue is shown separately from personal
+spending. Paid orders still processing count as spent; failed, unpaid, refunded,
+and store-customer orders are excluded from personal spending. Purchase amounts
+exclude separately charged payment fees. Legacy purchases and transaction-only
+payments are included, with linked records counted once regardless of debit sign.
+Monthly spending and purchase counts use Ghana/UTC calendar months; top-ups are
+reported separately. Invalid month parameters return HTTP 400.
+
+New agent withdrawal requests accept Mobile Money only. Historical bank payouts
+remain readable. Run `npm run test:account-stats` in `backend/` for isolated
+MongoDB integration tests for spending, monthly endpoints, and withdrawal methods.

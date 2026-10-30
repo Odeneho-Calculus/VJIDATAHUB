@@ -278,11 +278,8 @@ export default function AgentCommissions() {
   const [payoutSubmitting, setPayoutSubmitting] = useState(false);
   const [payoutFormData, setPayoutFormData] = useState({
     amount: '',
-    method: 'bank',
+    method: 'mobile_money',
     details: {
-      accountNumber: '',
-      bankCode: '',
-      accountName: '',
       phone: '',
       network: 'MTN',
     },
@@ -354,8 +351,8 @@ export default function AgentCommissions() {
       setShowPayoutForm(false);
       setPayoutFormData({
         amount: '',
-        method: 'bank',
-        details: { accountNumber: '', bankCode: '', accountName: '', phone: '', network: 'MTN' },
+        method: 'mobile_money',
+        details: { phone: '', network: 'MTN' },
       });
       fetchData();
     } catch (err) {
@@ -567,68 +564,30 @@ export default function AgentCommissions() {
 
                 <div>
                   <label className="vtu-stat-label" style={{ marginBottom: '8px', display: 'block' }}>Payout Method</label>
+                  <p className="font-bold text-sm">Mobile Money</p>
+                </div>
+                <div>
+                  <label className="vtu-stat-label" style={{ marginBottom: '8px', display: 'block' }}>Network</label>
                   <select
                     className="comm-form-select"
-                    value={payoutFormData.method}
-                    onChange={(e) => setPayoutFormData({ ...payoutFormData, method: e.target.value })}
+                    value={payoutFormData.details.network}
+                    onChange={(e) => setPayoutFormData({ ...payoutFormData, details: { ...payoutFormData.details, network: e.target.value } })}
                   >
-                    <option value="bank">Bank Transfer</option>
-                    <option value="mobile_money">Mobile Money</option>
+                    <option value="MTN">MTN</option>
+                    <option value="Vodafone">Telecel (Vodafone)</option>
+                    <option value="AirtelTigo">AT (AirtelTigo)</option>
                   </select>
                 </div>
-
-                {payoutFormData.method === 'bank' ? (
-                  <>
-                    <div>
-                      <label className="vtu-stat-label" style={{ marginBottom: '8px', display: 'block' }}>Bank Name</label>
-                      <select
-                        className="comm-form-select"
-                        value={payoutFormData.details.bankCode}
-                        onChange={(e) => setPayoutFormData({ ...payoutFormData, details: { ...payoutFormData.details, bankCode: e.target.value } })}
-                      >
-                        <option value="">Select Bank</option>
-                        {commissionSummary?.availableBanks?.map(bank => (
-                          <option key={bank.code} value={bank.code}>{bank.name}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="vtu-stat-label" style={{ marginBottom: '8px', display: 'block' }}>Account Number</label>
-                      <input
-                        type="text"
-                        className="comm-form-input"
-                        value={payoutFormData.details.accountNumber}
-                        onChange={(e) => setPayoutFormData({ ...payoutFormData, details: { ...payoutFormData.details, accountNumber: e.target.value } })}
-                        placeholder="10-digit account number"
-                      />
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div>
-                      <label className="vtu-stat-label" style={{ marginBottom: '8px', display: 'block' }}>Network</label>
-                      <select
-                        className="comm-form-select"
-                        value={payoutFormData.details.network}
-                        onChange={(e) => setPayoutFormData({ ...payoutFormData, details: { ...payoutFormData.details, network: e.target.value } })}
-                      >
-                        <option value="MTN">MTN</option>
-                        <option value="Vodafone">Telecel (Vodafone)</option>
-                        <option value="AirtelTigo">AT (AirtelTigo)</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="vtu-stat-label" style={{ marginBottom: '8px', display: 'block' }}>Phone Number</label>
-                      <input
-                        type="text"
-                        className="comm-form-input"
-                        value={payoutFormData.details.phone}
-                        onChange={(e) => setPayoutFormData({ ...payoutFormData, details: { ...payoutFormData.details, phone: e.target.value } })}
-                        placeholder="Momo phone number"
-                      />
-                    </div>
-                  </>
-                )}
+                <div>
+                  <label className="vtu-stat-label" style={{ marginBottom: '8px', display: 'block' }}>Phone Number</label>
+                  <input
+                    type="text"
+                    className="comm-form-input"
+                    value={payoutFormData.details.phone}
+                    onChange={(e) => setPayoutFormData({ ...payoutFormData, details: { ...payoutFormData.details, phone: e.target.value } })}
+                    placeholder="Momo phone number"
+                  />
+                </div>
 
                 {requestedAmount > 0 && !payoutValidationMessage && (
                   <div style={{ background: '#fafaf7', borderRadius: '12px', padding: '16px', border: '1.5px solid #e4e4de' }}>

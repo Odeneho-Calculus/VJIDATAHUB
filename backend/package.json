@@ -16,7 +16,10 @@
     "delete-transactions": "node scripts/deleteAllTransactions.js",
     "cleanup-store-plans": "node scripts/cleanupStorePlansByActiveVtu.js",
     "reconcile-store-commissions": "node scripts/reconcileStoreCommissions.js",
-    "repair-store-commissions": "node scripts/repairStoreCommissions.js"
+    "repair-store-commissions": "node scripts/repairStoreCommissions.js",
+    "report-store-refund-shortfalls": "node scripts/reportStoreRefundShortfalls.js",
+    "test:store-refunds": "node --test tests/storeRefunds.test.js",
+    "test:account-stats": "node --test tests/accountStats.test.js"
   },
   "keywords": [
     "api",
@@ -43,6 +46,7 @@
   },
   "devDependencies": {
     "eslint": "^9.39.2",
+    "mongodb-memory-server": "^11.3.0",
     "nodemon": "^3.1.11"
   }
 }

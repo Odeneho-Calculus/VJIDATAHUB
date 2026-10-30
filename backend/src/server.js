@@ -6,6 +6,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const connectDB = require('./config/database');
 const { startProviderBalanceCheckJob } = require('./jobs/checkProviderBalance');
+const { startStoreRefundRetryJob } = require('./jobs/retryStoreRefunds');
 const { startTopzaOrderStatusSyncJob } = require('./jobs/syncTopzaOrderStatus');
 const { startSkdataplugOrderStatusSyncJob } = require('./jobs/syncSkdataplugOrderStatus');
 const { startAutoVerifyPaystackJob } = require('./jobs/autoVerifyPaystackPayments');
@@ -54,6 +55,12 @@ if (process.env.BALANCE_CHECK_ENABLED !== 'false') {
   } catch (error) {
     console.error('Failed to initialize provider balance check job:', error.message);
   }
+}
+
+try {
+  startStoreRefundRetryJob();
+} catch (error) {
+  console.error('Failed to initialize store refund retry job:', error.message);
 }
 
 try {

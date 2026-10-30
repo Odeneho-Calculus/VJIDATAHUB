@@ -38,10 +38,14 @@ const sellerCommissionSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['earned', 'pending_withdrawal', 'withdrawn'],
+      enum: ['earned', 'pending_withdrawal', 'withdrawn', 'reversed'],
       default: 'earned',
       index: true,
     },
+    withdrawalAllocatedAmount: { type: Number, default: null, min: 0 },
+    refundReversedAmount: { type: Number, default: 0, min: 0 },
+    refundRecoveredAmount: { type: Number, default: 0, min: 0 },
+    refundSettled: { type: Boolean, default: false },
     withdrawalRequestId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'AgentCommissionPayout',

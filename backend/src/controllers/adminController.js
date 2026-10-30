@@ -1,3 +1,4 @@
+const { getUserSpending } = require('../services/spendingService');
 const axios = require('axios');
 const User = require('../models/User');
 const Transaction = require('../models/Transaction');
@@ -253,14 +254,16 @@ exports.getAllUsers = async (req, res) => {
     // Populate store data for agents
     const usersWithStoreData = await Promise.all(
       users.map(async (user) => {
+        const { totalSpent } = await getUserSpending(user._id);
+        const account = { ...user.toObject(), totalSpent };
         if (user.role === 'agent') {
           const store = await Store.findOne({ owner: user._id }).select('totalRevenue totalOrders');
           return {
-            ...user.toObject(),
+            ...account,
             store: store || null
           };
         }
-        return user;
+        return account;
       })
     );
 
@@ -312,7 +315,7 @@ exports.getUserById = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      user,
+      user: { ...user.toObject(), totalSpent: (await getUserSpending(user._id)).totalSpent },
     });
   } catch (error) {
     res.status(500).json({
@@ -2826,7 +2829,7 @@ exports.refundOrder = async (req, res) => {
         type: 'refund',
         title: 'Order Refunded',
         message: `Your order ${order.orderNumber} has been refunded (GHS ${(refundResult.amountRefunded || order.amount).toFixed(2)})`,
-        description: `Reason: ${reason}. The amount has been credited to your wallet.`,
+        description: `Reason: ${reason}. Net wallet credit GHS ${refundResult.netWalletCredit ?? refundResult.amountRefunded}. Commission recovery GHS ${refundResult.commissionRecovery || 0}.`,
         severity: 'info',
       });
     }

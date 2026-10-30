@@ -10,7 +10,6 @@ export const UserViewModal = ({ isOpen, onClose, user, getStatusColor, getStatus
 
   const totalSpent = user.totalSpent || 0;
   const storeRevenue = user.store?.totalRevenue || 0;
-  const totalExpenses = user.role === 'agent' ? totalSpent + storeRevenue : totalSpent;
 
   const isTempDeleted = user.status === 'temporarily_deleted' || user.deletedAt;
 
@@ -168,41 +167,13 @@ export const UserViewModal = ({ isOpen, onClose, user, getStatusColor, getStatus
           <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
             <p className="text-[10px] font-bold text-black uppercase tracking-tight mb-3">Total Expenses</p>
 
-            {user.role === 'agent' ? (
-              <div className="space-y-3">
-                <div className="flex justify-between items-center p-3 bg-white rounded-lg border border-slate-200">
-                  <div className="flex items-center gap-2">
-                    <ShoppingCart size={16} className="text-blue-600" />
-                    <span className="text-sm font-bold text-black">Personal Spending</span>
-                  </div>
-                  <span className="text-sm font-black text-blue-600">GHS {formatNumberAbbreviated(totalSpent)}</span>
-                </div>
-
-                <div className="flex justify-between items-center p-3 bg-white rounded-lg border border-slate-200">
-                  <div className="flex items-center gap-2">
-                    <DollarSign size={16} className="text-emerald-600" />
-                    <span className="text-sm font-bold text-black">Store Revenue</span>
-                  </div>
-                  <span className="text-sm font-black text-emerald-600">GHS {formatNumberAbbreviated(storeRevenue)}</span>
-                </div>
-
-                <div className="flex justify-between items-center p-3 bg-gradient-to-r from-blue-50 to-emerald-50 rounded-lg border-2 border-blue-200">
-                  <div className="flex items-center gap-2">
-                    <AlertCircle size={16} className="text-blue-600" />
-                    <span className="text-sm font-bold text-black">Total Expenses</span>
-                  </div>
-                  <span className="text-lg font-black text-blue-600">GHS {formatNumberAbbreviated(totalExpenses)}</span>
-                </div>
+            <div className="flex justify-between items-center p-4 bg-white rounded-lg border border-slate-200">
+              <div className="flex items-center gap-2">
+                <ShoppingCart size={16} className="text-blue-600" />
+                <span className="text-sm font-bold text-black">Total Spent</span>
               </div>
-            ) : (
-              <div className="flex justify-between items-center p-4 bg-white rounded-lg border border-slate-200">
-                <div className="flex items-center gap-2">
-                  <DollarSign size={16} className="text-blue-600" />
-                  <span className="text-sm font-bold text-black">Total Spent</span>
-                </div>
-                <span className="text-lg font-black text-blue-600">GHS {formatNumberAbbreviated(totalSpent)}</span>
-              </div>
-            )}
+              <span className="text-lg font-black text-blue-600">GHS {formatNumberAbbreviated(totalSpent)}</span>
+            </div>
           </div>
 
           {user.role === 'agent' && user.store && (

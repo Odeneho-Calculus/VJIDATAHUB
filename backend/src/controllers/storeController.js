@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const axios = require('axios');
 const Store = require('../models/Store');
 const User = require('../models/User');
@@ -865,14 +866,11 @@ exports.createCommissionPayout = async (req, res) => {
       return res.status(400).json({ success: false, message: 'amount, method, and details required' });
     }
 
-    if (method === 'mobile_money') {
-      if (!details.phone || !details.network) {
-        return res.status(400).json({ success: false, message: 'Phone and network required for Mobile Money' });
-      }
-    } else if (method === 'bank') {
-      if (!details.accountNumber || !details.bankCode || !details.accountName) {
-        return res.status(400).json({ success: false, message: 'Account details required for Bank transfer' });
-      }
+    if (method !== 'mobile_money') {
+      return res.status(400).json({ success: false, message: 'Agent withdrawals support Mobile Money only' });
+    }
+    if (!details.phone || !details.network) {
+      return res.status(400).json({ success: false, message: 'Phone and network required for Mobile Money' });
     }
 
     const settings = await SystemSettings.getSettings();
@@ -920,35 +918,43 @@ exports.createCommissionPayout = async (req, res) => {
       });
     }
 
-    const payout = await AgentCommissionPayout.create({
-      agentId: user._id,
-      storeId: store._id,
-      amount: parsedAmount,
-      requestedAmount: parsedAmount,
-      withdrawalFeeType: settings.commissionSettings.withdrawalFeeType,
-      withdrawalFeeValue: settings.commissionSettings.withdrawalFeeValue,
-      withdrawalFeeAmount: feeAmount,
-      netAmount,
-      method,
-      details,
-      status: 'pending',
-    });
+    const session = await mongoose.startSession();
+    let payout;
+    try {
+      await session.withTransaction(async () => {
+        const [createdPayout] = await AgentCommissionPayout.create([{
+          agentId: user._id,
+          storeId: store._id,
+          amount: parsedAmount,
+          requestedAmount: parsedAmount,
+          withdrawalFeeType: settings.commissionSettings.withdrawalFeeType,
+          withdrawalFeeValue: settings.commissionSettings.withdrawalFeeValue,
+          withdrawalFeeAmount: feeAmount,
+          netAmount,
+          method,
+          details,
+          status: 'pending',
+        }], { session });
+        payout = createdPayout;
+        await moveToPending({ storeId: store._id, amount: parsedAmount, session });
+        let remaining = parsedAmount;
+        const earnedRows = await SellerCommission.find({
+          storeId: store._id,
+          storeOwnerId: user._id,
+          status: 'earned',
+        }).sort({ createdAt: 1, _id: 1 }).session(session);
+        for (const row of earnedRows) {
+          if (remaining <= 0) break;
+          row.withdrawalAllocatedAmount = Math.min(remaining, Number(row.commissionEarned || 0));
+          row.status = 'pending_withdrawal';
+          row.withdrawalRequestId = payout._id;
+          await row.save({ session });
+          remaining = round2(remaining - row.withdrawalAllocatedAmount);
+        }
 
-    await moveToPending({ storeId: store._id, amount: parsedAmount });
-
-    let remaining = parsedAmount;
-    const earnedRows = await SellerCommission.find({
-      storeId: store._id,
-      storeOwnerId: user._id,
-      status: 'earned',
-    }).sort({ createdAt: 1 });
-
-    for (const row of earnedRows) {
-      if (remaining <= 0) break;
-      row.status = 'pending_withdrawal';
-      row.withdrawalRequestId = payout._id;
-      await row.save();
-      remaining -= Number(row.commissionEarned || 0);
+      });
+    } finally {
+      await session.endSession();
     }
 
     res.status(201).json({
@@ -1456,7 +1462,9 @@ exports.purchasePublicBundle = async (req, res) => {
       planName: planData.name,
       amount: storePlan.customPrice,
       transactionCharge: dataPurchaseCharge,
-      adminBasePrice: planData.costPrice || planData.sellingPrice || storePlan.customPrice,
+      adminBasePrice: storePlan.planType === 'DataPlan'
+        ? (planData.costPrice || planData.sellingPrice || planData.price || storePlan.customPrice)
+        : resolvePlanPrice(planData, { userRole: 'agent', agentFeeStatus: 'paid' }),
       paymentMethod: 'paystack',
       status: 'pending',
       paymentStatus: 'pending',
@@ -1657,6 +1665,10 @@ exports.verifyPublicPayment = async (req, res) => {
       const { processStoreOrderRefund } = require('../utils/refund');
       const refundResult = await processStoreOrderRefund(order, providerResponse.error || 'Provider purchase failed');
 
+      if (!refundResult.success) {
+        return res.status(503).json({ success: false, message: 'Order failed; refund requires retry', data: { order, refund: refundResult } });
+      }
+
       // Notify the agent about the failed order
       const store = await Store.findById(order.storeId).populate('owner', '_id name email');
       if (store && store.owner) {
@@ -1664,7 +1676,7 @@ exports.verifyPublicPayment = async (req, res) => {
           type: 'order_failed',
           title: 'Store Order Failed',
           message: `A customer order for ${order.dataAmount} (${order.phoneNumber}) failed after payment.`,
-          description: `Order ${order.orderNumber} failed: ${providerResponse.error || 'Provider purchase failed'}. The admin base price has been refunded to your wallet. Please repurchase for the customer.`,
+          description: `Order ${order.orderNumber} failed: ${providerResponse.error || 'Provider purchase failed'}. Refund GHS ${refundResult.amountRefunded || 0}; commission recovery GHS ${refundResult.commissionRecovery || 0}; net wallet credit GHS ${refundResult.netWalletCredit || 0}. Please repurchase for the customer.`,
           severity: 'error',
           userId: store.owner._id,
           data: {

@@ -186,7 +186,7 @@ const syncTopzaOrderStatus = async () => {
                 type: 'order_failed',
                 title: 'Store Order Failed',
                 message: `A customer order for ${order.dataAmount} (${order.phoneNumber}) failed after payment.`,
-                description: `Order ${order.orderNumber} failed: ${normalizedProviderStatus || 'Service sync failure'}. The admin base price has been refunded to your wallet. Please repurchase for the customer.`,
+                description: `Order ${order.orderNumber} failed: ${normalizedProviderStatus || 'Service sync failure'}. Refund GHS ${refundResult.amountRefunded || 0}; commission recovery GHS ${refundResult.commissionRecovery || 0}; net wallet credit GHS ${refundResult.netWalletCredit || 0}. Please repurchase for the customer.`,
                 severity: 'error',
                 userId: store.owner._id,
                 data: {

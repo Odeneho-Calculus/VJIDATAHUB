@@ -1,3 +1,4 @@
+const { getUserSpending } = require('../services/spendingService');
 const User = require('../models/User');
 const Store = require('../models/Store');
 const SystemSettings = require('../models/SystemSettings');
@@ -285,7 +286,7 @@ exports.switchRole = async (req, res) => {
                 role: user.role,
                 agentFeeStatus: user.agentFeeStatus,
                 referralCode: user.referralCode,
-                totalSpent: user.totalSpent,
+                totalSpent: (await getUserSpending(user._id)).totalSpent,
                 dataUsed: user.dataUsed,
                 referralEarnings: user.referralEarnings,
                 isEmailVerified: user.isEmailVerified,
