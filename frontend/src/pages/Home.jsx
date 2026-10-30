@@ -216,34 +216,18 @@ export default function Home() {
   ];
 
   return (
-    <div style={{ fontFamily: "'DM Sans', 'Nunito', sans-serif", background: '#ffffff', minHeight: '100vh' }}>
+    <div style={{ fontFamily: "'DM Sans', 'Nunito', sans-serif", background: 'var(--bg-secondary)', minHeight: '100vh' }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@500&display=swap');
 
         .vji-hero {
           position: relative;
           overflow: hidden;
-          background: #000;
+          background: var(--bg-secondary);
           min-height: 320px;
-        }
-        .vji-hero::after {
-          content: "";
-          position: absolute;
-          inset: 0;
-          background: rgba(0, 0, 0, 0.45);
-          z-index: 1;
         }
         @media (min-width: 768px) {
           .vji-hero { min-height: 400px; }
-        }
-        .vji-hero-img {
-          position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          object-position: center;
-          opacity: 1;
         }
         .vji-hero-content {
           position: relative;
@@ -270,22 +254,20 @@ export default function Home() {
         .vji-hero h1 {
           font-size: clamp(28px, 5vw, 52px);
           font-weight: 800;
-          color: #fff;
+          color: var(--text-primary);
           line-height: 1.15;
           margin: 0 0 16px;
           max-width: 640px;
-          text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
         .vji-hero h1 span {
-          color: #A78BFA;
+          color: #7C3AED;
         }
         .vji-hero p {
           font-size: clamp(14px, 2vw, 16px);
-          color: #C4B5FD;
+          color: var(--text-secondary);
           max-width: 520px;
           line-height: 1.6;
           margin: 0 0 28px;
-          text-shadow: 0 1px 2px rgba(0,0,0,0.5);
         }
         .vji-btn-primary {
           display: inline-flex;
@@ -307,15 +289,14 @@ export default function Home() {
           align-items: center;
           gap: 8px;
           background: transparent;
-          color: #fff;
+          color: var(--text-primary);
           font-weight: 700;
           font-size: 14px;
           padding: 12px 22px;
           border-radius: 6px;
-          border: 1.5px solid rgba(255,255,255,0.35);
+          border: 1.5px solid var(--border-color);
           text-decoration: none;
           transition: border-color 0.15s, background 0.15s;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
         }
         .vji-btn-outline:hover { border-color: #A78BFA; background: rgba(167,139,250,0.12); }
         .vji-btn-dark {
@@ -663,12 +644,6 @@ export default function Home() {
 
       {/* ── HERO ── */}
       <section className="vji-hero">
-        <img
-          src="/banner/homebanner.png"
-          alt=""
-          aria-hidden="true"
-          className="vji-hero-img"
-        />
         <div className="vji-hero-content">
           <div className="vji-tag">
             <Sparkles style={{ width: 11, height: 11 }} />
